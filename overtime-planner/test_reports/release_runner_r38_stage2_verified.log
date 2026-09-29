@@ -1,0 +1,1542 @@
+================================================================
+ HORTICULTURE OPERATIONS - COMPLETE RELEASE & RETAINED GATES RUNNER
+================================================================
+
+>>> [SUITE 1/20] Running Retained Gate B1: Canonical v2 Persistence & Boundary Validation...
+=== RUNNING GATE B1 CANONICAL V2 PERSISTENCE & SCHEDULED-COMMITMENT SUITE ===
+
+>>> [ASSERTION 1] Fresh Explicit-Empty V2 Workspace Full Lifecycle
+  [PASS] Assertion 1: Fresh explicit-empty v2 workspace successfully executes save -> reload -> export -> restore.
+
+>>> [ASSERTION 2] Real Current-V2 Commitments with Observed Time Formats
+  [PASS] Assertion 2: All 5 observed production time formats verified through full save -> reload -> export -> restore pipeline.
+
+>>> [ASSERTION 3] Strict Validation Rejection on Impossible / Malformed Records
+  [PASS] Assertion 3: All 18 negative malformed commitment scenarios strictly rejected; storage preserved.
+
+>>> [ASSERTION 4] Mandatory Evidence Maps & Recognized V1 Migration
+  [PASS] Assertion 4: Mandatory evidence maps strictly enforced; recognized v1 migration verified intact.
+
+>>> [ASSERTION 5] Exporter Mandatory Retention Check & Save-Then-Export
+  [PASS] Assertion 5: Mandatory retention checker fails closed; checked save-then-export verified.
+
+>>> [ASSERTION 6] Failed Restore Non-Mutation & Valid Restore Detached Working Copy
+  [PASS] Assertion 6: Failed restore leaves state untouched; valid restore adopts detached data.
+
+>>> [ASSERTION 7] Single-File HTML Standalone Hash Equivalence
+  [PASS] Assertion 7: Both standalone HTML distributions match byte-for-byte (5b9ee448296bcb03...).
+
+>>> [ASSERTION 8] Independent Peer Review 13 Discriminating Probes
+  [PASS] Assertion 8: All 6 Review 13 discriminating probes passed (0 gaps demonstrated).
+
+>>> [ASSERTION 9] Independent Peer Review 14 Discriminating Probes (11 Checks)
+  [PASS] Assertion 9: All 11 Review 14 discriminating probes passed (0 gaps demonstrated).
+
+>>> [ASSERTION 10] Independent Peer Review 15 Discriminating Probes (Canonical vs Runtime)
+  [PASS] Assertion 10: All Review 15 discriminating probes and actual app runtime projection verified (0 gaps demonstrated).
+
+>>> [ASSERTION 11] Review 16 Canonical Constructor Microclosure & V1 Migration
+  [PASS] Assertion 11: Review 16 constructor microclosure and v1 normalisation verified (0 gaps demonstrated).
+
+================================================================
+ ALL GATE B1 CANONICAL PERSISTENCE & VALIDATION TESTS PASSED (100%)
+================================================================
+Persisted v2 workspace missing or invalid evidence maps, quarantined without overwriting storage: Missing required current-v2 field: historicalSnapshots
+Cannot export backup: Evidence key retention validator is unavailable
+Workspace restore aborted: invalid Schema v2 envelope Historical snapshot "job-parks-1@2026-06-06" has invalid durationHours: must be a positive finite number.
+Cannot export backup: Invalid current-v2 field: assignments: expected object map
+Persisted v2 workspace missing or invalid evidence maps, quarantined without overwriting storage: Missing required current-v2 field: assignments
+Workspace restore aborted: invalid Schema v2 envelope Invalid current-v2 field: assignments: expected object map
+>>> [SUITE 1 PASSED] (0.17s, exit 0)
+
+>>> [SUITE 2/20] Running Retained Gate B2: Authoritative Commitment Lifecycle Acceptance...
+=== RUNNING GATE B2 AUTHORITATIVE COMMITMENT LIFECYCLE ACCEPTANCE SUITE ===
+
+>>> [SCENARIO 1] Source and Descendant Scheduled Commitment Capture
+  [PASS] 1.1: Manual allocation snapshots committed target with recorded timing and assigned staff.
+  [PASS] 1.2: Fixed propagation captures source and cross-year descendant snapshots.
+  [PASS] 1.3: Rotation committed targets snapshotted; vacant descendants receive no fabricated snapshot.
+
+>>> [SCENARIO 2] Reconciliation and Targeted Ownership Pruning
+  [PASS] 2.1: Repeat reduction prunes only instruction-owned future allocations/snapshots.
+  [PASS] 2.2: Source employee replacement updates membership while preserving timing and recordedAt.
+  [PASS] 2.3: Idempotent re-save generates 0 record churn (snapshot-map and assignment equality).
+
+>>> [SCENARIO 3] Date Rollover, Parent Job Mutation, and Rest-Gap Enforcement
+  [PASS] 3.1: Clock rollover preserves original historical timing despite active parent job mutation.
+  [PASS] 3.2: Archived parent job suppresses future shifts; active future rostering retirement fails closed.
+  [PASS] 3.3: 10-hour rest rule strictly enforced across year boundary using preserved evidence.
+
+>>> [SCENARIO 4] Unverified Historical Data Fail-Closed & Forbidden Deletion
+  [PASS] 4.1: Unverified historical commitment fails closed and blocks affected eligibility.
+  [PASS] 4.2: Unauthorised snapshot deletion blocked; committed storage preserved.
+
+>>> [SCENARIO 5] Authorised Future Unassignment and Failure Atomicity
+  [PASS] 5.1: Explicit future unassignment removes only owned snapshot via designated operation.
+  [PASS] 5.2: Persistence write failure leaves live state and committed storage completely unchanged.
+
+>>> [SCENARIO 6] Full Persistence, Backup, and Cross-Workspace Restore
+  [PASS] 6.3: Save -> verified reload -> backup -> clean restore preserves all commitments with zero leakage.
+
+>>> [REVIEW 18 BOUNDED DISCRIMINATORS] Code-Integrity Baseline Suite
+  [PASS] R18-1: Missing verified baseline reader prevents modal overwrite.
+  [PASS] R18-2: Unreadable committed bytes remain quarantined in modal save.
+  [PASS] R18-3: Absent rostering engine fails closed without unsnapshotted fallback.
+  [PASS] R18-4: Public updateShiftStaff fails closed.
+  [PASS] R18-5: Planner requires source/provenance proof for descendant deletion.
+  [PASS] R18-6: Existing snapshot lacking recordedAt does not acquire fabricated audit time.
+
+>>> [REVIEW 19 PLANNER BOUNDARY CONTRACTS] Direct Negative Input Verification
+  [PASS] R19-1: Missing injected local todayKey fails closed, preventing past snapshot removal.
+  [PASS] R19-2: Malformed todayKey fails closed even for otherwise permitted future removal.
+  [PASS] R19-3: Descendant removal requires afterRostering provenance proof.
+  [PASS] R19-4: Descendant removal requires actual engine-pruned provenance proof.
+  [PASS] R19-5: Genuine future descendant removal with complete ownership proof remains allowed.
+  [PASS] R19-6: Unrelated manual/another source provenance cannot authorize deletion.
+  [PASS] R19-7: Valid explicit current/future source unassignment remains allowed.
+  [PASS] R19-8: Pure planner does not mutate caller-owned operation metadata.
+
+================================================================
+ ALL GATE B2 & REVIEW 18/19 ACCEPTANCE SCENARIOS PASSED (100%)
+================================================================
+Failed to save current workspace: Error: Active rostering instruction "ROSTER-JOB-FIXED-CROSS-2026-06-13-slot-0" belongs to non-active Job "JOB-FIXED-CROSS" (status: "archived").
+    at Object.createWorkspaceEnvelope (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage/migrationEngine.js:98:13)
+    at Object.createWorkspaceEnvelope (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:80:44)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:293:30)
+    at Object.saveJob (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:468:26)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b2.cjs:381:38)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+saveJob in-memory mutation rolled back due to storage failure.
+Cannot save workspace: suspicious evidence loss detected. Live historicalSnapshots is empty ({}) while established workspace contains 1 authoritative snapshot records. Save aborted to preserve historical evidence.
+Failed to save workspace to localStorage: Error: QuotaExceededError: simulated localStorage write failure
+    at MockLocalStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b2.cjs:30:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object.saveAllocation (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/components/staffAssignModal.js:891:27)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b2.cjs:576:32)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+Cannot save allocation: QuotaExceededError: simulated localStorage write failure
+HortOpsApp.updateShiftStaff is deprecated and fails closed: schedule assignments must be allocated via HortOpsStaffAssignModal or canonical B2 operations with authoritative scheduled-commitment snapshots.
+>>> [SUITE 2 PASSED] (0.12s, exit 0)
+
+>>> [SUITE 3/20] Running Retained Gate B3: Transaction Coordinator & Rollback Hardening...
+=== RUNNING GATE B3 TRANSACTION HARDENING & ATOMICITY TEST SUITE ===
+
+  [PASS] B3-01: updatePermit: successful permit mutation commits and adopts state
+  [PASS] B3-02 / FULL-B3-03: updatePermit: storage failure rolls back live permits, bytes unchanged
+  [PASS] B3-03: updateStaffMember: successful update commits and adopts detached state
+  [PASS] B3-04: updateStaffMember: storage failure leaves staff list and committed bytes unchanged
+  [PASS] B3-05: reconcileStaffSnapshot: successful reconciliation commits atomically and adopts state
+  [PASS] B3-06 / FULL-B3-04: reconcileStaffSnapshot: storage failure preserves original roster, assignments, and storage bytes
+  [PASS] B3-07: reconcileStaffSnapshot: departed staff does not erase historical scheduled commitment assignments
+  [PASS] B3-08 / FULL-B3-05: saveJob: existing Job edit storage failure preserves original Job and bytes
+  [PASS] B3-09: saveJob: new Job insertion storage failure does not append uncommitted Job to live list
+  [PASS] B3-10: saveJob: instruction sealing on retirement rolls back if storage write fails
+  [PASS] B3-11: deleteJob: unencumbered hard delete failure rolls back live jobs list
+  [PASS] B3-12: deleteJob: active future rostering instruction fails closed against retirement deletion
+  [PASS] FULL-B3-01 (FR-01): getJobDependencies: recognizes historical scheduled commitment snapshots; prevents hard delete
+  [PASS] FULL-B3-02: deleteJob: storage failure during history-only retirement rolls back live state and bytes
+  [PASS] FULL-B3-06 (FR-04): restoreWorkspaceJson: accepted partial restore resets omitted optional domains to canonical defaults
+  [PASS] FULL-B3-06 (Negative): restoreWorkspaceJson: rejected invalid restore preserves prior live state and storage bytes
+  [PASS] B3-13 / FULL-B3-08: caller-owned mutation after successful saveJob or updateStaffMember cannot reach adopted live state
+  [PASS] B3-14 / FULL-B3-07: unrelated B3 mutations preserve B2 snapshots, instructions, provenance and canonical identity
+
+================================================================
+ ALL GATE B3 TESTS PASSED (18/18) [100%]
+================================================================
+Failed to save workspace to localStorage: Error: SIMULATED_STORAGE_FAILURE: QuotaExceededError
+    at MockStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:23:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:295:25)
+    at Object.updatePermit (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:372:26)
+    at /home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:226:19
+    at runTest (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:190:5)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:219:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+Failed to save workspace to localStorage: Error: SIMULATED_STORAGE_FAILURE: QuotaExceededError
+    at MockStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:23:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:295:25)
+    at Object.updateStaffMember (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:885:26)
+    at /home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:265:19
+    at runTest (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:190:5)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:259:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+Failed to save workspace to localStorage: Error: SIMULATED_STORAGE_FAILURE: QuotaExceededError
+    at MockStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:23:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:295:25)
+    at Object.reconcileStaffSnapshot (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:827:26)
+    at /home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:314:19
+    at runTest (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:190:5)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:299:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+Failed to save workspace to localStorage: Error: SIMULATED_STORAGE_FAILURE: QuotaExceededError
+    at MockStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:23:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:295:25)
+    at Object.saveJob (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:468:26)
+    at /home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:358:19
+    at runTest (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:190:5)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:352:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+saveJob in-memory mutation rolled back due to storage failure.
+Failed to save workspace to localStorage: Error: SIMULATED_STORAGE_FAILURE: QuotaExceededError
+    at MockStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:23:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:295:25)
+    at Object.saveJob (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:468:26)
+    at /home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:373:19
+    at runTest (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:190:5)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:366:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+saveJob in-memory mutation rolled back due to storage failure.
+Failed to save workspace to localStorage: Error: SIMULATED_STORAGE_FAILURE: QuotaExceededError
+    at MockStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:23:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:295:25)
+    at Object.saveJob (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:468:26)
+    at /home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:414:19
+    at runTest (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:190:5)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:381:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+saveJob in-memory mutation rolled back due to storage failure.
+Failed to save workspace to localStorage: Error: SIMULATED_STORAGE_FAILURE: QuotaExceededError
+    at MockStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:23:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:295:25)
+    at Object.deleteJob (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:624:28)
+    at /home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:433:19
+    at runTest (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:190:5)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:423:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+Failed to save workspace to localStorage: Error: SIMULATED_STORAGE_FAILURE: QuotaExceededError
+    at MockStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:23:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:295:25)
+    at Object.saveJob (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:468:26)
+    at Object.deleteJob (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:609:29)
+    at /home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:531:19
+    at runTest (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:190:5)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_gate_b3.cjs:513:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+saveJob in-memory mutation rolled back due to storage failure.
+Workspace restore aborted: invalid Schema v2 envelope Job at index 0 missing required id or name.
+>>> [SUITE 3 PASSED] (0.05s, exit 0)
+
+>>> [SUITE 4/20] Running Retained Gate C: Prototype Seed Isolation & Privacy Clearance...
+=== RUNNING STAGE 1 GATE C ACCEPTANCE TEST SUITE ===
+  [PASS] C-01: Zero prototype personal data and council email addresses in compiled distribution bundles.
+  [PASS] C-02: Absolute clean-slate boot structure: Schema v2 envelope with zero inherited operational data.
+  [PASS] C-03: All six views render error-free on zero-job / zero-staff workspace.
+  [PASS] C-04: Clean-slate operational CRUD: saveJob, importStaffMembers, atomic persistence and reload.
+  [PASS] C-05: Established user workspaces are loaded faithfully without destruction or forced reset.
+  [PASS] C-06: Obsolete write-side updateShiftStaff strictly deprecated and fails closed.
+  [PASS] C-07: Single-file distribution verified byte-identical (SHA-256: 5b9ee448296bcb03016d3282ab50cd2d54429be7f1e139127189eb769a6829d0).
+
+================================================================
+ ALL STAGE 1 GATE C ACCEPTANCE TESTS PASSED (100%)
+================================================================
+
+HortOpsApp.updateShiftStaff is deprecated and fails closed: schedule assignments must be allocated via HortOpsStaffAssignModal or canonical B2 operations with authoritative scheduled-commitment snapshots.
+>>> [SUITE 4 PASSED] (0.08s, exit 0)
+
+>>> [SUITE 5/20] Running Retained Canonical Restore: Full Envelope Equivalence (R23-B3)...
+=== RUNNING R23-B3 RESTORE CANONICAL EQUIVALENCE TEST ===
+  [PASS] Live state adopted canonical defaults for omitted domains
+  [PASS] Committed bytes match live state canonical defaults exactly
+  [PASS] Cold app.init() reload is canonically equivalent to live state
+  [PASS] Canonical export envelope preserves canonical defaults
+  [PASS] Persistence failure leaves prior live state and storage bytes untouched
+
+================================================================
+ ALL R23-B3 RESTORE CANONICAL EQUIVALENCE CHECKS PASSED (100%)
+================================================================
+
+Failed to save workspace to localStorage: Error: SIMULATED_STORAGE_FAILURE: QuotaExceededError
+    at MockStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_r23_restore_canonical.cjs:15:32)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object.restoreWorkspaceJson (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:693:41)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_r23_restore_canonical.cjs:176:21)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+Workspace restore aborted: persistence failed SIMULATED_STORAGE_FAILURE: QuotaExceededError
+>>> [SUITE 5 PASSED] (0.04s, exit 0)
+
+>>> [SUITE 6/20] Running Review 29: Negative Canonical Domain Matrix & Shift Resilience...
+================================================================
+ REVIEW 29 VERIFICATION: NEGATIVE CANONICAL DOMAIN MATRIX & SHIFT RESILIENCE
+================================================================
+
+>>> [PART 1] Negative Canonical Input Matrix across all 8 Domains
+  [PASS] Domain 'jobs': all 4 negative invalid/null inputs fail closed without storage mutation.
+  [PASS] Domain 'roster': all 4 negative invalid/null inputs fail closed without storage mutation.
+  [PASS] Domain 'assignments': all 4 negative invalid/null inputs fail closed without storage mutation.
+  [PASS] Domain 'rostering': all 4 negative invalid/null inputs fail closed without storage mutation.
+  [PASS] Domain 'historicalSnapshots': all 4 negative invalid/null inputs fail closed without storage mutation.
+  [PASS] Domain 'permits': all 4 negative invalid/null inputs fail closed without storage mutation.
+  [PASS] Domain 'budgetSettings': all 4 negative invalid/null inputs fail closed without storage mutation.
+  [PASS] Domain 'uiState': all 4 negative invalid/null inputs fail closed without storage mutation.
+
+>>> [PART 2] Missing-JobName Allocation Resilience & Targeted Repeat Pruning
+  [PASS] saveAllocation executed cleanly on missing-jobName shift, matched by stable jobId, and preserved snapshot.
+
+================================================================
+ ALL REVIEW 29 NEGATIVE DOMAIN & SHIFT RESILIENCE PROBES PASSED (100%)
+================================================================
+>>> [SUITE 6 PASSED] (0.07s, exit 0)
+
+>>> [SUITE 7/20] Running FR-02: Strict Gregorian Calendar & Recurrence Interval Validation...
+=== RUNNING FR-02 SCHEDULE PRECISION & RECURRENCE INTERVAL VALIDATION SUITE ===
+[PASS] Test 1: dateUtils strict Gregorian calendar decomposition verified.
+[PASS] Test 2: One-off job with non-existent Gregorian date (2026-02-30) rejected.
+[PASS] Test 3: One-off job with non-existent Gregorian date (2026-04-31) rejected.
+[PASS] Test 4: One-off job with non-leap year Feb 29 rejected.
+[PASS] Test 5: Recurring job with non-existent anchorDate rejected.
+[PASS] Test 6: Non-integer recurrence interval (1.5) strictly rejected.
+[PASS] Test 7: Zero recurrence interval (0) strictly rejected.
+[PASS] Test 8: Negative recurrence interval (-2) strictly rejected.
+[PASS] Test 9: Valid Gregorian date and integer recurrence interval jobs pass validation.
+
+================================================================
+ ALL FR-02 SCHEDULE VALIDATION TESTS PASSED (100%)
+================================================================
+
+>>> [SUITE 7 PASSED] (0.03s, exit 0)
+
+>>> [SUITE 8/20] Running FR-03: Adelaide Timezone & DST-Aware 10-Hour Physical Rest...
+=== RUNNING FR-03 TIMEZONE & DST-AWARE 10-HOUR REST SUITE ===
+Current process.env.TZ: (host default)
+[PASS] Test 1: Autumn DST transition physical elapsed time verified (11 hours).
+[PASS] Test 2: Spring DST transition physical elapsed time verified (9 hours).
+[PASS] Test 3: Spring DST changeover correctly detects 9h physical rest violation despite nominal 10h clock gap.
+[PASS] Test 4: Autumn DST changeover correctly permits physical 10.5h rest despite nominal 9.5h clock gap.
+[PASS] Test 5: Standard non-transition 9h rest gap correctly fails.
+
+================================================================
+ ALL FR-03 TIMEZONE & DST REST VALIDATION TESTS PASSED (100%)
+================================================================
+
+>>> [SUITE 8 PASSED] (0.04s, exit 0)
+
+>>> [SUITE 9/20] Running RG1: Static Syntax & Helper Scope Audit...
+=== RUNNING STATIC RELEASE GATES ===
+Auditing 48 JavaScript files...
+[PASS] All 48 JavaScript files passed node --check syntax audit.
+[PASS] Zero undeclared helper identifiers detected.
+STATIC RELEASE TESTS PASSED (100%)
+>>> [SUITE 9 PASSED] (0.96s, exit 0)
+
+>>> [SUITE 10/20] Running RG2: Scheduler Engine Invariants & Recurrence Overrides...
+=== RUNNING SCHEDULER REGRESSION SUITE ===
+[DIAGNOSTIC] 2026 seeded schedule rows:       99 (seeded output under current Whitmore interpretation)
+[DIAGNOSTIC] 2026 unique shift IDs:          99
+[DIAGNOSTIC] 2026 duplicate shift IDs:       0
+[PASS] Contractual schedule invariants verified: 0 duplicates, row-to-ID parity, canonical shift IDs.
+[DIAGNOSTIC] 2026 calculated projected cost: $279731.20 (seeded result, not permanent business canon)
+[PASS] Cost calculation contract verified on deterministic EA penalty fixture ($1,028.60).
+[PASS] Inactive jobs produce 0 generated occurrences.
+[PASS] 2028 Week 53 correctly maps to 2028-12-30.
+[PASS] Friday and Monday overtime recurrence verified.
+[PASS] Explicit occurrence suppresses generated duplicate.
+[PASS] Permit overrides on explicit occurrences resolved correctly.
+[PASS] Assignment overrides on explicit occurrences resolved correctly.
+[PASS] One-off year isolation verified: 2027 events generate 0 shifts in 2026/2028 across Fri/Sat/Sun/Mon.
+[PASS] Recurring anchor weekday mismatch enforcement verified.
+[PASS] Canonical eligibility revalidation flags on_leave, temporarily_unavailable, inactive, and departed assignees.
+[PASS] Retired job cancels future explicit occurrences while preserving past actuals.
+[PASS] Canonical crew-level Plant Operator validation verified (valid, missing, non-required).
+[PASS] Explicit occurrence lifecycle resolver verified (past orphan, future orphan, future inactive, future active).
+[PASS] Annual job preferredDay validation verified: Tuesday skipped, Friday scheduled.
+--- SEEDED 2026 PLANT OPERATOR AUDIT REPORT ---
+2026 Plant-Operator-required shifts: 67
+Valid crews: 10
+Invalid crews: 57
+Future Plant-Operator-required shifts: 24
+Future valid crews: 3
+Future invalid crews: 21
+------------------------------------------------
+[PASS] Seeded 2026 Plant Operator relational invariants & crew contracts verified.
+[PASS] All 10 active recurring seeded jobs generate non-zero occurrences matching schedule intent.
+--- JOB STATUS SCHEDULABILITY AUDIT ---
+active occurrences:   6
+inactive occurrences: 0
+draft occurrences:    0
+archived occurrences: 0
+resolved occurrences: 0
+banana occurrences:   0
+---------------------------------------
+[PASS] Job status schedulability positive allow-list verified.
+[PASS] Universal active-only explicit occurrence schedulability verified across all parent statuses.
+[PASS] Scheduler defence-in-depth test: missing, null, empty, whitespace, and unknown status jobs generate 0 occurrences.
+ALL SCHEDULER REGRESSION TESTS PASSED (100%)
+
+>>> [SUITE 10 PASSED] (1.74s, exit 0)
+
+>>> [SUITE 11/20] Running RG3: Workforce Lifecycle & Assignment Integrity...
+=== RUNNING WORKFORCE REGRESSION SUITE ===
+[PASS] CSV quoting, multiline, escaped quotes, and duplicate ID rejection verified.
+[PASS] CSV serializer formula-injection hardening verified.
+[PASS] Departed workforce assignment lifecycle verified: past actuals preserved, future explicit and custom assignments vacated (vacatedCount: 2).
+[PASS] Canonical eligibility validator invariants verified.
+[PASS] Incoming employment status preserved across all non-active states (active, departed, inactive, on_leave, temporarily_unavailable).
+[PASS] All non-active workforce lifecycle transitions vacate future assignments while preserving past actuals.
+[PASS] Runtime eligibility validator fails closed for unknown employment status (banana).
+[PASS] Plant Operator lifecycle transitions (departed, inactive, on_leave, unavailable, unknown) invalidate required crews.
+[PASS] Fail-closed CSV rejection verified for "departedd", "banana", "actve".
+[PASS] Departed staff reactivation protection verified against typo status.
+[PASS] Unsafe Employee ID rejected by CSV parser.
+[PASS] All 253 seeded staff IDs verified valid against canonical regex.
+[PASS] Mandatory P0 Shift ID identity & time-overlap regression matrix verified (Cases A through F).
+[PASS] Stage 1 cross-date overlap, 10-hour rest-gap & DST/cross-year matrix verified (Cases G through P).
+[PASS] Canonical workforce employment status fail-closed invariants verified across 8 matrix states.
+=== RUNNING CANDIDATE ORDERING EQUIVALENCE TEST SUITE (OFFLINE15.1) ===
+Loaded 253 roster members and 12 jobs.
+  [PASS] Scenario 1: Standard shift - Job 1 (no search, all depts) -> 253 candidates, exact 100% order match
+  [PASS] Scenario 2: Plant Op shift - Job 3 -> 253 candidates, exact 100% order match
+  [PASS] Scenario 3: Exclusive Team shift -> 253 candidates, exact 100% order match
+  [PASS] Scenario 4: Search query filter "John" -> 5 candidates, exact 100% order match
+  [PASS] Scenario 5: Department filter "City Maintenance" -> 0 candidates, exact 100% order match
+  [PASS] Scenario 6: Team filter "Parklands East" -> 0 candidates, exact 100% order match
+  [PASS] Scenario 7: onlyPreferredCrew toggle ON -> 23 candidates, exact 100% order match
+
+================================================================
+ ALL 7 CANDIDATE ORDERING EQUIVALENCE SCENARIOS PASSED (100%)
+ CANDIDATE ORDERING AND RANKING TIERS PROVEN BYTE-FOR-BYTE EQUIVALENT.
+================================================================
+
+[PASS] Candidate Ordering Equivalence Suite verified (100% byte-for-byte identical).
+
+ALL WORKFORCE REGRESSION TESTS PASSED (100%)
+
+>>> [SUITE 11 PASSED] (0.10s, exit 0)
+
+>>> [SUITE 12/20] Running RG4: Persistence Contract & JSON Schema Validation...
+=== RUNNING PERSISTENCE & STORAGE REGRESSION SUITE ===
+[PASS] Raw stored envelope confirmed Schema v2 before reload.
+[PASS] Storage save/load contract and normal round-trip verified.
+[PASS] Empty state preservation verified: jobs: [] and roster: [] survived reload.
+[PASS] Storage write failure detection and non-swallowed error contract verified.
+[PASS] JSON schema validation below UI layer verified: malformed, invalid anchors, unsupported weekdays, and duplicate staff rejected.
+[PASS] JSON restore round-trip equivalence verified.
+[PASS] Duplicate Job ID rejection verified atomically in workspace schema.
+[PASS] Recurring anchor weekday mismatch rejection verified in JSON schema.
+[PASS] JSON restore failure contract verified: returns failure when persistence fails.
+[PASS] JSON restore of activeView (analytics) and currentYear (2028) verified.
+[PASS] Legacy assignment key dependency detection verified: blocks hard deletion.
+[PASS] JSON schema validation rejects unknown job status (banana).
+[PASS] JSON schema validation rejects unknown employee status (banana).
+[PASS] JSON schema validation rejects annual job with unsupported preferredDay Tuesday.
+[PASS] JSON schema validation rejects unsafe Job ID.
+[PASS] JSON schema validation rejects unsafe Staff ID.
+[PASS] All 12 seeded Job IDs and 253 seeded Staff IDs verified valid against canonical regex.
+[PASS] Schema v2 rejects job with missing status.
+[PASS] Schema v2 rejects staff member with missing status.
+[PASS] Legacy v1 persisted workspace migrated to v2 with explicit statuses and validated.
+[PASS] Malformed persisted workspace with unsafe ID rejected before adoption.
+[PASS] Section 26: App save writes genuine Schema v2 into hort_ops_workspace_v2 before reload.
+[PASS] Section 27: Exported backup is Schema v2 and restores cleanly without migration.
+[PASS] Section 28: Invalid v2 persisted workspace quarantined and preserved byte-identical without overwrite.
+[PASS] Section 29: Anti-rollback verified: invalid v2 does not trigger automatic fallback to stale v1.
+[PASS] Section 30A: Atomic v1 -> v2 migration persisted, verified, and legacy v1 retired.
+[PASS] Section 30B: Failed migration persistence preserves legacy v1 without destructive cleanup.
+[PASS] Section 31: Canonical Schema v2 Job and Employee status allow-lists verified.
+[PASS] Section 4 & 26: Successful JSON recovery clears recoveryRequired and subsequent save succeeds without reload.
+[PASS] Section 4 & 26: Failed recovery leaves Recovery Required active.
+[PASS] Section 12 & 28: Schema 1 envelope in v2 key migrated and persisted atomically as Schema 2.
+[PASS] Section 12 & 28: V1-in-v2 migration persistence failure preserves raw source and enters recovery mode.
+[PASS] Section 21 & 28: Atomic legacy individual-keys migration persisted, verified, and retired.
+[PASS] Section 21 & 28: Legacy individual keys migration persistence failure preserves keys untouched.
+[PASS] Section 14 & 16: Canonical prepareWorkspaceJsonImport pipeline verified for Schema 1 and Schema 2 backups.
+[PASS] Section 2, 4, 6: Unsupported schema versions strictly rejected in import and persisted storage.
+[PASS] Section 8, 9, 10: Non-object v2 payload matrix quarantined without rollback to v1 or storage overwrite.
+[PASS] Section 12, 13, 14: Malformed v1 source enters recovery, raw v1 preserved, no defaults shadowed in v2.
+[PASS] Section 15, 16, 17: Malformed legacy individual keys quarantined, raw keys preserved, no defaults created.
+[PASS] Section 18, 19, 25: Default workspace created only on genuine clean slate.
+[PASS] Section 17 & 30: Canonical validator version matrix strictly rejects non-integer-2 schemas and missing version.
+[PASS] Section 18, 10 & 30: Invalid Job save rejected before write; storage preserved byte-for-byte unchanged.
+[PASS] Section 19, 20 & 30: Invalid Employee and invalid scheduling definitions rejected before write.
+[PASS] Section 12, 16, 21 & 30: Direct restore cannot bypass validation; invalid restore leaves valid storage and healthy status intact.
+[PASS] Section 22, 23, 24 & 30: Valid Schema 2 save, valid recovery exit cycle, and Schema 1 migration confirmed.
+[PASS] Section 8 & 28: Write-side schema version contract strictly rejects non-v2 schemas without mutating storage.
+[PASS] Section 9 & 29: Direct restore strictly respects Schema v2 version boundary and prevents future-schema coercion.
+[PASS] Section 19 & 30: All 12 seeded jobs verified 100% compliant with canonical validation rules (0 named bypasses).
+=== RUNNING ARCHITECTURE DEPENDENCY CONTRACT FAILURE SUITE (OFFLINE15.1) ===
+
+>>> [CONTRACT 1/6] Testing HortOpsSchemaValidator Withheld Contract...
+  [PASS] HortOpsSchemaValidator fail-closed: validation rejected, save blocked, storage untouched.
+
+>>> [CONTRACT 2/6] Testing HortOpsMigrationEngine Withheld Contract...
+  [PASS] HortOpsMigrationEngine fail-closed: Schema 1 quarantined, no relabelling, explicit failure.
+
+>>> [CONTRACT 3/6] Testing HortOpsStorageDriver Withheld Contract...
+  [PASS] HortOpsStorageDriver fail-closed: health reported unavailable, probeOk is false.
+
+>>> [CONTRACT 4/6] Testing HortOpsSchedulerEngine Withheld Contract...
+  [PASS] HortOpsSchedulerEngine fail-closed: throws explicit errors, never fabricates fake output.
+
+>>> [CONTRACT 5/6] Testing HortOpsCostCalculator Withheld Contract...
+  [PASS] HortOpsCostCalculator fail-closed: throws explicit error, never falls back to base rate.
+
+>>> [CONTRACT 6/6] Testing HortOpsEligibilityEngine Withheld Contract...
+  [PASS] HortOpsEligibilityEngine fail-closed: assigned staff invalidated with ELIGIBILITY_ENGINE_UNAVAILABLE, 0 candidates eligible.
+
+================================================================
+ ALL 6 ARCHITECTURE DEPENDENCY FAILURE CONTRACTS PASSED (100%)
+ ZERO SILENT FALLBACKS DETECTED. SAFE FAIL-CLOSED CONTRACTS PROVEN.
+================================================================
+
+[PASS] Architecture Dependency Failure Contracts verified (100% fail-closed).
+
+ALL PERSISTENCE REGRESSION TESTS PASSED (100%)
+
+Failed to save workspace to localStorage: Error: QuotaExceededError: simulated localStorage write failure
+    at MockLocalStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:14:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:162:25)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+Failed to save workspace to localStorage: Error: QuotaExceededError: simulated localStorage write failure
+    at MockLocalStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:14:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object._commitCanonicalProposal (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:295:25)
+    at Object.saveCurrentWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:315:20)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:171:37)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+Failed to save workspace to localStorage: Error: QuotaExceededError: simulated localStorage write failure
+    at MockLocalStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:14:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object.importWorkspaceJson (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:152:24)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:354:32)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+Failed to save workspace to localStorage: Error: QuotaExceededError: simulated localStorage write failure
+    at MockLocalStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:14:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object.restoreWorkspaceJson (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:693:41)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:359:42)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+Workspace restore aborted: persistence failed QuotaExceededError: simulated localStorage write failure
+Persisted v2 workspace failed validation, quarantined without overwriting storage: Job ID "x');alert(1);//" contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted.
+Persisted v2 workspace missing or invalid evidence maps, quarantined without overwriting storage: Missing required current-v2 field: assignments
+Persisted v2 workspace missing or invalid evidence maps, quarantined without overwriting storage: Missing required current-v2 field: assignments
+Failed to save workspace to localStorage: Error: QuotaExceededError: simulated localStorage write failure
+    at MockLocalStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:14:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object.loadWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:369:32)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:714:34)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+Migration v1 -> v2 persistence failed, preserving legacy v1 untouched.
+Failed to save workspace to localStorage: Error: QuotaExceededError: simulated localStorage write failure
+    at MockLocalStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:14:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object.restoreWorkspaceJson (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/app.js:693:41)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:808:44)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+Workspace restore aborted: persistence failed QuotaExceededError: simulated localStorage write failure
+Failed to save workspace to localStorage: Error: QuotaExceededError: simulated localStorage write failure
+    at MockLocalStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:14:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object.loadWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:320:36)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:838:31)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+Persisting migrated v1-in-v2 envelope failed, preserving raw source: QuotaExceededError: simulated localStorage write failure
+Failed to save workspace to localStorage: Error: QuotaExceededError: simulated localStorage write failure
+    at MockLocalStorage.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:14:13)
+    at Object.saveWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:231:29)
+    at Object.loadWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:462:38)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:870:30)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+Migration from legacy individual keys failed persistence, preserving legacy keys untouched.
+Persisted v2 workspace has unsupported schemaVersion: 99
+Persisted v2 workspace root is not an object, quarantined without overwriting storage
+Persisted v2 workspace root is not an object, quarantined without overwriting storage
+Persisted v2 workspace root is not an object, quarantined without overwriting storage
+Persisted v2 workspace root is not an object, quarantined without overwriting storage
+Persisted v2 workspace root is not an object, quarantined without overwriting storage
+Persisted v2 workspace corrupted, quarantined without overwriting storage: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at Object.loadWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:271:29)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:958:29)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+Legacy v1 workspace corrupted, preserving legacy v1 untouched: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at Object.loadWorkspace (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/js/utils/storage.js:342:29)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_persistence.cjs:972:32)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+Workspace restore aborted: invalid Schema v2 envelope Job ID "bad id bypass" contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted.
+Workspace restore aborted: invalid Schema v2 envelope Expected an explicit current Schema v2 workspace object
+Workspace restore aborted: invalid Schema v2 envelope Expected an explicit current Schema v2 workspace object
+Migration engine missing during legacy v1 load, preserving legacy v1 untouched
+Eligibility engine unavailable: window.HortOpsEligibilityEngine is required
+>>> [SUITE 12 PASSED] (0.10s, exit 0)
+
+>>> [SUITE 13/20] Running RG5: Assisted Rostering Engine & Propagation Invariants...
+=== RUNNING OFFLINE17 ROSTERING ENGINE TEST SUITE ===
+
+[1] Testing Series Resolution & Repeat Bounds...
+  ✔ Series resolution and remaining occurrence counts verified.
+
+[2] Testing Fixed Basic Propagation (Repeat 3 of 6)...
+  ✔ Fixed basic propagation (1-3 assigned, 4-6 vacant) verified with provenance.
+
+[3] Testing Fixed from Middle Occurrence (Start at 4, Repeat 2)...
+  ✔ Fixed from middle occurrence verified.
+
+[4] Testing Fixed Temporary Ineligibility (No silent replacement)...
+  ✔ Fixed temporary ineligibility verified: vacancy left, resumes when eligible.
+
+[5] Testing Manual Assignment Precedence Over Earlier Propagation...
+  ✔ Manual precedence contract verified: explicit assignment preserved.
+
+[6] Testing Rotation Basic Propagation (Avoiding immediate repeat)...
+  ✔ Rotation sequence: EMP-001 -> EMP-002 -> EMP-001 -> EMP-002 (no immediate repeats).
+
+[7] Testing Rotation Single Eligible Candidate Fallback (No artificial vacancy)...
+  ✔ Single candidate fallback verified: reuses candidate with explanatory note, no artificial vacancy.
+
+[8] Testing Rotation Plant Operator Crew Requirement...
+  ✔ Plant operator crew contract satisfied under rotation.
+
+[9] Testing Provenance-Aware Pruning on Instruction Modification...
+  ✔ Provenance-aware pruning verified: only generated assignments pruned, manual assignments preserved.
+
+[10] Testing Schema v2 Envelope Persistence with Rostering State...
+  ✔ Persistence round-trip with Schema v2 envelope verified.
+
+[11] Stage 1: Eligibility engine rejects candidate with insufficient rest...
+  ✔ Stage 1: Eligibility engine correctly blocks rest-gap violator and permits eligible alternative.
+  ✔ Stage 1: INSUFFICIENT_REST propagates through validateStaffEligibility (rotation auto-fill path).
+
+[12] Testing Rotation Recommendation Excludes Insufficient-Rest Candidate Via Real Boundary Lookup...
+  ✔ Rotation recommendation successfully excluded candidate with insufficient rest via real adjacent boundary lookup.
+
+[13] Testing saveAllocation() Hard Rejection Flow With Mocked window.alert...
+  ✔ saveAllocation() hard rejection verified: alert called with Insufficient Rest (< 10h) without ReferenceError, state unmutated.
+
+[14] Testing Boundary Cache Dynamic State Invalidation...
+  ✔ Boundary cache signature-aware invalidation verified: mutations immediately reflected.
+
+[15] Testing Friday, 31 December 2027 Materialisation & Cross-Year Rest Block...
+  ✔ Friday 31 Dec 2027 materialized and successfully blocks insufficient-rest allocation on 1 Jan 2028.
+
+[16] Testing Fail-Closed Handling on Adjacent Boundary Lookup Failure...
+  ✔ Fail-closed handling verified across scheduler, eligibility engine, rotation recommender, and saveAllocation modal.
+
+[17] Testing Job Duration Change Dynamic Boundary Cache Invalidation...
+  ✔ Job duration change dynamically invalidates boundary cache without manual cache clearing.
+
+[18] Testing Historical Timing Integrity & Inactive/Archived Job Preservation...
+  ✔ Historical shift on archived job preserved with authoritative snapshot timing verbatim.
+  ✔ Rotation evaluates against authoritative historical occurrence snapshot and excludes rest-gap violator.
+  ✔ Future assignment on inactive/archived job is properly suppressed.
+
+[19] Testing Missing Parent Job & Unknown Historical Calculations...
+  ✔ Cost calculator produces 0 cost, 0 meals, and no NaN for unverified schedule.
+  ✔ Slot totalCrewHours treats unverified shifts as 0 crew hours without NaN.
+  ✔ Missing parent job with unverified schedule fails closed without assuming free availability.
+
+[20] Testing Unavailable Scheduler Facade on Boundary Date Fails Closed...
+  ✔ Unavailable scheduler facade on boundary date fails closed immediately.
+
+[21] Testing Boundary Cache Dynamic Invalidation on Anchor-Week Parity Change...
+  ✔ Boundary cache dynamically invalidated on anchorWeek parity change without manual cache clearing.
+
+[22] Testing Active Job Mutation & Historical Timing Protection...
+  ✔ Active job past occurrence retains authoritative snapshot timing despite parent job mutation.
+  ✔ Rotation recommendation excludes rest-gap violator on active mutated job using authoritative snapshot.
+
+[23] Testing Archive Parent Job Historical Protection & Suppression...
+  ✔ Historical snapshot preserved on archived job and future unworked occurrences suppressed.
+
+[24] Testing Past Assignment on Active Job Without Authoritative Snapshot Fails Closed...
+  ✔ Past assignment on active job without snapshot marks unverifiedSchedule and fails closed.
+
+[25] Testing Boundary Cache Dynamic Invalidation on Historical Snapshot and Midnight Rollover...
+  ✔ Boundary cache dynamically invalidates on midnight date rollover and historical snapshot addition.
+
+[26] Testing Historical Snapshots Schema v2 Persistence Round-Trip & Rejection...
+  ✔ Historical snapshots Schema v2 persistence round-trip and validation rejection verified.
+
+=============================================================
+ALL 26 OFFLINE17 ROSTERING TEST SUITES PASSED (100% COMPLIANT)
+=============================================================
+
+>>> [SUITE 13 PASSED] (0.06s, exit 0)
+
+>>> [SUITE 14/20] Running RG6: Truthful Persistence State & Recovery Warnings...
+=== RUNNING OFFLINE17 TRUTHFUL PERSISTENCE RECOVERY TEST ===
+  ✔ Normal persistence state correctly displays Saved / Storage Health Normal.
+  ✔ Truthfulness contract verified: UI strictly exposes Recovery Required and suppresses normal Saved status.
+=== TRUTHFUL PERSISTENCE RECOVERY TEST PASSED ===
+
+>>> [SUITE 14 PASSED] (0.03s, exit 0)
+
+>>> [SUITE 15/20] Running RG7: Multi-Year Scheduler & Rostering Differential (2025-2028)...
+================================================================
+ OFFLINE17 MULTI-YEAR SCHEDULER & ROSTERING DIFFERENTIAL AUDIT
+ EVALUATING YEARS: 2025, 2026, 2027, 2028
+================================================================
+
+>>> [YEAR 2025] Running Schedule Generation & Invariant Analysis...
+  ✔ Year 2025: 2 shifts generated across 52 weekend slots.
+  ✔ Shift IDs, dates, recurrence, and job counts 100% invariant under rostering.
+  ✔ Baseline Cost: $6769.80 | Rostered Cost: $3085.80 (Delta: $-3684.00)
+
+>>> [YEAR 2026] Running Schedule Generation & Invariant Analysis...
+  ✔ Year 2026: 99 shifts generated across 52 weekend slots.
+  ✔ Shift IDs, dates, recurrence, and job counts 100% invariant under rostering.
+  ✔ Baseline Cost: $279731.20 | Rostered Cost: $279731.20 (Delta: $0.00)
+
+>>> [YEAR 2027] Running Schedule Generation & Invariant Analysis...
+  ✔ Year 2027: 82 shifts generated across 53 weekend slots.
+  ✔ Shift IDs, dates, recurrence, and job counts 100% invariant under rostering.
+  ✔ Baseline Cost: $224627.40 | Rostered Cost: $224627.40 (Delta: $0.00)
+
+>>> [YEAR 2028] Running Schedule Generation & Invariant Analysis...
+  ✔ Year 2028: 85 shifts generated across 53 weekend slots.
+  ✔ Shift IDs, dates, recurrence, and job counts 100% invariant under rostering.
+  ✔ Baseline Cost: $233434.70 | Rostered Cost: $233434.70 (Delta: $0.00)
+
+================================================================
+ MULTI-YEAR DIFFERENTIAL SUMMARY REPORT
+================================================================
+┌─────────┬─────────────┬────────────────┬──────────────┬────────────────┬──────────────┬───────────────────────┬───────────────────────┬─────────────┬────────────────────────┐
+│ (index) │ totalShifts │ uniqueShiftIds │ weekendSlots │ targetJob      │ seriesLength │ baselineProjectedCost │ rosteredProjectedCost │ costDelta   │ scheduleShapePreserved │
+├─────────┼─────────────┼────────────────┼──────────────┼────────────────┼──────────────┼───────────────────────┼───────────────────────┼─────────────┼────────────────────────┤
+│ 2025    │ 2           │ 2              │ 52           │ 'frome-street' │ 12           │ '$6769.80'            │ '$3085.80'            │ '$-3684.00' │ true                   │
+│ 2026    │ 99          │ 99             │ 52           │ 'tramline-5am' │ 18           │ '$279731.20'          │ '$279731.20'          │ '$0.00'     │ true                   │
+│ 2027    │ 82          │ 82             │ 53           │ 'tramline-5am' │ 12           │ '$224627.40'          │ '$224627.40'          │ '$0.00'     │ true                   │
+│ 2028    │ 85          │ 85             │ 53           │ 'tramline-5am' │ 12           │ '$233434.70'          │ '$233434.70'          │ '$0.00'     │ true                   │
+└─────────┴─────────────┴────────────────┴──────────────┴────────────────┴──────────────┴───────────────────────┴───────────────────────┴─────────────┴────────────────────────┘
+
+[PASS] Multi-year differential verified: zero unexpected scheduling/cost anomalies.
+>>> [SUITE 15 PASSED] (0.91s, exit 0)
+
+>>> [SUITE 16/20] Running RG8: Offline17.5j Rostering Integrity Freeze & Invariants...
+=== RUNNING OFFLINE17.5J ROSTERING INTEGRITY FREEZE SUITE (158 GATES) ===
+
+[Test 1] Repeat reduction across years prunes downstream assignments and provenance...
+  ✔ Passed: Repeat reduction across years strictly pruned downstream assignments.
+
+[Test 2] Repeat increase across years extends assignments to newly in-scope shifts...
+  ✔ Passed: Repeat increase seamlessly re-extended assignments across year boundary.
+
+[Test 3] Employee replacement across years removes old employee and assigns new employee...
+  ✔ Passed: Employee replacement pruned old employee and assigned new employee across years.
+
+[Test 4] Mode change from Fixed to Manual removes downstream assignments, leaves current shift intact...
+  ✔ Passed: Mode change to Manual pruned all downstream propagation.
+
+[Test 5] Mode change from Fixed to Rotation retains slot identity, assigns distinct staff...
+  ✔ Passed: Mode changed from Fixed to Rotation and rotated candidate successfully.
+
+[Test 6] Mode change from Rotation to Fixed assigns single officer across downstream shifts...
+  ✔ Passed: Mode changed from Rotation to Fixed, assigning single officer.
+
+[Test 7] Source employee removal prunes entire downstream series for that slot...
+  ✔ Passed: Source employee removal pruned all downstream occurrences.
+
+[Test 8] Same-instruction idempotency: multiple saves produce identical assignments with 0 duplicates...
+  ✔ Passed: Re-applying identical instruction is strictly idempotent with 0 duplicates.
+
+[Test 9] Stable crew-slot identity: removing an earlier slot preserves slotId and instructions for remaining slots...
+  ✔ Passed: Stable slot identity maintained when preceding slot removed.
+
+[Test 10] Historical protection: past shifts cannot propagate and cannot be modified by future propagation...
+  ✔ Passed: Historical protection enforced: past shifts cannot propagate and past actuals are immutable.
+
+[Test 11] Multi-year series recurrence: Fixed propagation spans Dec 2026 into Jan 2027 seamlessly...
+  ✔ Passed: Fixed mode propagated seamlessly across 2026 -> 2027 boundary.
+
+[Test 12] Multi-year series recurrence: Rotation propagation spans Dec 2026 into Jan 2027 seamlessly...
+  ✔ Passed: Rotation mode rotated distinct staff across 2026 -> 2027 boundary.
+
+[Test 13] Plant Operator Rotation Gate: never assign ordinary worker when operator is required...
+  ✔ Passed: Plant operator rotation gate strictly blocked silent fallback to ordinary workers.
+
+[Test 14] Schema validation fail-closed on malformed instructions/provenance...
+  ✔ Passed: Schema v2 validator fail-closed on invalid instruction format (Instruction "bad-inst" has non-canonical instructionId: bad-inst).
+
+[Test 15] Forward planner vacancy denominator: displays totalShiftVacancies (e.g. Vacancy 1 of 2)...
+  ✔ Passed: Forward planner vacancy card correctly uses totalShiftVacancies denominator.
+
+[Test 16] Actionable operator warnings: surfaces warnings for conflicts, 0 warnings for normal completion...
+  ✔ Passed: Actionable warnings surfaced with exact diagnostic categories; 0 on happy path.
+
+[Test 17] Real year-filtered cross-year Fixed: allShifts single-year, resolves 2027 seamlessly...
+  ✔ Passed: Real year-filtered UI state resolved all 6 occurrences into 2027 under one instruction.
+
+[Test 18] Annual Fixed Repeat 3: spans 2026, 2027, 2028...
+  ✔ Passed: Annual Fixed Repeat 3 correctly spans 2026, 2027, 2028.
+
+[Test 19] Annual Rotation Repeat 4: spans 2026, 2027, 2028, 2029...
+  ✔ Passed: Annual Rotation Repeat 4 correctly spans across 4 years (2026-2029).
+
+[Test 20] Downstream inherited save: unchanged save creates 0 duplicate instructions...
+  ✔ Passed: Saving inherited occurrence unchanged produces 0 duplicate instructions.
+
+[Test 21] Downstream inherited row removal protection: UI and state prevent orphan provenance...
+  ✔ Passed: Inherited staff removal blocked, preventing contradictory assignment/provenance state.
+
+[Test 22] Historical long-lived instruction edit: historical actuals remain 100% immutable...
+  ✔ Passed: Historical actuals preserved completely untouched during instruction edits and persisted cleanly.
+
+[Test 23] Employee replacement cleans stale source provenance...
+  ✔ Passed: Stale source provenance cleanly deleted upon employee replacement.
+
+[Test 24] Durable manual slot identity: SLOT-2 preserved when SLOT-1 removed...
+  ✔ Passed: Durable slot identity maintained for manual and instructed slots on reopen/reorder.
+
+[Test 25] Comprehensive discrete schema validation matrix (independent assertions)...
+  ✔ Passed: All 20 discrete schema invalidation scenarios fail closed independently with exact diagnostic error reasons.
+
+[Test 26] Plant Operator warning end-to-end: live engine run emits plant_operator_unresolved...
+  ✔ Passed: Plant Operator unresolved event mapped end-to-end from engine to high-severity warning.
+
+[Test 27] Manual precedence warning end-to-end: live engine run emits manual_assignment_preserved...
+  ✔ Passed: Manual assignment collision mapped end-to-end to actionable warning.
+
+[Test 28] Sparse recurrence Fixed Repeat 12 (52-week recurrence)...
+  ✔ Passed: 52-week recurrence Fixed Repeat 12 resolved exactly 12 canonical occurrences.
+
+[Test 29] Sparse recurrence Rotation Repeat 12 (52-week recurrence)...
+  ✔ Passed: 52-week recurrence Rotation Repeat 12 resolved 12 occurrences with staff rotation continuity.
+
+[Test 30] Historical Fixed -> Rotation calling convention: string employee IDs, canonical rotation, schema valid...
+  ✔ Passed: Historical Fixed -> Rotation correctly assigned string employee IDs via canonical rotation and validated Schema v2.
+
+[Test 31] Historical Rotation with future Manual collision: manual preserved, no crew overstaffing...
+  ✔ Passed: Historical Rotation strictly respected downstream Manual precedence with zero overstaffing.
+
+[Test 32] Historical Fixed with future Manual collision: manual preserved, no crew overstaffing...
+  ✔ Passed: Historical Fixed strictly respected downstream Manual precedence with zero crew overstaffing.
+
+[Test 33] Plant Operator through historical edit: canonical operator gate enforced on future occurrences...
+  ✔ Passed: Plant Operator requirement strictly enforced through historical edit via canonical engine.
+
+[Test 34] Static source guard: zero duplicate candidate-selection or assignment logic...
+  ✔ Passed: Static source inspection verified single canonical propagation implementation.
+
+[Test 35] Failed save rollback immutability: zero state mutation when persistence rejected...
+  ✔ Passed: Pre-save inputs remained strictly immutable with 100% rollback fidelity.
+
+[Test 36] Schema reject orphan provenance: missing shift key in assignments fails closed...
+  ✔ Passed: Schema validator strictly rejected orphan provenance missing shift key in assignments.
+
+[Test 37] Schema reject instruction identity mismatch: id !== instructionId fails closed...
+  ✔ Passed: Schema validator strictly rejected instruction with mismatched id and instructionId.
+
+[Test 38] Schema reject duplicate active slot claims: multiple employees claiming same slotId fails closed...
+  ✔ Passed: Schema validator strictly rejected multiple active provenance claims on same slotId.
+
+[Test 39] Historical Fixed -> Fixed: clamps old Repeat count and establishes non-overlapping instruction scope...
+  ✔ Passed: Historical Fixed -> Fixed correctly clamped old Repeat to 3 with non-overlapping forward scope.
+
+[Test 40] Historical Fixed -> Rotation: clamps old Repeat count and establishes non-overlapping instruction scope...
+  ✔ Passed: Historical Fixed -> Rotation correctly clamped old Repeat to 3 and established valid forward Rotation.
+
+[Test 41] Historical Fixed -> Manual: retains clamped historical instruction and satisfies Schema v2...
+  ✔ Passed: Historical Fixed -> Manual retained clamped historical instruction and validated Schema v2.
+
+[Test 42] Historical source-slot removal: retains clamped historical instruction and satisfies Schema v2...
+  ✔ Passed: Historical source-slot removal retained clamped historical instruction and validated Schema v2.
+
+[Test 43] Static source guard: zero ambiguous variable hoisting in historical clamp block...
+  ✔ Passed: Static source inspection verified oldStartIndex usage and zero ambiguous oldStartIdx occurrences.
+
+[Test 44] Initial historical split with lineage fields (status, predecessor, lineageRootId)...
+  ✔ Passed: Historical split successfully established lineage pointers (status, root, predecessor) and passed Schema v2.
+
+[Test 45] Reopening historical source shows sealed status and [Open Active Rostering] pointer...
+  ✔ Passed: Reopening historical source shows sealed status, blocks mutation, and provides guided navigation to active continuation.
+
+[Test 46] Editing active continuation (Repeat 3 -> Repeat 2) prunes third shift, predecessor untouched...
+  ✔ Passed: Editing active continuation pruned third shift cleanly with predecessor 100% untouched.
+
+[Test 47] Active Fixed -> Manual reconciles future state cleanly, historical predecessor untouched...
+  ✔ Passed: Active Fixed -> Manual reconciled future occurrences cleanly while retaining historical predecessor.
+
+[Test 48] Active Fixed -> Rotation works through canonical propagateOccurrence...
+  ✔ Passed: Active Fixed -> Rotation executed via canonical propagation with valid schema.
+
+[Test 49] Multi-step time advancement creates clean linear chain (Inst1 -> Inst2 -> Inst3)...
+  ✔ Passed: Linear lineage chain formed successfully (Inst1 -> Inst2 -> Inst3) with exact single active terminal.
+
+[Test 50] Historical source edit attempt does not mutate future active continuation (sealed history invariant)...
+  ✔ Passed: Historical source edit attempt safely sealed without mutating future active continuation.
+
+[Test 51] Missing predecessor continuation fails closed in schema validation...
+  ✔ Passed: Missing predecessor instruction rejected fail-closed.
+
+[Test 52] Multiple active continuations fail closed in schema validation...
+  ✔ Passed: Multiple active instructions in lineage rejected fail-closed.
+
+[Test 53] Lineage cycle fails closed in schema validation...
+  ✔ Passed: Lineage cycle detected and rejected fail-closed.
+
+[Test 54] Provenance outside repeat count (sequenceIndex >= repeatCount) fails closed...
+  ✔ Passed: sequenceIndex >= repeatCount strictly rejected fail-closed.
+
+[Test 55] Real Offline17.4a un-annotated split workspace loads without Recovery Required...
+  ✔ Passed: Legacy 17.4a split workspace normalized and validated without Recovery Required.
+
+[Test 56] Unsplit legacy workspace normalizes safely...
+  ✔ Passed: Unsplit legacy workspace safely normalized to active terminal.
+
+[Test 57] Ambiguous legacy state fails closed into Recovery Mode...
+  ✔ Passed: Ambiguous legacy state correctly rejected fail-closed.
+
+[Test 58] Normalization idempotency across multiple runs...
+  ✔ Passed: normalizeLineage is strictly idempotent.
+
+[Test 59] DOM render test for ordinary and sealed shifts (proves no ReferenceError)...
+  ✔ Passed: Both ordinary and sealed shifts render without ReferenceError.
+
+[Test 60] Sealed history UI elements and select suppression...
+  ✔ Passed: Sealed history UI correctly suppresses controls and renders navigation pointers.
+
+[Test 61] Active instruction with past start date remains editable for future occurrences...
+  ✔ Passed: Active instruction with past start date remains fully editable up to maxRepeat.
+
+[Test 62] Cross-year navigation in openActiveContinuation...
+  ✔ Passed: Cross-year navigation seamlessly switches year, shifts, and opens continuation modal.
+
+[Test 63] Same-year navigation in openActiveContinuation...
+  ✔ Passed: Same-year navigation transitions selected date and opens continuation modal.
+
+[Test 64] Navigation failure handles unresolvable target safely...
+  ✔ Passed: Unresolvable continuation target handled safely without throwing or mutating state.
+
+[Test 65] Historical instruction with NO active continuation is sealed in UI...
+  ✔ Passed: Historical instruction with NO continuation renders completely sealed and read-only.
+
+[Test 66] Active continuation changed to Manual -> predecessor remains sealed on reopen...
+  ✔ Passed: Reopening predecessor with no active continuation maintains isSealedHistorical = true.
+
+[Test 67] Attempt to save/edit historical instruction with no continuation is blocked in engine...
+  ✔ Passed: Historical instruction with no continuation cleanly locked from future propagation.
+
+[Test 68] Repeat increase on historical source cannot resurrect future continuation...
+  ✔ Passed: Repeat increase on historical ancestor cannot resurrect future propagation.
+
+[Test 69] Overlapping legacy pair is rejected fail-closed...
+  ✔ Passed: Overlapping legacy pair rejected fail-closed without inventing false lineage.
+
+[Test 70] Clean non-overlapping legacy pair normalizes cleanly...
+  ✔ Passed: Clean non-overlapping legacy pair correctly validated and normalized.
+
+[Test 71] Mixed modern/legacy group does NOT rewrite modern metadata...
+  ✔ Passed: Modern authoritative metadata strictly protected from rewrite in mixed groups.
+
+[Test 72] Normalization idempotency on rejected states...
+  ✔ Passed: normalizeLineage is strictly idempotent on rejected and fail-closed inputs.
+
+================================================================
+[Test 73] Historical status seals even when source date is not past...
+  ✔ Passed: Historical status unconditionally seals regardless of source date.
+
+[Test 74] Active future instruction remains editable...
+  ✔ Passed: Active future instruction remains fully editable.
+
+[Test 75] One-off Job with multiple legacy source instructions fails closed...
+  ✔ Passed: One-off Job with multiple legacy source instructions fails closed.
+
+[Test 76] Recurring off-cadence legacy source fails closed...
+  ✔ Passed: Recurring off-cadence legacy source fails closed.
+
+[Test 77] Failed legacy canonical-occurrence inference performs zero partial mutation...
+  ✔ Passed: Zero partial mutation on rejected legacy states verified.
+
+[Test 78] Clean canonical legacy split still normalises correctly...
+  ✔ Passed: Clean canonical legacy split correctly normalized and validated.
+
+[Test 79] Single valid generated source normalizes to active...
+  ✔ Passed: Single valid generated source normalizes to active and validates Schema v2.
+
+[Test 80] Single invalid off-cadence legacy source fails closed...
+  ✔ Passed: Single invalid off-cadence legacy source strictly fails closed.
+
+[Test 81] Single invalid one-off legacy source fails closed...
+  ✔ Passed: Single invalid one-off legacy source strictly fails closed.
+
+[Test 82] Single valid explicit operational source normalizes to active...
+  ✔ Passed: Single valid explicit operational source normalizes to active and validates Schema v2.
+
+[Test 83] Explicit predecessor -> generated successor non-overlapping pair migrates cleanly...
+  ✔ Passed: Explicit predecessor -> generated successor migrates cleanly.
+
+[Test 84] Explicit predecessor -> generated successor overlapping pair fails closed...
+  ✔ Passed: Explicit operational validity does not excuse overlapping ranges (fails closed).
+
+[Test 85] Transactional failure immutability: zero partial mutation on failed normalization...
+  ✔ Passed: Zero partial mutation on rejected single and multi-instruction states verified.
+
+[Test 86] Normalization idempotency across single, multi, and explicit states...
+  ✔ Passed: normalizeLineage is strictly idempotent across single, multi, and explicit states.
+
+[Test 87] Modern historical lineage remains valid after Job recurrence edit...
+  ✔ Passed: Modern historical lineage remains valid after Job recurrence edit.
+
+[Test 88] Historical-only Job recurrence edit persists successfully...
+  ✔ Passed: Historical-only Job recurrence edit persists successfully.
+
+[Test 89] Active future rostering blocks incompatible recurrence edit...
+  ✔ Passed: Active future rostering blocks incompatible recurrence edit.
+
+[Test 90] Rejected Job edit leaves live and persisted Job unchanged...
+  ✔ Passed: Rejected Job edit leaves live and persisted Job unchanged (zero split-brain).
+
+[Test 91] Raw workspace.shifts cannot authorise off-cadence legacy source...
+  ✔ Passed: Raw workspace.shifts strictly rejected from authorising off-cadence legacy sources.
+
+[Test 92] Trusted explicit occurrence remains accepted...
+  ✔ Passed: Trusted explicit occurrence ledger remains accepted.
+
+[Test 93] Accepted workspace can immediately save unchanged...
+  ✔ Passed: Load -> Save equivalence verified across modern, legacy, and malicious states.
+
+[Test 94] Canonical envelope does not discard validation-critical state...
+  ✔ Passed: Canonical envelope retains all validation-critical state.
+
+[Test 95] Weekly -> Fortnightly blocked when later active scope changes (sparsification)...
+  ✔ Passed: Weekly -> Fortnightly sparsification blocked, live & persisted state untouched.
+
+[Test 96] Fortnightly -> Weekly blocked because Repeat sequence changes (densification)...
+  ✔ Passed: Fortnightly -> Weekly Repeat-semantic sequence change strictly blocked.
+
+[Test 97] Source remains valid canonical occurrence, but later sequence changes -> blocked...
+  ✔ Passed: Proved source-only validity is no longer sufficient; full sequence comparison enforced.
+
+[Test 98] Active instruction with historical source date protects future occurrences...
+  ✔ Passed: Active instruction with historical source date safely protects future occurrences.
+
+[Test 99] Active Job -> Inactive blocked when active future rostering exists...
+  ✔ Passed: Active Job -> Inactive blocked, preventing hidden future shifts in Forward Planner.
+
+[Test 100] Active Job -> Inactive allowed with historical-only lineage...
+  ✔ Passed: Active -> Inactive allowed when only historical-only lineage exists.
+
+[Test 101] JobRegistry status toggle is transactional (staged)...
+  ✔ Passed: JobRegistry toggleStatus stages update cleanly; zero split-brain on rejection.
+
+[Test 102] Delete/Retire cannot bypass active future guard...
+  ✔ Passed: deleteJob cannot bypass active future rostering guard.
+
+[Test 103] Compatible non-scheduling Job edit remains allowed...
+  ✔ Passed: Non-scheduling edits remain allowed without unnecessary locking.
+
+[Test 104] Successful guarded Job edit preserves exact future active sequence...
+  ✔ Passed: Invariant affirmed: Future active occurrence sequence BEFORE == AFTER (4 non-empty occurrences).
+
+[Test 105] Active instruction with zero assignments prevents hard delete...
+  ✔ Passed: Active instruction with zero assignments prevents hard delete.
+
+[Test 106] Historical instruction with zero assignments prevents hard delete...
+  ✔ Passed: Historical instruction prevents hard delete, preserving audit lineage.
+
+[Test 107] Delete/Retire blocks when active future rostering exists (even with zero assignments)...
+  ✔ Passed: Active future rostering blocks Delete/Retire even with zero assignments.
+
+[Test 108] Historical-only Delete path retires Job to inactive instead of hard deleting...
+  ✔ Passed: Historical-only Job cleanly retired to Inactive, preserving historical lineage.
+
+[Test 109] Retirement persistence failure rolls back in-memory Job status...
+  ✔ Passed: Retirement save failure rolls back in-memory Job status (zero split-brain).
+
+[Test 110] Modern active off-cadence source fails Schema v2 validation closed...
+  ✔ Passed: Modern active off-cadence source strictly fails closed in Schema v2.
+
+[Test 111] Modern historical source remains valid in Schema v2 after recurrence drift...
+  ✔ Passed: Modern historical source remains valid after current recurrence drift.
+
+[Test 112] Trusted explicit modern active source remains valid in Schema v2...
+  ✔ Passed: Trusted explicit operational occurrence authorises modern active instruction.
+
+[Test 113] Unresolved active instruction blocks Job schedule mutation fail-closed...
+  ✔ Passed: Unresolved active instruction fails closed, blocking schedule & status mutation.
+
+[Test 114] Hard-delete persistence failure restores deleted Job in memory...
+  ✔ Passed: Hard-delete persistence failure restores Job in memory (transactional rollback).
+
+[Test 115] Non-empty sequence invariant reaffirmed on schedule preservation...
+  ✔ Passed: Non-empty sequence equality verified before and after permitted mutation.
+
+[Test 116] Schema rejects active instruction under inactive Job...
+  ✔ Passed: Active instruction under inactive Job strictly rejected by Schema v2.\n
+[Test 117] Schema rejects active instruction under draft, archived, resolved statuses...
+  ✔ Passed: Active instruction under draft, archived, resolved Job statuses fails Schema v2.\n
+[Test 118] Historical instruction remains valid under inactive and archived Jobs...
+  ✔ Passed: Historical instructions remain 100% valid under non-active Jobs (archival integrity).\n
+[Test 119] Exhausted active instruction seals to historical during retirement transaction...
+  ✔ Passed: Exhausted active instruction sealed historical during retirement transaction.\n
+[Test 120] Future-active instruction still blocks retirement...
+  ✔ Passed: Active future instruction strictly blocks retirement.\n
+[Test 121] Mixed exhausted + future-active lineages block entire transaction without partial sealing...
+  ✔ Passed: Mixed lineages completely block transaction; zero partial sealing verified.\n
+[Test 122] Retirement save failure restores both Job and instruction statuses (atomic rollback)...
+  ✔ Passed: Storage failure during retirement atomically rolls back both Job and instruction statuses.\n
+[Test 123] Delete/Retire route seals exhausted active instruction...
+  ✔ Passed: Delete/Retire route seamlessly seals exhausted active instruction.\n
+[Test 124] Registry toggle route seals exhausted active instruction...
+  ✔ Passed: JobRegistry.toggleStatus seals exhausted active instruction to historical.\n
+[Test 125] Reactivating Job does not reactivate historical instruction...
+  ✔ Passed: Reactivating Job preserves historical instruction as sealed (no resurrection).\n
+[Test 126] Trusted explicit active instruction still invalid under inactive Job...
+  ✔ Passed: Trusted explicit active source under inactive Job strictly fails Schema v2.\n
+[Test 127] Unresolved active instruction fails closed and is not mistaken for exhausted instruction...
+  ✔ Passed: Unresolved active instruction fails closed and is not mistaken for exhausted.\n
+[Test 128] Exhausted active Fixed instruction seals before cadence edit...
+  ✔ Passed: Exhausted active Fixed instruction sealed historical before cadence edit.
+
+[Test 129] Proving proposed cadence would have resurrected future occurrences if unsealed...
+  ✔ Passed: Resurrection mathematically proven prevented: historical sealing blocks Oct/Nov future scope.
+
+[Test 130] Anchor/schedule-field variant seals exhausted instruction...
+  ✔ Passed: Anchor-field schedule edit seals exhausted active instruction.
+
+[Test 131] Mixed exhausted + incompatible future-active blocks with zero mutation...
+  ✔ Passed: Mixed exhausted + incompatible future-active blocks transaction with zero mutation.
+
+[Test 132] Multiple exhausted instructions seal atomically on schedule mutation...
+  ✔ Passed: Multiple exhausted instructions sealed atomically in one transaction.
+
+[Test 133] Unresolved active instruction prevents any staged sealing on schedule change...
+  ✔ Passed: Unresolved active instruction blocks schedule change with zero partial sealing.
+
+[Test 134] Non-scheduling Job edit does not trigger sealing...
+  ✔ Passed: Non-scheduling edit leaves exhausted instruction status untouched.
+
+[Test 135] Persistence failure restores Job and exhausted instruction statuses (atomic rollback)...
+  ✔ Passed: Storage failure during schedule mutation atomically rolls back both Job and instruction.
+
+[Test 136] Save/reload preserves historical sealing and new Job schedule...
+  ✔ Passed: Save/reload confirms persistent historical sealing and updated recurrence.
+
+[Test 137] Assignment-free exhausted active instruction seals correctly (vacant slot)...
+  ✔ Passed: Assignment-free exhausted active instruction seals cleanly (vacant slot principle).
+
+[Test 138] Exhausted Rotation instruction seals without re-running rotation...
+  ✔ Passed: Exhausted Rotation instruction sealed historical without re-running rotation logic.
+
+[Test 139] Exhausted + compatible future-active instruction...
+  ✔ Passed: Compatible schedule edit seals exhausted instruction while preserving future-active instruction.
+
+[Test 140] Historical Fixed instruction + future provenance (target >= today) fails Schema v2 (Invariant I2)...
+  ✔ Passed: Historical instruction owning future provenance strictly rejected by Schema v2 (Invariant I2).
+
+[Test 141] Historical Fixed instruction + past provenance (target < today) is valid in Schema v2 (Invariant I2/I4)...
+  ✔ Passed: Historical instruction + past provenance remains 100% valid (Invariant I2/I4).
+
+[Test 142] Future assignment linked to historical instruction blocks Job schedule mutation...
+  ✔ Passed: Future assignment linked to historical instruction blocks Job mutation fail-closed.
+
+[Test 143] Active future provenance remains valid in Schema v2...
+  ✔ Passed: Active future provenance remains 100% valid in Schema v2.
+
+[Test 144] Historical instruction remains valid under inactive Job (Invariant I4)...
+  ✔ Passed: Historical instruction remains valid under inactive Job (Invariant I4).
+
+[Test 145] Active instruction under inactive Job is rejected by Schema v2 (Invariant I1)...
+  ✔ Passed: Active instruction under inactive Job strictly rejected (Invariant I1).
+
+[Test 146] Active future instruction that fails operational resolution blocks schedule mutation (Invariant I3/I5)...
+  ✔ Passed: Unresolvable active instruction blocks schedule mutation fail-closed (Invariant I3/I5).
+
+[Test 147] Exhausted active instruction seals to historical before schedule mutation (Invariant I6)...
+  ✔ Passed: Exhausted active instruction sealed historical and never resurrected (Invariant I6).
+
+[Test 148] Any rostering instruction prevents hard delete, retiring Job instead (Invariant I7)...
+  ✔ Passed: Any rostering instruction prevents hard delete, retiring Job instead (Invariant I7).
+
+[Test 149] Future active rostering strictly blocks Job retirement (Invariant I8)...
+  ✔ Passed: Future active rostering strictly blocks Job retirement (Invariant I8).
+
+[Test 150] Completed historical lineage with zero active terminal instructions is valid in Schema v2 (Invariant I9)...
+  ✔ Passed: Completed historical chain with zero active terminals validates cleanly (Invariant I9).
+
+[Test 151] Permitted schedule mutation preserves exact active future sequence semantics (Invariant I10)...
+  ✔ Passed: Permitted schedule mutation preserves exact active future sequence semantics (Invariant I10).
+
+[Test 152] Mixed exhausted + incompatible future-active blocks transaction with zero mutation (Invariant I11)...
+  ✔ Passed: Blocked transaction makes zero live or persisted mutation (Invariant I11).
+
+[Test 153] Persistence failure during mutation triggers complete transactional rollback (Invariant I11)...
+  ✔ Passed: Persistence failure triggers complete transactional rollback (Invariant I11).
+
+[Test 154] Load -> Save equivalence: accepted loaded state is immediately saveable unchanged (Invariant I12)...
+  ✔ Passed: Accepted loaded state is immediately saveable unchanged without drift (Invariant I12).
+
+[Test 155] Trusted explicit occurrence authorizes modern active instruction across lifecycle...
+  ✔ Passed: Trusted explicit operational occurrence authorises modern active instruction.
+
+[Test 156] Exhausted Rotation instruction seals historical preserving rotation assignments...
+  ✔ Passed: Exhausted Rotation instruction sealed historical with preserved assignments.
+
+[Test 157] Assignment-free active instruction prevents hard delete and blocks retirement when future...
+  ✔ Passed: Assignment-free active future instruction prevents hard delete and blocks retirement.
+
+[Test 158] Deterministic State Matrix Model Assertion (Invariants I1-I12)...
+  ✔ Passed: All 6 core combinations of the deterministic state matrix asserted successfully.
+
+ALL 158 OFFLINE17.5J ROSTERING INTEGRITY GATES PASSED (100% PASS)
+================================================================
+
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering based on its current schedule. End or revise that rostering before changing the Job schedule.
+Persisted v2 workspace missing or invalid evidence maps, quarantined without overwriting storage: Missing required current-v2 field: historicalSnapshots
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering based on its current schedule. End or revise that rostering before changing the Job schedule.
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering based on its current schedule. End or revise that rostering before changing the Job schedule.
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering and cannot be made inactive until that rostering is ended or revised.
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering and cannot be made inactive until that rostering is ended or revised.
+saveJob in-memory mutation rolled back due to storage failure.
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering and cannot be made inactive until that rostering is ended or revised.
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering and cannot be made inactive until that rostering is ended or revised.
+saveJob in-memory mutation rolled back due to storage failure.
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering based on its current schedule. End or revise that rostering before changing the Job schedule.
+Job recurrence change blocked by active future rostering guard: Active rostering for this Job could not be resolved against the current schedule. Resolve the rostering integrity issue before changing the Job.
+saveJob in-memory mutation rolled back due to storage failure.
+Job recurrence change blocked by active future rostering guard: Future assignment on 2026-10-17 is linked to a historical instruction. Resolve this rostering contradiction before changing the Job.
+Job recurrence change blocked by active future rostering guard: Active rostering for this Job could not be resolved against the current schedule. Resolve the rostering integrity issue before changing the Job.
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering and cannot be made inactive until that rostering is ended or revised.
+Job recurrence change blocked by active future rostering guard: This Job has active future rostering based on its current schedule. End or revise that rostering before changing the Job schedule.
+saveJob in-memory mutation rolled back due to storage failure.
+>>> [SUITE 16 PASSED] (23.82s, exit 0)
+
+>>> [SUITE 17/20] Running RG9: Playwright Headless Browser Smoke Suite...
+=== RUNNING BROWSER SMOKE TEST SUITE (STATIC FILE:// EXECUTION) ===
+Testing static self-contained app directly via: file:///home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/dist/hort_ops_offline_planner.html
+[PASS] Application initialised and mounted successfully.
+[PASS] All 6 main views navigated and mounted with non-empty content.
+[PASS] Job Registry Add Job, Edit Job, and Deletion workflows verified without error.
+[PASS] Crew Allocator modal opened, searched, interacted, and saved successfully.
+[PASS] Forward Planner shift cards verified clean: 0 Plant Op pills on shift cards.
+[PASS] Forward Planner unallocated rows verified: 2 Unallocated Slot pills displayed, 0 Plant Op pills.
+[PASS] Plant Operator SVG warning badges verified: 2 badges rendered on right side of cards.
+[PASS] Overtime Exemption modal opened, saved, and verified inert under HTML injection payloads.
+[PASS] Non-destructive search input typing and focus preservation verified.
+[PASS] Forward Planner verified safe from HTML payload injection across both unassigned and assigned branches.
+[PASS] Calendar view verified safe from HTML payload injection.
+[PASS] Peak Weekends view verified safe from HTML payload injection.
+[PASS] Job Registry view and search attribute verified safe from HTML payload injection.
+[PASS] Warnings button and modal opened and closed successfully.
+[PASS] Export and Import modals opened and closed successfully.
+=== Step 6: Testing Modal Scroll Isolation, Chaining Containment & Scroll Restoration ===
+[PASS] Background scrolled to non-zero offset: 38px
+[PASS] Job Edit modal body scrolls internally without background leakage.
+[PASS] Scroll chaining containment verified at top and bottom boundaries.
+[PASS] Wheel over modal header and footer verified inert.
+[PASS] Modal close restored exact background scroll position and preserved drawer.
+[PASS] Crew Allocator modal containment, inertness, and scroll restoration verified.
+[PASS] Import modal containment, inertness, and scroll restoration verified.
+[PASS] Export modal containment, inertness, and scroll restoration verified.
+[PASS] Overtime Exemption modal containment, inertness, and scroll restoration verified.
+[PASS] Warnings modal containment, inertness, and scroll restoration verified.
+[PASS] Short viewport (520px height) internal scrolling and header/footer accessibility verified.
+[PASS] Truthful header storage health pill verified.
+[PASS] Section 22: Crew Allocator department and team XSS escaping verified.
+[PASS] Section 32: Job Editor dynamic workforce hierarchy verified against live staffList.
+[PASS] Section 9 & 27: Job Editor and Crew Allocator team handlers verified safe from JavaScript injection.
+[PASS] Section 17, 20 & 29: Job Editor Secondary & Tertiary team preferences and historical preservation verified.
+[PASS] Truthful Recovery Required UI verified: exposes Recovery Required and suppresses Saved status.
+Running Step 7C: Permanent Historical Sealing & Lineage Verification...
+[PASS] Step 7C: Permanent historical sealing, navigation, and completed historical UI verified in browser.
+
+Running Step 7D: Active Future Schedule Compatibility & Status Protection...
+[PASS] Step 7D: Active future schedule compatibility and status protection verified in browser.
+
+Running Step 7E: Assignment-Free Active Future Job Delete Protection...
+[PASS] Step 7E: Assignment-free active future Job delete protection verified in browser.
+
+Running Step 7F: Exhausted Active Instruction Retirement & Sealing in Browser...
+[PASS] Step 7F: Exhausted active instruction retirement & sealing verified in browser.
+
+Running Step 7G: Exhausted Active Instruction Sealing on Schedule Mutation in Browser...
+[PASS] Step 7G: Exhausted active instruction sealing on schedule mutation verified in browser.
+
+[PASS] Verification screenshot saved to /tmp/offline_release_gates_verified.png and /home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/offline_release_gates_verified.png
+Browser console errors logged: 0
+Browser unhandled page errors: 0
+BROWSER SMOKE TESTS PASSED (100%)
+
+>>> [SUITE 17 PASSED] (25.00s, exit 0)
+
+>>> [SUITE 18/20] Running Stage 2 Node: Workspace Management, Destructive Reset & Storage Hygiene Contract...
+================================================================
+ STAGE 2 WORKSPACE MANAGEMENT & STORAGE HYGIENE CONTRACT SUITE
+ (PR23_02 / Review 38 Comprehensive Acceptance Matrix)
+================================================================
+
+[PASS] (1/16) R37-P1: Failed reset must not report success or clear live state
+[PASS] (2/16) R37-P2: Compaction deletion failures must be reported truthfully
+[PASS] (3/16) R37-P3: Persistence probe must clean up on read mismatch
+[PASS] (4/16) A01: Preflight read snapshot failure causes zero deletions and explicit failure
+[PASS] (5/16) A02: First targeted removal failure halts and maintains durable state
+[PASS] (6/16) A03: Nth-key deletion failure triggers compensating rollback and survives cold reload
+[PASS] (7/16) A04: Multiple removal failures handled deterministically with explicit diagnostics
+[PASS] (8/16) A05: Compensating rollback write failure stages emergency backup and blocks autosave
+[PASS] (9/16) A06: Verified clean reset wipes all owned keys, cleans staging, and leaves third-party data
+[PASS] (10/16) A08: Confirmation input not exactly RESET rejects execution without destructive calls
+[PASS] (11/16) A09: Reset modal renders truthful rollback banner and suppresses reload on failure
+[PASS] (12/16) T03-A: Compaction idempotency on already clean workspace
+[PASS] (13/16) T03-B: Compaction prunes all allowlisted stale keys and leaves active data safe
+[PASS] (14/16) T04-A: Probe cleanup double-fault marks probeOk = false without throwing
+[PASS] (15/16) T04-B: Unrounded quota ratio boundary testing (> 80%)
+[PASS] (16/16) T05/A10: Quarantine payload extraction conserves corrupt bytes safely
+
+----------------------------------------------------------------
+TOTAL: 16 PASSED, 0 FAILED (of 16 contract assertions)
+----------------------------------------------------------------
+
+StorageDriver removeItem failed for hort_ops_workspace_v2: Error: Injected removeItem denial for key: hort_ops_workspace_v2 (call #1)
+    at Object.removeItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:55:15)
+    at Object.resetWorkspace (js/utils/storage/storageDriver.js:183:33)
+    at Object.resetWorkspace (js/utils/storage.js:45:42)
+    at Object.resetToCleanSlate (js/app.js:744:32)
+    at mockStorage.hort_ops_custom_staff_v1 (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:187:24)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:533:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+Storage compaction deletion failure for hort_ops_custom_staff_v1: Error: Injected removeItem denial for key: hort_ops_custom_staff_v1 (call #1)
+    at Object.removeItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:55:15)
+    at Object.compactStorage (js/utils/storage/storageDriver.js:388:35)
+    at mockStorage.unrelated (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:200:24)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:533:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+StorageDriver preflight read snapshot failed: Error: Injected getItem denial for key: hort_ops_workspace_v2
+    at Object.getItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:41:15)
+    at Object.resetWorkspace (js/utils/storage/storageDriver.js:139:49)
+    at Object.resetWorkspace (js/utils/storage.js:45:42)
+    at Object.resetToCleanSlate (js/app.js:744:32)
+    at mockStorage.hort_ops_workspace_v2 (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:227:25)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:533:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+StorageDriver removeItem failed for hort_ops_workspace_v2: Error: Injected removeItem denial for key: hort_ops_workspace_v2 (call #1)
+    at Object.removeItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:55:15)
+    at Object.resetWorkspace (js/utils/storage/storageDriver.js:183:33)
+    at Object.resetWorkspace (js/utils/storage.js:45:42)
+    at Object.resetToCleanSlate (js/app.js:744:32)
+    at JSON.stringify.schemaVersion (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:244:25)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:533:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+StorageDriver removeItem failed for hort_ops_jobs_offline: Error: Injected removeItem denial for key: hort_ops_jobs_offline (call #2)
+    at Object.removeItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:55:15)
+    at Object.resetWorkspace (js/utils/storage/storageDriver.js:183:33)
+    at Object.resetWorkspace (js/utils/storage.js:45:42)
+    at Object.resetToCleanSlate (js/app.js:744:32)
+    at mockStorage.hort_ops_workspace_v2 (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:285:25)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:533:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+StorageDriver removeItem failed for hort_ops_workspace_v2: Error: Injected removeItem denial for key: hort_ops_workspace_v2 (call #1)
+    at Object.removeItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:55:15)
+    at Object.resetWorkspace (js/utils/storage/storageDriver.js:183:33)
+    at Object.resetWorkspace (js/utils/storage.js:45:42)
+    at Object.resetToCleanSlate (js/app.js:744:32)
+    at mockStorage.hort_ops_workspace_v2 (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:319:25)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:533:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+StorageDriver removeItem failed for hort_ops_jobs_offline: Error: Injected removeItem denial for key: hort_ops_jobs_offline (call #2)
+    at Object.removeItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:55:15)
+    at Object.resetWorkspace (js/utils/storage/storageDriver.js:183:33)
+    at Object.resetWorkspace (js/utils/storage.js:45:42)
+    at Object.resetToCleanSlate (js/app.js:744:32)
+    at mockStorage.hort_ops_workspace_v2 (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:342:25)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:533:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+StorageDriver compensating rollback setItem failed for hort_ops_workspace_v2: Error: Injected setItem denial for key: hort_ops_workspace_v2
+    at Object.setItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:48:15)
+    at Object.resetWorkspace (js/utils/storage/storageDriver.js:224:37)
+    at Object.resetWorkspace (js/utils/storage.js:45:42)
+    at Object.resetToCleanSlate (js/app.js:744:32)
+    at mockStorage.hort_ops_workspace_v2 (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:342:25)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:533:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+Workspace save blocked: persistent storage is safeguarded following reset failure.
+StorageDriver removeItem failed for hort_ops_workspace_v2: Error: Injected removeItem denial for key: hort_ops_workspace_v2 (call #1)
+    at Object.removeItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:55:15)
+    at Object.resetWorkspace (js/utils/storage/storageDriver.js:183:33)
+    at Object.resetWorkspace (js/utils/storage.js:45:42)
+    at Object.resetToCleanSlate (js/app.js:744:32)
+    at Object.executeReset (js/components/resetWorkspaceModal.js:79:21)
+    at mockStorage.hort_ops_workspace_v2 (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:429:20)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/test_stage2_workspace_contract.cjs:533:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+>>> [SUITE 18 PASSED] (0.10s, exit 0)
+
+>>> [SUITE 19/20] Running Stage 2 Node: Master Release Runner Self-Test Contract (Matrix B01-B04)...
+================================================================
+ MASTER RELEASE RUNNER CONTRACT SELF-TEST SUITE (R38-02 / B01-B04)
+================================================================
+
+[PASS] (1/4) B01: Inject one mandatory browser suite BLOCKED while others PASSED -> Exits code 2 with BLOCKED summary
+[PASS] (2/4) B02: Inject one mandatory suite FAILED while others PASSED -> Exits code 1 with FAILED summary
+[PASS] (3/4) B03: All mandatory suites PASSED -> Exits code 0 with clean summary
+[PASS] (4/4) B04: Missing / incomplete suite manifest -> Exits nonzero
+
+----------------------------------------------------------------
+TOTAL: 4 PASSED, 0 FAILED (of 4 runner contract assertions)
+----------------------------------------------------------------
+
+>>> [SUITE 19 PASSED] (0.25s, exit 0)
+
+>>> [SUITE 20/20] Running Stage 2 Browser: Workspace Seeding, Reset Verification & Quarantine Smoke...
+================================================================
+ STAGE 2 PLAYWRIGHT BROWSER SMOKE SUITE
+ (PR23_02 / Review 38 Durability & Cold Reload Verification)
+================================================================
+
+>>> [1/6] Seeding populated canonical Schema v2 workspace...
+    [PASS] Populated workspace seeded successfully (2 jobs, 2 staff).
+>>> [2/6] Testing Reset Confirmation input validation...
+    [PASS] All false confirmation tokens strictly rejected.
+>>> [3/6] Testing Partial Reset Failure, Compensating Rollback & Cold Reload...
+    Performing cold browser reload to verify pre-reset data survival...
+    [PASS] Partial reset safely rolled back and 100% verified durable across cold reload.
+>>> [4/6] Executing clean destructive reset with un-mocked storage...
+    [PASS] Clean slate verified durable post-reload.
+>>> [5/6] Testing Storage Health Monitor Modal & Compaction...
+    [PASS] Storage health monitor, active probe & compaction verified.
+>>> [6/6] Testing Corrupted Workspace Quarantine Recovery Flow...
+    [PASS] Corrupted workspace triggered recovery state successfully.
+
+================================================================
+ ALL 6 STAGE 2 BROWSER LIFECYCLE TESTS PASSED (100% OK)
+================================================================
+
+>>> [SUITE 20 PASSED] (3.80s, exit 0)
+
+================================================================
+ FINAL COMPLETE RELEASE GATES AUDIT SUMMARY
+================================================================
+ [PASSED] [Stage 1 Retained] Retained Gate B1: Canonical v2 Persistence & Boundary Validation (0.17s, exit 0)
+ [PASSED] [Stage 1 Retained] Retained Gate B2: Authoritative Commitment Lifecycle Acceptance (0.12s, exit 0)
+ [PASSED] [Stage 1 Retained] Retained Gate B3: Transaction Coordinator & Rollback Hardening (0.05s, exit 0)
+ [PASSED] [Stage 1 Retained] Retained Gate C: Prototype Seed Isolation & Privacy Clearance (0.08s, exit 0)
+ [PASSED] [Stage 1 Retained] Retained Canonical Restore: Full Envelope Equivalence (R23-B3) (0.04s, exit 0)
+ [PASSED] [Stage 1 Retained] Review 29: Negative Canonical Domain Matrix & Shift Resilience (0.07s, exit 0)
+ [PASSED] [Stage 1 Retained] FR-02: Strict Gregorian Calendar & Recurrence Interval Validation (0.03s, exit 0)
+ [PASSED] [Stage 1 Retained] FR-03: Adelaide Timezone & DST-Aware 10-Hour Physical Rest (0.04s, exit 0)
+ [PASSED] [Stage 1 Retained] RG1: Static Syntax & Helper Scope Audit (0.96s, exit 0)
+ [PASSED] [Stage 1 Retained] RG2: Scheduler Engine Invariants & Recurrence Overrides (1.74s, exit 0)
+ [PASSED] [Stage 1 Retained] RG3: Workforce Lifecycle & Assignment Integrity (0.10s, exit 0)
+ [PASSED] [Stage 1 Retained] RG4: Persistence Contract & JSON Schema Validation (0.10s, exit 0)
+ [PASSED] [Stage 1 Retained] RG5: Assisted Rostering Engine & Propagation Invariants (0.06s, exit 0)
+ [PASSED] [Stage 1 Retained] RG6: Truthful Persistence State & Recovery Warnings (0.03s, exit 0)
+ [PASSED] [Stage 1 Retained] RG7: Multi-Year Scheduler & Rostering Differential (2025-2028) (0.91s, exit 0)
+ [PASSED] [Stage 1 Retained] RG8: Offline17.5j Rostering Integrity Freeze & Invariants (23.82s, exit 0)
+ [PASSED] [Stage 1 Retained] RG9: Playwright Headless Browser Smoke Suite (25.00s, exit 0)
+ [PASSED] [Stage 2 Acceptance] Stage 2 Node: Workspace Management, Destructive Reset & Storage Hygiene Contract (0.10s, exit 0)
+ [PASSED] [Stage 2 Acceptance] Stage 2 Node: Master Release Runner Self-Test Contract (Matrix B01-B04) (0.25s, exit 0)
+ [PASSED] [Stage 2 Acceptance] Stage 2 Browser: Workspace Seeding, Reset Verification & Quarantine Smoke (3.80s, exit 0)
+
+----------------------------------------------------------------
+ STAGE 1 RETAINED GATES: 17/17 PASSED (0 failed, 0 blocked)
+ STAGE 2 ACCEPTANCE GATES: 3/3 PASSED (0 failed, 0 blocked)
+----------------------------------------------------------------
+TOTAL: 20 PASSED, 0 FAILED, 0 BLOCKED, 20 SUITES.
+TOTAL: 20 PASSED, 0 FAILED, 0 BLOCKED, 20/20 SUITES.
+
+[RELEASE GATE PASSED] All 20 mandatory release gate suites passed with zero failures and zero blocked.

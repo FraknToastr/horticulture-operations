@@ -1,0 +1,111 @@
+@font-face {
+  font-family: "OpenDyslexic";
+  src: local("OpenDyslexic"), url("../fonts/OpenDyslexic-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "OpenDyslexic";
+  src: local("OpenDyslexic Bold"), url("../fonts/OpenDyslexic-Bold.woff") format("woff");
+  font-weight: 700 950;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "OpenDyslexic";
+  src: local("OpenDyslexic Italic"), url("../fonts/OpenDyslexic-Italic.woff") format("woff");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --uos-font: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --uos-font-readable: var(--uos-font);
+  --uos-space-1: 4px;
+  --uos-space-2: 8px;
+  --uos-space-3: 12px;
+  --uos-space-4: 16px;
+  --uos-space-5: 20px;
+  --uos-space-6: 24px;
+  --uos-space-8: 32px;
+  /* Shared segmented-canvas vocabulary. */
+  --page-bg: #f4f6f9;
+  --panel-bg: #ffffff;
+  --panel-border: #dde3ec;
+  --panel-radius: 8px;
+  --panel-gap: 16px;
+  --panel-gap-compact: 12px;
+  --panel-shadow: none;
+  --uos-radius-control: 6px;
+  --uos-radius-panel: 8px;
+  --uos-radius-overlay: 10px;
+  --uos-radius-sm: var(--uos-radius-control);
+  --uos-radius-md: var(--uos-radius-panel);
+  --uos-header-height: 64px;
+  --uos-command-height: 40px;
+  --uos-control-height: 34px;
+  --uos-row-height: 34px;
+  --uos-panel-header-height: 40px;
+  --uos-rail-width: 220px;
+  --uos-rail-collapsed: 64px;
+  --uos-inspector-width: 450px;
+  --uos-focus-width: 2px;
+  --uos-motion-fast: 100ms;
+  --uos-motion-standard: 160ms;
+  --uos-motion-panel: 220ms;
+  --uos-ease: cubic-bezier(.2, 0, 0, 1);
+  --uos-shadow-float: none;
+  --uos-shadow-modal: none;
+  --uos-logo-green: #91ad88;
+  --uos-navy-950: #002447;
+  --uos-navy-900: #032b50;
+  --uos-navy-850: #07345c;
+  --uos-blue-700: #064edb;
+  --uos-blue-600: #0a5bea;
+  --uos-blue-500: #1769f2;
+  --uos-brand: var(--uos-blue-700);
+  --uos-brand-strong: #043da9;
+  --uos-action: var(--uos-brand);
+  --uos-action-hover: var(--uos-brand-strong);
+  --uos-on-action: #fff;
+  --uos-info: #1769f2;
+  --uos-success: #24964a;
+  --uos-warning: #c56a00;
+  --uos-danger: #c93648;
+  --uos-purple: #7b3fe4;
+  --uos-teal: #148d8b;
+  --uos-nature-green: #15803d;
+  --uos-nature-green-hover: #166534;
+  --uos-nature-green-soft: #f0fdf4;
+  --uos-nature-green-border: #86efac;
+  --uos-nature-green-text: #15803d;
+  --uos-lifecycle-bump-in: var(--uos-warning);
+  --uos-lifecycle-event-start: var(--uos-info);
+  --uos-lifecycle-event-end: var(--uos-danger);
+  --uos-lifecycle-bump-out: var(--uos-brand);
+}
+
+html[data-suite-font="dyslexic"] {
+  --uos-font-readable: "OpenDyslexic", "Trebuchet MS", Verdana, sans-serif;
+  --uos-control-height: 38px;
+  --uos-row-height: 40px;
+}
+
+html[data-suite-theme="dark"] {
+  --page-bg: var(--uos-canvas);
+  --panel-bg: var(--uos-surface);
+  --panel-border: var(--uos-border);
+}
+
+html[data-suite-theme="protanopia"],
+html[data-suite-theme="deuteranopia"],
+html[data-suite-theme="tritanopia"] {
+  --page-bg: var(--uos-canvas);
+  --panel-bg: var(--uos-surface);
+  --panel-border: var(--uos-border);
+}

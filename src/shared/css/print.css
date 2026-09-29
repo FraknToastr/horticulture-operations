@@ -1,0 +1,87 @@
+@media print {
+  @page {
+    size: auto;
+    margin: 0 !important;
+  }
+  :root { --uos-canvas: #fff; --uos-surface: #fff; --uos-text: #000; --uos-border: #bbb; }
+  body { overflow: visible !important; background: #fff !important; color: #000 !important; }
+  .uos-header, .uos-rail, .uos-command-bar, .uos-toast-region, .uos-modal-backdrop, [data-no-print] { display: none !important; }
+  .uos-app, .uos-shell, .uos-workspace, .uos-workspace__body, .uos-split { height: auto !important; display: block !important; overflow: visible !important; }
+  .uos-inspector { position: static !important; width: auto !important; border: 0 !important; box-shadow: none !important; }
+  .uos-panel, .uos-table { break-inside: avoid; box-shadow: none !important; }
+  .uos-table-wrap { overflow: visible !important; border: 0; }
+
+  /* Strict Quote Document Export Formatting */
+  body.is-printing-quote .uos-header,
+  body.is-printing-quote .uos-rail,
+  body.is-printing-quote .program-rail,
+  body.is-printing-quote .program-header,
+  body.is-printing-quote .program-quote-builder-pane,
+  body.is-printing-quote .program-quote-preview-toolbar,
+  body.is-printing-quote .uos-command-bar,
+  body.is-printing-quote .uos-toast-region,
+  body.is-printing-quote .uos-modal-backdrop,
+  body.is-printing-quote [data-no-print] {
+    display: none !important;
+  }
+
+  body.is-printing-quote .program-quote-layout > :not(.program-quote-preview-pane),
+  body.is-printing-quote .program-quote-preview-pane > :not(.program-quote-preview-viewport) {
+    display: none !important;
+  }
+
+  body.is-printing-quote,
+  body.is-printing-quote .uos-app,
+  body.is-printing-quote .uos-shell,
+  body.is-printing-quote .uos-workspace,
+  body.is-printing-quote .uos-workspace__body,
+  body.is-printing-quote .program-app,
+  body.is-printing-quote .program-workspace,
+  body.is-printing-quote .program-canvas,
+  body.is-printing-quote .program-pane,
+  body.is-printing-quote .program-quote-layout,
+  body.is-printing-quote .program-quote-preview-pane,
+  body.is-printing-quote .program-quote-preview-viewport {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  body.is-printing-quote .uos-quote-sheet {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body.is-printing-quote .uos-quote-sheet * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body.is-printing-quote .uos-quote-sheet-page:not(:last-child) {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  body.is-printing-quote .uos-quote-sheet-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+}

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Markdown · Mermaid viewer</title>
+  <style>
+    :root { --ink:#173b2e; --muted:#60776c; --line:#cbded2; --soft:#edf6f1; --paper:#fcfefc; --brand:#2f7358; }
+    * { box-sizing:border-box; }
+    html,body { height:100%; margin:0; }
+    body { background:#edf5f0; color:var(--ink); font-family:ui-sans-serif,system-ui,sans-serif; }
+    button,textarea { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible,textarea:focus-visible,.file-button:focus-visible { outline:3px solid #56a983; outline-offset:2px; }
+    .app { height:100%; max-width:1900px; margin:auto; display:grid; grid-template-rows:auto minmax(0,1fr); }
+    .top { display:flex; align-items:center; gap:15px; padding:16px 24px; border-bottom:1px solid var(--line); background:#fff; }
+    .logo { display:grid; place-items:center; width:42px; height:42px; flex:none; border:1px solid #a9cdbc; border-radius:11px; background:var(--soft); color:var(--brand); font:900 12px ui-monospace,monospace; }
+    .brand { flex:1; min-width:0; }
+    h1 { margin:0; font-size:22px; letter-spacing:-.035em; }
+    .brand p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+    .tools,.controls { display:flex; align-items:center; gap:7px; }
+    .btn,.file-button { display:inline-flex; align-items:center; justify-content:center; min-height:34px; border:1px solid var(--line); border-radius:8px; padding:6px 11px; background:#fff; color:var(--ink); font-size:12px; font-weight:700; text-decoration:none; white-space:nowrap; }
+    .btn:hover,.file-button:hover { background:var(--soft); border-color:#98c3ad; }
+    .primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+    .primary:hover { background:#245e47; color:#fff; }
+    #file { position:absolute; width:1px; height:1px; opacity:0; }
+    .work { display:grid; grid-template-columns:minmax(280px,360px) minmax(0,1fr); gap:16px; min-height:0; padding:16px; }
+    .card { min-height:0; overflow:hidden; border:1px solid var(--line); border-radius:14px; background:#fff; box-shadow:0 8px 30px #173b2e0b; }
+    .source { display:grid; grid-template-rows:auto minmax(0,1fr); }
+    .head { display:flex; justify-content:space-between; gap:10px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line); }
+    .head h2 { margin:0; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+    .hint { color:var(--muted); font-size:11px; }
+    textarea { width:100%; height:100%; resize:none; border:0; padding:17px; background:transparent; color:#254d3d; font:13px/1.6 ui-monospace,Consolas,monospace; }
+    .main { display:grid; grid-template-rows:auto minmax(0,1fr); min-height:0; }
+    .status { display:flex; gap:9px; align-items:center; padding:0 12px; color:var(--muted); font-size:12px; }
+    .status i { width:8px; height:8px; border-radius:50%; background:#63a980; }
+    .read { overflow:auto; padding:clamp(16px,2vw,32px); background:var(--paper); }
+    .read h1,.read h2,.read h3 { color:var(--ink); }
+    .read p,.read li { max-width:78ch; line-height:1.65; }
+    .read a { color:#216d50; }
+    .read blockquote { margin:18px 0; padding:12px 18px; border-left:4px solid #a9cdbc; background:var(--soft); }
+    .read pre { overflow:auto; padding:15px; border-radius:9px; background:#16382d; color:#dff3e9; font:12px/1.6 ui-monospace,monospace; }
+    .read table { border-collapse:collapse; width:min(100%,1000px); font-size:13px; }
+    .read th,.read td { border:1px solid var(--line); padding:10px; text-align:left; }
+    .read th { background:var(--soft); }
+    .diagram { margin:0 0 25px; padding:10px; border:1px solid var(--line); border-radius:13px; background:#f8fcfa; }
+    .dhead { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 9px 10px; color:var(--muted); font:11px ui-monospace,monospace; }
+    .dhead .btn { min-width:31px; min-height:30px; padding:4px 8px; }
+    .stage { position:relative; height:clamp(480px,72vh,900px); overflow:hidden; border:1px solid #dbe8e1; border-radius:9px; background-color:#fbfefc; background-image:radial-gradient(#c9dbd1 1px,transparent 1px); background-size:24px 24px; cursor:grab; touch-action:none; }
+    .stage.drag { cursor:grabbing; }
+    .stage svg { position:absolute; top:0; left:0; transform-origin:0 0; }
+    .diagram details { margin-top:8px; }
+    .diagram summary { cursor:pointer; }
+    .diagram pre { max-height:220px; }
+    .empty { display:grid; place-items:center; min-height:45vh; color:var(--muted); text-align:center; }
+    .empty strong { display:block; margin-bottom:7px; color:var(--ink); font-size:18px; }
+    .error { padding:14px; color:#773d18; background:#fff5e9; border-radius:8px; }
+    @media(max-width:850px) { .app { height:auto; min-height:100%; } .top { flex-wrap:wrap; } .tools { width:100%; } .work { grid-template-columns:1fr; } .source { height:240px; } .read { min-height:70vh; } .stage { height:65vh; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="logo" aria-hidden="true">MD</div>
+      <div class="brand"><h1>Markdown · Mermaid viewer</h1><p>Open, paste or drop a document. Everything runs locally in this file.</p></div>
+      <div class="tools">
+        <label class="file-button primary" for="file">Open file</label><input id="file" type="file" accept=".md,.markdown,.mermaid,.mmd,.txt">
+        <button class="btn" id="sample">Load sample</button><button class="btn" id="clear">Clear</button>
+      </div>
+    </header>
+    <main class="work" id="drop">
+      <section class="card source"><div class="head"><h2>Source</h2><span class="hint">Markdown or Mermaid</span></div><textarea id="input" spellcheck="false" aria-label="Markdown or Mermaid source"></textarea></section>
+      <section class="main"><div class="status"><i></i><span id="state">Ready</span><span>·</span><span id="chars">0 characters</span></div><article class="card read" id="view" aria-live="polite"></article></section>
+    </main>
+  </div>
+  <script>
+  (() => {
+    'use strict';
+    const input = document.getElementById('input');
+    const view = document.getElementById('view');
+    const state = document.getElementById('state');
+    const chars = document.getElementById('chars');
+    const drop = document.getElementById('drop');
+    const sample = '# Project delivery map\n\nA compact example combining **Markdown** with a Mermaid flowchart.\n\n```mermaid\nflowchart LR\nR[Register matter] --> P[Delivery Project]\nP --> T[Planner Task]\nT --> J[Draft Planner Job]\nP --> G[Work geometry]\nG --> M[Space Map Job]\nJ --> C[Costing]\nM --> C\nC --> Q[Draft Quote]\n```\n\n- Drag diagrams to pan\n- Use the mouse wheel or controls to zoom';
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const inline = value => escapeHtml(value).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+)\*/g,'<em>$1</em>');
+    const empty = '<div class="empty"><div><strong>Nothing to view</strong><span>Paste Markdown or Mermaid into the source panel.</span></div></div>';
+
+    function documentHtml(source) {
+      if (/^\s*(?:flowchart|graph)\s+(?:TD|TB|BT|LR|RL)\b/i.test(source)) return diagramHtml(source);
+      const lines = source.replace(/\r/g,'').split('\n');
+      const output = [];
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i];
+        if (/^\s*```/.test(line)) {
+          const language = line.trim().slice(3).trim().toLowerCase();
+          const block = [];
+          i++;
+          while (i < lines.length && !/^\s*```/.test(lines[i])) block.push(lines[i++]);
+          if (i < lines.length) i++;
+          output.push(language === 'mermaid' || language === 'mmd' ? diagramHtml(block.join('\n')) : '<pre><code>'+escapeHtml(block.join('\n'))+'</code></pre>');
+          continue;
+        }
+        if (!line.trim()) { i++; continue; }
+        const heading = line.match(/^\s*(#{1,6})\s+(.+)/);
+        if (heading) { output.push('<h'+heading[1].length+'>'+inline(heading[2])+'</h'+heading[1].length+'>'); i++; continue; }
+        if (/^\s*>/.test(line)) {
+          const quote = [];
+          while (i < lines.length && /^\s*>/.test(lines[i])) quote.push(lines[i++].replace(/^\s*>\s?/,''));
+          output.push('<blockquote>'+inline(quote.join(' '))+'</blockquote>'); continue;
+        }
+        if (/^\s*[-*+]\s+/.test(line)) {
+          const items = [];
+          while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) items.push('<li>'+inline(lines[i++].replace(/^\s*[-*+]\s+/,''))+'</li>');
+          output.push('<ul>'+items.join('')+'</ul>'); continue;
+        }
+        if (line.includes('|') && i+1 < lines.length && /^\s*\|?\s*:?-{2,}/.test(lines[i+1])) {
+          const cells = row => row.trim().replace(/^\||\|$/g,'').split('|').map(cell => '<td>'+inline(cell.trim())+'</td>').join('');
+          const head = cells(line).replace(/<td>/g,'<th>').replace(/<\/td>/g,'</th>');
+          i += 2;
+          const rows = [];
+          while (i < lines.length && lines[i].includes('|')) rows.push('<tr>'+cells(lines[i++])+'</tr>');
+          output.push('<table><thead><tr>'+head+'</tr></thead><tbody>'+rows.join('')+'</tbody></table>'); continue;
+        }
+        const paragraph = [line.trim()]; i++;
+        while (i < lines.length && lines[i].trim() && !/^\s*(?:#{1,6}\s|```|>|[-*+]\s)/.test(lines[i])) paragraph.push(lines[i++].trim());
+        output.push('<p>'+inline(paragraph.join(' '))+'</p>');
+      }
+      return output.join('') || empty;
+    }
+
+    function diagramHtml(source) {
+      return '<section class="diagram"><div class="dhead"><span>MERMAID FLOWCHART</span><div class="controls"><button class="btn" data-action="fit" aria-label="Fit diagram width">Fit width</button><button class="btn" data-action="out" aria-label="Zoom out">−</button><button class="btn" data-action="in" aria-label="Zoom in">+</button></div></div><div class="stage"><svg role="img" aria-label="Mermaid flowchart diagram"></svg></div><details><summary class="hint">Diagram source</summary><pre>'+escapeHtml(source)+'</pre></details></section>';
+    }
+
+    function parseFlowchart(source) {
+      const lines = source.replace(/\r/g,'').split('\n').map(line => line.trim()).filter(Boolean);
+      if (!/^(?:flowchart|graph)\s+(?:TD|TB|BT|LR|RL)\b/i.test(lines[0] || '')) throw Error('This local viewer supports Mermaid flowchart and graph diagrams.');
+      const direction = (lines[0].match(/\b(TD|TB|BT|LR|RL)\b/i) || [,'TD'])[1].toUpperCase();
+      const nodes = new Map();
+      const edges = [];
+      const classes = new Map();
+      const styles = new Map();
+      const token = '([A-Za-z][\\w-]*)(\\[[^\\]]*\\]|\\{[^}]*\\}|\\([^)]*\\))?';
+      const edgePattern = new RegExp('^'+token+'\\s*(-->|---|-.->|==>|--\\s*(.*?)\\s*-->)\\s*'+token+'\\s*$');
+      function put(id, shape) {
+        const existing = nodes.get(id) || {id, label:id, type:'box'};
+        if (shape) { existing.label = shape.slice(1,-1); existing.type = shape[0] === '{' ? 'decision' : 'box'; }
+        nodes.set(id,existing);
+      }
+      for (const line of lines.slice(1)) {
+        if (/^classDef\s+/.test(line)) {
+          const match = line.match(/^classDef\s+(\S+)\s+(.+?);?$/);
+          if (match) {
+            const rules = {};
+            for (const part of match[2].split(',')) { const pair = part.split(':'); if (pair.length === 2) rules[pair[0].trim()] = pair[1].replace(/;$/,'').trim(); }
+            styles.set(match[1],rules);
+          }
+          continue;
+        }
+        if (/^class\s+/.test(line)) {
+          const match = line.match(/^class\s+([\w,-]+)\s+([\w-]+)\s*;?$/);
+          if (match) for (const id of match[1].split(',')) classes.set(id,match[2]);
+          continue;
+        }
+        const edge = line.match(edgePattern);
+        if (edge) {
+          put(edge[1],edge[2]); put(edge[5],edge[6]);
+          edges.push({from:edge[1],to:edge[5],label:edge[4] || ''});
+          continue;
+        }
+        const standalone = line.match(new RegExp('^'+token+'$'));
+        if (standalone) put(standalone[1],standalone[2]);
+      }
+      if (!nodes.size) throw Error('No flowchart nodes were found. Check the Mermaid source.');
+      return {nodes:[...nodes.values()],edges,direction,classes,styles};
+    }
+
+    function draw(box) {
+      const source = box.querySelector('pre').textContent;
+      const stage = box.querySelector('.stage');
+      const svg = box.querySelector('svg');
+      let graph;
+      try { graph = parseFlowchart(source); }
+      catch (error) { stage.innerHTML = '<div class="error">'+escapeHtml(error.message)+'</div>'; return; }
+      const {nodes,edges,direction,classes,styles} = graph;
+      const horizontal = direction === 'LR' || direction === 'RL';
+      const nodeWidth = 240, nodeHeight = 104, columnGap = 130, rowGap = 72, margin = 70;
+      const level = new Map();
+      const incoming = new Set(edges.map(edge => edge.to));
+      const roots = nodes.filter(node => !incoming.has(node.id));
+      const queue = (roots.length ? roots : nodes.slice(0,1)).map(node => [node.id,0]);
+      while (queue.length) {
+        const [id,depth] = queue.shift();
+        if (level.has(id)) continue;
+        level.set(id,depth);
+        for (const edge of edges) if (edge.from === id && !level.has(edge.to)) queue.push([edge.to,depth+1]);
+      }
+      for (const node of nodes) if (!level.has(node.id)) level.set(node.id,0);
+      const groups = new Map();
+      for (const node of nodes) { const depth = level.get(node.id); if (!groups.has(depth)) groups.set(depth,[]); groups.get(depth).push(node); }
+      const maxLevel = Math.max(...groups.keys());
+      const maxGroup = Math.max(...[...groups.values()].map(group => group.length));
+      const layerStep = horizontal ? nodeWidth + columnGap : nodeHeight + rowGap;
+      const sideStep = horizontal ? nodeHeight + rowGap : nodeWidth + columnGap;
+      const width = horizontal ? margin*2 + (maxLevel+1)*layerStep : margin*2 + maxGroup*sideStep;
+      const height = horizontal ? margin*2 + maxGroup*sideStep : margin*2 + (maxLevel+1)*layerStep;
+      const positions = new Map();
+      for (const [depth,group] of groups) group.forEach((node,index) => {
+        const side = margin + (index+(maxGroup-group.length)/2)*sideStep;
+        positions.set(node.id,horizontal ? {x:margin+depth*layerStep,y:side} : {x:side,y:margin+depth*layerStep});
+      });
+      svg.setAttribute('width',width);
+      svg.setAttribute('height',height);
+      svg.setAttribute('viewBox','0 0 '+width+' '+height);
+      const markerId = 'arrow-'+Math.random().toString(36).slice(2);
+      let markup = '<defs><marker id="'+markerId+'" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 z" fill="#6d9983"/></marker></defs>';
+      for (const edge of edges) {
+        const from = positions.get(edge.from), to = positions.get(edge.to);
+        if (!from || !to) continue;
+        const x1 = from.x + nodeWidth/2, y1 = from.y + nodeHeight/2;
+        const x2 = to.x + nodeWidth/2, y2 = to.y + nodeHeight/2;
+        const dx = x2-x1, dy = y2-y1;
+        const axis = horizontal ? 'x' : 'y';
+        const start = axis === 'x' ? {x:x1+Math.sign(dx)*nodeWidth/2,y:y1} : {x:x1,y:y1+Math.sign(dy)*nodeHeight/2};
+        const end = axis === 'x' ? {x:x2-Math.sign(dx)*nodeWidth/2,y:y2} : {x:x2,y:y2-Math.sign(dy)*nodeHeight/2};
+        const d = horizontal ? `M${start.x},${start.y} C${(start.x+end.x)/2},${start.y} ${(start.x+end.x)/2},${end.y} ${end.x},${end.y}` : `M${start.x},${start.y} C${start.x},${(start.y+end.y)/2} ${end.x},${(start.y+end.y)/2} ${end.x},${end.y}`;
+        markup += '<path d="'+d+'" fill="none" stroke="#82a696" stroke-width="2" marker-end="url(#'+markerId+')"/>';
+        if (edge.label) markup += '<text x="'+((start.x+end.x)/2)+'" y="'+((start.y+end.y)/2-7)+'" text-anchor="middle" fill="#506f5e" font-size="12" font-family="sans-serif">'+escapeHtml(edge.label)+'</text>';
+      }
+      for (const node of nodes) {
+        const at = positions.get(node.id);
+        const style = styles.get(classes.get(node.id)) || {};
+        const fill = /^#[0-9a-f]{3,8}$/i.test(style.fill || '') ? style.fill : '#fff';
+        const stroke = /^#[0-9a-f]{3,8}$/i.test(style.stroke || '') ? style.stroke : '#6da688';
+        const color = /^#[0-9a-f]{3,8}$/i.test(style.color || '') ? style.color : '#214b39';
+        const shape = node.type === 'decision' ? '<polygon points="120,1 239,52 120,103 1,52" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2"/>' : '<rect width="240" height="104" rx="12" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2"/>';
+        const label = escapeHtml(node.label.replace(/<br\s*\/?\s*>/gi,'\n')).replace(/\n/g,'<br>');
+        markup += '<g data-node="'+escapeHtml(node.id)+'" transform="translate('+at.x+','+at.y+')">'+shape+'<foreignObject x="27" y="13" width="186" height="78"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;overflow-wrap:anywhere;color:'+color+';font:13px/1.25 sans-serif">'+label+'</div></foreignObject></g>';
+      }
+      svg.innerHTML = markup;
+      let scale = 1, tx = 0, ty = 0;
+      const apply = () => { svg.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; };
+      const fit = () => {
+        const rect = stage.getBoundingClientRect();
+        scale = Math.min(1,(rect.width-26)/width);
+        tx = (rect.width-width*scale)/2;
+        ty = 8;
+        apply();
+      };
+      const zoom = factor => {
+        const rect = stage.getBoundingClientRect();
+        const centerX = rect.width/2, centerY = rect.height/2;
+        const next = Math.max(.2,Math.min(3,scale*factor));
+        tx = centerX-(centerX-tx)*next/scale;
+        ty = centerY-(centerY-ty)*next/scale;
+        scale = next;
+        apply();
+      };
+      box.querySelector('[data-action="fit"]').onclick = fit;
+      box.querySelector('[data-action="out"]').onclick = () => zoom(1/1.2);
+      box.querySelector('[data-action="in"]').onclick = () => zoom(1.2);
+      stage.onwheel = event => { event.preventDefault(); zoom(event.deltaY < 0 ? 1.12 : 1/1.12); };
+      let dragging = false, dragX = 0, dragY = 0;
+      stage.onpointerdown = event => { dragging = true; dragX = event.clientX-tx; dragY = event.clientY-ty; stage.classList.add('drag'); stage.setPointerCapture(event.pointerId); };
+      stage.onpointermove = event => { if (dragging) { tx = event.clientX-dragX; ty = event.clientY-dragY; apply(); } };
+      stage.onpointerup = stage.onpointercancel = () => { dragging = false; stage.classList.remove('drag'); };
+      const first = positions.get(nodes[0].id);
+      const stageWidth = stage.getBoundingClientRect().width;
+      tx = stageWidth/2 - first.x - nodeWidth/2;
+      ty = 8;
+      apply();
+    }
+
+    function render() {
+      view.innerHTML = documentHtml(input.value);
+      view.querySelectorAll('.diagram').forEach(draw);
+      chars.textContent = input.value.length.toLocaleString()+' characters';
+      state.textContent = input.value.trim() ? 'Rendered locally' : 'Ready';
+    }
+    function readFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { input.value = String(reader.result); render(); };
+      reader.onerror = () => { state.textContent = 'Could not read file'; };
+      reader.readAsText(file);
+    }
+    input.addEventListener('input',render);
+    document.getElementById('file').addEventListener('change',event => readFile(event.target.files[0]));
+    document.getElementById('sample').onclick = () => { input.value = sample; render(); };
+    document.getElementById('clear').onclick = () => { input.value = ''; render(); input.focus(); };
+    for (const type of ['dragenter','dragover']) drop.addEventListener(type,event => { event.preventDefault(); drop.classList.add('drag'); });
+    for (const type of ['dragleave','drop']) drop.addEventListener(type,event => { event.preventDefault(); drop.classList.remove('drag'); });
+    drop.addEventListener('drop',event => readFile(event.dataTransfer.files[0]));
+    input.value = sample;
+    render();
+  })();
+  </script>
+</body>
+</html>

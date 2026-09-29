@@ -1,0 +1,110 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body {
+  display: grid;
+  place-items: center;
+  background: #102a20;
+  font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+  caret-color: transparent;
+}
+
+.launcher-stage {
+  position: relative;
+  width: min(100vw, calc(100dvh * 1.4990234375));
+  aspect-ratio: 1535 / 1024;
+  overflow: hidden;
+  container-type: inline-size;
+  background: #f4f3df;
+  box-shadow: 0 0 72px rgba(0, 0, 0, .28);
+}
+
+.launcher-art,
+.launcher-navigation,
+.launcher-hotspots {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.launcher-art {
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.launcher-navigation { display: block; }
+.launcher-hotspots { display: block; }
+.hotspot rect {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 4;
+  rx: 10;
+  vector-effect: non-scaling-stroke;
+  pointer-events: fill;
+  transition: fill 140ms ease, stroke 140ms ease;
+}
+.hotspot:hover rect { fill: rgba(255, 255, 255, .16); stroke: rgba(85, 105, 48, .72); }
+.hotspot:focus { outline: none; }
+.hotspot:focus-visible rect { fill: rgba(255, 255, 255, .22); stroke: #173d2d; stroke-width: 5; }
+.hotspot--disabled { cursor: not-allowed; }
+.hotspot--disabled:hover rect { fill: rgba(255, 255, 255, .1); stroke: rgba(85, 105, 48, .48); }
+
+.uos-signature {
+  position: absolute;
+  right: 8px;
+  bottom: 2.6%;
+  display: flex;
+  width: auto;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  filter: drop-shadow(0 2px 7px rgba(0, 0, 0, .55));
+  pointer-events: none;
+}
+
+.uos-signature__logo { display: block; width: 14.35cqw; height: auto; }
+.uos-signature__dots { display: block; width: .8072cqw; height: auto; align-self: center; }
+.uos-signature__name,
+.uos-signature__credit {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-self: stretch;
+  font-size: clamp(5px, .67cqw, 11px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .095em;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, .75);
+}
+.uos-signature__name span,
+.uos-signature__credit span {
+  display: block;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+}
+.uos-signature__name { text-transform: uppercase; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hotspot rect { transition: none; }
+}
+
+@media print {
+  html, body { overflow: visible; }
+  .launcher-stage { width: 100%; box-shadow: none; }
+}

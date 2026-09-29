@@ -1,0 +1,5 @@
+# Quarantined development masters and legacy operational artifacts
+# These files must be removed from the project root prior to overlaying Gate C PR21 packages.
+User_table.csv
+sample-overtime-source.json
+PERSONNEL_DUPLICATE_ASSIGNMENT_INVESTIGATION.md

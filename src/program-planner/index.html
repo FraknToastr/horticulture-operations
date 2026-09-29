@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en-AU" data-app-name="Horticulture Program Planner" data-suite-theme="light" data-suite-font="standard">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    (function redirectLegacyEntry() {
+      if (window.top !== window.self) return;
+      var owner = new URLSearchParams(window.location.search).get("owner");
+      var target = owner === "EVT" ? "events.html" : "nsa.html";
+      window.location.replace(target + window.location.hash);
+    }());
+  </script>
+  <title>Horticulture Program Planner · U-OS</title>
+  <link rel="icon" href="../shared/assets/uos-grid-arrow-favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../shared/css/tokens.css">
+  <link rel="stylesheet" href="../shared/css/reset.css">
+  <link rel="stylesheet" href="../shared/css/themes.css">
+  <link rel="stylesheet" href="../shared/css/components.css">
+  <link rel="stylesheet" href="../shared/css/shell.css">
+  <link rel="stylesheet" href="../shared/css/accessibility.css">
+  <link rel="stylesheet" href="../shared/css/print.css" media="print">
+  <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
+  <link rel="stylesheet" href="styles.css?v=20260923-cost-library-pin-v3">
+  <link rel="stylesheet" href="status-v5.css?v=20260913-status-history-review-v1">
+  <link rel="stylesheet" href="reports.css">
+</head>
+<body class="program-planner">
+  <a class="uos-skip-link" href="#main-workspace">Skip to workspace</a>
+  <div class="uos-app program-app" id="program-app" data-program-app>
+    <header class="uos-header program-header" aria-label="Application header">
+      <div class="uos-brand">
+        <a class="uos-brand__home" href="../index.html" target="_top" data-uos-home aria-label="Back to Horticulture Operations Suite">
+          <img class="uos-brand__logo uos-brand__logo--light" src="../shared/assets/uos-logo-forward.svg" alt="U-OS">
+          <img class="uos-brand__logo uos-brand__logo--dark" src="../shared/assets/uos-logo-forward-dark.svg" alt="U-OS">
+        </a>
+        <img class="uos-brand__dots" src="../shared/assets/uos-logo-dot-column.svg" alt="">
+        <span class="uos-brand__system" aria-hidden="true"><span>Urban</span><span>Operating</span><span>System</span></span>
+        <span class="uos-brand__divider" aria-hidden="true"></span>
+        <h1 class="uos-brand__headline" id="program-header-title">Nature Strip Applications</h1>
+        <span class="uos-brand__divider uos-brand__divider--second" aria-hidden="true"></span>
+        <span class="uos-brand__module" id="program-header-module" data-header-module>Register</span>
+      </div>
+
+      <div class="program-header__center">
+        <nav class="program-header-nav" aria-label="Module navigation">
+          <button class="program-header-nav__item" type="button" data-destination="register" data-program-destination="register" data-uos-tooltip="Register" data-uos-tooltip-pos="bottom" aria-label="Register">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg><span>Register</span><span class="program-header-nav__count" data-program-header-count="register" aria-hidden="true">0</span>
+          </button>
+          <button class="program-header-nav__item" type="button" data-destination="planner" data-program-destination="planner" data-uos-tooltip="Project Planner" data-uos-tooltip-pos="bottom" aria-label="Project Planner">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Planner</span><span class="program-header-nav__count" data-program-header-count="planner" aria-hidden="true">0</span>
+          </button>
+          <button class="program-header-nav__item" type="button" data-destination="map" data-program-destination="map" data-uos-tooltip="Space Map" data-uos-tooltip-pos="bottom" aria-label="Space Map">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-13a7 7 0 1 0-14 0c0 6.9 7 13 7 13Z"/><circle cx="12" cy="9" r="2.5"/></svg><span>Space Map</span>
+          </button>
+          <button class="program-header-nav__item" type="button" data-destination="costing" data-program-destination="costing" data-uos-tooltip="Cost Calculator" data-uos-tooltip-pos="bottom" aria-label="Cost Calculator">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg><span>Calculator</span>
+          </button>
+          <button class="program-header-nav__item" type="button" data-destination="scheduler" data-program-destination="scheduler" data-uos-tooltip="Job Scheduler" data-uos-tooltip-pos="bottom" aria-label="Job Scheduler">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>Scheduler</span>
+          </button>
+          <button class="program-header-nav__item" type="button" data-destination="quotes" data-program-destination="quotes" data-uos-tooltip="Quote Builder" data-uos-tooltip-pos="bottom" aria-label="Quote Builder">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><span>Quotes</span>
+          </button>
+          <button class="program-header-nav__item" type="button" data-destination="budget" data-program-destination="budget" data-uos-tooltip="Annual Budget" data-uos-tooltip-pos="bottom" aria-label="Annual Budget">
+            <span class="program-header-nav__currency-icon" aria-hidden="true">$</span><span>Budget</span>
+          </button>
+          <button class="program-header-nav__item" type="button" data-destination="dashboard" data-program-destination="dashboard" data-uos-tooltip="Dashboard" data-uos-tooltip-pos="bottom" aria-label="Dashboard" aria-current="page" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Dashboard</span>
+          </button>
+          <button class="program-header-nav__item" type="button" data-destination="reports" data-program-destination="reports" data-uos-tooltip="Reports &amp; Financials" data-uos-tooltip-pos="bottom" aria-label="Reports and Financials" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><span>Reports</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="uos-header__actions">
+        <div class="program-persistence" data-program-persistence-state="loading" role="status" aria-live="polite">
+          <span class="program-persistence__dot" aria-hidden="true"></span>
+          <span data-program-persistence>Opening…</span>
+        </div>
+        <button class="uos-header__action" type="button" data-destination="data" data-program-destination="data" data-uos-tooltip="Data &amp; Settings" data-uos-tooltip-pos="bottom" aria-label="Data and Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.09A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.09a1.7 1.7 0 0 0 1 1.51 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.1.37.32.72.6 1 .3.28.68.43 1.1.4h.09v4h-.09a1.7 1.7 0 0 0-1.7.6Z"/></svg>
+        </button>
+                <button class="uos-header__action program-header-privacy-btn" type="button" data-action="toggle-privacy" data-uos-tooltip="Toggle Privacy Mode  -  Masks PII across all views" aria-label="Toggle Privacy Mode" aria-pressed="false">
+          <svg class="privacy-icon--off" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="privacy-icon--on" viewBox="0 0 24 24" aria-hidden="true" style="display:none;"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+          <span>Privacy</span>
+        </button>
+        <button class="uos-header__action" type="button" data-uos-display aria-label="Display settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M4.9 4.9 7 7m10 10 2.1 2.1M2 12h3m14 0h3M4.9 19.1 7 17m10-10 2.1-2.1"/></svg><span>Display</span>
+        </button>
+        <button class="uos-header__action" type="button" data-uos-about aria-label="About Horticulture Program Planner">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/></svg><span>About</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="uos-shell program-shell">
+      <main class="uos-workspace program-workspace" id="main-workspace" tabindex="-1">
+
+        <div class="program-canvas">
+          <section class="program-state program-state--loading program-island" id="workspace-loading" data-program-loading aria-live="polite" aria-busy="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            <div><h3>Opening your program workspace</h3><p>Checking canonical and legacy browser workspaces.</p></div>
+          </section>
+
+          <section class="program-state program-state--error program-island" id="workspace-error" role="alert" data-program-error hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg>
+            <div><h3>Workspace could not be opened</h3><p id="workspace-error-message" data-program-error-message>Your stored data has not been changed.</p></div>
+            <button class="uos-button" id="workspace-retry" type="button" data-program-retry><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg><span>Try again</span></button>
+          </section>
+
+          <section class="program-migration program-island" id="migration-preview" aria-labelledby="migration-title" data-program-migration hidden>
+            <header class="program-panel__head">
+              <div>
+                <p class="uos-eyebrow">Migration preview</p>
+                <h3 id="migration-title">Review existing horticulture workspaces</h3>
+                <p>Nothing will be replaced until you confirm this staged migration.</p>
+              </div>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
+            </header>
+            <div class="program-migration__summary" id="migration-summary" data-program-migration-counts aria-live="polite">
+              <div><span>Total records</span><strong data-program-migration-total>0</strong></div>
+              <div><span>Nature Strip</span><strong data-program-migration-nature>0</strong></div>
+              <div><span>Remediation</span><strong data-program-migration-remediation>0</strong></div>
+              <div><span>Applications</span><strong data-program-migration-count="applications">0</strong></div>
+              <div><span>Events</span><strong data-program-migration-count="events">0</strong></div>
+              <div><span>Projects</span><strong data-program-migration-count="projects">0</strong></div>
+              <div><span>Jobs</span><strong data-program-migration-count="jobs">0</strong></div>
+            </div>
+            <ul class="program-migration__warnings" id="migration-warnings" data-program-migration-warnings hidden></ul>
+            <footer class="program-panel__actions">
+              <button class="uos-button" id="migration-cancel" type="button" data-program-start-empty>Start with an empty workspace</button>
+              <button class="uos-button uos-button--primary" id="migration-confirm" type="button" data-program-apply><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>Create unified workspace</span></button>
+            </footer>
+          </section>
+
+ <div class="program-ready" data-program-workspace hidden>
+  <dialog class="program-data-card program-island program-workspace-backup-reminder" data-program-backup-reminder aria-labelledby="program-backup-reminder-title">
+   <header>
+    <div class="program-workspace-backup-reminder__identity"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM15 3v5h5M9 13h6M9 17h6"/></svg><p class="uos-eyebrow" id="program-backup-reminder-title">Workspace protection</p></div>
+    <div class="program-data-card__actions"><button type="button" class="uos-button uos-button--primary" data-program-backup-now>Download backup</button><button type="button" class="uos-button uos-button--secondary" data-program-backup-later>Later</button></div>
+    <p class="program-workspace-backup-reminder__saved-at" data-program-backup-last-saved aria-live="polite"></p>
+   </header>
+  </dialog>
+          <section class="program-dashboard program-view" id="dashboard-view" data-program-view="dashboard" aria-labelledby="dashboard-title" hidden>
+            <header class="program-dashboard__intro program-island program-island__head">
+              <div>
+                <p class="uos-eyebrow">Program overview</p>
+                <h3 id="dashboard-title">Horticulture operations at a glance</h3>
+              </div>
+              <p id="dashboard-period" aria-live="polite"></p>
+            </header>
+            <div class="program-dashboard__grid" id="dashboard-grid">
+              <article class="program-kpi" role="button" tabindex="0" data-dashboard-kpi="applications" data-uos-tooltip="Open Applications in Register" aria-label="Open Applications in Register"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5"/></svg><span>Applications</span><strong data-program-kpi="applications">?</strong></article>
+              <article class="program-kpi" role="button" tabindex="0" data-dashboard-kpi="projects" data-uos-tooltip="Open Delivery Projects in Project Planner" aria-label="Open Delivery Projects in Project Planner"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2a4.5 4.5 0 0 0-4.5 4.5C7.5 8 9 10 12 12c3-2 4.5-4 4.5-5.5A4.5 4.5 0 0 0 12 2Z"/><path d="M12 22a4.5 4.5 0 0 0 4.5-4.5C16.5 16 15 14 12 12c-3 2-4.5 4-4.5 5.5A4.5 4.5 0 0 0 12 22Z"/><path d="M22 12a4.5 4.5 0 0 0-4.5-4.5C16 7.5 14 9 12 12c2 3 4 4.5 5.5 4.5A4.5 4.5 0 0 0 22 12Z"/><path d="M2 12a4.5 4.5 0 0 0 4.5 4.5C8 16.5 10 15 12 12c-2-3-4-4.5-5.5-4.5A4.5 4.5 0 0 0 2 12Z"/></svg><span>Delivery Projects</span><strong data-program-kpi="projects">?</strong></article>
+              <article class="program-kpi" role="button" tabindex="0" data-dashboard-kpi="events" data-uos-tooltip="Open Events in Register" aria-label="Open Events in Register"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v15H3V6a2 2 0 0 1 2-2Z"/></svg><span>Events</span><strong data-program-kpi="events">?</strong></article>
+              <article class="program-kpi" role="button" tabindex="0" data-dashboard-kpi="jobs" data-uos-tooltip="Open Jobs in Job Scheduler" aria-label="Open Jobs in Job Scheduler"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v9"/><path d="M9 2h6"/><path d="M12 11a5 5 0 0 1 5 5v5H7v-5a5 5 0 0 1 5-5z"/><path d="M3 22h18"/></svg><span>Jobs</span><strong data-program-kpi="jobs">?</strong></article>
+              <article class="program-kpi" role="button" tabindex="0" data-dashboard-kpi="approved" data-uos-tooltip="Open Financials in Reports" aria-label="Open Financials in Reports"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>Operational Amount</span><strong data-program-kpi="approved">?</strong></article>
+              <article class="program-kpi" role="button" tabindex="0" data-dashboard-kpi="committed" data-uos-tooltip="Open Financials in Reports" aria-label="Open Financials in Reports"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Committed</span><strong data-program-kpi="committed">?</strong></article>
+              <article class="program-kpi" role="button" tabindex="0" data-dashboard-kpi="actual" data-uos-tooltip="Open Financials in Reports" aria-label="Open Financials in Reports"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-7"/></svg><span>Actual</span><strong data-program-kpi="actual">?</strong></article>
+              <article class="program-kpi" role="button" tabindex="0" data-dashboard-kpi="spare" data-uos-tooltip="Open Financials in Reports" aria-label="Open Financials in Reports"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg><span>Available funding</span><strong data-program-kpi="spare">?</strong></article>
+            </div>
+            <div class="program-dashboard__operations" data-program-dashboard-detail hidden>
+              <section class="program-dashboard-panel program-island" aria-labelledby="dashboard-ownership-title">
+                <header class="program-dashboard-panel__head">
+                  <div><p class="uos-eyebrow">Ownership</p><h4 id="dashboard-ownership-title">Operational records</h4></div>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3 20v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2M14 14h3a4 4 0 0 1 4 4v2"/></svg>
+                </header>
+                <dl class="program-dashboard-breakdown">
+                  <div role="button" tabindex="0" data-dashboard-owner-jump="NSA" data-uos-tooltip="View Nature Strip records in Register" aria-label="View Nature Strip records in Register"><dt><span class="program-owner-dot program-owner-dot--nature" aria-hidden="true"></span>Nature Strip</dt><dd data-program-dashboard-owner="NSA">0</dd></div>
+                  <div role="button" tabindex="0" data-dashboard-owner-jump="EVT" data-uos-tooltip="View Remediation records in Register" aria-label="View Remediation records in Register"><dt><span class="program-owner-dot program-owner-dot--remediation" aria-hidden="true"></span>Remediation</dt><dd data-program-dashboard-owner="EVT">0</dd></div>
+                </dl>
+                <p class="program-dashboard-panel__note">Applications, events, projects and jobs grouped by their canonical owner.</p>
+              </section>
+              <section class="program-dashboard-panel program-island" aria-labelledby="dashboard-status-title">
+                <header class="program-dashboard-panel__head">
+                  <div><p class="uos-eyebrow">Workflow</p><h4 id="dashboard-status-title">Status overview</h4></div>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="19" cy="12" r="2"/><circle cx="16" cy="18" r="2"/></svg>
+                </header>
+                <dl class="program-dashboard-breakdown" data-program-dashboard-status-list></dl>
+                <p class="program-dashboard-panel__empty" data-program-dashboard-status-empty>No statuses have been recorded.</p>
+              </section>
+              <section class="program-dashboard-panel program-island" aria-labelledby="dashboard-attention-title">
+                <header class="program-dashboard-panel__head">
+                  <div><p class="uos-eyebrow">Attention</p><h4 id="dashboard-attention-title">Items to review</h4></div>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.7 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+                </header>
+                <dl class="program-dashboard-breakdown program-dashboard-breakdown--attention">
+                  <div role="button" tabindex="0" data-dashboard-attention-jump="overdueJobs" data-uos-tooltip="View overdue jobs in Scheduler" aria-label="View overdue jobs in Scheduler"><dt>Overdue jobs</dt><dd data-program-dashboard-attention="overdueJobs">0</dd></div>
+                  <div role="button" tabindex="0" data-dashboard-attention-jump="unscheduledJobs" data-uos-tooltip="View unscheduled jobs in Scheduler" aria-label="View unscheduled jobs in Scheduler"><dt>Unscheduled jobs</dt><dd data-program-dashboard-attention="unscheduledJobs">0</dd></div>
+                  <div role="button" tabindex="0" data-dashboard-attention-jump="unassignedCostingLines" data-uos-tooltip="View unassigned lines in Cost Calculator" aria-label="View unassigned lines in Cost Calculator"><dt>Unassigned costing lines</dt><dd data-program-dashboard-attention="unassignedCostingLines">0</dd></div>
+                  <div role="button" tabindex="0" data-dashboard-attention-jump="missingStatus" data-uos-tooltip="View unassigned status records in Register" aria-label="View unassigned status records in Register"><dt>Records without status</dt><dd data-program-dashboard-attention="missingStatus">0</dd></div>
+                </dl>
+                <p class="program-dashboard-panel__empty" data-program-dashboard-attention-empty hidden>No items currently need review.</p>
+      </section>
+    </div>
+            <section class="program-empty program-island" id="workspace-empty" aria-labelledby="empty-title" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13.5M4 19.5h16M8 9h8M8 13h5"/></svg>
+              <div><h3 id="empty-title">No program records yet</h3><p>Open Data &amp; Settings to import an existing workspace or begin with an empty unified workspace.</p></div>
+              <button class="uos-button uos-button--primary" type="button" data-open-destination="data"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg><span>Open Data &amp; Settings</span></button>
+            </section>
+          </section>
+
+          <section class="program-register-layout program-register-layout--disclosure program-view" data-program-view="register" aria-labelledby="register-title" hidden>
+            <!-- Full-width tabular Register with record drawers. -->
+            <div class="program-register-main-pane program-island">
+              <header class="program-panel__head program-register-main-header">
+                <div class="program-register-header__top-row">
+                  <div class="program-register-header__left">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;color:var(--uos-primary);flex-shrink:0;"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+                    <h3 id="register-title" class="uos-sr-only">Applications and Events Register</h3>
+                    <div class="program-filter-drawer" data-filter-drawer="register" style="border:none;background:transparent;">
+                      <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="registerFilterDrawerBody" aria-label="Toggle status filters" style="height:28px;min-height:28px;padding:0 10px;gap:10px;border:1px solid var(--panel-border);border-radius:var(--panel-radius, 6px);background:var(--uos-surface-muted);">
+                        <span class="program-filter-drawer-toggle__lead">
+                          <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-icon"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                          <span>Filters</span>
+                        </span>
+                        <span class="program-filter-drawer-toggle__trail">
+                          <span class="program-filter-drawer-active-badge" data-filter-drawer-badge="register" hidden>0</span>
+                          <span class="program-filter-drawer-reset" data-filter-drawer-reset="register" role="button" tabindex="0" aria-label="Reset active filters" title="Reset active filters" hidden>&times;</span>
+                          <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-chevron"><path d="m6 9 6 6 6-6"/></svg>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Actions & PDF Dropzone in Main Header Top Row -->
+                  <div class="program-register-header-controls">
+                    <input type="hidden" data-register-ownership value="all">
+                    <input type="hidden" data-register-sort value="date">
+
+                    <!-- Dynamic Add Application / Add Event Button -->
+                    <button type="button" class="uos-button uos-button--primary uos-button--sm" data-register-add-record style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                      <span data-register-add-label>Add Application</span>
+                    </button>
+
+                    <!-- Right-Aligned PDF Drag-and-Drop Box -->
+                    <div class="program-register-pdf-dropzone" data-register-pdf-dropzone data-uos-tooltip="Drop Application PDF or click to upload" data-uos-tooltip-pos="bottom" role="button" tabindex="0" aria-label="Drag and drop Application PDF">
+                      <input type="file" accept=".pdf,application/pdf" hidden data-register-pdf-input aria-label="Upload Application PDF file">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3-3 3 3"/></svg>
+                      <span class="program-register-pdf-dropzone__label">Drop Application PDF</span>
+                    </div>
+                  </div>
+                </div>
+              </header>
+
+              <div class="program-filter-drawer-body program-register-filter-drawer-body" id="registerFilterDrawerBody" data-filter-drawer-body="register" hidden style="padding: 8px 16px; border-bottom: 1px solid var(--panel-border); background: var(--panel-bg);">
+                <label class="program-register-smart-search">
+                  <span class="uos-sr-only">Search Register records</span>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                  <input type="search" data-register-search autocomplete="off" spellcheck="false" placeholder="Smart search by name, ID, location, reference, status or date" aria-label="Smart search Register records">
+                </label>
+                <div class="program-status-filter-pills" id="registerStatusFilterPills" data-status-filter-pills="register"></div>
+              </div>
+
+              <div class="program-table-wrap program-scroll-region">
+                <table class="uos-table program-register-table">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="program-register-table__toggle-col"><span class="uos-sr-only">Expand</span></th>
+                      <th scope="col">Title / Name</th>
+                      <th scope="col">Location</th>
+                      <th scope="col" class="program-register-table__reference-col" data-register-sort-header="receipt"><button type="button" class="program-register-table__sort" data-register-table-sort="receipt"><span data-register-sort-label="receipt">Ref / Receipt</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
+                      <th scope="col" class="program-register-table__project-col">Project</th>
+                      <th scope="col" class="program-register-table__status-col">Status</th>
+                      <th scope="col" class="program-register-table__received-col" data-register-sort-header="date"><button type="button" class="program-register-table__sort" data-register-table-sort="date"><span>Received</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
+                      <th scope="col" class="program-register-table__actions-col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody data-register-table-body></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="program-map-layout program-view" data-program-view="map" aria-label="Space Map" hidden>
+            <div class="program-map-workspace">
+              <!-- Pane 1: Dual-Use Inspector & Event/App Picker -->
+              <aside class="program-map-sidebar program-island" aria-label="Polygon inspector, remediation events and nature strip applications sidebar">
+                <header class="program-map-sidebar__head">
+                  <div><p class="uos-eyebrow">Space Map</p><h3>Mapped Records</h3></div>
+                </header>
+                <!-- Scope selector -->
+                <div class="program-map-scope-wrap">
+                  <div class="uos-segmented program-map-scope-segmented" role="group" aria-label="Map Sidebar Scope">
+                    <button type="button" class="is-active" data-map-scope="register" aria-pressed="true">Register</button>
+                    <button type="button" data-map-scope="projects" aria-pressed="false">Projects</button>
+                  </div>
+                </div>
+                <div class="program-filter-drawer" data-filter-drawer="map">
+                  <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="mapFilterDrawerBody" aria-label="Toggle search and status filters">
+                    <span class="program-filter-drawer-toggle__lead">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                      <span>Search & Filters</span>
+                    </span>
+                    <span class="program-filter-drawer-toggle__trail">
+                          <span class="program-filter-drawer-active-badge" data-filter-drawer-badge="map" hidden>0</span>
+                          <span class="program-filter-drawer-reset" data-filter-drawer-reset="map" role="button" tabindex="0" aria-label="Reset active filters" title="Reset active filters" hidden>&times;</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-chevron"><path d="m6 9 6 6 6-6"/></svg>
+                    </span>
+                  </button>
+                  <div class="program-filter-drawer-body" id="mapFilterDrawerBody" data-filter-drawer-body data-sidebar-search-wrap hidden>
+                    <label class="program-map-search"><span class="uos-sr-only">Search events, applications or polygons</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="search" placeholder="Search events, apps, parks, IDs..." id="eventSearchInput" data-event-search aria-label="Search events and applications"></label>
+                    <div class="program-map-spatial-filter-row" id="mapSpatialFilterPills" data-spatial-filter-pills="map"></div>
+                    <div class="program-map-filter-divider"></div>
+                    <div class="program-status-filter-pills" id="mapStatusFilterPills" data-status-filter-pills="map"></div>
+                  </div>
+                </div>
+                <!-- View 1: Remediation Events & Nature Strip Apps List Picker -->
+                <div class="program-map-event-list program-scroll-region" id="eventPickerList" data-sidebar-pane="list"></div>
+                <!-- View 2: Polygon Inspector (Opened via Add/Edit Polygons button) -->
+                <div class="program-map-shape-list program-scroll-region" id="shapeList" data-sidebar-pane="shapes" hidden></div>
+              </aside>
+              <!-- Pane 2: Space Map Canvas Space -->
+              <div class="program-map-canvas-container program-island">
+                <header class="program-map-canvas-header">
+                  <div class="program-map-header-controls" data-module-controls="map" role="toolbar" aria-label="Space Map controls">
+                    <div class="program-map-primary-actions">
+                      <button class="uos-button uos-button--secondary uos-button--sm is-active" type="button" id="selectToolButton" data-map-tool="select" aria-pressed="true" title="Select records and pins, or cancel the active map tool"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M3 3l7 17 2.5-6.5L19 11z"/></svg><span>Select / Edit</span></button>
+                      <span class="program-map-tool-status" id="mapToolStatus" role="status" aria-live="polite" hidden></span>
+                      <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="coordinateShapeButton"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span>Data</span></button>
+                      <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="zoomShapesButton" aria-label="Fit map to all shapes">Fit</button>
+                      <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="resetHomeButton" aria-label="Reset viewport to Home" title="Reset viewport to Adelaide LGA Home"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
+                    </div>
+                    <details class="program-map-menu program-map-menu--display">
+                      <summary class="uos-button uos-button--secondary uos-button--sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Display</span></summary>
+                      <div class="program-map-menu__panel program-map-menu__panel--display">
+                        <label class="uos-field uos-field--sm"><span>Basemap</span><select class="uos-select" id="providerSelect"><option value="offline">Offline grid (private)</option><option value="esri-world-imagery" selected>Esri World Imagery (aerial)</option><option value="carto-light">Carto Light</option><option value="osm">OpenStreetMap (OSM)</option><option value="metromaps">Metromaps</option></select></label>
+                        <div class="program-map-toggles" role="group" aria-label="Map display options">
+                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapLength" aria-pressed="false">Length</button>
+                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapArea" aria-pressed="true">Area</button>
+                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapAngles" aria-pressed="false">Angles</button>
+                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapEdges" aria-pressed="true">Edges</button>
+                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapIndex" aria-pressed="true">Index</button>
+                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapActiveOnly" aria-pressed="false">Active only</button>
+                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapSelectedOnly" aria-pressed="false">Selected only</button>
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                </header>
+                <div class="program-map-floating-draw-toolbar" id="floatingDrawToolbar" role="toolbar" aria-label="Drawing tools">
+                    <button class="program-map-floating-draw-toolbar__handle" type="button" aria-label="Drag drawing toolbar" title="Drag drawing toolbar">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="6" r="1"/><circle cx="16" cy="6" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/><circle cx="8" cy="18" r="1"/><circle cx="16" cy="18" r="1"/></svg>
+                    </button>
+                    <div class="program-map-floating-draw-toolbar__controls">
+                      <div class="program-draw-modes" role="group" aria-label="Draw mode">
+                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-draw-mode="polygon" aria-pressed="true">Polygon</button>
+                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-draw-mode="line" aria-pressed="false">Line</button>
+                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-draw-mode="square" aria-pressed="false">Line to Square</button>
+                      </div>
+                      <button class="uos-button uos-button--primary uos-button--sm program-map-floating-draw-toolbar__start" type="button" id="startDrawingButton">Start Drawing</button>
+                      <div class="program-map-drawing-actions" role="group" aria-label="Active drawing controls">
+                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="finishDrawingButton" disabled>Finish</button>
+                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="cancelDrawingButton" disabled>Cancel</button>
+                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="undoDrawingButton" disabled>Undo Point</button>
+                      </div>
+                    </div>
+                </div>
+                <div class="program-map-canvas-inner" id="eventMap" tabindex="0" aria-label="Interactive spatial map canvas">
+                  <div class="program-map-unavailable" id="mapUnavailable" hidden>
+                    <h3>Interactive map unavailable</h3>
+                    <p>Coordinate entry, validation and mapped costing remain available in the shape editor.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="program-planner-layout program-view" data-program-view="planner" aria-labelledby="planner-title" hidden>
+            <div class="program-planner-workspace">
+              <!-- Pane 1: Small Left Side Pane (List + Search) -->
+              <aside class="program-planner-sidebar program-island" aria-label="Project list sidebar">
+                <header class="program-planner-sidebar__head">
+                  <div><p class="uos-eyebrow">Delivery Projects</p><h3 id="planner-sidebar-title">Project List</h3></div>
+                </header>
+                <!-- Inline Cross-Module Quick Actions Icon-Only Toolbar -->
+                <nav class="program-register-mini-toolbar" data-planner-mini-toolbar aria-label="Project quick actions">
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-planner-toolbar-jump="register" data-uos-tooltip="View in Register" title="View in Register" aria-label="View in Register"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm is-current-module" type="button" data-planner-toolbar-jump="planner" data-uos-tooltip="Currently in Project Planner" title="Currently in Project Planner" aria-label="Currently in Project Planner" aria-current="page" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-planner-toolbar-jump="map" data-uos-tooltip="View on Space Map" title="View on Space Map" aria-label="View on Space Map"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-planner-toolbar-jump="costing" data-uos-tooltip="Open in Cost Calculator" title="Open in Cost Calculator" aria-label="Open in Cost Calculator"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-planner-toolbar-jump="scheduler" data-uos-tooltip="Schedule in Job Scheduler" title="Schedule in Job Scheduler" aria-label="Schedule in Job Scheduler"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-planner-toolbar-jump="quotes" data-uos-tooltip="Open in Quote Builder" title="Open in Quote Builder" aria-label="Open in Quote Builder"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></button>
+                </nav>
+                <div class="program-filter-drawer" data-filter-drawer="planner">
+                  <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="plannerFilterDrawerBody" aria-label="Toggle search and status filters">
+                    <span class="program-filter-drawer-toggle__lead">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                      <span>Search & Filters</span>
+                    </span>
+                    <span class="program-filter-drawer-toggle__trail">
+                      <span class="program-filter-drawer-active-badge" data-filter-drawer-badge="planner" hidden>0</span>
+                      <span class="program-filter-drawer-reset" data-filter-drawer-reset="planner" role="button" tabindex="0" aria-label="Reset active filters" title="Reset active filters" hidden>&times;</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-chevron"><path d="m6 9 6 6 6-6"/></svg>
+                    </span>
+                  </button>
+                  <div class="program-filter-drawer-body" id="plannerFilterDrawerBody" data-filter-drawer-body hidden>
+                    <label class="program-map-search"><span class="uos-sr-only">Search project applications or events</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="search" placeholder="Search project apps, events, IDs..." id="plannerSearchInput" aria-label="Search project applications and events"></label>
+                    <div class="program-status-filter-pills" id="plannerStatusFilterPills" data-status-filter-pills="planner"></div>
+                  </div>
+                </div>
+                <div class="program-map-event-list program-scroll-region" id="plannerPickerList"></div>
+              </aside>
+
+              <!-- Pane 2: Large Right Side Main Pane with Browser Tabs & Checklist -->
+              <div class="program-planner-main-pane">
+                <h3 class="uos-sr-only" id="planner-title">Project Checklists</h3>
+                <nav class="planner-browser-tabs" id="plannerBrowserTabs" aria-label="Project Planner Tabs"></nav>
+                <div class="planner-checklist-wrap program-scroll-region" id="plannerChecklistContent"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="program-costing-workspace program-view" data-program-view="costing" aria-label="Costing workspace" hidden data-program-costing>
+            <!-- Left Panel: Projects Side Panel (Standard side panel width, full screen height) -->
+            <aside class="program-costing-projects-pane program-island" aria-labelledby="costing-projects-title" data-costing-projects-panel>
+              <header class="program-costing-sidebar-head">
+                <div class="program-costing-title">
+                  <div>
+                    <p class="uos-eyebrow" data-costing-projects-eyebrow>Delivery Projects</p>
+                    <h3 id="costing-projects-title" data-costing-projects-heading>Costing Projects</h3>
+                  </div>
+                </div>
+              </header>
+              <!-- Inline Cross-Module Quick Actions Icon-Only Toolbar -->
+              <nav class="program-register-mini-toolbar" data-costing-mini-toolbar aria-label="Costing quick actions">
+                <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-costing-toolbar-jump="register" data-uos-tooltip="View in Register" title="View in Register" aria-label="View in Register"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></button>
+                <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-costing-toolbar-jump="planner" data-uos-tooltip="Open in Project Planner" title="Open in Project Planner" aria-label="Open in Project Planner"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>
+                <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-costing-toolbar-jump="map" data-uos-tooltip="Map work area in Space Map" title="Map work area in Space Map" aria-label="Map work area in Space Map"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></button>
+                <button class="uos-button uos-button--secondary uos-button--sm is-current-module" type="button" data-costing-toolbar-jump="costing" data-uos-tooltip="Currently in Cost Calculator" title="Currently in Cost Calculator" aria-label="Currently in Cost Calculator" aria-current="page" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg></button>
+                <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-costing-toolbar-jump="scheduler" data-uos-tooltip="Schedule in Job Scheduler" title="Schedule in Job Scheduler" aria-label="Schedule in Job Scheduler"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></button>
+                <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-costing-toolbar-jump="quotes" data-uos-tooltip="Create or open Quote in Quote Builder" title="Create or open Quote in Quote Builder" aria-label="Create or open Quote in Quote Builder"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></button>
+              </nav>
+              <div class="program-filter-drawer" data-filter-drawer="costing">
+                <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="costingFilterDrawerBody" aria-label="Toggle search and status filters">
+                  <span class="program-filter-drawer-toggle__lead">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                    <span>Search &amp; Filters</span>
+                  </span>
+                  <span class="program-filter-drawer-toggle__trail">
+                    <span class="program-filter-drawer-active-badge" data-filter-drawer-badge="costing" hidden>0</span>
+                    <span class="program-filter-drawer-reset" data-filter-drawer-reset="costing" role="button" tabindex="0" aria-label="Reset active filters" title="Reset active filters" hidden>&times;</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-chevron"><path d="m6 9 6 6 6-6"/></svg>
+                  </span>
+                </button>
+                <div class="program-filter-drawer-body" id="costingFilterDrawerBody" data-filter-drawer-body hidden>
+                  <label class="program-map-search">
+                    <span class="uos-sr-only">Search delivery projects</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                    <input type="search" placeholder="Search delivery projects, jobs, IDs..." id="costingSearchInput" data-costing-project-search aria-label="Search delivery projects">
+                  </label>
+                  <div class="program-status-filter-pills" id="costingStatusFilterPills" data-status-filter-pills="costing"></div>
+                </div>
+              </div>
+              <div class="program-costing-projects-body program-scroll-region" data-costing-projects-list></div>
+            </aside>
+
+            <!-- Middle Panel: Global Rate Item Library (Splits remaining space with Job Calculator) -->
+            <section class="program-cost-catalog program-island" aria-labelledby="cost-catalog-title">
+              <header class="program-costing-head">
+                <div class="program-costing-title"><div><p class="uos-eyebrow">Global cost library</p><h3 id="cost-catalog-title">Rate Items</h3></div></div>
+                <button class="program-cost-tools-toggle uos-button uos-button--secondary uos-button--sm" type="button" data-costing-tools-toggle aria-expanded="false" aria-controls="costingLibraryTools" aria-label="Show Rate Library search and actions" title="Rate Library tools"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M4 3h5m-2.5-2v4"/></svg><span>Tools</span><svg class="program-cost-tools-toggle__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+              </header>
+              <div class="program-cost-controls" id="costingLibraryTools" data-costing-tools hidden>
+                <label class="program-cost-search"><span class="uos-sr-only">Search rates</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="search" placeholder="Search rates" data-costing-search></label>
+                <label><span class="uos-sr-only">Filter category</span><select data-costing-category><option value="all">All categories</option></select></label>
+                <div class="program-costing-head__actions program-cost-controls__actions"><button class="uos-button uos-button--secondary" type="button" data-costing-add-item data-uos-tooltip="Add Rate Item to Resource Calculator" aria-label="Add Rate Item to Resource Calculator"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add rate</span></button><button class="uos-button uos-button--secondary" type="button" data-costing-export data-uos-tooltip="Export Rate Library" aria-label="Export Rate Library"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg><span>Export Rate Library</span></button></div>
+              </div>
+              <div class="program-cost-tabs" role="tablist" aria-label="Rate Library categories">
+                <button class="program-header-nav__item" type="button" role="tab" data-costing-section="Labour" aria-selected="true" tabindex="0"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="6" r="2.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2M8 12l-2 4m10-4 2 4"/></svg><span>Labour</span></button>
+                <button class="program-header-nav__item" type="button" role="tab" data-costing-section="Equipment" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M10 2h4l.6 2.3 2 1.1 2.3-.6 2 3.4-1.7 1.7v2.2l1.7 1.7-2 3.4-2.3-.6-2 1.1L14 22h-4l-.6-2.3-2-1.1-2.3.6-2-3.4 1.7-1.7v-2.2L3.1 10.2l2-3.4 2.3.6 2-1.1z"/></svg><span>Equipment</span></button>
+                <button class="program-header-nav__item" type="button" role="tab" data-costing-section="Material" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 9 5-9 5-9-5 9-5Zm-9 5v10l9 5 9-5V7M12 12v10M7 4.8l9 5"/></svg><span>Material</span></button>
+                <button class="program-header-nav__item" type="button" role="tab" data-costing-section="Contractors" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M2 21v-2a7 7 0 0 1 14 0v2M17 6a3 3 0 0 1 0 6m1 3a5 5 0 0 1 4 5v1"/></svg><span>Contractors</span></button>
+                <button class="program-header-nav__item" type="button" role="tab" data-costing-section="Sundry" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 5V3h8v2M8 11h8m-8 5h5"/></svg><span>Sundry</span></button>
+              </div>
+              <div class="program-cost-table-wrap program-scroll-region">
+                <table class="program-cost-table"><colgroup><col class="program-cost-col-category"><col class="program-cost-col-description"><col class="program-cost-col-unit"><col class="program-cost-col-rate"><col class="program-cost-col-state"><col class="program-cost-col-actions"></colgroup><thead><tr><th scope="col" aria-sort="none"><button class="program-rate-sort" type="button" data-rate-sort="category"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h14"/></svg><span>Category</span><span class="program-rate-sort__indicator" data-rate-sort-indicator aria-hidden="true">↕</span></button></th><th scope="col" aria-sort="ascending"><button class="program-rate-sort" type="button" data-rate-sort="description"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Description</span><span class="program-rate-sort__indicator" data-rate-sort-indicator aria-hidden="true">↑</span></button></th><th scope="col"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-7"/></svg>Unit</th><th scope="col"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Rate</th><th scope="col"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>State</th><th scope="col"><span class="uos-sr-only">Actions</span></th></tr></thead><tbody data-costing-catalog-body></tbody></table>
+                <div class="program-cost-empty" data-costing-catalog-empty hidden><strong>No Rate Items found</strong><p>Add or import a Rate Item, or adjust this filter.</p></div>
+              </div>
+            </section>
+
+            <!-- Right Panel: Job Calculator Pane (Splits remaining space with Rates Catalog) -->
+            <section class="program-job-calculator program-island" aria-labelledby="costing-title">
+              <header class="program-costing-head program-calculator-head">
+                <div class="program-costing-title"><div><p class="uos-eyebrow">Resource Calculator</p><h3 id="costing-title">Assigned Rate Items</h3></div></div>
+              </header>
+              <div class="program-calculator-table-wrap program-scroll-region">
+                <table class="program-calculator-table"><colgroup><col class="program-calculator-col-line-item"><col class="program-calculator-col-source"><col class="program-calculator-col-qty"><col class="program-calculator-col-unit"><col class="program-calculator-col-rate"><col class="program-calculator-col-total"><col class="program-calculator-col-actions"></colgroup><thead><tr><th scope="col">Line item</th><th scope="col">Source</th><th scope="col">Qty</th><th scope="col">Unit</th><th scope="col">Rate</th><th scope="col">Total</th><th scope="col"><span class="uos-sr-only">Remove</span></th></tr></thead><tbody data-costing-lines></tbody></table>
+                <div class="program-cost-empty" data-costing-lines-empty><strong>No costing lines assigned</strong><p>Add an active catalog item or send a mapped polygon quantity to this job.</p></div>
+              </div>
+              <footer class="program-cost-totals" data-costing-totals-footer>
+                <div class="program-cost-adjustments"><label><span>Preliminaries</span><span class="program-percent-input"><input type="number" min="0" max="100" step="0.1" value="0" data-costing-preliminaries aria-label="Preliminaries percentage"><b>%</b></span></label><label><span>Margin</span><span class="program-percent-input"><input type="number" min="0" max="100" step="0.1" value="0" data-costing-margin aria-label="Margin percentage"><b>%</b></span></label></div>
+                <dl><div><dt>Subtotal</dt><dd data-costing-total="subtotal">$0.00</dd></div><div><dt data-costing-total-label="preliminaries">Preliminaries (0%)</dt><dd data-costing-total="preliminaries">$0.00</dd></div><div><dt data-costing-total-label="margin">Margin (0%)</dt><dd data-costing-total="margin">$0.00</dd></div><div><dt>GST (10%)</dt><dd data-costing-total="gst">$0.00</dd></div></dl>
+                <div class="program-grand-total"><span>AUD grand total</span><strong data-costing-total="grand">$0.00</strong></div>
+              </footer>
+              <p class="program-cost-error" data-costing-error role="alert" hidden></p>
+            </section>
+          </section>
+
+          <section class="program-scheduler-layout program-view" data-program-view="scheduler" aria-labelledby="scheduler-title" hidden data-program-scheduler>
+            <!-- Left Side: Smaller Inspector Pane -->
+            <aside class="program-scheduler-inspector program-island" aria-label="Scheduled jobs">
+              <section data-scheduler-list-mode aria-label="Job list">
+                <header class="program-scheduler-inspector__head"><div><p class="uos-eyebrow">Schedule</p><h3>Delivery Projects</h3></div></header>
+                <!-- Inline Cross-Module Quick Actions Icon-Only Toolbar -->
+                <nav class="program-register-mini-toolbar" data-scheduler-mini-toolbar aria-label="Scheduler quick actions">
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="register" data-uos-tooltip="View in Register" title="View in Register" aria-label="View in Register"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="planner" data-uos-tooltip="Open in Project Planner" title="Open in Project Planner" aria-label="Open in Project Planner"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="map" data-uos-tooltip="Inspect on Space Map" title="Inspect on Space Map" aria-label="Inspect on Space Map"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="costing" data-uos-tooltip="View in Cost Calculator" title="View in Cost Calculator" aria-label="View in Cost Calculator"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm is-current-module" type="button" data-scheduler-toolbar-jump="scheduler" data-uos-tooltip="Currently in Job Scheduler" title="Currently in Job Scheduler" aria-label="Currently in Job Scheduler" aria-current="page" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="quotes" data-uos-tooltip="Open in Quote Builder" title="Open in Quote Builder" aria-label="Open in Quote Builder"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></button>
+                </nav>
+                <div class="program-filter-drawer" data-filter-drawer="scheduler-sidebar">
+                  <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="schedulerSidebarFilterDrawerBody" aria-label="Toggle search and status filters">
+                    <span class="program-filter-drawer-toggle__lead">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                      <span>Search &amp; Filters</span>
+                    </span>
+                    <span class="program-filter-drawer-toggle__trail">
+                      <span class="program-filter-drawer-active-badge" data-filter-drawer-badge="scheduler-sidebar" hidden>0</span>
+                      <span class="program-filter-drawer-reset" data-filter-drawer-reset="scheduler-sidebar" role="button" tabindex="0" aria-label="Reset active filters" title="Reset active filters" hidden>&times;</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-chevron"><path d="m6 9 6 6 6-6"/></svg>
+                    </span>
+                  </button>
+                  <div class="program-filter-drawer-body" id="schedulerSidebarFilterDrawerBody" data-filter-drawer-body hidden>
+                    <label class="program-map-search">
+                      <span class="uos-sr-only">Search delivery projects</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                      <input type="search" placeholder="Search delivery projects, jobs, IDs..." id="schedulerSidebarSearchInput" data-scheduler-project-search aria-label="Search delivery projects">
+                    </label>
+                    <div class="program-status-filter-pills" id="schedulerSidebarStatusFilterPills" data-status-filter-pills="scheduler-sidebar"></div>
+                  </div>
+                </div>
+                <div class="program-scheduler-list program-scroll-region" role="listbox" tabindex="0" aria-label="Visible scheduled jobs" data-scheduler-list></div>
+                <div class="program-scheduler-empty" data-scheduler-empty hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15h6"/></svg><p>No scheduled jobs match this period and filter set.</p></div>
+              </section>
+              <article class="program-scheduler-detail" data-scheduler-detail hidden aria-labelledby="scheduler-detail-title">
+                <header class="program-scheduler-inspector__head" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                  <button type="button" class="program-scheduler-back" data-scheduler-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span>Back to List</span></button>
+                  <span data-scheduler-detail-badge></span>
+                </header>
+                <div class="program-scheduler-detail__body program-scroll-region">
+                  <p class="uos-eyebrow" data-scheduler-detail-owner></p>
+                  <h3 id="scheduler-detail-title" data-scheduler-detail-title>Selected job</h3>
+                  <div data-scheduler-conflicts></div>
+                  <form class="program-scheduler-form" data-scheduler-form aria-describedby="scheduler-form-error">
+                    <div class="program-scheduler-form__grid">
+                      <label><span>Start date</span><input type="date" name="startDate" required></label>
+                      <label><span>End date</span><input type="date" name="endDate" required></label>
+                      <label class="program-scheduler-form__check"><input type="checkbox" name="allDay"><span>All-day job</span></label>
+                      <label data-scheduler-timed><span>Start time</span><input type="time" name="startTime"></label>
+                      <label data-scheduler-timed><span>End time</span><input type="time" name="endTime"></label>
+                      <label><span>Crew</span><input type="text" name="crewId" autocomplete="off"></label>
+                      <label class="program-scheduler-form__wide"><span>Location</span><input type="text" name="location" autocomplete="off"></label>
+                      <label><span>Status</span><input type="text" name="status" autocomplete="off"></label>
+                      <label><span>Priority</span><input type="text" name="priority" autocomplete="off"></label>
+                    </div>
+                    <p class="program-scheduler-form__error" id="scheduler-form-error" data-scheduler-form-error role="alert" hidden></p>
+                    <div class="program-scheduler-form__actions"><button class="uos-button uos-button--primary" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span>Save schedule</span></button><button class="uos-button uos-button--danger" type="button" data-scheduler-delete-job><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Delete job</span></button></div>
+                  </form>
+                  <dl data-scheduler-detail-fields></dl>
+                </div>
+              </article>
+            </aside>
+
+            <!-- Right Side: Larger Calendar Pane -->
+            <section class="program-scheduler-calendar program-island">
+              <header class="program-scheduler-head">
+                <div class="program-scheduler-header__left" style="display:flex;align-items:center;gap:10px;">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;color:var(--uos-primary);flex-shrink:0;"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+                  <span id="scheduler-title" class="uos-sr-only">Job Scheduler</span>
+                  <div class="program-filter-drawer" data-filter-drawer="scheduler" style="border:none;background:transparent;">
+                    <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="schedulerFilterDrawerBody" aria-label="Toggle schedule filters" style="height:28px;min-height:28px;padding:0 10px;gap:10px;border:1px solid var(--panel-border);border-radius:var(--panel-radius, 6px);background:var(--uos-surface-muted);">
+                      <span class="program-filter-drawer-toggle__lead">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-icon"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                        <span>Filters</span>
+                      </span>
+                      <span class="program-filter-drawer-toggle__trail">
+                        <span class="program-filter-drawer-active-badge" data-filter-drawer-badge="scheduler" hidden>0</span>
+                        <span class="program-filter-drawer-reset" data-filter-drawer-reset="scheduler" role="button" tabindex="0" aria-label="Reset active filters" title="Reset active filters" hidden>&times;</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-chevron"><path d="m6 9 6 6 6-6"/></svg>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Center: Calendar Navigation (Previous, Today, Next, Period Title) -->
+                <div class="program-scheduler-navigation" role="group" aria-label="Calendar navigation">
+                  <button type="button" class="uos-button uos-button--secondary uos-button--icon" data-scheduler-previous aria-label="Previous period"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+                  <button type="button" class="uos-button uos-button--secondary" data-scheduler-today><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Today</span></button>
+                  <button type="button" class="uos-button uos-button--secondary uos-button--icon" data-scheduler-next aria-label="Next period"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+                  <strong data-scheduler-period aria-live="polite"></strong>
+                </div>
+
+                <!-- Right: Week / Month View Mode Toggle -->
+                <div class="program-scheduler-modes" role="group" aria-label="Calendar view">
+                  <button type="button" data-scheduler-mode="week" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span>Week</span></button>
+                  <button type="button" data-scheduler-mode="month" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Month</span></button>
+                </div>
+              </header>
+
+              <!-- Collapsible Filters Drawer for Scheduler Dropdown Filters in a Single Row -->
+              <div class="program-filter-drawer-body program-scheduler-filter-drawer-body" id="schedulerFilterDrawerBody" data-filter-drawer-body="scheduler" hidden style="padding: 8px 16px; border-bottom: 1px solid var(--panel-border); background: var(--panel-bg);">
+                <div class="program-scheduler-filters" role="group" aria-label="Filter scheduled jobs">
+                  <label><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.6 11 23l-9-9V4h10l8.6 8.6a1.4 1.4 0 0 1 0 2Z"/><circle cx="7" cy="9" r="1"/></svg>Category</span><select data-scheduler-filter="category"><option value="all">All</option></select></label>
+                  <label><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="19" cy="12" r="2"/></svg>Status</span><select data-scheduler-filter="status"><option value="all">All</option></select></label>
+                  <label><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3 20v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2M14 14h3a4 4 0 0 1 4 4v2"/></svg>Crew</span><select data-scheduler-filter="crew"><option value="all">All</option></select></label>
+                </div>
+              </div>
+
+              <div class="program-calendar-scroll program-scroll-region">
+                <div class="program-calendar" data-scheduler-calendar role="region" aria-label="Program calendar"></div>
+              </div>
+            </section>
+          </section>
+          <section class="program-budget program-view" data-program-view="budget" aria-labelledby="budget-title" hidden>
+            <header class="program-budget__header program-island"><div><p class="uos-eyebrow">City operations</p><h2 id="budget-title">Annual Budget</h2><p>Approve annual authority, review pending changes, and close the year. Allocate funds from a Register record.</p></div><button class="uos-button uos-button--primary" type="button" data-budget-action="create">Create annual budget</button></header>
+            <p class="program-budget__notice" data-budget-notice role="status" hidden></p>
+            <div class="program-budget__toolbar program-island"><label class="uos-field"><span>Financial year</span><select class="uos-select" data-budget-year></select></label><div data-budget-year-state></div></div>
+            <div class="program-budget__metrics" data-budget-metrics></div>
+            <div class="program-budget__grid"><section class="program-island"><div class="program-budget__section-head"><div><h3>Register allocations</h3><p>Funds stay with the Register record even before a Project exists. Open the Register to allocate or adjust.</p></div></div><div class="program-budget__table-wrap"><table><thead><tr><th>Register record</th><th>Allocated</th><th>Committed</th><th>Actual</th><th>Available</th><th>Year-end review</th></tr></thead><tbody data-budget-allocations></tbody></table></div><h3>Pending changes</h3><ol class="program-budget__history" data-budget-pending></ol></section><section class="program-island"><div class="program-budget__section-head"><div><h3>History</h3><p>Approvals, changes, and carry-forwards are recorded.</p></div></div><ol class="program-budget__history" data-budget-history></ol></section></div>
+          </section>
+          <section class="program-reports program-view" data-program-view="reports" aria-labelledby="reports-title" hidden>
+            <header class="program-reports__head program-island">
+              <div class="program-panel__head"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><div><p class="uos-eyebrow">Reports &amp; Financials</p><h3 id="reports-title">No reportable activity</h3><p data-program-module-summary="reports">Approved annual authority comes from Annual Budgets; commitments and actual spend come from recorded Job charges.</p></div></div>
+              <p class="program-reports__live" data-reports-updated aria-live="polite"></p>
+            </header>
+            <div class="program-reports__empty program-island" data-reports-empty><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><div><h3>No financial activity yet</h3><p>Create and cost Jobs to populate live budget reporting. No example records are embedded.</p></div></div>
+            <div class="program-reports__content program-scroll-region" data-reports-content hidden>
+              <section class="program-report-kpis" aria-label="Program financial position">
+                <article class="program-report-kpi program-island"><span>Operational Amount</span><strong data-reports-kpi="approvedBudget">$0</strong></article>
+                <article class="program-report-kpi program-island"><span>Committed budget</span><strong data-reports-kpi="committedBudget">$0</strong></article>
+                <article class="program-report-kpi program-island"><span>Actual spend</span><strong data-reports-kpi="actualSpend">$0</strong></article>
+                <article class="program-report-kpi program-island"><span>Available funding</span><strong data-reports-kpi="spareFunds">$0</strong></article>
+              </section>
+              <div class="program-report-grid">
+                <section class="program-report-panel program-island"><header><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 3"/></svg><div><h3>Budget position</h3><p>Committed, actual and spare funding update with each Job change.</p></div></header><div data-reports-donut></div><ul class="program-report-bars" data-reports-owner-bars></ul></section>
+                <section class="program-report-panel program-island"><header><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M5 7v13h14V7M8 3h8v4M8 12h8M8 16h5"/></svg><div><h3>Operational area position</h3><p>Nature Strip and Remediation financial totals remain explicit.</p></div></header><div class="program-report-table-wrap"><table><thead><tr><th scope="col">Operational area</th><th scope="col">Jobs</th><th scope="col">Operational Amount</th><th scope="col">Committed</th><th scope="col">Actual</th><th scope="col">Available</th></tr></thead><tbody data-reports-owner-body></tbody></table></div></section>
+                <section class="program-report-panel program-island"><header><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="19" cy="12" r="2"/></svg><div><h3>Status breakdown</h3><p>Committed values are Draft, Scheduled and In Progress Jobs.</p></div></header><div class="program-report-table-wrap"><table><thead><tr><th scope="col">Status</th><th scope="col">Jobs</th><th scope="col">Estimate</th><th scope="col">Committed</th><th scope="col">Actual</th></tr></thead><tbody data-reports-status-body></tbody></table></div></section>
+                <section class="program-report-panel program-report-panel--wide program-island"><header><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h8M8 17h5"/></svg><div><h3>Job financial register</h3><p>Completed-job variance shows funds released or exceeded.</p></div></header><div class="program-report-table-wrap"><table><thead><tr><th scope="col">Job</th><th scope="col">Owner</th><th scope="col">Status</th><th scope="col">Estimate</th><th scope="col">Actual</th><th scope="col">Variance</th></tr></thead><tbody data-reports-job-body></tbody></table></div></section>
+              </div>
+            </div>
+          </section>
+          <section class="program-data program-view" data-program-view="data" aria-labelledby="data-title" hidden>
+            <div class="program-data-toolbar program-island" data-program-data-toolbar>
+              <div class="program-data-status-wrap"><p class="program-data-status" data-program-data-status role="status" aria-live="polite"></p></div>
+              <div class="program-data-toolbar__actions">
+                <button type="button" class="uos-button uos-button--secondary uos-button--sm" data-program-restore-stored style="margin-left: 8px;">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  <span>Restore Stored Data</span>
+                </button>
+                <span class="program-data-toolbar__divider" aria-hidden="true"></span>
+          <button type="button" class="uos-button uos-button--secondary uos-button--sm" data-program-review-legacy><span>Review legacy data</span></button>
+                <button type="button" class="uos-button uos-button--primary uos-button--sm" data-program-export-open>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V9m0 0 4 4m-4-4-4 4M5 4h14"/></svg><span>Workspace backup</span>
+                </button>
+                <details class="program-danger-zone"><summary>Danger zone</summary><div class="program-danger-zone__actions" role="group" aria-label="Destructive data actions">
+                  <button type="button" class="uos-button uos-button--secondary uos-button--sm" data-program-clear="users">Clear Users</button>
+                  <button type="button" class="uos-button uos-button--secondary uos-button--sm" data-program-clear="rates">Clear Rates Catalog</button>
+                  <button type="button" class="uos-button uos-button--secondary uos-button--sm" data-program-clear="nsa">Clear Nature Strip Register</button>
+                  <button type="button" class="uos-button uos-button--secondary uos-button--sm" data-program-clear="evt">Clear Remediation Register</button>
+                  <button type="button" class="uos-button uos-button--secondary uos-button--sm" data-program-clear="payments">Clear Payment Ledger</button>
+                  <button type="button" class="uos-button uos-button--secondary uos-button--sm" data-program-clear="all">Clear Session Data</button>
+                  <button type="button" class="uos-button uos-button--danger uos-button--sm" data-program-delete-stored>Delete Stored Workspace</button>
+                </div></details>
+              </div>
+            </div>
+            <div class="program-data__main">
+              <section class="program-data-card program-data-card--full program-island" aria-labelledby="smart-import-title">
+                <header>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
+                  <div>
+                    <h3 id="smart-import-title">Smart Import</h3>
+                    <p>Signature-first detection stages data without changing the active workspace.</p>
+                  </div>
+                </header>
+                <div class="program-data-card__body program-data-card__body--full">
+                  <div class="program-data-dropzone program-data-dropzone--full" data-program-dropzone>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <p><strong>Drag &amp; drop file here</strong> or browse to stage data</p>
+                    <small>Supports .json, .zip, .csv, .xlsx, .pdf</small>
+                    <button class="uos-button uos-button--primary" type="button" data-program-smart-import>Browse Files</button>
+                    <input class="uos-sr-only" type="file" data-program-import-input accept=".json,.zip,.csv,.xlsx,.pdf,application/json,application/zip,text/csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                  </div>
+                </div>
+              </section>
+              <section class="program-data-card program-data-card--full program-island" aria-labelledby="data-health-title"><header><div><h3 id="data-health-title">Data Health</h3><p>Read-only canonical relationship checks.</p></div><button class="uos-button uos-button--secondary uos-button--sm" type="button" data-program-health-run>Run checks</button></header><div class="program-data-card__body"><p data-program-health-summary aria-live="polite">Checks not run.</p><p data-program-mutation-summary>No successful workspace mutation recorded in this document.</p><ul data-program-health-issues></ul></div></section>
+            </div>
+          </section>
+
+          <!-- Module 7: Quote Builder (50/50 Equal Split: Left Builder Form, Right Live Previewer) -->
+          <div class="program-view program-quote-view" data-program-view="quotes" hidden>
+            <div class="program-quote-layout">
+              <!-- Left Side: Smaller Inspector / Projects Pane -->
+              <aside class="program-quote-sidebar program-island" aria-label="Quote delivery projects">
+                <header class="program-quote-sidebar__head">
+                  <div class="program-quote-title">
+                    <div>
+                      <p class="uos-eyebrow" data-quote-projects-eyebrow>Delivery Projects</p>
+                      <h3 id="quote-projects-title" data-quote-projects-heading>Quote Projects</h3>
+                    </div>
+                  </div>
+                </header>
+                <!-- Inline Cross-Module Quick Actions Icon-Only Toolbar -->
+                <nav class="program-register-mini-toolbar" data-quote-mini-toolbar aria-label="Quote quick actions">
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quotes-toolbar-jump="register" data-uos-tooltip="View in Register" title="View in Register" aria-label="View in Register"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quotes-toolbar-jump="planner" data-uos-tooltip="Open in Project Planner" title="Open in Project Planner" aria-label="Open in Project Planner"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quotes-toolbar-jump="map" data-uos-tooltip="Inspect on Space Map" title="Inspect on Space Map" aria-label="Inspect on Space Map"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quotes-toolbar-jump="costing" data-uos-tooltip="View in Cost Calculator" title="View in Cost Calculator" aria-label="View in Cost Calculator"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quotes-toolbar-jump="scheduler" data-uos-tooltip="Schedule Labour" title="Schedule Labour" aria-label="Schedule Labour"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></button>
+                  <button class="uos-button uos-button--secondary uos-button--sm is-current-module" type="button" data-quotes-toolbar-jump="quotes" data-uos-tooltip="Currently in Quote Builder" title="Currently in Quote Builder" aria-label="Currently in Quote Builder" aria-current="page" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></button>
+                </nav>
+                <div class="program-filter-drawer" data-filter-drawer="quotes">
+                  <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="quoteFilterDrawerBody" aria-label="Toggle search and status filters">
+                    <span class="program-filter-drawer-toggle__lead">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                      <span>Search & Filters</span>
+                    </span>
+                    <span class="program-filter-drawer-toggle__trail">
+                      <span class="program-filter-drawer-active-badge" data-filter-drawer-badge="quotes" hidden>0</span>
+                      <span class="program-filter-drawer-reset" data-filter-drawer-reset="quotes" role="button" tabindex="0" aria-label="Reset active filters" title="Reset active filters" hidden>&times;</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-chevron"><path d="m6 9 6 6 6-6"/></svg>
+                    </span>
+                  </button>
+                  <div class="program-filter-drawer-body" id="quoteFilterDrawerBody" data-filter-drawer-body data-sidebar-search-wrap hidden>
+                    <label class="program-map-search">
+                      <span class="uos-sr-only">Search delivery projects for quoting</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                      <input type="search" placeholder="Search delivery projects..." id="quoteSearchInput" data-quote-project-search aria-label="Search delivery projects">
+                    </label>
+                    <div class="program-status-filter-pills" id="quoteStatusFilterPills" data-status-filter-pills="quotes"></div>
+                  </div>
+                </div>
+                <div class="program-quote-projects-body program-scroll-region" data-quote-projects-list></div>
+              </aside>
+
+              <!-- Middle Pane: Quote Builder Controls & Line Items -->
+              <div class="program-quote-builder-pane">
+                <div class="program-quote-pane-head">
+                  <div class="program-quote-info-text program-quote-pane-head__column program-quote-pane-head__column--info">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>Labour and equipment items added in the <strong>Cost Calculator</strong> are automatically added to this quote. Use the <strong>Cost Calculator</strong> to add items.</span>
+                  </div>
+                  <div class="program-quote-pane-actions program-quote-pane-head__column program-quote-pane-head__column--actions">
+                                    <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quote-refresh hidden>
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"/></svg><span>Refresh current costs</span>
+                                    </button>
+                                    <button class="uos-button uos-button--primary uos-button--sm" type="button" data-quote-revision hidden>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Create revision</span>
+                    </button>
+                    <button class="uos-button uos-button--primary uos-button--sm" type="button" data-quote-save>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg><span>Save Quote</span>
+                    </button>
+                  </div>
+                </div>
+
+              <div class="program-quote-pane-body">
+                <section class="program-quote-card program-quote-history" aria-labelledby="quote-history-title">
+                  <div class="program-quote-card__head">
+                    <div><p class="uos-eyebrow">Saved records</p><h4 id="quote-history-title">Quote and revision history</h4></div>
+                    <span class="program-quote-history__count" data-quote-history-count>0 quotes</span>
+                  </div>
+                  <p class="program-quote-history__help">Choose a saved quote or revision for this project. Loading a record never changes it.</p>
+                  <div class="program-quote-history__list" data-quote-history-list role="list" aria-live="polite">
+                    <p class="program-quote-history__empty">Select a delivery project to view its quote history.</p>
+                  </div>
+                </section>
+
+                <!-- Section 1: Customer & Metadata -->
+                  <div class="program-quote-card program-quote-section--metadata">
+                    <div class="program-quote-card__head">
+                      <h4>1. Customer &amp; Quote Metadata</h4>
+                    </div>
+                    <div class="program-quote-form-grid">
+                      <div class="uos-field">
+                        <label for="quote-source">Load from Application / Event</label>
+                        <select id="quote-source" class="uos-select uos-select--sm" data-client-picker></select>
+                      </div>
+                      <div class="uos-field">
+                        <label for="quote-reference">Quote Reference #</label>
+                        <input id="quote-reference" type="text" class="uos-input uos-input--sm" data-quote-num placeholder="e.g. Q-2026-0801">
+                      </div>
+                      <div class="uos-field">
+                        <label for="quote-client">Client Name / Organization</label>
+                        <input id="quote-client" type="text" class="uos-input uos-input--sm" data-quote-client placeholder="Client or organisation">
+                      </div>
+                      <div class="uos-field">
+                        <label for="quote-address">Address / Site Location</label>
+                        <input id="quote-address" type="text" class="uos-input uos-input--sm" data-quote-address placeholder="Site address">
+                      </div>
+                      <div class="uos-field">
+                        <label for="quote-date">Quote Issue Date</label>
+                        <input id="quote-date" type="date" class="uos-input uos-input--sm" data-quote-date>
+                      </div>
+                      <div class="uos-field">
+                        <label for="quote-expiry">Expiry / Valid Until Date</label>
+                        <input id="quote-expiry" type="date" class="uos-input uos-input--sm" data-quote-expiry>
+                      </div>
+                      <div class="uos-field">
+                        <label for="quote-email">Contact Email</label>
+                        <input id="quote-email" type="email" class="uos-input uos-input--sm" data-quote-email placeholder="name@example.com">
+                      </div>
+                    </div>
+                    <dl class="program-quote-audit" aria-label="Quote audit chain">
+                      <div><dt>Quote ID</dt><dd data-quote-audit="number">Assigned when saved</dd></div>
+                      <div><dt>Project ID</dt><dd data-quote-audit="project">—</dd></div>
+                      <div><dt>Revision</dt><dd data-quote-audit="revision">1</dd></div>
+                      <div><dt>Previous Quote ID</dt><dd data-quote-audit="previous">Original revision</dd></div>
+                    </dl>
+                  </div>
+
+                  <!-- Section 2: Line Items -->
+                  <div class="program-quote-card program-quote-section--lines">
+                    <div class="program-quote-card__head" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                      <h4>2. Itemized Quotation Lines</h4>
+                      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-add-line>+ Quote adjustment</button>
+                      </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                      <table class="uos-table program-quote-builder-table">
+                        <thead>
+                          <tr>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Qty</th>
+                            <th>Unit</th>
+                            <th>Rate ($)</th>
+                            <th style="text-align: right;">Total</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody data-quote-builder-lines></tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <!-- Section 3: Scope and Terms -->
+                  <div class="program-quote-card program-quote-section--terms">
+                    <div class="program-quote-card__head">
+                    <h4>3. Scope and Terms</h4>
+                    </div>
+                    <div class="program-quote-form-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                      <div class="uos-field" style="grid-column: span 2;">
+                        <label for="quote-prepared">Prepared By / Officer</label>
+                        <input id="quote-prepared" type="text" class="uos-input uos-input--sm" data-quote-prepared placeholder="Officer or team">
+                      </div>
+                      <div class="uos-field" style="grid-column: span 2;">
+                        <label for="quote-scope">Scope Description &amp; Notes</label>
+                        <textarea id="quote-scope" class="uos-textarea uos-textarea--sm" rows="3" data-quote-scope></textarea>
+                      </div>
+                      <div class="uos-field" style="grid-column: span 2;">
+                        <label for="quote-terms">Terms &amp; Conditions</label>
+                        <textarea id="quote-terms" class="uos-textarea uos-textarea--sm" rows="3" data-quote-terms></textarea>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Section 4: Project Funding Position -->
+                  <div class="program-quote-card program-quote-section--funding">
+                    <div class="program-quote-card__head"><h4>4. Project Funding Position (ex GST)</h4></div>
+                    <div class="program-quote-form-grid">
+              <div class="uos-field"><label>Council Operational Amount</label><input type="number" min="0" step="0.01" class="uos-input uos-input--sm" data-operational-amount value="0"><button class="uos-button uos-button--secondary uos-button--sm" type="button" data-open-destination="budget">Manage allocation in Budget</button></div>
+                      <div class="uos-field"><label for="quote-contingency">Contingency Allowance (%)</label><input id="quote-contingency" type="number" step="0.5" min="0" max="50" class="uos-input uos-input--sm" data-quote-contingency value="0"></div>
+                      <div class="uos-field"><label for="quote-discount">Discount Rate (%)</label><input id="quote-discount" type="number" step="0.5" min="0" max="50" class="uos-input uos-input--sm" data-quote-discount value="0"></div>
+                      <div class="program-funding-summary">
+                        <dl class="program-quote-funding">
+                          <dt>Calculated delivery cost</dt><dd data-funding-value="delivery">$0.00</dd>
+                          <dt>Council operational funding</dt><dd data-funding-value="council">$0.00</dd>
+                          <dt>Discount allowance ($)</dt><dd data-funding-value="discount">$0.00</dd>
+                          <dt>Contingency allowance ($)</dt><dd data-funding-value="contingency">$0.00</dd>
+                          <dt>Customer quote contribution</dt><dd data-funding-value="customer">$0.00</dd>
+                                <dt>Total Funding</dt><dd data-funding-value="total">$0.00</dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Section 5: Payment Ledger -->
+                  <section class="program-quote-card program-payment-ledger" aria-labelledby="payment-ledger-title">
+                    <div class="program-quote-card__head">
+                      <div><p class="uos-eyebrow">After issue</p><h4 id="payment-ledger-title">5. Payment Ledger</h4></div>
+                      <span class="program-payment-ledger__status" data-payment-status>Unpaid</span>
+                    </div>
+                    <div class="program-payment-ledger__summary" aria-live="polite">
+                      <span>Total <strong data-payment-total>$0.00</strong></span>
+                      <span>Paid <strong data-payment-paid>$0.00</strong></span>
+                      <span>Balance <strong data-payment-balance>$0.00</strong></span>
+                    </div>
+                    <form class="program-payment-ledger__form" data-payment-form>
+                      <label>Amount <input class="uos-input uos-input--sm" type="number" min="0.01" step="0.01" name="amount" required></label>
+                      <label>Date <input class="uos-input uos-input--sm" type="date" name="paymentDate" required></label>
+                      <label>Method <select class="uos-select uos-select--sm" name="method"><option>Bank transfer</option><option>Card</option><option>Cash</option><option>EFT</option><option>Purchase order</option><option>Council Operational Budget</option><option>Paid with Deposit</option><option>Other</option></select></label>
+                      <label>Reference <input class="uos-input uos-input--sm" type="text" name="reference" maxlength="80" required></label>
+                      <label class="program-payment-ledger__notes">Notes <input class="uos-input uos-input--sm" type="text" name="notes" maxlength="160"></label>
+                      <div class="program-payment-ledger__actions">
+                        <button class="uos-button uos-button--secondary uos-button--sm" type="submit" data-payment-record>Record payment</button>
+                        <button class="uos-button uos-button--secondary uos-button--sm" type="submit" data-deposit-record>Record deposit</button>
+                      </div>
+                    </form>
+                    <p class="program-payment-ledger__note" data-payment-form-note>Issue or accept the Quote before recording payments.</p>
+                    <div class="program-payment-ledger__table-wrap">
+                      <table class="uos-table program-payment-ledger__table"><thead><tr><th>Date</th><th>Reference</th><th>Method</th><th>Amount</th><th>Status / reason</th><th><span class="uos-sr-only">Actions</span></th></tr></thead><tbody data-payment-rows><tr><td colspan="6">Save the quote before recording payments.</td></tr></tbody></table>
+                    </div>
+                  </section>
+
+                  <!-- Section 6: Position -->
+                  <div class="program-quote-card program-quote-section--position">
+                    <div class="program-quote-card__head">
+                      <h4>6. Position</h4>
+                    </div>
+                    <div class="program-quote-form-grid" style="grid-template-columns: 1fr; gap: 16px;">
+                      <div class="program-funding-gap" data-funding-card>
+                        <div class="program-funding-gap__head" data-funding-label>Project Funding Position</div>
+                        <div class="program-funding-gap__metric"><span>Delivery Cost (ex-GST)</span><strong data-funding-value="delivery">$0.00</strong></div>
+                        <div class="program-funding-gap__metric"><span>Council Contribution</span><strong data-funding-value="council">$0.00</strong></div>
+                        <div class="program-funding-gap__metric"><span>Customer Contribution</span><strong data-funding-value="customer">$0.00</strong></div>
+                        <div class="program-funding-gap__metric"><span data-funding-metric-label>Funding Position</span><strong data-funding-value="positionTotal">$0.00</strong></div>
+                      </div>
+                      <div class="program-funding-gap" style="background: var(--uos-surface-muted, #f8fafc); border-color: var(--panel-border, #cbd5e1);">
+                        <div class="program-funding-gap__head">Customer Account Ledger</div>
+                        <div class="program-funding-gap__metric"><span>Quoted Total (inc-GST)</span><strong data-funding-value="customerTotal">$0.00</strong></div>
+                        <div class="program-funding-gap__metric"><span>Payments Received</span><strong data-funding-value="paymentsPaid">$0.00</strong></div>
+                        <div class="program-funding-gap__metric"><span>GST Remaining</span><strong data-funding-value="positionGst">$0.00</strong></div>
+                        <div class="program-funding-gap__metric"><span>Outstanding Balance</span><strong data-funding-value="customerOutstanding">$0.00</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right 50% Half: Live Inline Print-Ready Previewer -->
+              <div class="program-quote-preview-pane">
+                <div class="program-quote-preview-toolbar">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="uos-badge uos-badge--status uos-badge--info">LIVE PREVIEW</span>
+                            <div class="program-quote-preview-status" aria-label="Quote lifecycle">
+                                Quote Status <strong data-quote-status>Draft</strong>
+                                <span data-quote-lifecycle-actions hidden>
+                                    <button class="uos-button uos-button--primary uos-button--sm" type="button" data-quote-issue>Issue</button>
+                                    <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quote-accept>Accept</button>
+                                    <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quote-decline>Decline</button>
+                                </span>
+                            </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="program-quote-mode-slider" role="radiogroup" aria-label="Quote View Mode" style="display: flex; background: var(--uos-surface-muted, #f1f5f9); border: 1px solid var(--panel-border, #cbd5e1); border-radius: 20px; padding: 2px;">
+                      <button type="button" class="program-quote-mode-btn is-active" data-quote-view-mode="itemised" aria-pressed="true" style="padding: 3px 12px; border: none; background: #ffffff; color: var(--uos-brand, #2563eb); font-size: 11px; font-weight: 700; border-radius: 16px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">Itemised</button>
+                      <button type="button" class="program-quote-mode-btn" data-quote-view-mode="summary" aria-pressed="false" style="padding: 3px 12px; border: none; background: transparent; color: var(--uos-text-muted, #64748b); font-size: 11px; font-weight: 700; border-radius: 16px; cursor: pointer;">Summary</button>
+                    </div>
+                    <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quote-print>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span>Print / Export PDF</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="program-quote-preview-viewport">
+                  <div class="uos-quote-sheet" data-quote-preview-sheet></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+        <div class="uos-sr-only" id="live-region" role="status" aria-live="polite" aria-atomic="true"></div>
+      </main>
+    </div>
+  </div>
+
+  <dialog class="program-data-dialog" data-program-import-modal aria-labelledby="program-import-title">
+    <div class="program-data-dialog__frame"><header><div><p class="uos-eyebrow">Staged import</p><h2 id="program-import-title">Review before applying</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" data-program-import-cancel aria-label="Cancel import"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header><div class="program-data-dialog__body"><section data-program-import-legacy-summary hidden><h3>Legacy workspace conversion</h3><p data-program-import-legacy-message></p><ul data-program-import-legacy-details></ul></section><section><h3>Warnings</h3><ul data-program-import-warnings></ul></section><section><h3>Conflict preview</h3><ul data-program-import-conflicts></ul></section><p class="program-import-apply-notice">No workspace data changes until <strong>Apply import</strong> succeeds.</p><p id="program-import-blocked-status" data-program-import-blocked role="alert" hidden></p></div><footer><button class="uos-button uos-button--secondary" type="button" data-program-import-cancel>Cancel</button><button class="uos-button uos-button--primary" type="button" data-program-import-apply><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>Apply import</span></button></footer></div>
+  </dialog>
+
+  <dialog class="program-data-dialog" data-program-clear-dialog aria-labelledby="program-clear-dialog-title">
+    <div class="program-data-dialog__frame">
+      <header>
+        <div>
+          <p class="uos-eyebrow">Session Clearance Confirmation</p>
+          <h2 id="program-clear-dialog-title" data-program-clear-title>Confirm Action</h2>
+        </div>
+        <button class="uos-button uos-button--secondary uos-button--icon" type="button" data-program-clear-cancel aria-label="Cancel clearance">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+      <div class="program-data-dialog__body">
+        <p data-program-clear-message>Are you sure you want to clear this data for the current session?</p>
+        <p><small class="uos-text-muted">This clearance only affects the active in-memory session and is not saved to IndexedDB or localStorage.</small></p>
+      </div>
+      <footer>
+        <button class="uos-button uos-button--secondary" type="button" data-program-clear-cancel>Cancel</button>
+        <button class="uos-button uos-button--danger" type="button" data-program-clear-confirm>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>Confirm Clear</span>
+        </button>
+      </footer>
+    </div>
+  </dialog>
+
+    <dialog class="program-data-dialog" data-program-delete-dialog aria-labelledby="program-delete-dialog-title">
+    <div class="program-data-dialog__frame">
+      <header>
+        <div>
+          <p class="uos-eyebrow">Permanent Storage Deletion</p>
+          <h2 id="program-delete-dialog-title">Delete Stored Workspace?</h2>
+        </div>
+        <button class="uos-button uos-button--secondary uos-button--icon" type="button" data-program-delete-cancel aria-label="Cancel deletion">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+      <div class="program-data-dialog__body">
+        <p>Are you sure you want to permanently delete the stored workspace from browser storage?</p>
+        <p><small class="uos-text-muted">A fresh JSON backup is required before deletion. This deletes application records from IndexedDB and memory. <strong>Restore Stored Data will no longer be able to recover this workspace.</strong></small></p>
+      </div>
+      <footer>
+        <button class="uos-button uos-button--secondary" type="button" data-program-delete-cancel>Cancel</button>
+        <button class="uos-button uos-button--secondary" type="button" data-program-delete-backup>Download required backup</button>
+        <button class="uos-button uos-button--danger" type="button" data-program-delete-confirm disabled aria-describedby="program-delete-backup-required">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>Confirm Delete</span>
+        </button>
+      </footer>
+      <p id="program-delete-backup-required" class="uos-sr-only">Download a fresh JSON backup before confirming deletion.</p>
+    </div>
+  </dialog>
+
+  <dialog class="program-data-dialog" data-program-export-modal aria-labelledby="program-export-title">
+    <div class="program-data-dialog__frame"><header><div><p class="uos-eyebrow">Workspace backup</p><h2 id="program-export-title">Choose a portable format</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" data-program-export-cancel aria-label="Close export options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header><div class="program-export-options"><button type="button" data-program-export-json><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM15 3v5h5M9 13h6M9 17h6"/></svg><span><strong>Workspace backup (.json)</strong><small>Complete canonical schema-v5 workspace for recovery.</small></span></button><button type="button" data-program-export-bundle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v13H3zM7 3h10v4M9 11h6M9 15h6"/></svg><span><strong>CSV + GeoJSON bundle</strong><small>Optional interchange ZIP with entity tables and spatial geometry.</small></span></button></div><footer><button class="uos-button uos-button--secondary" type="button" data-program-export-cancel>Cancel</button></footer></div>
+  </dialog>
+
+  <dialog class="program-rate-dialog" data-costing-rate-dialog aria-labelledby="costing-rate-dialog-title">
+    <form method="dialog" data-costing-rate-form aria-describedby="costing-rate-error">
+      <header><div><p class="uos-eyebrow">Cost catalog</p><h2 id="costing-rate-dialog-title" data-costing-rate-dialog-title>Add rate</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" data-costing-rate-cancel aria-label="Close rate editor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+      <div class="program-rate-form-grid">
+        <label class="program-rate-form-wide"><span>Description</span><textarea name="description" rows="4" required></textarea></label>
+        <label><span>Kind</span><select name="kind" required><option value="Labour">Labour</option><option value="Equipment">Equipment</option><option value="Material">Material</option><option value="Contractors">Contractors</option><option value="Sundry">Sundry</option></select></label>
+        <label><span>Category</span><select name="category" required><option>Preparation</option><option>Installation</option><option>Maintenance</option><option>Materials</option><option>Equipment</option><option>Administration</option></select></label>
+        <label><span>Unit</span><select name="unit" class="uos-select"><option value="each">each</option><option value="hour">hour</option><option value="day">day</option><option value="week">week</option><option value="m²">m²</option><option value="ha">ha</option><option value="km²">km²</option><option value="m³">m³</option><option value="L">L</option><option value="kg">kg</option><option value="tonne">tonne</option><option value="m">m</option><option value="lm">lm</option><option value="item">item</option><option value="count">count</option><option value="set">set</option></select></label>
+        <label><span>Unit rate</span><input name="unitRate" type="number" min="0" step="0.01" required></label>
+        <label><span>Quantity mode</span><select name="quantityMode"><option value="direct">Direct</option><option value="m2">Area (m²)</option><option value="m3">Volume (m³)</option><option value="kg">Mass (kg)</option><option value="hours">Hours</option></select></label>
+        <label class="program-rate-active"><input name="active" type="checkbox" checked><span>Active and available for costing</span></label>
+        <label class="program-rate-active"><input name="spatialEnabled" type="checkbox" data-costing-rate-spatial><span>Also available as a polygon job</span></label>
+        <label class="program-rate-form-wide" data-costing-rate-work-type-field><span>Polygon work type</span><select name="workTypeKey" data-costing-rate-work-type disabled><option value="">Select a work type</option><option value="turfing">Turfing area</option><option value="aerate">Aeration area</option><option value="fertilise">Fertilising area</option><option value="topdressing">Topdressing area</option><option value="rolling">Rolling area</option></select><small class="uos-field-hint">Uses this same Rate Item for future Space Map polygons. Existing jobs and cost snapshots are unchanged.</small></label>
+      </div>
+      <p class="program-cost-error" id="costing-rate-error" data-costing-rate-error role="alert" hidden></p>
+      <footer><button class="uos-button uos-button--secondary" type="button" data-costing-rate-cancel>Cancel</button><button class="uos-button uos-button--primary" type="submit" value="default" data-costing-rate-submit>Save rate</button></footer>
+    </form>
+  </dialog>
+
+  <dialog class="program-rate-dialog program-map-data-dialog" id="coordinateShapeDialog" aria-labelledby="coordinateShapeDialogTitle">
+    <div class="program-data-dialog__frame program-map-data-dialog__frame">
+      <header><div><p class="uos-eyebrow">Spatial data</p><h2 id="coordinateShapeDialogTitle">Import or export map geometry</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" id="cancelCoordinateShapeButton" aria-label="Close map data"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+      <div class="program-data-dialog__body program-map-data-dialog__body">
+        <section class="program-map-data-dialog__controls" aria-labelledby="geometry-file-title">
+          <div><p class="uos-eyebrow">Import file</p><h3 id="geometry-file-title">Add geometry file</h3></div>
+          <label class="program-geometry-drop" data-geometry-drop-zone tabindex="0"><input id="geometryFileInput" type="file" accept=".geojson,.json,.wkt,application/geo+json,application/json,text/plain"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 17v3h16v-3"/></svg><strong>Drop file or browse</strong><span data-geometry-file-name>GeoJSON, JSON or WKT · maximum 20 MB</span></label>
+          <label class="uos-field"><span>Format</span><select class="uos-select" id="geometryFormatInput"><option value="auto">Detect automatically</option><option value="geojson">GeoJSON</option><option value="wkt">WKT</option></select></label>
+        </section>
+        <label class="uos-field program-map-data-dialog__paste"><span>Paste GeoJSON or WKT text</span><textarea class="uos-textarea" id="geometryTextInput" rows="14" placeholder="POLYGON ((138.60 -34.93, ...)) or a GeoJSON Feature"></textarea><span class="uos-field-hint">Supported: Polygon, MultiPolygon, LineString and MultiLineString.</span></label>
+      </div>
+      <footer>
+        <button class="uos-button uos-button--secondary" type="button" id="cancelCoordinateShapeModalButton">Cancel</button><div class="program-map-data-dialog__footer-actions"><button class="uos-button uos-button--secondary" type="button" id="exportMapGeoJsonButton"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg><span>Export GeoJSON</span></button><button class="uos-button uos-button--primary" type="button" id="submitCoordinateShapeButton"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>Import geometry</span></button></div>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog class="program-rate-dialog" id="deleteShapeDialog" aria-labelledby="deleteShapeDialogTitle">
+    <div class="program-data-dialog__frame">
+      <header><div><p class="uos-eyebrow">Delete geometry</p><h2 id="deleteShapeDialogTitle">Delete shape?</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" id="cancelDeleteShapeButton" aria-label="Close confirmation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+      <div class="program-data-dialog__body">
+        <p>This shape and its geometry-derived Job and Costing Line will be removed. Quote snapshots already issued remain unchanged.</p>
+      </div>
+      <footer>
+        <button class="uos-button uos-button--secondary" type="button" id="cancelDeleteShapeModalButton">Cancel</button>
+        <button class="uos-button uos-button--primary" type="button" id="confirmDeleteShapeButton">Delete shape</button>
+      </footer>
+    </div>
+  </dialog>
+
+    <dialog class="program-rate-dialog program-location-inspector-dialog" id="locationInspectorDialog" aria-labelledby="locationInspectorDialogTitle">
+    <div class="program-data-dialog__frame">
+      <header><div><p class="uos-eyebrow">Location pins</p><h2 id="locationInspectorDialogTitle" data-inspector-title>Location pins</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" id="cancelLocationInspectorButton" aria-label="Close pin manager"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+      <div class="program-data-dialog__body" data-inspector-pin-list style="max-height: 360px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+      </div>
+      <footer>
+        <button class="uos-button uos-button--secondary" type="button" id="closeLocationInspectorModalButton">Close</button>
+        <button class="uos-button uos-button--primary" type="button" data-inspector-add-pin data-location-action="add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add location pin</span></button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog class="program-rate-dialog" id="deleteRegisterDialog" aria-labelledby="deleteRegisterDialogTitle">
+    <div class="program-data-dialog__frame">
+      <header><div><p class="uos-eyebrow">Delete register record</p><h2 id="deleteRegisterDialogTitle">Delete this record and all related records?</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" data-register-delete-cancel aria-label="Close deletion warning"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+      <div class="program-data-dialog__body">
+        <p><strong data-register-delete-name>This register record</strong> will be permanently removed. The following linked records will also be deleted:</p>
+        <ul data-register-delete-impact></ul>
+        <p data-register-delete-no-dependencies hidden>No related operational records were found.</p>
+        <p><strong>This action cannot be undone.</strong></p>
+      </div>
+      <footer>
+        <button class="uos-button uos-button--secondary" type="button" data-register-delete-cancel>Cancel</button>
+        <button class="uos-button uos-button--danger" type="button" data-register-delete-confirm>Delete all related records</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <script defer src="app-config.js"></script>
+  <script defer src="../remediation-planner/config/map-providers.js?v=20260922-metromaps-default"></script>
+  <script defer src="../remediation-planner/config/metromaps-provider.js?v=20260922-wmts-fix"></script>
+  <script defer src="../shared/js/suite.js"></script>
+  <script defer src="../shared/js/storage.js?v=20260912-empty-baseline-v1"></script>
+  <script defer src="../shared/vendor/pdfjs/pdf.min.js"></script>
+  <script defer src="../shared/js/imports.js"></script>
+  <script defer src="../shared/js/unified-workspace.js"></script>
+  <script defer src="../shared/js/smart-import.js"></script>
+  <script defer src="../shared/js/import-targets.js"></script>
+  <script defer src="../shared/js/xlsx-reader.js"></script>
+  <script defer src="../shared/js/rate-library.js?v=20260928-rate-library-schema-v2"></script>
+  <script defer src="../shared/js/map-costing.js"></script>
+  <script defer src="js/privacy.js?v=20260824-privacy-mode"></script>
+  <script defer src="js/status.js?v=20260913-quote-signal-guard"></script>
+  <script defer src="js/default-rate-catalog.js?v=20260912-empty-baseline-v1"></script>
+  <script defer src="js/model.js?v=20260928-rate-kind-five-v1"></script>
+  <script defer src="js/budget-model.js?v=20260928-budget-v1"></script>
+  <script defer src="js/budget-governance.js?v=20260929-budget-governance-v1"></script>
+  <script defer src="js/status-model.js?v=20260912-empty-baseline-v1"></script>
+  <script defer src="js/product-contracts.js?v=20260911-product-contracts-v1"></script>
+  <script defer src="js/costing-model.js?v=20260928-rate-library-five-kinds-v1"></script>
+  <script defer src="js/work-area-service.js?v=20260830-catalog-work-type-v1"></script>
+  <script defer src="js/quote-model.js?v=20260829-audit-remediation-v1"></script>
+  <script defer src="js/funding-model.js?v=20260821-performance-hotfix"></script>
+  <script defer src="js/data-health.js?v=20260912-schema-v5"></script>
+  <script defer src="js/status-health.js?v=20260912-schema-v5"></script>
+    <script defer src="js/observability.js?v=20260909-slice10"></script>
+  <script defer src="js/migration.js"></script>
+  <script defer src="js/storage.js?v=20260829-audit-remediation-v1"></script>
+  <script defer src="js/data-workspace.js?v=20260913-pdf-preview-delta-v1"></script>
+  <script defer src="js/data-settings.js?v=20260913-clean-import-preview-v1"></script>
+  <script defer src="js/dashboard.js?v=20260821-performance-hotfix"></script>
+  <script defer src="js/reports-model.js"></script>
+  <script defer src="js/reports.js?v=20260821-performance-hotfix"></script>
+  <script defer src="js/card-visibility.js?v=20260830-disclosure-visibility-v12"></script>
+  <script defer src="js/disclosure-rows.js?v=20260911-scoped-disclosures-v1"></script>
+  <script defer src="js/register.js?v=20260913-register-context-v2"></script>
+  <script defer src="js/budget.js?v=20260928-budget-v1"></script>
+  <script defer src="js/register-open-project-fix.js?v=20260922-open-project"></script>
+  <script defer src="js/drawer-workspace.js?v=20260913-drawer-context-v3"></script>
+  <script defer src="js/scheduler-model.js?v=20260828-first-review-phase3-v1"></script>
+  <script defer src="js/planner-model.js"></script>
+  <script defer src="js/scheduler.js?v=20260911-sidebar-state-v1"></script>
+  <script defer src="js/costing.js?v=20260928-rate-library-ui-v1"></script>
+  <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
+  <script defer src="../shared/vendor/maplibre/maplibre-gl.js"></script>
+  <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
+  <script defer src="../remediation-planner/js/map.js?v=20260824-pin-edit"></script>
+  <script defer src="js/program-map.js?v=20260913-active-location-v2"></script>
+  <script defer src="js/map-floating-draw-toolbar.js?v=20260922-v1"></script>
+  <script defer src="js/planner.js?v=20260911-sidebar-state-v1"></script>
+  <script defer src="js/planner-section-headers.js?v=20260922-chevron-fix"></script>
+  <script defer src="js/quote-builder.js?v=20260911-sidebar-state-v1"></script>
+<script defer src="js/app.js?v=20260913-drawer-context-v3"></script>
+  <script defer src="js/status-app.js?v=20260912-schema-v5"></script>
+  <script defer src="js/status-ui.js?v=20260913-status-history-review-v1"></script>
+  <script defer src="js/register-history-ui.js?v=20260912-register-history-v2"></script>
+</body>
+</html>

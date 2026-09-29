@@ -1,0 +1,13 @@
+*, *::before, *::after { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; }
+html { font-family: var(--uos-font-readable); background: var(--uos-canvas); }
+body { margin: 0; overflow: hidden; color: var(--uos-text); background: var(--uos-canvas); font-size: 14px; line-height: 1.4; caret-color: transparent; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button, select, summary, [role="button"], [tabindex]:not(input):not(textarea) { caret-color: transparent; }
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea, [contenteditable="true"] { caret-color: auto; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+h1, h2, h3, h4, p { text-wrap: pretty; }
+[hidden] { display: none !important; }

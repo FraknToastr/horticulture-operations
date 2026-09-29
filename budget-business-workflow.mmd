@@ -1,0 +1,42 @@
+flowchart TD
+  R[Open NSA or Event Register record] --> C[Delivery Project grid: Budget and allocation rows]
+  C --> C2[Newest FY first; one row per governed Register allocation]
+  C2 --> C3{Allocation exists?}
+  C3 -- No --> Z[Current FY and $0.00]
+  C3 -- Yes --> A[Allocate / Adjust]
+  Z --> A
+  A --> F[Preselected Register, owner and current July–June year]
+  F --> B[Show authority, existing allocation and remaining funds]
+  B --> D{Decision in one form}
+  D -- Save draft --> P[Pending request; balances unchanged]
+  P --> P2{Later decision}
+  P2 -- Reject --> N[Rejection recorded; balances unchanged]
+  P2 -- Approve --> V
+  D -- Approve --> V[Atomic decision and signed allocation entry]
+  V --> H[Inline Register FY rows and history show amount, internal ID and captured reference]
+
+  subgraph Annual_management[Manage annual budget]
+    Y[Create owner / financial year authority] --> Y2[Record annual approval]
+    Y2 --> Y3[Signed supplements and reductions]
+    Y3 --> T[Atomic linked allocation transfers]
+    T --> CL[Close year]
+    CL --> RD[Record separate reopen decision]
+    RD --> RO[Apply reopen]
+  end
+
+  subgraph Delivery[Delivery and charges]
+    J[Job or allocation detail] --> JC[Explicit commitment, actual or release decision]
+    JC --> JR[Check selected Job and allocation balances]
+  end
+
+  subgraph Year_end[Year-end carry-forward review]
+    CL --> Q{Register Yes or No?}
+    Q -- No --> QN[Record No; no funds move]
+    Q -- Yes --> QY[Record Yes; no funds move]
+    QY --> QH[Keep carry-forward FY and amount hidden]
+    QY --> E[Verify unspent evidence and propose next-year amount]
+    E --> CD{Recorded decision}
+    CD -- Reject or pending --> QN2[Next-year authority unchanged; no carry-forward amount shown]
+    CD -- Approve --> CF[Post to next year; source year remains closed]
+    CF --> CV[Show governed destination-FY allocation amount]
+  end

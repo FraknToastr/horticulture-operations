@@ -1,0 +1,91 @@
+html,
+html[data-suite-theme="light"] {
+  color-scheme: light;
+  --uos-canvas: #f6f8fb;
+  --uos-surface: #ffffff;
+  --uos-surface-muted: #fafbfd;
+  --uos-surface-strong: #eaf2ff;
+  --uos-overlay: rgba(255, 255, 255, .94);
+  --uos-text: #071b3c;
+  --uos-text-soft: #172b4d;
+  --uos-text-muted: #526079;
+  --uos-border: #dce3ec;
+  --uos-border-strong: #bdc8d6;
+  --uos-brand-text: #064edb;
+  --uos-brand-soft: #eaf2ff;
+  --uos-info-soft: #eaf2ff;
+  --uos-success-soft: #e9f7ec;
+  --uos-warning-soft: #fff2e2;
+  --uos-danger-soft: #fdecef;
+  --uos-purple-soft: #f2eaff;
+  --uos-teal-soft: #e7f8f7;
+  --uos-rail: #002447;
+  --uos-rail-hover: #07345c;
+  --uos-rail-active: #064edb;
+  --uos-rail-text: #ffffff;
+  --uos-rail-muted: #b9c8d8;
+  --uos-backdrop: rgba(0, 24, 51, .58);
+}
+
+html[data-suite-theme="dark"] {
+  color-scheme: dark;
+  --uos-canvas: #171d28;
+  --uos-surface: #222a38;
+  --uos-surface-muted: #293344;
+  --uos-surface-strong: #313c4f;
+  --uos-overlay: rgba(34, 42, 56, .96);
+  --uos-text: #f0f4fb;
+  --uos-text-soft: #c1cbda;
+  --uos-text-muted: #a7b3c7;
+  --uos-border: #3a465a;
+  --uos-border-strong: #526078;
+  --uos-brand: #6ca1ff;
+  --uos-brand-strong: #8bb5ff;
+  --uos-action: #1769f2;
+  --uos-action-hover: #397ff4;
+  --uos-brand-text: #9cbfff;
+  --uos-brand-soft: #223b66;
+  --uos-info: #7ca5ff;
+  --uos-info-soft: #273a5d;
+  --uos-success: #65c980;
+  --uos-success-soft: #263f30;
+  --uos-warning: #f0ad55;
+  --uos-warning-soft: #473825;
+  --uos-danger: #ffb5ad;
+  --uos-danger-soft: #4a302e;
+  --uos-rail: #001a33;
+  --uos-rail-hover: #07345c;
+  --uos-rail-active: #1769f2;
+  --uos-rail-text: #f0f5f1;
+  --uos-rail-muted: #aebdb2;
+  --uos-backdrop: rgba(3, 8, 12, .72);
+}
+
+html[data-suite-theme="protanopia"] {
+  --uos-canvas: #f3f6f8; --uos-surface: #fff; --uos-surface-muted: #eef3f7; --uos-surface-strong: #dfe8ef;
+  --uos-overlay: rgba(255,255,255,.96); --uos-text: #101820; --uos-text-soft: #34485a; --uos-text-muted: #4b6072;
+  --uos-border: #aab9c6; --uos-border-strong: #667d8e; --uos-brand: #005fcc; --uos-brand-strong: #00458f;
+  --uos-brand-text: #004faa; --uos-brand-soft: #e1efff; --uos-info: #005fcc; --uos-info-soft: #e1efff;
+  --uos-warning: #7b5100; --uos-warning-soft: #fff0c7; --uos-danger: #7c3650; --uos-danger-soft: #f7e4eb;
+  --uos-success: #005fcc; --uos-success-soft: #e1efff; --uos-rail: #172a39; --uos-rail-hover: #29465b; --uos-rail-active: #005fcc; --uos-rail-text: #fff; --uos-rail-muted: #cad8e3; --uos-backdrop: rgba(10,24,36,.58);
+}
+
+html[data-suite-theme="deuteranopia"] {
+  --uos-canvas: #f4f6f8; --uos-surface: #fff; --uos-surface-muted: #edf2f6; --uos-surface-strong: #dce7ee;
+  --uos-overlay: rgba(255,255,255,.96); --uos-text: #111820; --uos-text-soft: #35495b; --uos-text-muted: #4d6273;
+  --uos-border: #aab9c5; --uos-border-strong: #687e8e; --uos-brand: #005a9c; --uos-brand-strong: #003f70;
+  --uos-brand-text: #004f88; --uos-brand-soft: #dceefa; --uos-info: #005a9c; --uos-info-soft: #dceefa;
+  --uos-warning: #765100; --uos-warning-soft: #fff0c2; --uos-danger: #734b00; --uos-danger-soft: #f8e9cf;
+  --uos-success: #005a9c; --uos-success-soft: #dceefa; --uos-rail: #172935; --uos-rail-hover: #294553; --uos-rail-active: #005a9c; --uos-rail-text: #fff; --uos-rail-muted: #cbd6dd; --uos-backdrop: rgba(10,23,32,.58);
+}
+
+html[data-suite-theme="tritanopia"] {
+  --uos-canvas: #f7f4f7; --uos-surface: #fff; --uos-surface-muted: #f1ecf3; --uos-surface-strong: #e7ddea;
+  --uos-overlay: rgba(255,255,255,.96); --uos-text: #19151d; --uos-text-soft: #4d4054; --uos-text-muted: #67566f;
+  --uos-border: #bdaec3; --uos-border-strong: #7e6a87; --uos-brand: #6b2c91; --uos-brand-strong: #4d1f69;
+  --uos-brand-text: #592578; --uos-brand-soft: #f0e4f6; --uos-info: #6b2c91; --uos-info-soft: #f0e4f6;
+  --uos-warning: #7a5700; --uos-warning-soft: #fff0c5; --uos-danger: #9a1745; --uos-danger-soft: #f9e1e9;
+  --uos-success: #6b2c91; --uos-success-soft: #f0e4f6; --uos-rail: #2d2033; --uos-rail-hover: #49344f; --uos-rail-active: #6b2c91; --uos-rail-text: #fff; --uos-rail-muted: #ded1e2; --uos-backdrop: rgba(25,15,30,.58);
+}
+
+html[data-suite-theme="protanopia"], html[data-suite-theme="deuteranopia"], html[data-suite-theme="tritanopia"] { color-scheme: light; }

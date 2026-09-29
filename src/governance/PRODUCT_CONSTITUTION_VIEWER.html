@@ -1,0 +1,1244 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Horticulture Operations Suite — Product Constitution</title><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font:15px/1.65 Inter,Segoe UI,Arial,sans-serif;color:#17202a;background:#f4f6f8}.shell{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:100vh}.side{position:sticky;top:0;height:100vh;overflow:auto;background:#101820;color:#dbe5ec;padding:22px 16px;border-right:1px solid #263644}.brand{font-weight:750;font-size:17px;color:#fff;padding:0 8px 15px;border-bottom:1px solid #2c3d4a;margin-bottom:14px}.side nav a{display:block;color:#aebdca;text-decoration:none;padding:7px 9px;border-radius:7px;font-size:13px;line-height:1.3}.side nav a.l2{padding-left:22px;font-size:12px}.side nav a.active{background:#253746;color:#fff;box-shadow:inset 3px 0 #63b3ed}.main{min-width:0}.topbar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid #dce3e8;padding:10px 28px;display:flex;justify-content:space-between;align-items:center}.topbar strong{font-size:13px}.topbar span{font-size:12px;color:#61717f}.document{max-width:1500px;margin:0 auto;padding:38px 54px 100px}.document>h1{margin-top:70px;padding-top:18px;border-top:1px solid #d8e0e6;font-size:30px}.document>h1:first-child{margin-top:0;border:0}.document h2{margin-top:42px;font-size:22px}.document h3{margin-top:28px}.document p,.document li{max-width:1000px}.document table{border-collapse:collapse;width:100%;margin:20px 0;background:#fff}.document th,.document td{border:1px solid #d9e1e7;padding:9px 11px;text-align:left;vertical-align:top}.document th{background:#eef3f6}.document blockquote{border-left:4px solid #78909c;margin-left:0;padding:4px 18px;color:#44515c;background:#eef2f5}.document pre:not(.diagram-card pre){background:#17212b;color:#e7edf2;padding:18px;border-radius:10px;overflow:auto}.document code{font-family:Cascadia Code,Consolas,monospace}.diagram-card{margin:28px 0 42px;background:#fff;border:1px solid #d6e0e7;border-radius:14px;overflow:hidden;box-shadow:0 8px 26px rgba(20,35,50,.07)}.diagram-head{display:flex;gap:20px;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid #dce4e9}.diagram-head h3{margin:0;font-size:18px}.diagram-head p{margin:2px 0 0;color:#687985;font-size:12px}.diagram-tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.diagram-tools button{border:1px solid #c8d3da;background:#f7f9fa;border-radius:7px;padding:7px 10px;cursor:pointer;font-weight:650}.diagram-tools button:hover{background:#e9eff3}.diagram-viewport{height:min(72vh,760px);min-height:560px;overflow:hidden;position:relative;background:linear-gradient(#fafcfd,#f6f9fb);cursor:grab;touch-action:none}.diagram-viewport.dragging{cursor:grabbing}.diagram-stage{width:100%;height:100%;transform-origin:0 0;will-change:transform}.diagram-svg{width:100%;height:100%;display:block;overflow:visible}.node{stroke-width:2;fill:#fff;stroke:#607d8b}.node.root{fill:#e8f5e9;stroke:#2e7d32}.node.project{fill:#e3f2fd;stroke:#1565c0}.node.commercial{fill:#fff3e0;stroke:#ef6c00}.node.decision{fill:#f3e5f5;stroke:#7b1fa2}.node.blocked{fill:#ffebee;stroke:#c62828}.node-label{font:600 16px Segoe UI,Arial;fill:#17202a;dominant-baseline:middle}.edge{stroke:#607d8b;stroke-width:2.3;fill:none}.arrow-head{fill:#607d8b}.edge-label{font:600 12px Segoe UI,Arial;fill:#53636f;paint-order:stroke;stroke:#f8fbfc;stroke-width:5px;stroke-linejoin:round}.mermaid-source{border-top:1px solid #e0e7ec;background:#fbfcfd;padding:10px 16px}.mermaid-source summary{cursor:pointer;font-weight:650;font-size:12px;color:#50606c}.mermaid-source pre{white-space:pre-wrap;background:#17212b;color:#e7edf2;padding:14px;border-radius:8px;overflow:auto}.diagram-card:fullscreen{background:#f4f7f9;padding:18px}.diagram-card:fullscreen .diagram-viewport{height:calc(100vh - 150px)}@media(max-width:900px){.shell{grid-template-columns:1fr}.side{display:none}.document{padding:24px 18px 80px}.diagram-viewport{min-height:480px}.topbar{padding:10px 16px}}@media print{.side,.topbar,.diagram-tools,.mermaid-source{display:none!important}.shell{display:block}.document{max-width:none;padding:0}.diagram-viewport{height:650px;min-height:650px;break-inside:avoid}.diagram-card{box-shadow:none;break-inside:avoid}}</style>
+</head><body><div class="shell"><aside class="side"><div class="brand">Product Constitution<br><small>v1.4 draft · HOS v5.0.0</small></div><nav id="toc"></nav></aside><main class="main"><header class="topbar"><strong>Horticulture Operations Suite</strong><span>Offline self-contained constitutional viewer · drag diagrams to pan · wheel/buttons to zoom</span></header><article class="document">
+<h1 id="horticulture-operations-suite">Horticulture Operations
+Suite</h1>
+<h2 id="product-constitution">Product Constitution</h2>
+<p><strong>Constitution version:</strong> 1.0-draft<br />
+<strong>Derived from:</strong> Horticulture Operations Suite v5.0.0
+portable codebase<br />
+<strong>Contract baseline:</strong> Product Contracts 1.0.0 / workspace
+schema v5<br />
+<strong>Purpose:</strong> Prevent product, data-model, workflow and
+AI-development drift.</p>
+<hr />
+<h2 id="constitutional-authority">1. Constitutional authority</h2>
+<p>This Constitution defines the product truths that must remain stable
+across refactoring, UI redesign, optimisation, AI-assisted development
+and future releases.</p>
+<p>It is deliberately narrower than a specification. It does
+<strong>not</strong> freeze every implementation detail, screen layout,
+label or code structure. It protects the business graph, ownership
+boundaries, lifecycle rules, commercial history, persistence guarantees
+and deliberate human decision points that make the product what it
+is.</p>
+<h3 id="authority-order">1.1 Authority order</h3>
+<p>When sources conflict, the intended authority order is:</p>
+<ol type="1">
+<li><strong>Product Constitution</strong></li>
+<li><strong>Explicit Product Contracts</strong></li>
+<li><strong>Canonical data model and lifecycle registries</strong></li>
+<li><strong>Recorded product/architecture decisions</strong></li>
+<li><strong>Executable validation and regression tests</strong></li>
+<li><strong>Current source implementation</strong></li>
+<li><strong>Individual development prompt</strong></li>
+</ol>
+<p>A development prompt does not silently amend a higher-order rule.</p>
+<h3 id="amendment-rule">1.2 Amendment rule</h3>
+<p>A constitutional rule may change only when the change is explicit and
+deliberate.</p>
+<p>An AI agent or developer must not reinterpret, bypass, weaken,
+generalise or remove a constitutional rule merely because another
+implementation appears simpler.</p>
+<p>If a requested change conflicts with this Constitution,
+implementation must stop at that boundary and identify:</p>
+<ul>
+<li>the constitutional rule affected;</li>
+<li>the requested conflicting behaviour;</li>
+<li>the business/data consequences;</li>
+<li>the contracts and workflows affected; and</li>
+<li>the amendment that would be required before implementation.</li>
+</ul>
+<hr />
+<h1 id="product-identity">2. Product identity</h1>
+<p>The Horticulture Operations Suite is a governed operational system
+for progressing horticulture matters from an originating
+<strong>Register matter</strong> through planning and delivery activity
+while preserving traceable operational and commercial history.</p>
+<p>The current suite contains two isolated business workspaces:</p>
+<ul>
+<li><strong>Nature Strip Applications (NSA)</strong></li>
+<li><strong>Event Space Remediation (EVT)</strong></li>
+</ul>
+<p>They share product architecture and services, but their operational
+records do not form one interchangeable workspace.</p>
+<p>The product is not a collection of independent mini-app databases.
+Register, Planner, Space Map, Calculator/Costing, Scheduler, Quote
+Builder and status functions are different views or services operating
+over a <strong>canonical business graph</strong>.</p>
+<hr />
+<h1 id="the-canonical-business-graph">3. The canonical business
+graph</h1><figure class="diagram-card" id="diagram-business" data-scale="1" data-x="0" data-y="0">
+<div class="diagram-head"><div><h3>Canonical Business Graph</h3><p>Protected ownership and operational lineage.</p></div><div class="diagram-tools"><button data-action="minus" title="Zoom out">−</button><button data-action="plus" title="Zoom in">+</button><button data-action="fit">Fit</button><button data-action="reset">100%</button><button data-action="full">Full screen</button></div></div>
+<div class="diagram-viewport"><div class="diagram-stage"><svg class="diagram-svg" viewBox="0 0 1200 680" role="img" aria-label="Canonical Business Graph"><defs><marker id="arrow-business" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head"/></marker></defs><path class="edge" d="M600.0,102 L600.0,150" marker-end="url(#arrow-business)"/><text class="edge-label" x="600.0" y="118.0" text-anchor="middle">0..1 active</text><path class="edge" d="M450,183.0 L260,330.0" marker-end="url(#arrow-business)"/><path class="edge" d="M450,183.0 L510,330.0" marker-end="url(#arrow-business)"/><path class="edge" d="M600.0,216 L640.0,300" marker-end="url(#arrow-business)"/><path class="edge" d="M750,183.0 L820,330.0" marker-end="url(#arrow-business)"/><path class="edge" d="M260,330.0 L550,330.0" marker-end="url(#arrow-business)"/><text class="edge-label" x="405.0" y="322.0" text-anchor="middle">explicit scheduling</text><path class="edge" d="M510,330.0 L550,330.0" marker-end="url(#arrow-business)"/><text class="edge-label" x="530.0" y="322.0" text-anchor="middle">explicit promotion</text><path class="edge" d="M640.0,360 L640.0,470" marker-end="url(#arrow-business)"/><path class="edge" d="M915.0,360 L890.0,470" marker-end="url(#arrow-business)"/><path class="edge" d="M915.0,360 L1085.0,470" marker-end="url(#arrow-business)"/><path class="edge" d="M1085.0,530 L1080.0,590" marker-end="url(#arrow-business)"/><rect class="node root" x="430" y="30" width="340" height="72" rx="14"/><text class="node-label" x="600.0" y="55.0" text-anchor="middle">REGISTER MATTER</text><text class="node-label" x="600.0" y="77.0" text-anchor="middle">Application (NSA) or Event (EVT)</text><rect class="node project" x="450" y="150" width="300" height="66" rx="14"/><text class="node-label" x="600.0" y="183.0" text-anchor="middle">DELIVERY PROJECT</text><rect class="node standard" x="70" y="300" width="190" height="60" rx="14"/><text class="node-label" x="165.0" y="330.0" text-anchor="middle">Tasks</text><rect class="node standard" x="300" y="300" width="210" height="60" rx="14"/><text class="node-label" x="405.0" y="330.0" text-anchor="middle">Work Geometry</text><rect class="node standard" x="550" y="300" width="180" height="60" rx="14"/><text class="node-label" x="640.0" y="330.0" text-anchor="middle">Jobs</text><rect class="node commercial" x="820" y="300" width="190" height="60" rx="14"/><text class="node-label" x="915.0" y="330.0" text-anchor="middle">Quotes</text><rect class="node standard" x="540" y="470" width="200" height="60" rx="14"/><text class="node-label" x="640.0" y="500.0" text-anchor="middle">Costing</text><rect class="node commercial" x="800" y="470" width="180" height="60" rx="14"/><text class="node-label" x="890.0" y="500.0" text-anchor="middle">Quote Lines</text><rect class="node commercial" x="1000" y="470" width="170" height="60" rx="14"/><text class="node-label" x="1085.0" y="500.0" text-anchor="middle">Payments</text><rect class="node commercial" x="970" y="590" width="220" height="60" rx="14"/><text class="node-label" x="1080.0" y="620.0" text-anchor="middle">Payment Allocations</text></svg></div></div>
+<details class="mermaid-source"><summary>Mermaid source</summary><pre><code>flowchart TD
+ R[Register Matter] --&gt;|0..1 active| P[Delivery Project]
+ P --&gt; T[Tasks]
+ P --&gt; G[Work Geometry]
+ P --&gt; J[Jobs]
+ P --&gt; Q[Quotes]
+ T --&gt;|explicit scheduling| J
+ G --&gt;|explicit promotion| J
+ J --&gt; C[Costing]
+ Q --&gt; QL[Quote Lines]
+ Q --&gt; PAY[Payments]
+ PAY --&gt; PA[Payment Allocations]</code></pre></details>
+</figure><figure class="diagram-card" id="diagram-er" data-scale="1" data-x="0" data-y="0">
+<div class="diagram-head"><div><h3>Canonical Entity Relationship View</h3><p>Cardinality-focused view of the protected business graph.</p></div><div class="diagram-tools"><button data-action="minus" title="Zoom out">−</button><button data-action="plus" title="Zoom in">+</button><button data-action="fit">Fit</button><button data-action="reset">100%</button><button data-action="full">Full screen</button></div></div>
+<div class="diagram-viewport"><div class="diagram-stage"><svg class="diagram-svg" viewBox="0 0 1200 680" role="img" aria-label="Canonical Entity Relationship View"><defs><marker id="arrow-er" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head"/></marker></defs><path class="edge" d="M270,90.0 L360,90.0" marker-end="url(#arrow-er)"/><text class="edge-label" x="315.0" y="82.0" text-anchor="middle">0..1</text><path class="edge" d="M600,90.0 L720,57.0" marker-end="url(#arrow-er)"/><text class="edge-label" x="660.0" y="65.5" text-anchor="middle">0..*</text><path class="edge" d="M600,90.0 L720,142.0" marker-end="url(#arrow-er)"/><text class="edge-label" x="660.0" y="108.0" text-anchor="middle">0..*</text><path class="edge" d="M600,90.0 L720,247.0" marker-end="url(#arrow-er)"/><text class="edge-label" x="660.0" y="160.5" text-anchor="middle">0..*</text><path class="edge" d="M600,90.0 L720,377.0" marker-end="url(#arrow-er)"/><text class="edge-label" x="660.0" y="225.5" text-anchor="middle">0..*</text><path class="edge" d="M810.0,84 L810.0,220" marker-end="url(#arrow-er)"/><text class="edge-label" x="810.0" y="144.0" text-anchor="middle">0..1</text><path class="edge" d="M825.0,169 L810.0,220" marker-end="url(#arrow-er)"/><text class="edge-label" x="817.5" y="186.5" text-anchor="middle">0..1</text><path class="edge" d="M900,247.0 L990,247.0" marker-end="url(#arrow-er)"/><text class="edge-label" x="945.0" y="239.0" text-anchor="middle">0..*</text><path class="edge" d="M900,377.0 L990,357.0" marker-end="url(#arrow-er)"/><text class="edge-label" x="945.0" y="359.0" text-anchor="middle">1..*</text><path class="edge" d="M900,377.0 L990,457.0" marker-end="url(#arrow-er)"/><text class="edge-label" x="945.0" y="409.0" text-anchor="middle">0..*</text><path class="edge" d="M1080.0,484 L1080.0,550" marker-end="url(#arrow-er)"/><text class="edge-label" x="1080.0" y="509.0" text-anchor="middle">0..*</text><rect class="node root" x="40" y="60" width="230" height="60" rx="14"/><text class="node-label" x="155.0" y="90.0" text-anchor="middle">REGISTER_MATTER</text><rect class="node project" x="360" y="60" width="240" height="60" rx="14"/><text class="node-label" x="480.0" y="90.0" text-anchor="middle">DELIVERY_PROJECT</text><rect class="node standard" x="720" y="30" width="180" height="54" rx="14"/><text class="node-label" x="810.0" y="57.0" text-anchor="middle">TASK</text><rect class="node standard" x="720" y="115" width="210" height="54" rx="14"/><text class="node-label" x="825.0" y="142.0" text-anchor="middle">WORK_GEOMETRY</text><rect class="node standard" x="720" y="220" width="180" height="54" rx="14"/><text class="node-label" x="810.0" y="247.0" text-anchor="middle">JOB</text><rect class="node standard" x="990" y="220" width="180" height="54" rx="14"/><text class="node-label" x="1080.0" y="247.0" text-anchor="middle">COSTING_LINE</text><rect class="node commercial" x="720" y="350" width="180" height="54" rx="14"/><text class="node-label" x="810.0" y="377.0" text-anchor="middle">QUOTE</text><rect class="node commercial" x="990" y="330" width="180" height="54" rx="14"/><text class="node-label" x="1080.0" y="357.0" text-anchor="middle">QUOTE_LINE</text><rect class="node commercial" x="990" y="430" width="180" height="54" rx="14"/><text class="node-label" x="1080.0" y="457.0" text-anchor="middle">PAYMENT</text><rect class="node commercial" x="970" y="550" width="220" height="54" rx="14"/><text class="node-label" x="1080.0" y="577.0" text-anchor="middle">PAYMENT_ALLOCATION</text></svg></div></div>
+<details class="mermaid-source"><summary>Mermaid source</summary><pre><code>erDiagram
+ REGISTER_MATTER ||--o| DELIVERY_PROJECT : has_active
+ DELIVERY_PROJECT ||--o{ TASK : owns
+ DELIVERY_PROJECT ||--o{ WORK_GEOMETRY : owns
+ DELIVERY_PROJECT ||--o{ JOB : owns
+ DELIVERY_PROJECT ||--o{ QUOTE : owns
+ TASK ||--o| JOB : may_create
+ WORK_GEOMETRY ||--o| JOB : may_promote_to
+ JOB ||--o{ COSTING_LINE : has
+ QUOTE ||--|{ QUOTE_LINE : contains
+ QUOTE ||--o{ PAYMENT : receives
+ PAYMENT ||--o{ PAYMENT_ALLOCATION : allocates</code></pre></details>
+</figure>
+<p>The following ownership chain is constitutional:</p>
+<pre class="text"><code>REGISTER MATTER
+Application (NSA) or Event (EVT)
+        |
+        | 0..1 active Delivery Project
+        v
+DELIVERY PROJECT
+        |
+        +-------------------+-------------------+------------------+
+        |                   |                   |                  |
+        v                   v                   v                  v
+     Tasks            Work Geometry           Jobs              Quotes
+        |                   |                   ^                  |
+        | explicit          | explicit          |                  |
+        | scheduling        | promotion         |                  |
+        +------------------&gt;|-------------------+                  |
+                            |                                      |
+                            v                                      v
+                         Costing                               Quote Lines
+                                                                   |
+                                                                   v
+                                                                Payments
+                                                                   |
+                                                                   v
+                                                         Payment Allocations</code></pre>
+<p>Supporting audit/history objects include status events, status
+recommendations and quote events.</p>
+<p>This graph must not be replaced by module-specific editable copies of
+the same business objects.</p>
+<hr />
+<h1 id="iron-clad-product-tenets">4. Iron-clad product tenets</h1>
+<h2 id="t-001-the-register-is-the-business-root">T-001 — The Register is
+the business root</h2>
+<p>Every delivery chain begins with exactly one originating
+<strong>Nature Strip Application</strong> or <strong>Event</strong>
+Register matter.</p>
+<p>No Project, Task, Job, Quote, Payment or operational delivery lineage
+may become an unexplained root-level business record.</p>
+<p>Every downstream delivery record must remain traceable to the
+Register matter that caused the work to exist.</p>
+<p><strong>Existing contract:</strong> PC-001 — REGISTER_ROOT.</p>
+<hr />
+<h2 id="t-002-nsa-and-events-are-isolated-operational-workspaces">T-002
+— NSA and Events are isolated operational workspaces</h2>
+<p>NSA records belong to the NSA workspace. Event records belong to the
+EVT workspace.</p>
+<p>Imports must respect the target application identity and workspace
+kind. Operational records from the other owner are not silently admitted
+into the active workspace.</p>
+<p>Shared reference data may exist where explicitly designed, but
+operational ownership must remain unambiguous.</p>
+<p><strong>Consequence:</strong> convenience is not sufficient
+justification for merging NSA and EVT operational data into one mutable
+workspace.</p>
+<p><strong>Existing enforcement:</strong> <code>app-config.js</code>,
+<code>ProgramData.assertImportIdentity</code>,
+<code>ProgramData.assertWorkspaceIsolation</code>.</p>
+<hr />
+<h2
+id="t-003-a-register-matter-has-at-most-one-active-delivery-project">T-003
+— A Register matter has at most one active Delivery Project</h2>
+<p>A Delivery Project has exactly one existing Register parent: an
+Application <strong>or</strong> an Event, never both and never
+neither.</p>
+<p>The Project owner must match its Register parent.</p>
+<p>A Register matter may have zero or one active Delivery Project.
+Multiple simultaneous active Projects for one Register matter are
+invalid.</p>
+<p>Historical Projects may exist only where their lifecycle explicitly
+makes them non-active.</p>
+<p><strong>Existing contract:</strong> PC-002 — PROJECT_PARENTAGE.</p>
+<hr />
+<h2
+id="t-004-canonical-records-are-edited-shadow-business-records-are-forbidden">T-004
+— Canonical records are edited; shadow business records are
+forbidden</h2>
+<p>A business concept has one canonical editable representation.</p>
+<p>Planner Tasks are canonical Project Task records. The Planner must
+not maintain a second editable checklist database.</p>
+<p>The Scheduler schedules canonical Jobs. It must not create or
+maintain a separate Scheduler Job database.</p>
+<p>Other modules must follow the same principle: a module may project,
+filter, calculate or present canonical data, but must not create a
+competing mutable copy of the same business truth.</p>
+<p><strong>Existing contracts:</strong> PC-003 and PC-006.</p>
+<hr />
+<h2
+id="t-005-register-location-and-project-work-geometry-mean-different-things">T-005
+— Register location and Project work geometry mean different things</h2>
+<p>A <strong>Register Location</strong> describes where the originating
+Application or Event is located.</p>
+<p><strong>Project Work Geometry</strong> describes the spatial extent
+of work that may be delivered.</p>
+<p>Therefore:</p>
+<ul>
+<li>Location pins belong to Applications or Events.</li>
+<li>Work Geometry belongs to a Delivery Project.</li>
+<li>Projects do not own Register Location pins.</li>
+<li>Point/Location records are not stored as Project Work Geometry.</li>
+<li>Project Work Geometry is polygon/line work geometry, not a
+substitute for the originating Register location.</li>
+</ul>
+<p><strong>Existing contract:</strong> PC-004 — SPATIAL_OWNERSHIP.</p>
+<hr />
+<h2 id="t-006-drawing-work-does-not-authorise-work">T-006 — Drawing work
+does not authorise work</h2>
+<p>Creating, importing or editing Project Work Geometry is a planning
+act.</p>
+<p>It does <strong>not</strong> automatically create a Job or Costing
+Line.</p>
+<p>Geometry enters the operational Job/Costing lineage only through an
+explicit user promotion/create-work action.</p>
+<p>Planning-only geometry with no Job and no Costing Line is valid.</p>
+<p>Once promoted:</p>
+<ul>
+<li>one Work Geometry has exactly one canonical Space Map Job;</li>
+<li>it has exactly one mapped Costing Line;</li>
+<li>Job, Costing Line and Geometry remain within the same Project and
+owner lineage;</li>
+<li>the lineage may not exist in a half-created state; and</li>
+<li>later geometry edits update the existing mapped lineage rather than
+creating duplicate Jobs.</li>
+</ul>
+<p>The deliberate human promotion boundary must not be automated away
+for convenience.</p>
+<p><strong>Existing contract:</strong> PC-005 —
+GEOMETRY_JOB_PROMOTION.</p>
+<hr />
+<h2
+id="t-007-every-job-belongs-to-a-project-and-retains-its-origin">T-007 —
+Every Job belongs to a Project and retains its origin</h2>
+<p>Every Job belongs to exactly one existing Delivery Project of the
+same owner.</p>
+<p>Where a Job originates from Planner, Calculator or Space Map
+activity, its source lineage must remain explainable through the
+canonical source identity.</p>
+<p>Planner and Space Map Jobs require exact source linkage.</p>
+<p>The Scheduler operates on these canonical Jobs rather than
+manufacturing unrelated scheduling copies.</p>
+<p><strong>Existing contract:</strong> PC-006 — JOB_PARENTAGE.</p>
+<hr />
+<h2
+id="t-008-costing-is-a-snapshot-not-a-live-reinterpretation-of-history">T-008
+— Costing is a snapshot, not a live reinterpretation of history</h2>
+<p>A Costing Line belongs to a Job and the same Delivery Project.</p>
+<p>The rate, description and costing basis used for an estimate are
+preserved as an explainable snapshot.</p>
+<p>A later Rate Catalog change must not silently rewrite an existing
+costing result.</p>
+<p>Recalculation or refresh must be an explicit operation where the
+product permits it.</p>
+<p>Mapped costing must retain its link to the Work Geometry that
+generated it.</p>
+<p><strong>Existing contract:</strong> PC-007 — COST_SNAPSHOT.</p>
+<hr />
+<h2
+id="t-009-draft-commercial-work-is-mutable-issued-commercial-history-is-not">T-009
+— Draft commercial work is mutable; issued commercial history is
+not</h2>
+<p>A Draft Quote may be edited and refreshed from current costs.</p>
+<p>Once a Quote is <strong>Issued</strong>, its commercial content
+becomes a stable snapshot.</p>
+<p>Issued and resolved Quotes must not be rewritten to make them
+resemble current Jobs, current costs or later business
+circumstances.</p>
+<p>Later commercial change occurs through a <strong>new Quote
+revision</strong>.</p>
+<p>A replacement revision:</p>
+<ul>
+<li>remains within the same Delivery Project;</li>
+<li>preserves the audit root;</li>
+<li>identifies its predecessor;</li>
+<li>supersedes rather than overwrites the predecessor; and</li>
+<li>preserves the earlier Quote as history.</li>
+</ul>
+<p>Accepted, Declined and Superseded history is not editable
+current-state data.</p>
+<p><strong>Existing contract:</strong> PC-008 — QUOTE_REVISION.</p>
+<hr />
+<h2
+id="t-010-money-must-remain-traceable-to-the-exact-commercial-record">T-010
+— Money must remain traceable to the exact commercial record</h2>
+<p>A Payment belongs to an exact Quote revision and the same Project
+lineage.</p>
+<p>Payment allocations may not cross Quote revision or Project
+boundaries.</p>
+<p>A reversal does not delete the Payment. It records reversal evidence
+and reverses associated active allocations.</p>
+<p>Commercial history must remain reconstructable after correction.</p>
+<p><strong>Existing contract:</strong> PC-009 —
+PAYMENT_TRACEABILITY.</p>
+<hr />
+<h2
+id="t-011-destructive-actions-may-not-destroy-the-business-story">T-011
+— Destructive actions may not destroy the business story</h2>
+<p>Deletion is dependency-aware.</p>
+<p>A record with downstream operational or commercial meaning must not
+be casually removed in a way that leaves orphaned or impossible
+history.</p>
+<p>Specifically:</p>
+<ul>
+<li>Register deletion must expose its dependency impact and require
+confirmation before removing the complete dependent chain.</li>
+<li>Mapped work with protected Scheduler, Planner or Quote dependencies
+cannot be casually removed.</li>
+<li>Jobs referenced by issued or resolved Quote history cannot be
+deleted.</li>
+<li>Historical commercial evidence is preserved rather than silently
+repaired by deletion.</li>
+</ul>
+<p>The product must prefer an explicit blocked action, lifecycle
+transition, supersession or reversal over silent historical
+corruption.</p>
+<p><strong>Existing contract:</strong> PC-010 —
+DEPENDENCY_PROTECTION.</p>
+<hr />
+<h2
+id="t-012-persistence-must-preserve-the-complete-business-graph">T-012 —
+Persistence must preserve the complete business graph</h2>
+<p>Save, export, import and recovery operate on the canonical workspace
+and its relationships.</p>
+<p>A workspace round-trip must preserve:</p>
+<ul>
+<li>canonical IDs;</li>
+<li>owner boundaries;</li>
+<li>Register → Project relationships;</li>
+<li>Task/Job source lineage;</li>
+<li>Geometry/Job/Costing lineage;</li>
+<li>Quote revision lineage;</li>
+<li>Payment lineage;</li>
+<li>lifecycle/audit evidence; and</li>
+<li>other canonical relationships required to reconstruct the same
+business story.</li>
+</ul>
+<p>Import is staged and validated before commit.</p>
+<p>If the workspace changes after staging, the stale staged import must
+not simply be applied.</p>
+<p>Ambiguous migration data must be retained for review/quarantine
+rather than having missing relationships invented.</p>
+<p><strong>Existing contract:</strong> PC-011 — WORKSPACE_RECOVERY.</p>
+<hr />
+<h2
+id="t-013-persistence-failure-must-not-legitimise-corrupt-state">T-013 —
+Persistence failure must not legitimise corrupt state</h2>
+<p>A canonical business mutation is revision-aware.</p>
+<p>Durable writes are read back and verified.</p>
+<p>A failed or unverified commit must not become the new accepted
+canonical state merely because it was the latest attempted write.</p>
+<p>Where supported, recovery returns to a last verified durable
+revision.</p>
+<p>Concurrent/stale revision conflicts are errors to resolve, not
+permission to overwrite a newer canonical state.</p>
+<hr />
+<h2
+id="t-014-lifecycle-vocabularies-belong-to-their-business-domains">T-014
+— Lifecycle vocabularies belong to their business domains</h2>
+<p>There is no universal application-wide status vocabulary.</p>
+<p>Register matters, Projects, Tasks, Jobs and Quotes represent
+different business concepts and retain their own governed lifecycle.</p>
+<p>Current state and milestone/audit history must not contradict one
+another.</p>
+<p>Unknown imported status values become <strong>Review
+required</strong> rather than being guessed into a convenient state.</p>
+<p>Cross-object automation may establish a status only from a concrete
+business fact. It must not infer business judgement.</p>
+<p><strong>Existing contract:</strong> PC-012 — DOMAIN_LIFECYCLES.</p>
+<hr />
+<h1 id="governed-lifecycle-model">5. Governed lifecycle model</h1>
+<p>The current schema-v5 lifecycle vocabularies are authoritative unless
+deliberately amended.</p>
+<h2 id="nature-strip-application-register">5.1 Nature Strip Application
+Register</h2>
+<pre class="text"><code>Received
+  -&gt; Quoted
+  -&gt; Scheduled
+  -&gt; In Progress
+  -&gt; Complete
+
+Alternative terminal path: Cancelled
+Exceptional imported state: Review required</code></pre>
+<p><code>Quoted</code> is not a free human status choice. It is
+established from the concrete fact that the current linked Quote has
+been issued.</p>
+<h2 id="event-register">5.2 Event Register</h2>
+<pre class="text"><code>Received
+  -&gt; Report Completed and Sent
+  -&gt; Quoted
+  -&gt; Planning
+  -&gt; Scheduled
+  -&gt; Completed
+
+Alternative terminal path: Cancelled
+Exceptional imported state: Review required</code></pre>
+<p>As with NSA, <code>Quoted</code> is tied to an eligible issued
+current Quote rather than arbitrary manual declaration.</p>
+<h2 id="delivery-project">5.3 Delivery Project</h2>
+<pre class="text"><code>Draft
+  -&gt; Planning
+  -&gt; In Delivery
+  -&gt; Complete</code></pre>
+<p>Additional governed states:</p>
+<ul>
+<li>On Hold</li>
+<li>Cancelled</li>
+<li>Review required</li>
+</ul>
+<h2 id="task">5.4 Task</h2>
+<pre class="text"><code>Not Started
+  -&gt; In Progress
+  -&gt; Complete</code></pre>
+<p>Additional governed states:</p>
+<ul>
+<li>On Hold</li>
+<li>N/A</li>
+<li>Review required</li>
+</ul>
+<h2 id="job">5.5 Job</h2>
+<pre class="text"><code>Draft
+  -&gt; Scheduled
+  -&gt; In Progress
+  -&gt; Completed</code></pre>
+<p>Additional governed states:</p>
+<ul>
+<li>Cancelled</li>
+<li>Review required</li>
+</ul>
+<h2 id="quote">5.6 Quote</h2>
+<pre class="text"><code>Draft -&gt; Issued -&gt; Accepted
+                 -&gt; Declined</code></pre>
+<p>A later revision may supersede an Issued/Accepted/Declined
+predecessor when the replacement is issued.</p>
+<p><code>Superseded</code> is historical and terminal.</p>
+<h2 id="status-governance">5.7 Status governance</h2>
+<p>Backward lifecycle movement, cancellation, hold states and movement
+away from terminal states require explicit governance/reasoning as
+defined by the status engine.</p>
+<p><code>Review required</code> is reserved for unresolved/unrecognised
+imported state and is not a normal officer-selected lifecycle stage.</p>
+<p>Status history must be recorded through the canonical status/audit
+mechanism rather than by independently rewriting labels in individual
+modules.</p>
+<hr />
+<h1 id="constitutional-business-workflows">6. Constitutional business
+workflows</h1>
+<h2 id="wf-001-matter-intake-to-delivery-project">WF-001 — Matter intake
+to Delivery Project</h2>
+<pre class="text"><code>Application/Event received
+        |
+        v
+Register matter created/imported
+        |
+        v
+Register remains canonical business root
+        |
+        v
+Officer determines delivery work is required
+        |
+        v
+Delivery Project created
+        |
+        v
+Project linked to exactly one Register parent</code></pre>
+<p>A Project cannot legitimately precede or lose its originating
+Register matter.</p>
+<hr />
+<h2 id="wf-002-planner-workflow">WF-002 — Planner workflow</h2>
+<pre class="text"><code>Delivery Project
+      |
+      v
+Canonical Project Tasks
+      |
+      +--&gt; assign / due date / notes / governed task state
+      |
+      v
+Explicit schedule action for schedulable task
+      |
+      v
+One canonical Planner Job
+      |
+      v
+Scheduler operates on that Job</code></pre>
+<p>Planner does not maintain an independent editable checklist
+truth.</p>
+<p>Repeated scheduling of the same Task must resolve to its existing
+canonical Planner Job rather than create duplicates.</p>
+<hr />
+<h2 id="wf-003-spatial-planning-to-operational-work">WF-003 — Spatial
+planning to operational work</h2><figure class="diagram-card" id="diagram-geometry" data-scale="1" data-x="0" data-y="0">
+<div class="diagram-head"><div><h3>Spatial Planning → Operational Work</h3><p>The explicit promotion boundary is a protected human decision.</p></div><div class="diagram-tools"><button data-action="minus" title="Zoom out">−</button><button data-action="plus" title="Zoom in">+</button><button data-action="fit">Fit</button><button data-action="reset">100%</button><button data-action="full">Full screen</button></div></div>
+<div class="diagram-viewport"><div class="diagram-stage"><svg class="diagram-svg" viewBox="0 0 1200 680" role="img" aria-label="Spatial Planning → Operational Work"><defs><marker id="arrow-geometry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head"/></marker></defs><path class="edge" d="M240,292.0 L285,292.0" marker-end="url(#arrow-geometry)"/><path class="edge" d="M505,292.0 L550,292.0" marker-end="url(#arrow-geometry)"/><path class="edge" d="M770,292.0 L820,292.0" marker-end="url(#arrow-geometry)"/><text class="edge-label" x="795.0" y="284.0" text-anchor="middle">explicit user promotion</text><path class="edge" d="M925.0,324 L925.0,430" marker-end="url(#arrow-geometry)"/><path class="edge" d="M820,462.0 L800,572.0" marker-end="url(#arrow-geometry)"/><rect class="node project" x="30" y="260" width="210" height="64" rx="14"/><text class="node-label" x="135.0" y="292.0" text-anchor="middle">Delivery Project</text><rect class="node standard" x="285" y="260" width="220" height="64" rx="14"/><text class="node-label" x="395.0" y="281.0" text-anchor="middle">Draw / import</text><text class="node-label" x="395.0" y="303.0" text-anchor="middle">Work Geometry</text><rect class="node decision" x="550" y="260" width="220" height="64" rx="14"/><text class="node-label" x="660.0" y="281.0" text-anchor="middle">Planning-only</text><text class="node-label" x="660.0" y="303.0" text-anchor="middle">geometry</text><rect class="node standard" x="820" y="260" width="210" height="64" rx="14"/><text class="node-label" x="925.0" y="281.0" text-anchor="middle">Canonical</text><text class="node-label" x="925.0" y="303.0" text-anchor="middle">Space Map Job</text><rect class="node standard" x="820" y="430" width="210" height="64" rx="14"/><text class="node-label" x="925.0" y="462.0" text-anchor="middle">Mapped Costing Line</text><rect class="node standard" x="500" y="540" width="300" height="64" rx="14"/><text class="node-label" x="650.0" y="572.0" text-anchor="middle">Later edits update existing lineage</text></svg></div></div>
+<details class="mermaid-source"><summary>Mermaid source</summary><pre><code>flowchart LR
+ P[Delivery Project] --&gt; G[Draw/import Work Geometry]
+ G --&gt; PG[Planning-only geometry]
+ PG --&gt;|explicit user promotion| J[Canonical Space Map Job]
+ J --&gt; C[Mapped Costing Line]
+ C --&gt; E[Later geometry edits update lineage]</code></pre></details>
+</figure>
+<pre class="text"><code>Delivery Project
+      |
+      v
+Draw/import Work Geometry
+      |
+      v
+Planning-only geometry
+      |
+      | explicit user promotion
+      v
+Canonical Space Map Job
+      |
+      v
+Mapped Costing Line
+      |
+      v
+Subsequent geometry edits update lineage</code></pre>
+<p>The transition from planning geometry to operational Job is a
+deliberate business action.</p>
+<hr />
+<h2 id="wf-004-calculatorcosting-to-job">WF-004 — Calculator/Costing to
+Job</h2>
+<p>Manual/Calculator costing operates within a selected Delivery
+Project.</p>
+<p>Jobs created for costing remain canonical Project-owned Jobs.</p>
+<p>Costing Lines remain subordinate to the relevant Job and Project and
+preserve the costing basis used at the time.</p>
+<p>The Calculator/Costing module does not become a second independent
+Job register.</p>
+<hr />
+<h2 id="wf-005-job-scheduling">WF-005 — Job scheduling</h2>
+<pre class="text"><code>Canonical Job
+     |
+     v
+Scheduler
+     |
+     +--&gt; date/time
+     +--&gt; crew
+     +--&gt; location
+     +--&gt; scheduling attributes
+     |
+     v
+Same canonical Job</code></pre>
+<p>Scheduling changes scheduling properties on the canonical Job.</p>
+<p>Source identity and Project ownership are not rewritten by
+scheduling.</p>
+<p>Conflict detection may identify crew/location clashes, but it does
+not create an alternative Job truth.</p>
+<hr />
+<h2 id="wf-006-quote-creation-readiness-and-issue">WF-006 — Quote creation, readiness and issue</h2>
+<figure class="diagram-card" id="diagram-quote-readiness" data-scale="1" data-x="0" data-y="0">
+<div class="diagram-head"><div><h3>Quote Readiness — Evidence Gate</h3><p>Draft creation is permissive; issuance requires sufficient canonical business evidence.</p></div><div class="diagram-tools"><button data-action="minus" title="Zoom out">−</button><button data-action="plus" title="Zoom in">+</button><button data-action="fit">Fit</button><button data-action="reset">100%</button><button data-action="full">Full screen</button></div></div>
+<div class="diagram-viewport"><div class="diagram-stage"><svg class="diagram-svg" viewBox="0 0 1400 760" role="img" aria-label="Quote Readiness evidence gate"><defs><marker id="arrow-readiness" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head"/></marker></defs>
+<path class="edge" d="M210 120 L360 120" marker-end="url(#arrow-readiness)"/><path class="edge" d="M530 120 L700 250" marker-end="url(#arrow-readiness)"/><path class="edge" d="M530 120 L700 380" marker-end="url(#arrow-readiness)"/><path class="edge" d="M530 120 L700 510" marker-end="url(#arrow-readiness)"/>
+<path class="edge" d="M920 250 L1040 380" marker-end="url(#arrow-readiness)"/><path class="edge" d="M920 380 L1040 380" marker-end="url(#arrow-readiness)"/><path class="edge" d="M920 510 L1040 380" marker-end="url(#arrow-readiness)"/><path class="edge" d="M1260 380 L1320 240" marker-end="url(#arrow-readiness)"/><text class="edge-label" x="1295" y="292">PASS</text><path class="edge" d="M1150 420 L1150 610" marker-end="url(#arrow-readiness)"/><text class="edge-label" x="1160" y="520">FAIL</text><path class="edge" d="M1040 640 L520 640 L520 155" marker-end="url(#arrow-readiness)"/>
+<rect class="node project" x="30" y="85" width="180" height="70" rx="14"/><text class="node-label" x="120" y="120" text-anchor="middle">Delivery Project</text>
+<rect class="node decision" x="360" y="85" width="170" height="70" rx="14"/><text class="node-label" x="445" y="120" text-anchor="middle">Draft Quote</text>
+<rect class="node standard" x="700" y="215" width="220" height="70" rx="14"/><text class="node-label" x="810" y="250" text-anchor="middle">Scope Evidence</text>
+<rect class="node standard" x="700" y="345" width="220" height="70" rx="14"/><text class="node-label" x="810" y="380" text-anchor="middle">Cost Basis Evidence</text>
+<rect class="node standard" x="700" y="475" width="220" height="70" rx="14"/><text class="node-label" x="810" y="510" text-anchor="middle">Funding Evidence</text>
+<rect class="node decision" x="1040" y="340" width="220" height="80" rx="18"/><text class="node-label" x="1150" y="370" text-anchor="middle">QUOTE</text><text class="node-label" x="1150" y="395" text-anchor="middle">READINESS</text>
+<rect class="node commercial" x="1250" y="185" width="140" height="70" rx="14"/><text class="node-label" x="1320" y="220" text-anchor="middle">ISSUE</text>
+<rect class="node blocked" x="1040" y="610" width="220" height="70" rx="14"/><text class="node-label" x="1150" y="635" text-anchor="middle">Remain Draft</text><text class="node-label" x="1150" y="660" text-anchor="middle">Resolve Evidence</text>
+</svg></div></div>
+<details class="mermaid-source"><summary>Mermaid source</summary><pre><code>flowchart TD
+ P[Delivery Project] --&gt; D[Draft Quote]
+ D --&gt; S[Scope Evidence]
+ D --&gt; C[Cost Basis Evidence]
+ D --&gt; F[Funding Evidence]
+ S --&gt; R{Quote Readiness}
+ C --&gt; R
+ F --&gt; R
+ R --&gt;|Not sufficient| B[Remain Draft / Resolve Evidence]
+ B --&gt; D
+ R --&gt;|Sufficient| I[ISSUE]
+ I --&gt; X[Immutable Quote + Readiness Evidence Snapshot]</code></pre></details>
+</figure>
+<p>A Draft Quote may be created immediately after an eligible Delivery Project exists. Planner Tasks, Work Geometry, Jobs and Costing Lines are <strong>not individually mandatory prerequisites</strong> to creating the Draft.</p>
+<p>The Draft-to-Issued transition is different. <strong>Quote Readiness</strong> evaluates canonical business evidence, not whether particular modules have been visited or completed.</p>
+<table><thead><tr><th>Readiness dimension</th><th>Constitutional question</th></tr></thead><tbody><tr><td><strong>Scope</strong></td><td>What is Council proposing to deliver or charge for?</td></tr><tr><td><strong>Cost basis</strong></td><td>How was each material commercial amount established?</td></tr><tr><td><strong>Funding</strong></td><td>Who is funding the work and how is the commercial amount composed?</td></tr></tbody></table>
+<p>Evidence may come from Jobs/governed Costing, Work Geometry/quantities, approved or fixed rates, an evidenced external estimate, or an authorised manual basis with a reason. The product deliberately does <strong>not</strong> require a Planner → Space Map → Calculator → Quote Builder sequence.</p>
+<p>Custom/manual Quote Lines remain permitted, but their basis must be classified and evidenced. A bare amount with no recognised basis cannot by itself satisfy Quote Readiness.</p>
+<p>At Issue, the immutable Quote must preserve the readiness outcome and sufficient evidence references/snapshots to reconstruct why issuance was permitted at that time.</p><hr />
+<h2 id="wf-007-quote-revision">WF-007 — Quote revision</h2>
+<pre class="text"><code>Issued / Accepted / Declined Quote
+              |
+              | explicit Create Revision
+              v
+          New Draft revision
+              |
+              | edit / refresh
+              v
+             Issue
+              |
+              v
+Previous revision -&gt; Superseded
+New revision      -&gt; Issued</code></pre>
+<p>Revision is additive history, not mutation of historical commercial
+truth.</p>
+<p>Only the appropriate latest non-superseded lineage may continue
+forward.</p>
+<hr />
+<h2 id="wf-008-payment-and-reversal">WF-008 — Payment and reversal</h2><figure class="diagram-card" id="diagram-payment" data-scale="1" data-x="0" data-y="0">
+<div class="diagram-head"><div><h3>Payment Traceability and Reversal</h3><p>Money remains attached to the exact Quote revision and Project lineage.</p></div><div class="diagram-tools"><button data-action="minus" title="Zoom out">−</button><button data-action="plus" title="Zoom in">+</button><button data-action="fit">Fit</button><button data-action="reset">100%</button><button data-action="full">Full screen</button></div></div>
+<div class="diagram-viewport"><div class="diagram-stage"><svg class="diagram-svg" viewBox="0 0 1200 680" role="img" aria-label="Payment Traceability and Reversal"><defs><marker id="arrow-payment" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head"/></marker></defs><path class="edge" d="M570.0,90 L570.0,160" marker-end="url(#arrow-payment)"/><path class="edge" d="M440,190.0 L360,350.0" marker-end="url(#arrow-payment)"/><path class="edge" d="M570.0,220 L600.0,500" marker-end="url(#arrow-payment)"/><path class="edge" d="M700,190.0 L790,350.0" marker-end="url(#arrow-payment)"/><text class="edge-label" x="745.0" y="262.0" text-anchor="middle">correction</text><path class="edge" d="M930.0,380 L930.0,500" marker-end="url(#arrow-payment)"/><path class="edge" d="M790,350.0 L730,530.0" marker-end="url(#arrow-payment)"/><text class="edge-label" x="760.0" y="432.0" text-anchor="middle">history remains</text><rect class="node commercial" x="420" y="30" width="300" height="60" rx="14"/><text class="node-label" x="570.0" y="60.0" text-anchor="middle">Payable Quote Revision</text><rect class="node commercial" x="440" y="160" width="260" height="60" rx="14"/><text class="node-label" x="570.0" y="190.0" text-anchor="middle">Record Payment</text><rect class="node standard" x="100" y="320" width="260" height="60" rx="14"/><text class="node-label" x="230.0" y="350.0" text-anchor="middle">Optional Line Allocations</text><rect class="node root" x="470" y="500" width="260" height="60" rx="14"/><text class="node-label" x="600.0" y="530.0" text-anchor="middle">Payment History Preserved</text><rect class="node decision" x="790" y="320" width="280" height="60" rx="14"/><text class="node-label" x="930.0" y="350.0" text-anchor="middle">Reverse Payment + Reason</text><rect class="node standard" x="790" y="500" width="280" height="60" rx="14"/><text class="node-label" x="930.0" y="530.0" text-anchor="middle">Reverse Active Allocations</text></svg></div></div>
+<details class="mermaid-source"><summary>Mermaid source</summary><pre><code>flowchart TD
+ Q[Payable Quote Revision] --&gt; P[Record Payment]
+ P --&gt; A[Optional Line Allocations]
+ P --&gt; H[Payment History]
+ P --&gt;|correction| R[Reverse Payment + Reason]
+ R --&gt; RA[Reverse Active Allocations]
+ R --&gt; H</code></pre></details>
+</figure>
+<pre class="text"><code>Payable Quote revision
+        |
+        v
+Record Payment
+        |
+        +--&gt; exact Quote revision
+        +--&gt; exact Project
+        +--&gt; payment reference
+        |
+        v
+Optional line allocations
+        |
+        v
+Payment history
+
+Correction:
+Payment -&gt; Reversed + reason
+Allocations -&gt; Reversed
+Historical record remains</code></pre>
+<p>Payments cannot be moved across commercial lineages merely to
+reconcile totals.</p>
+<hr />
+<h2 id="wf-009-import">WF-009 — Import</h2><figure class="diagram-card" id="diagram-import" data-scale="1" data-x="0" data-y="0">
+<div class="diagram-head"><div><h3>Governed Import and Durable Commit</h3><p>Candidate data is staged and validated before it can replace canonical state.</p></div><div class="diagram-tools"><button data-action="minus" title="Zoom out">−</button><button data-action="plus" title="Zoom in">+</button><button data-action="fit">Fit</button><button data-action="reset">100%</button><button data-action="full">Full screen</button></div></div>
+<div class="diagram-viewport"><div class="diagram-stage"><svg class="diagram-svg" viewBox="0 0 1200 670" role="img" aria-label="Governed Import and Durable Commit"><defs><marker id="arrow-import" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head"/></marker></defs><path class="edge" d="M560.0,74 L560.0,100" marker-end="url(#arrow-import)"/><path class="edge" d="M560.0,154 L560.0,180" marker-end="url(#arrow-import)"/><path class="edge" d="M560.0,234 L560.0,260" marker-end="url(#arrow-import)"/><path class="edge" d="M560.0,314 L560.0,340" marker-end="url(#arrow-import)"/><path class="edge" d="M560.0,394 L560.0,420" marker-end="url(#arrow-import)"/><path class="edge" d="M560.0,474 L560.0,500" marker-end="url(#arrow-import)"/><path class="edge" d="M560.0,554 L560.0,580" marker-end="url(#arrow-import)"/><rect class="node decision" x="430" y="20" width="260" height="54" rx="14"/><text class="node-label" x="560.0" y="47.0" text-anchor="middle">Select Import</text><rect class="node standard" x="430" y="100" width="260" height="54" rx="14"/><text class="node-label" x="560.0" y="127.0" text-anchor="middle">Identify Workspace Identity</text><rect class="node standard" x="430" y="180" width="260" height="54" rx="14"/><text class="node-label" x="560.0" y="207.0" text-anchor="middle">Build Candidate</text><rect class="node standard" x="430" y="260" width="260" height="54" rx="14"/><text class="node-label" x="560.0" y="287.0" text-anchor="middle">Normalize + Validate</text><rect class="node decision" x="430" y="340" width="260" height="54" rx="14"/><text class="node-label" x="560.0" y="367.0" text-anchor="middle">Preview Warnings / Conflicts</text><rect class="node standard" x="430" y="420" width="260" height="54" rx="14"/><text class="node-label" x="560.0" y="447.0" text-anchor="middle">Stage Against Revision</text><rect class="node decision" x="430" y="500" width="260" height="54" rx="14"/><text class="node-label" x="560.0" y="527.0" text-anchor="middle">Explicit Apply</text><rect class="node standard" x="430" y="580" width="260" height="54" rx="14"/><text class="node-label" x="560.0" y="607.0" text-anchor="middle">Re-check Base Revision</text></svg></div></div>
+<details class="mermaid-source"><summary>Mermaid source</summary><pre><code>flowchart TD
+ S[Select Import] --&gt; I[Identify Workspace Identity]
+ I --&gt; C[Build Candidate]
+ C --&gt; V[Normalize + Validate]
+ V --&gt; P[Preview Warnings / Conflicts]
+ P --&gt; ST[Stage Against Workspace Revision]
+ ST --&gt; A[Explicit Apply]
+ A --&gt; R[Re-check Base Revision]
+ R --&gt; D[Revision-aware Durable Commit]
+ D --&gt; RB[Read-back Verification]</code></pre></details>
+</figure>
+<pre class="text"><code>Select import
+     |
+     v
+Identify target / workspace identity
+     |
+     v
+Parse and build candidate
+     |
+     v
+Normalize + validate
+     |
+     v
+Preview warnings/conflicts
+     |
+     v
+Stage against current workspace revision
+     |
+     | explicit Apply
+     v
+Re-check base workspace has not changed
+     |
+     v
+Revision-aware durable commit
+     |
+     v
+Read-back verification</code></pre>
+<p>An import is not a direct uncontrolled write into live canonical
+state.</p>
+<hr />
+<h2 id="wf-010-destructive-change">WF-010 — Destructive change</h2><figure class="diagram-card" id="diagram-delete" data-scale="1" data-x="0" data-y="0">
+<div class="diagram-head"><div><h3>Dependency-aware Destructive Change</h3><p>Deletion cannot be an invisible repair mechanism.</p></div><div class="diagram-tools"><button data-action="minus" title="Zoom out">−</button><button data-action="plus" title="Zoom in">+</button><button data-action="fit">Fit</button><button data-action="reset">100%</button><button data-action="full">Full screen</button></div></div>
+<div class="diagram-viewport"><div class="diagram-stage"><svg class="diagram-svg" viewBox="0 0 1200 680" role="img" aria-label="Dependency-aware Destructive Change"><defs><marker id="arrow-delete" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head"/></marker></defs><path class="edge" d="M570.0,100 L570.0,170" marker-end="url(#arrow-delete)"/><path class="edge" d="M570.0,230 L570.0,300" marker-end="url(#arrow-delete)"/><path class="edge" d="M440,330.0 L420,500.0" marker-end="url(#arrow-delete)"/><text class="edge-label" x="430.0" y="407.0" text-anchor="middle">YES</text><path class="edge" d="M700,330.0 L760,500.0" marker-end="url(#arrow-delete)"/><text class="edge-label" x="730.0" y="407.0" text-anchor="middle">NO</text><path class="edge" d="M935.0,530 L935.0,590" marker-end="url(#arrow-delete)"/><rect class="node decision" x="430" y="40" width="280" height="60" rx="14"/><text class="node-label" x="570.0" y="70.0" text-anchor="middle">Delete / Remove Request</text><rect class="node standard" x="410" y="170" width="320" height="60" rx="14"/><text class="node-label" x="570.0" y="200.0" text-anchor="middle">Determine Dependency Impact</text><rect class="node decision" x="440" y="300" width="260" height="60" rx="14"/><text class="node-label" x="570.0" y="330.0" text-anchor="middle">Protected Dependency?</text><rect class="node blocked" x="90" y="470" width="330" height="60" rx="14"/><text class="node-label" x="255.0" y="500.0" text-anchor="middle">BLOCK / Require Lifecycle Action</text><rect class="node decision" x="760" y="470" width="350" height="60" rx="14"/><text class="node-label" x="935.0" y="500.0" text-anchor="middle">Expose Impact + Explicit Confirmation</text><rect class="node standard" x="810" y="590" width="250" height="60" rx="14"/><text class="node-label" x="935.0" y="620.0" text-anchor="middle">Controlled Deletion</text></svg></div></div>
+<details class="mermaid-source"><summary>Mermaid source</summary><pre><code>flowchart TD
+ D[Delete / Remove Request] --&gt; I[Determine Dependency Impact]
+ I --&gt; Q{Protected Dependency?}
+ Q --&gt;|Yes| B[BLOCK / Require Lifecycle Action]
+ Q --&gt;|No| C[Expose Impact + Explicit Confirmation]
+ C --&gt; X[Controlled Deletion]</code></pre></details>
+</figure>
+<pre class="text"><code>Delete/remove request
+        |
+        v
+Determine dependency impact
+        |
+        +--&gt; protected dependency? -&gt; BLOCK / require appropriate lifecycle action
+        |
+        +--&gt; removable chain? -&gt; expose impact + explicit confirmation
+                                      |
+                                      v
+                               controlled deletion</code></pre>
+<p>Deletion must never be used as an invisible repair mechanism for
+inconsistent business history.</p>
+<hr />
+<h1 id="explicit-product-contracts">7. Explicit product contracts</h1>
+<p>The codebase currently declares twelve product contracts. They are
+incorporated into this Constitution by reference.</p>
+<table style="width:97%;">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 32%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Contract</th>
+<th style="text-align: left;">Constitutional meaning</th>
+<th style="text-align: left;">Criticality</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PC-001 REGISTER_ROOT</td>
+<td style="text-align: left;">Register is the origin of every delivery
+chain</td>
+<td style="text-align: left;">Critical</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PC-002 PROJECT_PARENTAGE</td>
+<td style="text-align: left;">One parent and at most one active Project
+per Register matter</td>
+<td style="text-align: left;">Critical</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PC-003 PLANNER_TASK_CANON</td>
+<td style="text-align: left;">Planner Tasks are canonical Project
+records</td>
+<td style="text-align: left;">Critical</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PC-004 SPATIAL_OWNERSHIP</td>
+<td style="text-align: left;">Register Locations and Project Work
+Geometry are distinct</td>
+<td style="text-align: left;">High</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PC-005 GEOMETRY_JOB_PROMOTION</td>
+<td style="text-align: left;">Geometry becomes operational work only by
+explicit promotion</td>
+<td style="text-align: left;">Critical</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PC-006 JOB_PARENTAGE</td>
+<td style="text-align: left;">Jobs are Project-owned and
+source-traceable</td>
+<td style="text-align: left;">Critical</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PC-007 COST_SNAPSHOT</td>
+<td style="text-align: left;">Costing preserves its historical
+rate/basis</td>
+<td style="text-align: left;">High</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PC-008 QUOTE_REVISION</td>
+<td style="text-align: left;">Issued commercial history is immutable and
+revisioned</td>
+<td style="text-align: left;">Critical</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PC-009 PAYMENT_TRACEABILITY</td>
+<td style="text-align: left;">Payments remain tied to exact Quote
+revision/Project</td>
+<td style="text-align: left;">Critical</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PC-010 DEPENDENCY_PROTECTION</td>
+<td style="text-align: left;">Destructive actions cannot invalidate
+history</td>
+<td style="text-align: left;">Critical</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PC-011 WORKSPACE_RECOVERY</td>
+<td style="text-align: left;">Workspace persistence preserves the
+complete graph</td>
+<td style="text-align: left;">Critical</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PC-012 DOMAIN_LIFECYCLES</td>
+<td style="text-align: left;">Business domains own separate governed
+lifecycles</td>
+<td style="text-align: left;">Critical</td>
+</tr><tr><td>PC-013 QUOTE_READINESS</td><td>Quote issuance requires sufficient canonical scope, cost-basis and funding evidence; workflow gates are evidence-based, not module-based.</td><td>Critical</td></tr>
+</tbody>
+</table>
+<p>A future implementation must not satisfy the wording of one contract
+by violating another.</p>
+<hr />
+<h1 id="human-decision-boundaries">8. Human decision boundaries</h1>
+<p>The following boundaries are intentionally human-controlled and must
+not be silently converted into AI or automatic actions:</p>
+<ol type="1">
+<li>Promotion of planning-only Work Geometry into operational
+Job/Costing lineage.</li>
+<li>Issuing a Draft Quote.</li>
+<li>Creating a commercial Quote revision after issue/resolution.</li>
+<li>Acceptance/decline actions where an officer records the business
+outcome.</li>
+<li>Payment recording and payment reversal.</li>
+<li>Confirmation of destructive Register/dependency deletion.</li>
+<li>Resolution of ambiguous migrated/imported data.</li>
+<li>Status actions requiring an operator, reason or explicit business
+judgement.</li>
+<li>Application of a staged import.</li>
+</ol>
+<p>Automation may assist, validate, recommend or establish a state from
+a concrete fact where explicitly contracted. It must not manufacture the
+underlying business decision.</p>
+<hr />
+<h1 id="audit-and-explainability">9. Audit and explainability</h1>
+<p>The system must be capable of answering, from canonical data:</p>
+<ul>
+<li>What Register matter caused this Project to exist?</li>
+<li>Which Project owns this Task, Geometry, Job, Quote or Payment?</li>
+<li>Where did this Job originate?</li>
+<li>Which geometry produced this mapped Job/Costing Line?</li>
+<li>Which costing basis was used for an estimate?</li>
+<li>What exact commercial content was issued?</li>
+<li>Which Quote revision replaced which?</li>
+<li>Which Quote revision received a Payment?</li>
+<li>Was a Payment reversed, when, and why?</li>
+<li>What lifecycle changes occurred?</li>
+<li>Which imported value could not safely be interpreted?</li>
+<li>What downstream records would a destructive action affect?</li>
+</ul>
+<p>A refactor that makes these questions harder or impossible is a
+regression even if the UI still appears functional.</p>
+<hr />
+<h1 id="data-integrity-rules">10. Data integrity rules</h1>
+<p>The following are invalid product states:</p>
+<ul>
+<li>a Project with no Register parent;</li>
+<li>a Project with both an Application and Event parent;</li>
+<li>multiple active Projects for one Register matter;</li>
+<li>owner mismatch across a parent/child lineage;</li>
+<li>a canonical Task outside a Project;</li>
+<li>Planner shadow checklist state acting as business truth;</li>
+<li>multiple Planner Jobs for one source Task;</li>
+<li>a Project-owned Register Location pin;</li>
+<li>Point geometry represented as Project Work Geometry;</li>
+<li>operationally promoted geometry with missing or duplicate
+Job/Costing lineage;</li>
+<li>a Job without an existing Project;</li>
+<li>unexplained loss of source lineage;</li>
+<li>a Costing Line detached from its Job/Project;</li>
+<li>silent re-rating of historical costing;</li>
+<li>mutation of issued/resolved commercial content;</li><li>an Issued Quote with no preserved Quote Readiness outcome/evidence basis;</li><li>a workflow gate satisfied only by module visitation/completion rather than canonical business evidence;</li>
+<li>broken Quote revision/supersession lineage;</li>
+<li>a Payment crossing Quote/Project boundaries;</li>
+<li>deletion that leaves impossible downstream history;</li>
+<li>silent guessing of ambiguous migration relationships;</li>
+<li>cross-workspace operational leakage between NSA and EVT;</li>
+<li>current lifecycle state contradicting canonical lifecycle
+history.</li>
+</ul>
+<p>These states should be rejected, quarantined for review, or
+explicitly repaired through governed migration—not normalised into
+apparently valid data by guessing.</p>
+<hr />
+<h1 id="ai-development-guardrails">11. AI development guardrails</h1><figure class="diagram-card" id="diagram-ai" data-scale="1" data-x="0" data-y="0">
+<div class="diagram-head"><div><h3>AI Development Guardrail</h3><p>Every substantial AI change passes through governance before and after implementation.</p></div><div class="diagram-tools"><button data-action="minus" title="Zoom out">−</button><button data-action="plus" title="Zoom in">+</button><button data-action="fit">Fit</button><button data-action="reset">100%</button><button data-action="full">Full screen</button></div></div>
+<div class="diagram-viewport"><div class="diagram-stage"><svg class="diagram-svg" viewBox="0 0 1200 680" role="img" aria-label="AI Development Guardrail"><defs><marker id="arrow-ai" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head"/></marker></defs><path class="edge" d="M210,310.0 L260,310.0" marker-end="url(#arrow-ai)"/><path class="edge" d="M460,310.0 L510,310.0" marker-end="url(#arrow-ai)"/><path class="edge" d="M615.0,280 L620.0,130" marker-end="url(#arrow-ai)"/><text class="edge-label" x="617.5" y="197.0" text-anchor="middle">YES</text><path class="edge" d="M720,310.0 L780,310.0" marker-end="url(#arrow-ai)"/><text class="edge-label" x="750.0" y="302.0" text-anchor="middle">NO</text><path class="edge" d="M890.0,340 L890.0,420" marker-end="url(#arrow-ai)"/><path class="edge" d="M760,450.0 L730,570.0" marker-end="url(#arrow-ai)"/><path class="edge" d="M520,570.0 L410,570.0" marker-end="url(#arrow-ai)"/><text class="edge-label" x="465.0" y="562.0" text-anchor="middle">NO</text><path class="edge" d="M730,570.0 L830,570.0" marker-end="url(#arrow-ai)"/><text class="edge-label" x="780.0" y="562.0" text-anchor="middle">YES</text><rect class="node decision" x="30" y="280" width="180" height="60" rx="14"/><text class="node-label" x="120.0" y="310.0" text-anchor="middle">Change Request</text><rect class="node standard" x="260" y="280" width="200" height="60" rx="14"/><text class="node-label" x="360.0" y="310.0" text-anchor="middle">Impact Assessment</text><rect class="node decision" x="510" y="280" width="210" height="60" rx="14"/><text class="node-label" x="615.0" y="310.0" text-anchor="middle">Constitutional Conflict?</text><rect class="node blocked" x="480" y="70" width="280" height="60" rx="14"/><text class="node-label" x="620.0" y="100.0" text-anchor="middle">STOP: Product Decision Required</text><rect class="node standard" x="780" y="280" width="220" height="60" rx="14"/><text class="node-label" x="890.0" y="310.0" text-anchor="middle">Surgical Implementation</text><rect class="node standard" x="760" y="420" width="260" height="60" rx="14"/><text class="node-label" x="890.0" y="450.0" text-anchor="middle">Contract / Regression Verification</text><rect class="node decision" x="520" y="540" width="210" height="60" rx="14"/><text class="node-label" x="625.0" y="570.0" text-anchor="middle">Pass?</text><rect class="node blocked" x="190" y="540" width="220" height="60" rx="14"/><text class="node-label" x="300.0" y="570.0" text-anchor="middle">Reject / Repair</text><rect class="node root" x="830" y="540" width="210" height="60" rx="14"/><text class="node-label" x="935.0" y="570.0" text-anchor="middle">Accept Change</text></svg></div></div>
+<details class="mermaid-source"><summary>Mermaid source</summary><pre><code>flowchart LR
+ R[Change Request] --&gt; I[Impact Assessment]
+ I --&gt; C{Constitutional Conflict?}
+ C --&gt;|Yes| S[STOP: Product Decision Required]
+ C --&gt;|No| M[Surgical Implementation]
+ M --&gt; V[Contract / Regression Verification]
+ V --&gt; P{Pass?}
+ P --&gt;|No| F[Reject / Repair]
+ P --&gt;|Yes| A[Accept Change]</code></pre></details>
+</figure>
+<p>Any AI agent modifying this codebase must treat this Constitution as
+a constraint, not background documentation.</p>
+<h2 id="before-implementation">11.1 Before implementation</h2>
+<p>For any non-trivial change, the agent must report:</p>
+<pre class="text"><code>CHANGE IMPACT
+
+Requested change:
+Affected modules:
+Affected canonical entities:
+Affected workflows:
+Affected Product Contracts:
+Affected lifecycle domains:
+Persistence/schema impact:
+Commercial-history impact:
+Deletion/dependency impact:
+Workspace-isolation impact:
+
+Constitutional conflict:
+NONE / DETAILS
+
+Implementation may proceed:
+YES / REQUIRES PRODUCT DECISION</code></pre>
+<h2 id="during-implementation">11.2 During implementation</h2>
+<p>The agent must:</p>
+<ul>
+<li>prefer surgical changes over unrelated redesign;</li>
+<li>reuse canonical records and services rather than introduce shadow
+state;</li>
+<li>preserve IDs and lineage unless an approved migration explicitly
+changes them;</li>
+<li>not bypass validation to make a feature appear to work;</li>
+<li>not weaken a contract because existing data violates it;</li>
+<li>not infer missing business relationships during migration;</li>
+<li>not convert deliberate user actions into automatic actions without
+approval;</li>
+<li>not change unrelated lifecycle vocabularies;</li>
+<li>not rewrite historical commercial records;</li>
+<li>not use deletion to hide integrity problems.</li>
+</ul>
+<h2 id="after-implementation">11.3 After implementation</h2>
+<p>The agent must report:</p>
+<pre class="text"><code>CONSTITUTIONAL VERIFICATION
+
+Requested change:
+Files changed:
+
+Contracts affected:
+Contracts verified:
+
+Canonical graph changed:
+YES / NO
+
+Lifecycle changed:
+YES / NO
+
+Persistence/schema changed:
+YES / NO
+
+Human decision boundary changed:
+YES / NO
+
+Commercial history semantics changed:
+YES / NO
+
+Workspace isolation changed:
+YES / NO
+
+Unrequested behavioural changes:
+NONE / DETAILS
+
+Known constitutional regressions:
+NONE / DETAILS
+
+Tests/validation performed:</code></pre>
+<p>An answer of <code>YES</code> to a protected change is not
+automatically a defect, but it requires evidence that the change was
+explicitly authorised.</p>
+<hr />
+<h1 id="what-is-not-constitutional">12. What is NOT constitutional</h1>
+<p>To prevent the Constitution itself from causing development
+stagnation, the following are <strong>not automatically
+constitutional</strong> unless separately recorded as an explicit
+product decision:</p>
+<ul>
+<li>exact colours;</li>
+<li>exact typography;</li>
+<li>pixel dimensions;</li>
+<li>precise panel arrangements;</li>
+<li>CSS implementation strategy;</li>
+<li>DOM structure;</li>
+<li>filenames;</li>
+<li>function names;</li>
+<li>internal module boundaries;</li>
+<li>particular rendering libraries;</li>
+<li>exact wording of ordinary UI labels;</li>
+<li>temporary performance implementation choices.</li>
+</ul>
+<p>These may change freely provided the protected business model,
+workflows, contracts and user decision boundaries remain intact.</p>
+<p>Important UX decisions may be governed separately in
+<code>UX_RULES.md</code>.</p>
+<hr />
+<h1 id="current-releaseplatform-constraints">13. Current
+release/platform constraints</h1>
+<p>These are strong constraints of the reviewed v5.0.0 package, but are
+intentionally classified below constitutional business invariants so
+they can evolve deliberately without redefining the business model.</p>
+<h3 id="rc-001-local-web-runtime">RC-001 — Local web runtime</h3>
+<p>The portable v5 package is designed to run through its local Node
+static server rather than direct <code>file://</code> execution.</p>
+<h3 id="rc-002-no-runtime-npm-dependency-installation">RC-002 — No
+runtime npm dependency installation</h3>
+<p>The reviewed package declares no runtime npm dependency installation
+requirement; required browser assets are packaged with the
+application.</p>
+<h3 id="rc-003-browser-local-persistence">RC-003 — Browser-local
+persistence</h3>
+<p>NSA and Events persist their operational workspaces locally in
+browser IndexedDB using separate configured storage databases.</p>
+<h3 id="rc-004-empty-operational-baseline">RC-004 — Empty operational
+baseline</h3>
+<p>The reviewed package is designed to begin with an empty operational
+workspace and built-in Rate Catalog rather than shipping live
+operational records.</p>
+<p>These constraints should be changed explicitly, especially if the
+product later moves toward a hosted, multi-user, PWA or server-backed
+architecture.</p>
+<hr />
+<h1 id="evidence-map-to-the-reviewed-codebase">14. Evidence map to the
+reviewed codebase</h1>
+<p>This Constitution was derived primarily from executable rules already
+present in the v5.0.0 codebase rather than from aspirational product
+wording.</p>
+<table style="width:98%;">
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 55%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Area</th>
+<th style="text-align: left;">Primary evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Declared contracts PC-001–PC-012</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/product-contracts.js</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Canonical model / validation /
+deletion</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/model.js</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Lifecycle vocabularies and transition
+governance</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/status.js</code>,
+<code>status-model.js</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Planner Task → Job lineage</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/planner-model.js</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Scheduler canonical Job
+intake/scheduling</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/scheduler-model.js</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Geometry → Job → Costing promotion</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/work-area-service.js</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Costing/Job behaviour</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/costing-model.js</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Quote snapshots/revisions/payments</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/quote-model.js</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Import staging and workspace
+isolation</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/data-workspace.js</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Migration non-guessing behaviour</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/migration.js</code>,
+<code>storage.js</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Revision-aware durable
+persistence/recovery</td>
+<td
+style="text-align: left;"><code>src/program-planner/js/storage.js</code>,
+<code>src/shared/js/storage.js</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NSA/EVT identity boundaries</td>
+<td
+style="text-align: left;"><code>src/program-planner/app-config.js</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Current portable runtime</td>
+<td style="text-align: left;"><code>README_RUN.txt</code>,
+<code>package.json</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="constitutional-acceptance-test">15. Constitutional acceptance
+test</h1>
+<p>A future version remains recognisably the same governed product only
+if all of the following remain true:</p>
+<ul>
+<li>The Register is still the origin of delivery.</li>
+<li>Project parentage remains singular and traceable.</li>
+<li>NSA and EVT ownership remains unambiguous.</li>
+<li>Modules operate on canonical business records rather than shadow
+copies.</li>
+<li>Location and Work Geometry retain their different meanings.</li>
+<li>Planning geometry does not silently become operational work.</li>
+<li>Jobs remain Project-owned and source-traceable.</li>
+<li>Costing remains explainable historical evidence.</li>
+<li>Draft Quotes may be created without artificial module prerequisites.</li><li>Quote issuance is blocked until canonical scope, cost-basis and funding evidence satisfy Quote Readiness.</li><li>Workflow gates are satisfied by business evidence, never merely by module visitation/completion.</li><li>Issued Quotes preserve the readiness basis that authorised issuance.</li><li>Issued Quotes remain immutable commercial snapshots.</li>
+<li>Quote changes occur through revision history.</li>
+<li>Payments remain tied to exact Quote revisions.</li>
+<li>Reversal preserves history.</li>
+<li>Destructive actions remain dependency-aware.</li>
+<li>Import/persistence preserves the business graph.</li>
+<li>Ambiguous migration state is not guessed.</li>
+<li>Domain lifecycles remain governed separately.</li>
+<li>Human business decisions are not silently automated.</li>
+<li>The system remains capable of explaining the lineage of its
+operational and commercial records.</li>
+</ul>
+<p>If a proposed change breaks one of these statements, it is not merely
+a refactor. It is a <strong>product-model change</strong> and requires
+an explicit constitutional decision.</p>
+<hr />
+<h2 id="appendix-a-recommended-repository-placement">Appendix A —
+Recommended repository placement</h2>
+<pre class="text"><code>/governance
+    PRODUCT_CONSTITUTION.md
+    PRODUCT_CONTRACTS.md
+    CANONICAL_MODEL.md
+    UX_RULES.md
+    DECISIONS.md
+    RELEASE_GATES.md
+
+AI_INSTRUCTIONS.md</code></pre>
+<p><code>PRODUCT_CONSTITUTION.md</code> should remain concise enough
+that an AI coding agent can be required to read it at the beginning of
+every substantial development task.</p>
+<p>The existing executable <code>product-contracts.js</code> should
+remain the enforcement companion to this document rather than being
+replaced by prose.</p>
+<h2 id="governance-suite">Governance Suite &amp; Release Path</h2>
+<p>Constitutional integrity and release readiness are separate gates.</p>
+<div class="diagram-card"><div class="diagram-toolbar"><strong>Governance and update pathway</strong></div>
+<div class="mermaid-host" data-mermaid><pre class="mermaid">
+flowchart LR
+ C["Constitution"] --> PC["Product Contracts"]
+ C --> CM["Canonical Model"]
+ PC --> AI["AI Change Control"]
+ CM --> AI
+ D["Decisions"] --> AI
+ UX["UX Rules"] --> AI
+ AI --> SRC["Source Update"]
+ SRC --> RG["Release Gates"]
+ RG --> REL{"Release Decision"}
+</pre></div></div>
+<h3>Current Critical Release Blockers & UI Proof Gates</h3>
+<ul><li>Quote Builder accessibility after valid Project creation.</li><li>Cost Library items must be addable to Resource Calculator.</li><li>Space Map promotion must deterministically resolve supported work types such as <code>turfing</code> to an exact active Rate Item or configured mapping.</li></ul>
+
+
+<h1 id="ui-interaction-contracts">17. Non-negotiable UI interaction contracts</h1>
+<p>These contracts protect interaction architecture rather than decorative styling. Colours, spacing and typography may evolve; the sanctioned surfaces, ownership boundaries and routing behaviour may not silently drift.</p>
+
+<h2 id="pc014-sidebar-surface">PC-014 — Sidebar Surface Contract</h2>
+<p>The former expandable, collapse-to-super-narrow, undocked and floating sidebar system is decommissioned. It is not a dormant feature. Production source must not retain an executable or persisted pathway capable of reactivating it.</p>
+<ul>
+  <li>Sidebars use only currently sanctioned Register/Project cards, row-tables and module-specific full-size surfaces.</li>
+  <li>No expand/collapse-width control, compact-rail state, undock/float control or persisted preference may restore the retired framework.</li>
+  <li>Legacy compact-card/expanded-card mechanics are not a supported sidebar mode.</li>
+</ul>
+
+<h2 id="pc015-location-polygon">PC-015 — Location &amp; Polygon Sidebar Contract</h2>
+<ul>
+  <li><strong>Location module — Register view:</strong> always show a full-size Location Card, including when no Location has yet been recorded.</li>
+  <li><strong>Location module — Project view:</strong> always show a full-size Polygons Summary Card, including when polygon count is zero.</li>
+  <li>The Polygons Summary Card is the entry point to polygon editing in Polygon Inspector.</li>
+  <li>Polygon Inspector cards are full-size.</li>
+</ul>
+
+<div class="diagram-card">
+  <div class="diagram-tools">
+    <button data-action="out">−</button><button data-action="in">+</button>
+    <button data-action="fit">Fit</button><button data-action="reset">100%</button>
+  </div>
+  <div class="diagram-viewport"><div class="diagram-stage">
+    <pre class="mermaid">
+flowchart LR
+    AR["Active Register"] --> LR["Location — Register view"]
+    LR --> LC["Full-size Location Card<br/>always present"]
+    AP["Active Project"] --> LP["Location — Project view"]
+    LP --> PS["Full-size Polygons Summary Card<br/>always present"]
+    PS --> PI["Polygon Inspector"]
+    PI --> PIC["Full-size Inspector Cards"]
+    </pre>
+  </div></div>
+</div>
+
+<h2 id="pc016-scheduler-scope">PC-016 — Scheduler Interaction Scope</h2>
+<p>Scheduler separates broad operational visibility from editability. All Jobs in the owning application may appear on the calendar. Scheduler Editor may receive only a Job belonging to the active Register/Project.</p>
+<ul>
+  <li>Active-project Job selected from the Scheduler row-table → Scheduler Editor.</li>
+  <li>Active-project compact Job card selected on the calendar → Scheduler Editor.</li>
+  <li>Non-active-project Job card selected on the calendar → Job Summary modal.</li>
+  <li>The modal must not silently change the active Register/Project or inject that Job into Scheduler Editor.</li>
+</ul>
+
+<h2 id="pc017-calendar-signal">PC-017 — Scheduler Active-Project Signal</h2>
+<p>Calendar days containing Draft or Scheduled Jobs belonging to the active Register/Project carry a distinct cell-level colour state. The signal derives from canonical Job ownership and status and must recompute when either changes.</p>
+
+<div class="diagram-card">
+  <div class="diagram-tools">
+    <button data-action="out">−</button><button data-action="in">+</button>
+    <button data-action="fit">Fit</button><button data-action="reset">100%</button>
+  </div>
+  <div class="diagram-viewport"><div class="diagram-stage">
+    <pre class="mermaid">
+flowchart TD
+    ALL["All owner-app Jobs"] --> CAL["Scheduler Calendar"]
+    ACTIVE["Active Register / Project"] --> AJ["Active-project Jobs"]
+    AJ --> TABLE["Compact Job row-table"]
+    TABLE -->|"select Job"| EDIT["Scheduler Editor"]
+    CAL -->|"active-project Job card"| EDIT
+    CAL -->|"other-project Job card"| MODAL["Job Summary Modal"]
+    AJ -->|"Draft or Scheduled"| DAY["Colour-code calendar day cell"]
+    MODAL -.->|"must not change"| ACTIVE
+    </pre>
+  </div></div>
+</div>
+
+<h1 id="release-path-v14">18. v1.4 Release Proof</h1>
+<p>The new UI contracts are accompanied by release gates rather than assumptions that the current source already complies.</p>
+<ul>
+  <li><strong>Gate I:</strong> prove the retired sidebar architecture is completely unwired.</li>
+  <li><strong>Gate J:</strong> prove Location/Polygon full-size surfaces and empty states.</li>
+  <li><strong>Gate K:</strong> prove Scheduler ownership and interaction routing.</li>
+  <li><strong>Gate L:</strong> prove active-project Draft/Scheduled calendar-day signalling derives from canonical data.</li>
+</ul>
+
+</article></main></div><script>(()=>{const cards=[...document.querySelectorAll('.diagram-card')];function apply(c){const st=c.querySelector('.diagram-stage');st.style.transform=`translate(${c.dataset.x}px,${c.dataset.y}px) scale(${c.dataset.scale})`}function fit(c){c.dataset.scale='1';c.dataset.x='0';c.dataset.y='0';apply(c)}cards.forEach(c=>{const vp=c.querySelector('.diagram-viewport'),tools=c.querySelector('.diagram-tools'),st=c.querySelector('.diagram-stage');if(!vp||!tools||!st)return;let drag=false,sx=0,sy=0,ox=0,oy=0;tools.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;let s=+c.dataset.scale||1;if(b.dataset.action==='plus')s=Math.min(4,s*1.2);if(b.dataset.action==='minus')s=Math.max(.35,s/1.2);if(b.dataset.action==='reset'){c.dataset.scale='1';c.dataset.x='0';c.dataset.y='0';apply(c);return}if(b.dataset.action==='fit'){fit(c);return}if(b.dataset.action==='full'){if(document.fullscreenElement)document.exitFullscreen();else c.requestFullscreen?.();return}c.dataset.scale=s;apply(c)});vp.addEventListener('wheel',e=>{e.preventDefault();let s=+c.dataset.scale||1;const old=s;s=Math.max(.35,Math.min(4,s*(e.deltaY<0?1.12:.89)));const r=vp.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,x=+c.dataset.x||0,y=+c.dataset.y||0;c.dataset.x=mx-(mx-x)*(s/old);c.dataset.y=my-(my-y)*(s/old);c.dataset.scale=s;apply(c)},{passive:false});vp.addEventListener('pointerdown',e=>{drag=true;vp.setPointerCapture(e.pointerId);vp.classList.add('dragging');sx=e.clientX;sy=e.clientY;ox=+c.dataset.x||0;oy=+c.dataset.y||0});vp.addEventListener('pointermove',e=>{if(!drag)return;c.dataset.x=ox+e.clientX-sx;c.dataset.y=oy+e.clientY-sy;apply(c)});vp.addEventListener('pointerup',()=>{drag=false;vp.classList.remove('dragging')});vp.addEventListener('dblclick',()=>fit(c))});const nav=document.getElementById('toc');if(nav){nav.innerHTML='';const heads=[...document.querySelectorAll('.document h1,.document h2')];heads.forEach((h,i)=>{if(!h.id)h.id='section-'+i;const a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.trim();a.className=h.tagName==='H2'?'l2':'';nav.appendChild(a)});const links=[...nav.querySelectorAll('a')];let raf=0;function spy(){raf=0;if(!heads.length)return;let cur=heads[0];const y=innerHeight*.28;for(const h of heads){if(h.getBoundingClientRect().top<=y)cur=h;else break}links.forEach(a=>a.classList.toggle('active',a.hash==='#'+cur.id));const active=links.find(a=>a.classList.contains('active'));if(active){const side=nav.closest('.side');if(side){const sr=side.getBoundingClientRect(),ar=active.getBoundingClientRect();const pad=Math.min(90,side.clientHeight*.18);if(ar.top<sr.top+pad||ar.bottom>sr.bottom-pad){const target=active.offsetTop-(side.clientHeight/2)+(active.offsetHeight/2);side.scrollTo({top:Math.max(0,target),behavior:'smooth'})}}}}addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(spy)},{passive:true});spy()}})();</script>
+</body></html>

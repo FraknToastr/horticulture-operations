@@ -1,0 +1,13 @@
+================================================================
+ MASTER RELEASE RUNNER CONTRACT SELF-TEST SUITE (R38-02 / B01-B04)
+================================================================
+
+[PASS] (1/4) B01: Inject one mandatory browser suite BLOCKED while others PASSED -> Exits code 2 with BLOCKED summary
+[PASS] (2/4) B02: Inject one mandatory suite FAILED while others PASSED -> Exits code 1 with FAILED summary
+[PASS] (3/4) B03: All mandatory suites PASSED -> Exits code 0 with clean summary
+[PASS] (4/4) B04: Missing / incomplete suite manifest -> Exits nonzero
+
+----------------------------------------------------------------
+TOTAL: 4 PASSED, 0 FAILED (of 4 runner contract assertions)
+----------------------------------------------------------------
+

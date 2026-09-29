@@ -1,0 +1,21 @@
+'use strict';
+const assert=require('assert');
+const path=require('path');
+const mem=new Map();
+const localStorage={getItem:k=>mem.has(k)?mem.get(k):null,setItem:(k,v)=>mem.set(k,String(v)),removeItem:k=>mem.delete(k),clear:()=>mem.clear()};
+global.window={localStorage};global.localStorage=localStorage;
+const root=path.resolve(__dirname,'..');
+for (const f of ['js/data/holidays.js','js/data/initialJobs.js','js/data/staffRoster.js','js/data/historicalOccurrences.js','js/utils/icons.js','js/utils/securityUtils.js','js/utils/dateUtils.js','js/utils/storage/schemaValidator.js','js/utils/storage/migrationEngine.js','js/utils/storage/storageDriver.js','js/utils/storage.js','js/utils/eligibilityEngine.js','js/utils/rostering/engine.js','js/utils/scheduler/costCalculator.js','js/utils/scheduler/engine.js','js/utils/scheduler.js','js/app.js']) require(path.join(root,f));
+const v=window.HortOpsSchemaValidator, s=window.HortOpsStorage, a=window.HortOpsApp;
+const sid='J01@2027-01-02';const fresh=()=>({schemaVersion:2,jobs:[],roster:[],assignments:{},historicalSnapshots:{},rostering:{instructions:{},provenance:{}},permits:{},budgetSettings:{},uiState:{}});
+let count=0, passed=0, failed=0;function check(name,fn){count++;try{fn();passed++;console.log('PASS '+count+' '+name)}catch(e){failed++;console.log('FAIL '+count+' '+name+' :: '+e.message)}}
+const alias=fresh();delete alias.assignments;alias.customAssignments={[sid]:['E2']};
+const dual=fresh();dual.assignments[sid]=['E1'];dual.customAssignments={[sid]:['E2']};
+check('constructor rejects alias-only and conflicting dual-map envelopes',()=>{for(const [n,x] of [['alias',alias],['dual',dual]]) assert.throws(()=>s.createWorkspaceEnvelope(x), /assignments|Ambiguous/, n+' must be rejected')});
+check('canonical preflight default rejects alias and dual; explicit runtime accepts genuine state',()=>{assert.equal(v.validateCurrentV2Presence(alias).valid,false);assert.equal(v.validateCurrentV2Presence(dual).valid,false);const runtime=fresh();delete runtime.assignments;runtime.customAssignments={[sid]:['E1']};assert.equal(v.validateCurrentV2Presence(runtime,{inputKind:'runtime_state'}).valid,true)});
+check('direct save rejects both forms without overwriting canonical bytes',()=>{const w=fresh();w.assignments[sid]=['E1'];assert.equal(s.saveWorkspace(w).ok,true);let before=localStorage.getItem(s.WORKSPACE_STORAGE_KEY);for(const x of [alias,dual]){assert.equal(s.saveWorkspace(x).ok,false);assert.equal(localStorage.getItem(s.WORKSPACE_STORAGE_KEY),before)}});
+check('JSON import rejects both forms and preserves storage',()=>{const before=localStorage.getItem(s.WORKSPACE_STORAGE_KEY);for(const x of [alias,dual]){assert.equal(s.prepareWorkspaceJsonImport(JSON.stringify(x)).success,false);assert.equal(s.importWorkspaceJson(JSON.stringify(x)).success,false);assert.equal(localStorage.getItem(s.WORKSPACE_STORAGE_KEY),before)}});
+check('verified reader rejects injected alias-only storage without mutation',()=>{const before=localStorage.getItem(s.WORKSPACE_STORAGE_KEY);localStorage.setItem(s.WORKSPACE_STORAGE_KEY,JSON.stringify(alias));let res=s.readVerifiedCommittedV2();assert.equal(res.ok,false);assert.equal(localStorage.getItem(s.WORKSPACE_STORAGE_KEY),JSON.stringify(alias));localStorage.setItem(s.WORKSPACE_STORAGE_KEY,before)});
+check('real restore rejects alias and dual without changing live state or raw storage',()=>{a.init();let previous=a.state.jobs;let raw=localStorage.getItem(s.WORKSPACE_STORAGE_KEY);for(const x of [alias,dual]){assert.equal(a.restoreWorkspaceJson(x),false);assert.strictEqual(a.state.jobs,previous);assert.equal(localStorage.getItem(s.WORKSPACE_STORAGE_KEY),raw)}});
+check('canonical real restore accepts populated assignments with detached state',()=>{const w=fresh();w.assignments[sid]=['E1'];assert.equal(a.restoreWorkspaceJson(w),true);assert.deepEqual(a.state.customAssignments[sid],['E1']);w.assignments[sid][0]='E2';assert.deepEqual(a.state.customAssignments[sid],['E1']);assert.deepEqual(JSON.parse(localStorage.getItem(s.WORKSPACE_STORAGE_KEY)).assignments[sid],['E1'])});
+console.log('REVIEW16_INDEPENDENT '+passed+'/'+count+' PASS; '+failed+' GAP');process.exitCode=failed?1:0;

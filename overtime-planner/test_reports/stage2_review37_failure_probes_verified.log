@@ -1,0 +1,26 @@
+StorageDriver removeItem failed for hort_ops_workspace_v2: Error: Injected removeItem denial: hort_ops_workspace_v2
+    at Object.removeItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/review37_stage2_failure_probes.cjs:14:60)
+    at Object.resetWorkspace (js/utils/storage/storageDriver.js:183:33)
+    at Object.resetWorkspace (js/utils/storage.js:45:42)
+    at Object.resetToCleanSlate (js/app.js:744:32)
+    at mockStorage.hort_ops_custom_staff_v1 (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/review37_stage2_failure_probes.cjs:37:22)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/review37_stage2_failure_probes.cjs:61:35)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+PASS R37-P1: Failed reset must not report success or clear live state
+Storage compaction deletion failure for hort_ops_custom_staff_v1: Error: Injected removeItem denial: hort_ops_custom_staff_v1
+    at Object.removeItem (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/review37_stage2_failure_probes.cjs:14:60)
+    at Object.compactStorage (js/utils/storage/storageDriver.js:388:35)
+    at mockStorage.unrelated (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/review37_stage2_failure_probes.cjs:46:22)
+    at Object.<anonymous> (/home/n0rt/Antigravity-IDE/Hort_Ops_Visualisations/Offline2-Overtime-Planner/scripts/review37_stage2_failure_probes.cjs:61:35)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+PASS R37-P2: Compaction deletion failures must be reported truthfully
+PASS R37-P3: Persistence probe must clean up on read mismatch
+TOTAL 3 PASS, 0 FAIL

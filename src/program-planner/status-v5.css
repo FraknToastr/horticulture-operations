@@ -1,0 +1,33 @@
+.program-status-controls{margin-top:12px;padding:12px;border:1px solid var(--panel-border);border-radius:var(--panel-radius,6px);background:var(--uos-surface-muted)}
+.program-status-controls>header,.program-status-automation>header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.program-status-controls h4,.program-status-automation h3{margin:0}.program-status-actions,.program-status-recommendation>div{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.program-status-pause{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:650}.program-status-recommendation,.program-status-review-row{margin-top:10px;padding:10px;border:1px solid var(--panel-border);background:var(--uos-surface);border-radius:var(--panel-radius,6px)}
+.program-status-recommendation p,.program-status-review-row p{margin:0;text-wrap:pretty}.program-status-events{list-style:none;margin:12px 0 0;padding:0;border-top:1px solid var(--panel-border)}
+.program-status-events li{display:grid;grid-template-columns:minmax(0,1fr) auto 32px;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--panel-border);font-size:12px}.program-status-events time{color:var(--uos-text-muted)}
+.program-status-reason-button{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--panel-border);border-radius:50%;background:transparent;color:var(--uos-text-muted);cursor:pointer}.program-status-reason-button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7}
+.program-status-reason-button:hover,.program-status-reason-button:focus-visible{color:var(--uos-primary);border-color:var(--uos-primary)}.program-status-reason-meta>div{display:grid;grid-template-columns:90px 1fr;gap:12px}.program-status-reason-meta dt{font-weight:700}.program-status-reason-meta dd{margin:0}
+.program-status-review [data-status-review-list]{display:grid;gap:8px}.program-status-review-row{margin:0}.program-status-review-row>div{display:flex;gap:6px;margin-top:8px}.program-status-automation{margin-bottom:16px;padding:16px}.program-status-error{color:var(--uos-danger)}
+.status--review-required{color:var(--uos-warning);background:var(--uos-warning-soft)}
+.program-status-v5 .program-register-status-controls,
+.program-status-v5 .program-register-section--status dl > div:has([data-register-edit-key="status"]),
+.program-status-v5 .program-register-section--status dl > div:has([data-register-edit-key="statusDate"]),
+.program-status-v5 .program-register-cta-wrap--status{display:none}
+.program-status-v5 .program-register-status-layout{display:block}
+.program-status-governed-mount{min-width:0}
+.program-status-governed-mount .program-status-controls{margin-top:12px}
+.program-status-lifecycle-open{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;text-align:left}
+.program-status-history-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.program-status-history-heading .program-register-history-title{flex:1 1 auto}
+.program-status-lifecycle-launcher{display:flex;flex:0 0 auto;align-items:center}
+.program-register-status-history .program-status-lifecycle-review{display:inline-flex;width:auto;min-width:72px;justify-content:center;margin:0}
+.program-register-nsa-section__heading .program-status-lifecycle-review{min-height:32px}
+.program-status-lifecycle-dialog{width:min(720px,calc(100vw - 32px));max-width:720px;max-height:min(820px,calc(100dvh - 32px))}
+.program-status-lifecycle-dialog .program-data-dialog__frame{max-height:calc(100dvh - 32px)}
+.program-status-lifecycle-content{min-height:0;overflow:auto}
+.program-status-lifecycle-content .program-status-controls{margin-top:0;border:0;padding:0;background:transparent}
+.program-status-current,
+.program-status-events li>span{display:inline-flex;width:max-content;max-width:100%;align-items:center;padding:3px 9px;border:1px solid var(--panel-border);border-radius:999px;background:var(--uos-surface);color:var(--uos-text);font-size:12px;font-weight:750;line-height:1.35}
+.program-status-events li{grid-template-columns:minmax(110px,max-content) minmax(0,1fr) 32px}
+.program-status-events li>time{min-width:0;text-align:right}
+@media(max-width:720px){.program-status-controls>header,.program-status-automation>header{align-items:flex-start;flex-direction:column}.program-status-events li{grid-template-columns:1fr 32px}.program-status-events time{grid-column:1}}
+@media(prefers-reduced-motion:reduce){.program-status-reason-button{transition:none}}
