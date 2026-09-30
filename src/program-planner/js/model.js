@@ -346,7 +346,7 @@
       context: { financialYear: "", selectedOwner: "", locale: "en-AU", timeZone: "Australia/Adelaide" },
       referenceData: referenceData,
       workspace: {
-        destination: "dashboard", selectedEntityId: null, activeRecordTab: "overview", calendarCursor: "",
+        destination: "register", selectedEntityId: null, activeRecordTab: "overview", calendarCursor: "",
         scheduler: { mode: "week", sort: "date", filters: { ownership: [], status: [], crew: [] } },
         map: {
           scopeMode: "register", ownerMode: "", selectedRegisterId: "", selectedProjectId: "",
@@ -1845,9 +1845,17 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
     ];
     var canonicalIds = {};
     sourceIds.forEach(function (sourceId) { canonicalIds[stableId("NSA", "project", sourceId)] = true; });
+    var applicationIds = {};
+    (workspace.entities.applications || []).forEach(function (application) {
+      applicationIds[text(application && application.id)] = true;
+    });
     function authoritative(project) {
       var provenanceSource = project && project.provenance && text(project.provenance.sourceId);
-      return project && project.owner === "NSA" && (sourceIds.indexOf(provenanceSource) >= 0 || canonicalIds[project.id]);
+      return project && project.owner === "NSA" && (
+        sourceIds.indexOf(provenanceSource) >= 0 ||
+        canonicalIds[project.id] ||
+        applicationIds[text(project.applicationId)]
+      );
     }
     var removed = { projects: {}, jobs: {}, tasks: {}, costingLines: {}, geometries: {}, quotes: {}, quoteLines: {}, payments: {} };
     (workspace.entities.projects || []).forEach(function (project) {
@@ -1860,7 +1868,9 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
         if (!removed.jobs[job.id] && (removed.projects[job.projectId] || removed.jobs[job.parentJobId])) { removed.jobs[job.id] = true; changed = true; }
       });
     }
-    (workspace.entities.tasks || []).forEach(function (task) { if (removed.jobs[task.jobId]) removed.tasks[task.id] = true; });
+    (workspace.entities.tasks || []).forEach(function (task) {
+      if (removed.projects[task.projectId] || removed.jobs[task.jobId]) removed.tasks[task.id] = true;
+    });
     (workspace.entities.costingLines || []).forEach(function (line) { if (removed.projects[line.projectId] || removed.jobs[line.jobId]) removed.costingLines[line.id] = true; });
     (workspace.entities.geometries || []).forEach(function (geometry) { if (removed.projects[geometry.projectId] || removed.jobs[geometry.jobId]) removed.geometries[geometry.id] = true; });
     (workspace.entities.quotes || []).forEach(function (quote) { if (removed.projects[quote.projectId]) removed.quotes[quote.id] = true; });

@@ -99,7 +99,7 @@
     var summary = model && typeof model.recordSummary === "function" ? model.recordSummary(item) : null;
     var rawStatus = summary && summary.status || first(item, ["status", "applicationStatus", "state"]) || (item && item.details && text(item.details.status)) || (item && item.payload && item.payload.details && text(item.payload.details.status));
     var normStatus = normalizeStatus(rawStatus, owner);
-    var appDate = first(item, ["endDate", "end_date", "applicationDate", "date", "eventDate", "startDate", "submittedDate", "createdAt"]);
+    var appDate = first(item, ["dateReceived", "receivedDate", "endDate", "end_date", "applicationDate", "date", "eventDate", "startDate", "submittedDate", "createdAt"]);
     var defaultFy = getFinancialYearForDate(appDate);
     var rawHist = Array.isArray(item.statusHistory) ? item.statusHistory :
                   (item.payload && Array.isArray(item.payload.statusHistory) ? item.payload.statusHistory : []);
@@ -112,7 +112,7 @@
         var applicant = first(item, ["customerName", "applicantName", "contactName", "clientName", "contactPerson"]);
         return displayed && applicant && text(displayed) === text(applicant) ? "applicantName" : "";
       }()),
-      date: summary && summary.startDate || first(item, ["date", "eventDate", "startDate", "submittedDate", "createdAt"]),
+      date: summary && summary.startDate || first(item, ["dateReceived", "receivedDate", "date", "eventDate", "startDate", "submittedDate", "createdAt"]),
       priority: summary && summary.priority || first(item, ["priority"]) || "Normal",
       status: normStatus,
       crew: summary && summary.crewId || first(item, ["crew", "crewName", "crewId"]) || "Unassigned",
@@ -356,6 +356,23 @@
     return false;
   }
 
+  function budgetAmountForRecord(record) {
+    var api = window.UOS && window.UOS.ProgramBudget;
+    var entities = state.workspace && state.workspace.entities || {};
+    if (!record || !api || typeof api.allocationBalance !== "function") return 0;
+    var budgets = {};
+    (entities.annualBudgets || []).forEach(function (budget) { budgets[budget.id] = budget; });
+    return (entities.registerAllocations || []).filter(function (allocation) {
+      var budget = budgets[allocation.budgetId];
+      return allocation.registerId === record.id && budget && budget.owner === record.owner;
+    }).reduce(function (total, allocation) {
+      var balance = api.allocationBalance(state.workspace, allocation.id);
+      return total + Number(balance && balance.allocated || 0);
+    }, 0);
+  }
+  function budgetAmountLabel(record) {
+    return Number(budgetAmountForRecord(record)).toLocaleString("en-AU", { style: "currency", currency: "AUD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
   function buildMiniToolbarHtml(recordId, recordObj) {
     var recordAttr = recordId ? ' data-register-record="' + esc(recordId) + '"' : '';
     var rec = recordObj || (recordId ? state.records.find(function (r) { return r.id === recordId; }) : null);
@@ -499,16 +516,6 @@
 
   var virtualScrollCleanup = null;
 
-  function syncRegisterScrollRunway() {
-    var runway = one("[data-register-scroll-runway]");
-    var scroller = runway && runway.closest(".program-table-wrap");
-    var header = scroller && scroller.querySelector(".program-register-table thead");
-    var summary = scroller && scroller.querySelector(".program-register-summary-row");
-    var cell = runway && runway.firstElementChild;
-    if (!cell || !scroller || !header || !summary) return;
-    var available = scroller.clientHeight - header.getBoundingClientRect().height - summary.getBoundingClientRect().height;
-    cell.style.height = Math.max(0, Math.round(available)) + "px";
-  }
 
   function renderTable() {
   /* A direct redraw supersedes the deferred list redraw.  Leaving that timer
@@ -520,12 +527,10 @@
   }
     var tbody = one("[data-register-table-body]"); if (!tbody) return;
     var tableScroller = tbody.closest(".program-table-wrap");
-  var preserveModuleScroll = Boolean(tableScroller && (document.body.hasAttribute("data-drawer-module") || Array.prototype.some.call(tbody.querySelectorAll(".program-register-drawer-row"), function (drawerRow) { return !drawerRow.hidden; })));
-    var priorTableScrollTop = preserveModuleScroll ? tableScroller.scrollTop : 0;
-    var priorTableScrollLeft = preserveModuleScroll ? tableScroller.scrollLeft : 0;
-    /* Workspace mutations rebuild the Register rows. Preserve the measured
-       viewport cap across that replacement so mounted modules cannot fall
-       back to their legacy minimum height between renders. */
+  var preserveTableScroll = Boolean(tableScroller && (document.body.hasAttribute("data-register-drawer-open") || Array.prototype.some.call(tbody.querySelectorAll(".program-register-drawer-row"), function (drawerRow) { return !drawerRow.hidden; })));
+    var priorTableScrollTop = preserveTableScroll ? tableScroller.scrollTop : 0;
+    var priorTableScrollLeft = preserveTableScroll ? tableScroller.scrollLeft : 0;
+    /* Preserve the shared measured floor while Register rows are rebuilt. */
     var priorDrawerFloors = Object.create(null);
     tbody.querySelectorAll("[data-register-drawer-record].has-viewport-floor").forEach(function (existingDrawer) {
       var existingId = existingDrawer.getAttribute("data-register-drawer-record");
@@ -555,7 +560,7 @@
       if (virtualScrollCleanup) { virtualScrollCleanup(); virtualScrollCleanup = null; }
       clear(tbody);
       var emptyRow = document.createElement("tr");
-      emptyRow.innerHTML = '<td colspan="8" class="program-map-empty">No applications or events match current filters.</td>';
+      emptyRow.innerHTML = '<td colspan="9" class="program-map-empty">No applications or events match current filters.</td>';
       tbody.appendChild(emptyRow);
       return;
     }
@@ -591,12 +596,13 @@
             '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>' +
           '</button>' +
         '</td>' +
-        '<td class="program-register-table__title-cell"><strong>' + esc(displayName) + '</strong><span>' + esc(record.id) + '</span></td>' +
-        '<td class="program-register-table__location-cell">' + esc(record.location) + '</td>' +
-        '<td class="program-register-table__reference-cell">' + esc(refVal) + '</td>' +
-        '<td class="program-register-table__project-cell"><span class="program-register-project-state ' + (linkedProject ? 'is-created' : 'is-not-created') + '">' + projectState + '</span></td>' +
-        '<td class="program-register-table__status-cell">' + statusPillHtml(record.status) + '</td>' +
-        '<td class="program-register-table__received-cell">' + esc(formattedDate) + '</td>' +
+      '<td class="program-register-table__title-cell"><strong>' + esc(displayName) + '</strong><span>' + esc(record.id) + '</span></td>' +
+      '<td class="program-register-table__location-cell">' + esc(record.location) + '</td>' +
+      '<td class="program-register-table__status-cell">' + statusPillHtml(record.status) + '</td>' +
+      '<td class="program-register-table__received-cell">' + esc(formattedDate) + '</td>' +
+      '<td class="program-register-table__reference-cell">' + esc(refVal) + '</td>' +
+      '<td class="program-register-table__project-cell"><span class="program-register-project-state ' + (linkedProject ? 'is-created' : 'is-not-created') + '">' + projectState + '</span></td>' +
+      '<td class="program-register-table__budget-cell">' + esc(budgetAmountLabel(record)) + '</td>' +
         '<td class="program-register-table__actions-cell">' + buildMiniToolbarHtml(record.id, record) + '</td>';
 
       var drawerRow = document.createElement("tr");
@@ -613,7 +619,7 @@
       drawerRow.hidden = true;
 
       var drawerCell = document.createElement("td");
-      drawerCell.colSpan = 8;
+      drawerCell.colSpan = 9;
       var drawerHost = document.createElement("div");
       drawerHost.className = "program-register-drawer";
       drawerHost.setAttribute("data-register-drawer-record", record.id);
@@ -645,25 +651,11 @@
       if (disclosureApi && disclosureApi.isOpen(key)) renderDetail(record, drawerHost);
     });
 
-    var scrollRunway = document.createElement("tr");
-    scrollRunway.className = "program-register-scroll-runway";
-    scrollRunway.setAttribute("data-register-scroll-runway", "");
-    scrollRunway.setAttribute("aria-hidden", "true");
-    scrollRunway.innerHTML = '<td colspan="8"></td>';
-    fragment.appendChild(scrollRunway);
-
   tbody.appendChild(fragment);
-  if (preserveModuleScroll) {
-    var restoreModuleScroll = function (remainingFrames) {
-      if (!tableScroller.isConnected) return;
-      tableScroller.scrollTop = priorTableScrollTop;
-      tableScroller.scrollLeft = priorTableScrollLeft;
-      if (remainingFrames > 0 && typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(function () { restoreModuleScroll(remainingFrames - 1); });
-    };
-    restoreModuleScroll(4);
+  if (preserveTableScroll) {
+    tableScroller.scrollTop = priorTableScrollTop;
+    tableScroller.scrollLeft = priorTableScrollLeft;
   }
-    syncRegisterScrollRunway();
-    if (typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(syncRegisterScrollRunway);
     if (disclosureApi) disclosureApi.sync();
     var drawerWorkspace = window.UOS && window.UOS.ProgramDrawerWorkspace;
     if (drawerWorkspace && typeof drawerWorkspace.requestSync === "function") {
@@ -1488,12 +1480,12 @@
     var actionRow = document.createElement("div");
     actionRow.className = "program-register-nsa-project-fact program-register-budget-action-row";
     actionRow.setAttribute("data-register-budget-row", "action");
-    actionRow.innerHTML = '<span>Budget</span><button type="button" class="uos-button uos-button--secondary uos-button--sm" data-register-action="allocate-budget" data-register-record="' + esc(record.id) + '">Allocate/Adjust</button>';
+ actionRow.innerHTML = '<span>Budget</span><button type="button" class="uos-button uos-button--' + (allocations.length ? "primary" : "secondary") + ' uos-button--sm" data-register-action="allocate-budget" data-register-record="' + esc(record.id) + '">Allocate/Adjust</button>';
     projectFact.insertAdjacentElement("afterend", actionRow);
     var allocationTableRow = document.createElement("div");
     allocationTableRow.className = "program-register-nsa-project-fact program-register-budget-allocation-table-row";
     allocationTableRow.setAttribute("data-register-budget-row", "allocation-table");
-    allocationTableRow.innerHTML = '<span>Council Operations Allocated</span><div class="program-register-allocation-table" data-register-allocation-table><div class="program-register-allocation-table__header" data-register-allocation-header><span>Financial FY</span><span>Allocated</span></div></div>';
+      allocationTableRow.innerHTML = '<span>Council Operations Allocated</span><div class="program-register-allocation-table" data-register-allocation-table><div class="program-register-allocation-table__header" data-register-allocation-header><span>Financial Year</span><span>Allocated</span></div></div>';
     actionRow.insertAdjacentElement("afterend", allocationTableRow);
     var allocationTable = one("[data-register-allocation-table]", allocationTableRow);
     var rows = allocations.length ? allocations : [{ id: "", budgetId: "" }];
@@ -2494,11 +2486,14 @@
         var recordId = actionBtn.getAttribute("data-register-record") || state.selectedId;
         if (!recordId) return;
         var token = MODULE_ACTION_TOKENS.find(function (tok) { return tok.key === actionKey; });
-        var targetDest = token ? token.dest : actionKey;
-        var recordObj = state.records.find(function (r) { return r.id === recordId; });
-        var linkedProject = buildLinkedProject(state.workspace, recordObj);
-        var contextEntityId = recordId;
-        state.selectedId = recordId;
+    var targetDest = token ? token.dest : actionKey;
+    var recordObj = state.records.find(function (r) { return r.id === recordId; });
+    var linkedProject = buildLinkedProject(state.workspace, recordObj);
+    var contextEntityId = recordId;
+    if (targetDest && targetDest !== "register") {
+      document.body.setAttribute("data-register-module-navigation-pending", targetDest);
+    }
+    state.selectedId = recordId;
         state.mode = "detail";
         renderMode();
         renderTable();

@@ -35,13 +35,13 @@ async function floorGeometry(child, id) {
     const drawer = document.querySelector('[data-register-drawer-record="' + CSS.escape(recordId) + '"]');
     const cell = drawer.closest("td");
     const host = drawer.querySelector("[data-register-module-host]");
-    const floorStyle = getComputedStyle(cell);
+    const floorStyle = getComputedStyle(drawer);
     const drawerStyle = getComputedStyle(drawer);
     const drawerRect = drawer.getBoundingClientRect();
     const cellRect = cell.getBoundingClientRect();
     return {
       viewportBottom: innerHeight,
-      floorBottom: cellRect.bottom,
+      floorBottom: drawerRect.bottom,
       drawerBottom: drawerRect.bottom,
       floorWidth: floorStyle.borderBottomWidth,
       floorStyle: floorStyle.borderBottomStyle,
@@ -55,7 +55,7 @@ async function floorGeometry(child, id) {
 
 for (const fixture of [
   { owner: "NSA", shell: "/src/program-planner/nsa.html", colour: /rgb\((4, 120, 87|21, 128, 61)\)/ },
-  { owner: "EVT", shell: "/src/program-planner/events.html", colour: /rgb\(23, 105, 242\)/ }
+    { owner: "EVT", shell: "/src/program-planner/events.html", colour: /rgb\((23, 105, 242|29, 78, 216)\)/ }
 ]) {
   test(fixture.owner + " Register and Calculator keep their owner floor inside the viewport", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 720 });
@@ -66,6 +66,7 @@ for (const fixture of [
     expect(register.floorStyle).toBe("solid");
     expect(register.floorColor).toMatch(fixture.colour);
     expect(register.floorBottom).toBeLessThanOrEqual(register.viewportBottom);
+    expect(register.floorBottom).toBeGreaterThanOrEqual(register.viewportBottom - 8);
 
     await child.evaluate((recordId) => window.UOS.ProgramApp.navigateWithContext("costing", recordId), id);
     await child.waitForFunction(() => document.body.getAttribute("data-drawer-module") === "costing");
@@ -76,6 +77,7 @@ for (const fixture of [
     expect(calculator.floorStyle).toBe("solid");
     expect(calculator.floorColor).toMatch(fixture.colour);
     expect(calculator.floorBottom).toBeLessThanOrEqual(calculator.viewportBottom);
+    expect(calculator.floorBottom).toBeGreaterThanOrEqual(calculator.viewportBottom - 8);
     expect(calculator.drawerBottom).toBeLessThan(calculator.viewportBottom);
     expect(calculator.drawerHeight).toBeLessThanOrEqual(calculator.drawerMaxHeight + 0.5);
     expect(calculator.hostHeight).toBeLessThanOrEqual(calculator.drawerHeight + 0.5);

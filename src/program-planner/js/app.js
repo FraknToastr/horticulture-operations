@@ -10,7 +10,7 @@
   function all(selector) { return Array.prototype.slice.call(document.querySelectorAll(selector)); }
   function setText(selector, value) { var node = one(selector); if (node) node.textContent = String(value == null ? "" : value); }
   function setHidden(selector, hidden) { all(selector).forEach(function (node) { node.hidden = Boolean(hidden); }); }
-  function destination(value) { return DESTINATIONS.indexOf(value) >= 0 ? value : "dashboard"; }
+  function destination(value) { return DESTINATIONS.indexOf(value) >= 0 ? value : "register"; }
   function returnDestinationFromData(workspace) {
     var value = workspace && workspace.workspace && workspace.workspace.dataReturnDestination;
     return DESTINATIONS.indexOf(value) >= 0 && value !== "data" ? value : "register";
@@ -25,6 +25,29 @@
       var value = new URLSearchParams(window.location.search || "").get("owner");
       return value === "EVT" ? "EVT" : value === "NSA" ? "NSA" : "";
     } catch (error) { return ""; }
+  }
+  function factoryResetRequested() {
+    try {
+      var owner = entryOwner() || "NSA";
+      var store = window.parent && window.parent !== window ? window.parent.sessionStorage : window.sessionStorage;
+      var key = "uos.factory-reset-intent." + owner;
+      var createdAt = Number(store.getItem(key));
+      if (!createdAt || Date.now() - createdAt > 120000) {
+        store.removeItem(key);
+        return false;
+      }
+      return true;
+    } catch (_) { return false; }
+  }
+  function clearFactoryResetRequest() {
+    try {
+      var owner = entryOwner() || "NSA";
+      var store = window.parent && window.parent !== window ? window.parent.sessionStorage : window.sessionStorage;
+      store.removeItem("uos.factory-reset-intent." + owner);
+      var url = new URL(window.location.href);
+      url.searchParams.delete("factory-reset");
+      window.history.replaceState({}, "", url.pathname + (url.search || "") + (url.hash || ""));
+    } catch (_) {}
   }
   function workingOwner(workspace) {
     var configured = appConfig();
@@ -853,15 +876,35 @@ function resetStartupWorkspace(workspace) {
     state.error = null;
     state.isSessionCleared = false;
     render();
-   return (typeof UOS.ProgramStorage.getRaw === "function" ? UOS.ProgramStorage.getRaw() : UOS.ProgramStorage.get()).then(function (workspace) {
+    function loadStoredWorkspace() {
+      return (typeof UOS.ProgramStorage.getRaw === "function" ? UOS.ProgramStorage.getRaw() : UOS.ProgramStorage.get()).then(function (workspace) {
       /* A stored workspace may legitimately lack a rollout marker after an
          import. Startup is never authority to delete operational records. */
       if (workspace) return repairStoredWorkspace(workspace);
       return activate(UOS.ProgramModel.blank());
-    }).catch(function (error) {
-      if (recoverableStartupError(error)) return openStartupImportRecovery(error);
-      return fail(error);
-    });
+      }).catch(function (error) {
+        if (recoverableStartupError(error)) return openStartupImportRecovery(error);
+        return fail(error);
+      });
+    }
+    if (factoryResetRequested()) {
+      clearFactoryResetRequest();
+      var confirmation = UOS.dialogs && typeof UOS.dialogs.confirm === "function" ? UOS.dialogs.confirm({
+        title: "Factory reset this workspace?",
+        message: "This permanently deletes every Register record, linked Project, Planner task, budget and other stored workspace record in this browser. This cannot be undone.",
+        confirmLabel: "Permanently factory reset",
+        cancelLabel: "Keep stored workspace",
+        danger: true
+      }) : Promise.resolve(false);
+      return confirmation.then(function (confirmed) {
+        if (!confirmed) return loadStoredWorkspace();
+        return UOS.ProgramStorage.factoryReset().then(function (fresh) {
+          if (UOS.toast) UOS.toast("Factory reset complete. The Register and default Rate Library are ready.", "success");
+          return activate(fresh, { focus: "register" });
+        });
+      }).catch(fail);
+    }
+    return loadStoredWorkspace();
   }
 
   function applyMigration() {

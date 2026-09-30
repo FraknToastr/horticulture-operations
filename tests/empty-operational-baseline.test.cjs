@@ -35,6 +35,7 @@ for (const owner of ["NSA", "EVT"]) {
   assert.ok(workspace.entities.rateItems.every((item) => item.owner === "" && item.id.startsWith("RATE-") && ["Labour", "Equipment", "Material", "Contractors", "Sundry"].includes(item.kind)));
     assert.equal(workspace.entities.rateItems.filter((item) => item.kind === "Labour").length, 3);
     assert.equal(workspace.entities.rateItems.filter((item) => item.kind === "Sundry").length, 5);
+  assert.equal(workspace.workspace.destination, "register");
   assert.deepEqual(Object.fromEntries(["Labour", "Equipment", "Material", "Contractors", "Sundry"].map((kind) => [kind, workspace.entities.rateItems.filter((item) => item.kind === kind).length])), {
     Labour: 3, Equipment: 2, Material: 33, Contractors: 2, Sundry: 5
   });
@@ -77,7 +78,7 @@ test("one-time reset destroys operational state, restores rates, and is idempote
   }
   assert.deepEqual(json(result.workspace.referenceData.users || []), []);
   assert.equal(result.workspace.referenceData.dirty, undefined);
-  assert.equal(result.workspace.workspace.destination, "dashboard");
+  assert.equal(result.workspace.workspace.destination, "register");
   assert.equal(result.workspace.workspace.selectedEntityId, null);
   assert.equal(result.workspace.statusControl.automationEnabled, true);
   assert.equal(result.workspace.statusControl.operatorName, "");

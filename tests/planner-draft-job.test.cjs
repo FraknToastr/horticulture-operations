@@ -129,3 +129,38 @@ test("duplicated operational tasks do not inherit job links", () => {
   assert.notEqual(second.job.id, draft.job.id);
   assert.equal(second.workspace.entities.jobs.length, draft.workspace.entities.jobs.length + 1);
 });
+
+test("governed editor save creates exactly one Draft Planner Job for an operational task", () => {
+  const { model, planner, workspace, project } = fixture();
+  const values = { title: "Inspect irrigation assets", description: "Confirm valves, heads, and isolation points before work.", section: "Pre-delivery", operational: true, status: "In Progress", assigneeId: "Technical Officer", dueDate: "2026-10-12", notes: "Coordinate with irrigation team.", sortOrder: 7 };
+  const saved = planner.saveTask(workspace, project.id, null, values, { at: "2026-09-29T01:00:00.000Z" });
+  assert.equal(saved.created, true);
+  assert.equal(saved.task.operational, true);
+  assert.equal(saved.task.jobId, saved.job.id);
+  assert.equal(saved.job.status, "draft");
+  assert.equal(saved.job.sourceKind, "planner");
+  assert.equal(saved.job.sourceEntityId, saved.task.id);
+  assert.equal(saved.workspace.entities.jobs.filter((job) => job.sourceKind === "planner" && job.sourceEntityId === saved.task.id).length, 1);
+  assert.doesNotThrow(() => model.assertValid(saved.workspace));
+  const edited = planner.saveTask(saved.workspace, project.id, saved.task.id, { ...values, title: "Inspect and mark irrigation assets" }, { at: "2026-09-29T02:00:00.000Z" });
+  assert.equal(edited.created, false);
+  assert.equal(edited.job.id, saved.job.id);
+  assert.equal(edited.job.title, "Inspect and mark irrigation assets");
+  assert.equal(edited.workspace.entities.jobs.filter((job) => job.sourceKind === "planner" && job.sourceEntityId === saved.task.id).length, 1);
+});
+
+test("governed editor save keeps inert tasks job-free and allows confirmed Job-backed demotion", () => {
+  const { planner, workspace, project } = fixture();
+  const values = { title: "Confirm resident notification", description: "Record completion of the notification step.", section: "Planning and Approval", operational: false, status: "Not Started", assigneeId: "Admin", dueDate: "", notes: "", sortOrder: 8 };
+  const inert = planner.saveTask(workspace, project.id, null, values, {});
+  assert.equal(inert.task.operational, false);
+  assert.equal(inert.job, null);
+  assert.equal(inert.workspace.entities.jobs.filter((job) => job.sourceEntityId === inert.task.id).length, 0);
+  const operational = planner.saveTask(inert.workspace, project.id, inert.task.id, { ...values, operational: true }, {});
+  assert.throws(() => planner.saveTask(operational.workspace, project.id, inert.task.id, values, {}), /Confirm deletion of the linked Job/);
+  const demoted = planner.saveTask(operational.workspace, project.id, inert.task.id, values, { deleteLinkedJob: true });
+  assert.equal(demoted.task.operational, false);
+  assert.equal(demoted.task.jobId, null);
+  assert.equal(demoted.task.schedulerJobId, null);
+  assert.equal(demoted.workspace.entities.jobs.filter((job) => job.sourceEntityId === inert.task.id).length, 0);
+});

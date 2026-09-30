@@ -41,6 +41,33 @@ test("PC-006 Project promotion creates canonical checklist Tasks but no implicit
   });
 });
 
+test("NSA startup repair preserves a current linked Project and its Planner Tasks", () => {
+  const model = load("NSA");
+  const workspace = model.blank("2026-09-30T00:00:00.000Z");
+  const record = {
+    id: "NSA-APP-REPAIR-PERSISTENCE",
+    owner: "NSA",
+    type: "application",
+    title: "Repair persistence",
+    dateReceived: "2026-09-30",
+    status: "received"
+  };
+  workspace.entities.applications.push(record);
+  const promoted = model.promoteRegisterRecord(workspace, record.id);
+  const taskIds = promoted.workspace.entities.tasks
+    .filter((task) => task.projectId === promoted.project.id)
+    .map((task) => task.id);
+
+  const repaired = model.repairNatureProjectScope(model.normalize(promoted.workspace));
+
+  assert.ok(repaired.workspace.entities.applications.some((item) => item.id === record.id));
+  assert.ok(repaired.workspace.entities.projects.some((item) => item.id === promoted.project.id));
+  assert.deepEqual(
+    Array.from(repaired.workspace.entities.tasks.filter((task) => task.projectId === promoted.project.id).map((task) => task.id)),
+    Array.from(taskIds)
+  );
+});
+
 test("v4 normalisation performs v5 status migration and JSON round-trip", () => {
   const model = load(); const v4 = model.blank("2026-09-12T00:00:00.000Z");
   v4.schemaVersion = 4; delete v4.statusControl; delete v4.entities.statusEvents; delete v4.entities.statusRecommendations;

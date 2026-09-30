@@ -21,21 +21,97 @@ test("Budget UI allocates to a Register record before any Project exists", async
   });
   const frame = page.frameLocator("iframe");
   await expect(frame.locator('[data-program-view="budget"]')).toBeVisible();
+  await expect(frame.getByRole("heading", { name: "Annual Budgets" })).toBeVisible();
+  await expect(frame.locator(".program-budget__header")).toHaveCount(0);
+  await expect(frame.locator(".program-budget__workspace")).toBeVisible();
+  const budgetFloor = await frame.locator(".program-budget__workspace").evaluate((node) => ({
+    width: getComputedStyle(node).borderBottomWidth,
+    top: node.getBoundingClientRect().top,
+    bottom: node.getBoundingClientRect().bottom,
+    viewport: innerHeight
+  }));
+  expect(budgetFloor.width).toBe("4px");
+  expect(budgetFloor.bottom).toBeLessThanOrEqual(budgetFloor.viewport);
+  expect(budgetFloor.bottom).toBeGreaterThanOrEqual(budgetFloor.viewport - 8);
+  const originalViewport = page.viewportSize();
+  await page.setViewportSize({ width: originalViewport.width, height: originalViewport.height - 100 });
+  await expect.poll(() => frame.locator(".program-budget__workspace").evaluate((node) => innerHeight - node.getBoundingClientRect().bottom)).toBeGreaterThanOrEqual(0);
+  await expect.poll(() => frame.locator(".program-budget__workspace").evaluate((node) => innerHeight - node.getBoundingClientRect().bottom)).toBeLessThanOrEqual(8);
+  await page.setViewportSize(originalViewport);
+  await expect(frame.locator(".program-budget__approvals")).toBeVisible();
+  await expect(frame.locator(".program-budget__metrics")).toBeVisible();
+  await expect(frame.locator(".program-budget__metric")).toHaveCount(3);
+  await expect(frame.locator('[data-budget-pending]')).toHaveCount(1);
+  await expect(frame.locator('[data-budget-allocations]')).toHaveCount(1);
+  const recordsLayout = await frame.locator(".program-budget__records").evaluate((records) => {
+    const allocations = records.querySelector(".program-budget__allocations");
+    const pending = records.querySelector(".program-budget__pending");
+    const tableWrap = records.querySelector(".program-budget__table-wrap");
+    const pendingList = records.querySelector(".program-budget__history");
+    return {
+      allocationsHeight: allocations.getBoundingClientRect().height,
+      pendingHeight: pending.getBoundingClientRect().height,
+      tableOverflow: getComputedStyle(tableWrap).overflowY,
+      pendingOverflow: getComputedStyle(pendingList).overflowY,
+      allocationColumns: records.querySelectorAll(".program-budget__allocations thead th").length
+    };
+  });
+  expect(recordsLayout).toEqual(expect.objectContaining({ tableOverflow: "auto", pendingOverflow: "auto", allocationColumns: 6 }));
+  expect(recordsLayout.allocationsHeight).toBeGreaterThanOrEqual(145);
+  expect(recordsLayout.pendingHeight).toBeGreaterThanOrEqual(105);
+  const budgetColumns = await frame.locator(".program-budget__workspace").evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(" ").map(parseFloat));
+  expect(Math.abs(budgetColumns[0] - budgetColumns[1])).toBeLessThanOrEqual(2);
+  await expect(frame.locator('[data-budget-header-unallocated]')).toBeVisible();
+  const headerOrder = await frame.locator('[data-budget-header-unallocated], [data-program-destination="budget"]').evaluateAll((nodes) => nodes.map((node) => node.hasAttribute("data-budget-header-unallocated") ? "unallocated" : "budget"));
+  expect(headerOrder).toEqual(["budget", "unallocated"]);
+  const headerGeometry = await frame.locator('[data-program-destination="budget"], [data-budget-header-unallocated]').evaluateAll((nodes) => {
+    const budgetButton = nodes.find((node) => node.hasAttribute("data-program-destination"));
+    const balanceCard = nodes.find((node) => node.hasAttribute("data-budget-header-unallocated"));
+    const buttonRect = budgetButton.getBoundingClientRect();
+    const cardRect = balanceCard.getBoundingClientRect();
+    return { heightDifference: Math.abs(buttonRect.height - cardRect.height), separation: cardRect.left - buttonRect.right };
+  });
+  expect(headerGeometry.heightDifference).toBeLessThanOrEqual(1);
+  expect(headerGeometry.separation).toBeGreaterThanOrEqual(12);
+  await expect(frame.locator('[data-budget-header-year]')).toHaveCount(0);
+  expect(await frame.locator('[data-budget-header-amount]').evaluate((node) => parseFloat(getComputedStyle(node).fontSize))).toBeGreaterThanOrEqual(18);
+  // Global warning presentation is covered by its dedicated shell test.
   await frame.locator('[data-budget-year]').selectOption("2026-27");
-  await frame.locator('[data-budget-action="create"]').click();
-  await frame.locator('[data-budget-form="create"] button[type="submit"]').click();
-  await expect(frame.locator('[data-budget-action="approve"]')).toBeVisible();
-  await frame.locator('[data-budget-action="approve"]').click();
-  const approval = frame.locator('[data-budget-form="approve"]');
+  await expect(frame.locator('[data-budget-action="create"]')).toHaveCount(0);
+  const approval = frame.locator('[data-budget-inline-approve]');
+  await expect(approval).toBeVisible();
+  const approvalLayout = await approval.evaluate((form) => {
+    const box = (name) => {
+      const rect = form.elements[name].getBoundingClientRect();
+      return { x: rect.x, y: rect.y, width: rect.width };
+    };
+    return { amount: box("amount"), date: box("date"), actor: box("actor"), approver: box("approver"), reason: box("reason"), evidence: box("evidence") };
+  });
+  expect(Math.abs(approvalLayout.amount.y - approvalLayout.date.y)).toBeLessThanOrEqual(2);
+  expect(Math.abs(approvalLayout.actor.y - approvalLayout.approver.y)).toBeLessThanOrEqual(2);
+  expect(Math.abs(approvalLayout.reason.y - approvalLayout.evidence.y)).toBeLessThanOrEqual(2);
+  expect(Math.abs(approvalLayout.amount.width - approvalLayout.date.width)).toBeLessThanOrEqual(2);
+  await expect(frame.locator('[data-budget-action="approve"]')).toHaveCount(0);
+  await expect(frame.locator('[data-budget-history]')).toHaveCount(0);
+  await expect(frame.locator('[data-budget-year-state]')).not.toContainText("Manage annual budget");
+  await expect(frame.locator('.program-budget__status')).toHaveCount(0);
   await approval.locator('[name="amount"]').fill("1000");
+  await frame.locator('[data-budget-year]').selectOption("2027-28");
+  await frame.locator('[data-budget-year]').selectOption("2026-27");
+  await expect(frame.locator('[data-budget-inline-approve] [name="amount"]')).toHaveValue("1000");
   await approval.locator('[name="actor"]').fill("Budget officer");
   await approval.locator('[name="approver"]').fill("Budget officer");
   await approval.locator('[name="reason"]').fill("Annual approval");
   await approval.locator('[name="evidence"]').fill("Council approval record");
   await approval.locator('button[type="submit"]').click();
+  await expect(frame.locator('[data-budget-inline-approve]')).toHaveCount(0);
+  await expect(frame.locator('.program-budget__status')).toHaveAttribute("data-state", "open");
+  await expect(frame.locator('[data-budget-header-amount]')).toHaveText("$1,000.00");
+  await expect(frame.locator('.program-budget__approval-details')).toHaveCount(0);
   await expect(approval).toBeHidden();
   await child.evaluate(() => window.UOS.ProgramApp.navigate("register"));
   await expect(frame.locator('[data-program-view="register"]')).toBeVisible();
+  await expect(frame.locator('[data-budget-header-unallocated]')).toBeVisible();
   const filterToggle = frame.locator('[data-filter-drawer="register"] [data-filter-drawer-toggle]');
   if (await filterToggle.count()) await filterToggle.click();
   await frame.locator('[data-register-search]').fill("BUDGET-UI");
@@ -64,6 +140,7 @@ test("Budget UI allocates to a Register record before any Project exists", async
   await allocation.locator('[name="evidence"]').fill("Allocation approval record");
   await allocation.locator('button[value="approved"]').click();
   await expect(projectBudget.locator('[data-register-allocation-amount]')).toHaveText("$600.00");
+  await expect(frame.locator('[data-budget-header-amount]')).toHaveText("$400.00");
   await projectBudget.locator('[data-register-action="allocate-budget"]').click();
   const draft = frame.locator('[data-budget-form="allocate"]');
   await draft.locator('[name="amount"]').fill("50");
@@ -74,9 +151,8 @@ test("Budget UI allocates to a Register record before any Project exists", async
   await expect(draft).toBeHidden();
   await child.evaluate(() => window.UOS.ProgramApp.navigate("budget"));
   await expect(frame.locator('[data-budget-pending]')).toContainText("Pending scope");
-  await expect(frame.locator('[data-budget-history]')).toContainText("$1,000.00");
-  await expect(frame.locator('[data-budget-history]')).toContainText("NSA-APP-BUDGET-UI");
-  await expect(frame.locator('[data-budget-history]')).toContainText("R-UI-42");
+  await expect(frame.locator('[data-budget-history]')).toHaveCount(0);
+  await expect(frame.locator('.program-budget__approval-details')).toHaveCount(0);
   await frame.locator('[data-budget-action="decide"]').click();
   const rejected = frame.locator('[data-budget-form="decide"]');
   await rejected.locator('[name="decision"]').selectOption("rejected");
@@ -162,7 +238,7 @@ test("NSA Register drawer places newest-first FY allocations in the inline table
       equalButtonWidths: true,
       tableMatchesActionWidth: true,
       headerColumns: 2,
-      headerText: "Financial FYAllocated",
+      headerText: "Financial YearAllocated",
       compactHeader: true,
       discreteRowDivider: true,
       allocationRows: 2
@@ -203,7 +279,7 @@ test("Event Register drawer keeps project-free allocations in the inline table",
   const drawer = frame.locator('[data-register-drawer-record="EVT-INLINE-BUDGET"]');
   const projectGroup = drawer.locator(".program-register-nsa-summary-group--project");
   await expect(projectGroup.locator('[data-register-budget-row="allocation"]')).toHaveCount(2);
-  await expect(projectGroup.locator("[data-register-allocation-header]")).toHaveText("Financial FYAllocated");
+  await expect(projectGroup.locator("[data-register-allocation-header]")).toHaveText("Financial YearAllocated");
   await expect(projectGroup.locator('[data-register-budget-fy="2026-27"] [data-register-allocation-amount]')).toHaveText("$625.00");
   await expect(projectGroup.locator('[data-register-budget-fy="2025-26"] [data-register-allocation-amount]')).toHaveText("$375.00");
   await expect(projectGroup.locator('[data-register-action="allocate-budget"]')).toBeVisible();

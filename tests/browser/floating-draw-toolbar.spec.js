@@ -37,6 +37,9 @@ test("floating drawing toolbar exposes stateful controls and remains within the 
   await expect(toolbar.locator("#cancelDrawingButton")).toBeDisabled();
 
   const before = await toolbar.boundingBox();
+  const map = await frame.locator("#eventMap").boundingBox();
+  expect(before.x - map.x).toBeGreaterThanOrEqual(20);
+  expect(before.y - map.y).toBeGreaterThanOrEqual(20);
   const grip = await handle.boundingBox();
   await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
   await page.mouse.down();

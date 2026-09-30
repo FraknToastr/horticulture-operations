@@ -881,6 +881,8 @@ inconsistent business history.
 
 # 7. Explicit product contracts
 
+PC-018 and PC-019 now require one full-height, 4px hard-floor and scroll-ownership rule for native Register and every mounted module. An open row sits directly beneath the sticky Register column headings; its outer table cannot scroll until all rows close, while internal sections may scroll. Register-specific intrinsic-height or module-specific floor exceptions are prohibited. Budget remains a full-page workspace with the same hard-floor treatment. ADR-016 supersedes ADR-012.
+
 The constitutional register declares PC-001 through PC-028. PC-014 through PC-019 formalise the UI interaction architecture; PC-020 governs Planner Task management; PC-021 through PC-028 govern annual finance and delivery lineage. They are incorporated into this Constitution by reference. The historical excerpt below lists PC-001 through PC-012; `PRODUCT_CONTRACTS.md` is the complete contract register.
 
   ------------------------------------------------------------------------
@@ -1335,3 +1337,17 @@ development task.
 The existing executable `product-contracts.js` should remain the
 enforcement companion to this document rather than being replaced by
 prose.
+## T-020 --- Conservative, impact-scoped verification
+
+Testing effort must be proportional to the change surface and risk. A change that is limited to one JavaScript module or a clearly bounded set of modules must begin with the smallest relevant unit or module tests, then add only the directly affected browser or cross-module checks. The complete repository test regime is not the default for a narrow change.
+
+The change record must identify:
+
+- the changed modules and protected contracts;
+- the targeted tests run and their results;
+- any cross-module or browser boundary exercised;
+- why broader suites were not required, or the specific risk that justified them.
+
+The complete test regime is required when a change is broad, cross-cutting, schema/storage/migration related, security-sensitive, release-gate related, or otherwise likely to affect unrelated contracts. A full run may also be requested by the release owner. A green targeted run never waives a required release gate, and conservative testing must not be used to avoid testing a known impacted boundary.
+
+This rule is constitutional guidance for engineering verification, not permission to weaken product contracts or release evidence.

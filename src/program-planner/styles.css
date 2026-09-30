@@ -1,4 +1,8 @@
 /* Horticulture Program Planner — segmented canvas shell. */
+/* Register row-header: preserve one complete, white action rail and compact operational data. */
+.program-register-table__actions-cell { min-width: 420px; padding: 6px 8px !important; overflow: visible; }
+.program-register-table__actions-cell .program-register-mini-toolbar { display: inline-flex; flex-wrap: nowrap; gap: 8px; width: max-content; min-width: 100%; box-sizing: border-box; padding: 8px; overflow: visible; background: var(--uos-surface, #fff); }
+.program-register-table__actions-cell .program-register-mini-toolbar > button { flex: 0 0 auto; }
 
 body.program-planner {
   --program-content-max: 1280px;
@@ -6,6 +10,16 @@ body.program-planner {
   --program-rail-collapsed: 64px;
   background: var(--page-bg);
 }
+
+/* Register summary values: keep operational columns compact and leave width for the record identity. */
+.program-register-table__received-col,
+.program-register-table__received-cell { width: 88px; max-width: 88px; white-space: nowrap; }
+.program-register-table__reference-col,
+.program-register-table__reference-cell { width: 96px; max-width: 96px; }
+.program-register-table__project-col,
+.program-register-table__project-cell { width: 110px; max-width: 110px; }
+.program-register-table__budget-col,
+.program-register-table__budget-cell { width: 96px; max-width: 96px; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
 
 body.program-planner .uos-app,
 .program-app,
@@ -5343,8 +5357,8 @@ html[data-suite-theme="dark"] .program-scheduler-modes button.is-active {
 .program-map-floating-draw-toolbar {
   position: absolute;
   z-index: 12;
-  top: 12px;
-  left: 12px;
+  top: 20px;
+  left: 20px;
   display: flex;
   align-items: stretch;
   gap: 6px;
@@ -6651,9 +6665,9 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   border-color: #047857 !important;
   color: #ffffff !important;
   font-weight: 700;
-  min-height: 28px;
-  padding: 2px 10px;
-  gap: 4px;
+  min-height: 34px;
+  padding: 5px 14px;
+  gap: 6px;
 }
 
 .planner-btn-add-item svg {
@@ -6732,14 +6746,19 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
 .planner-col-owner { width: 154px; }
 .planner-col-due { width: 130px; }
 .planner-col-notes { min-width: 200px; }
-.planner-col-action { width: 112px; text-align: center; white-space: nowrap; }
+.planner-col-action { width: 150px; padding-inline: 14px !important; text-align: center; white-space: nowrap; }
 
 .planner-item-row[data-planner-selectable] { cursor: pointer; }
-.planner-item-row.is-duplicate-selected td { outline: 2px solid var(--program-owner-accent, #2563eb); outline-offset: -2px; }
+.planner-item-row.is-duplicate-selected,
+.planner-item-row[aria-selected="true"] { outline: 2px solid var(--program-owner-accent, #2563eb); outline-offset: -2px; }
+.planner-item-row.is-duplicate-selected td,
+.planner-item-row[aria-selected="true"] td { border-inline: 0; outline: 0; }
 .planner-item-row[data-planner-selectable]:focus-visible td { outline: 2px solid var(--program-owner-accent, #2563eb); outline-offset: -2px; }
+.planner-item-row.is-duplicate-selected:focus-visible td,
+.planner-item-row[aria-selected="true"]:focus-visible td { outline: 0; }
 .planner-duplicate-action { display: inline-flex; }
 .planner-duplicate-action:focus-visible { outline: 2px solid var(--program-owner-accent, #2563eb); outline-offset: 2px; border-radius: 4px; }
-.planner-schedule-btn { margin-right: 5px; padding: 3px 6px; border: 1px solid var(--program-owner-border, #bfdbfe); border-radius: 4px; color: var(--program-owner-strong, #1d4ed8); background: #fff; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
+.planner-schedule-btn { min-width: 54px; min-height: 30px; margin-right: 8px; padding: 5px 11px; border: 1px solid var(--program-owner-border, #bfdbfe); border-radius: 4px; color: var(--program-owner-strong, #1d4ed8); background: #fff; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
 .planner-schedule-btn.is-scheduled { color: #166534; border-color: #86efac; background: #f0fdf4; }
 
 @media (max-width: 760px) {
@@ -9714,18 +9733,6 @@ dd.is-privacy-masked {
   white-space: nowrap;
 }
 
-.program-register-scroll-runway,
-.program-register-scroll-runway:hover {
-  background: transparent !important;
-  cursor: default !important;
-}
-
-.program-register-scroll-runway > td {
-  padding: 0 !important;
-  border: 0 !important;
-  background: transparent !important;
-}
-
 .program-register-summary-row:focus-within {
   outline: 2px solid var(--program-owner-accent, #2563eb);
   outline-offset: -2px;
@@ -9836,64 +9843,25 @@ dd.is-privacy-masked {
   overflow: visible;
 }
 
-/* PC-018/019: grow intrinsically until a visible viewport floor is reached. */
-.program-register-drawer.has-viewport-floor {
-  box-sizing: border-box;
-  max-height: var(--program-drawer-max-height, 70vh);
-  overflow: hidden;
-  border-bottom: 4px solid var(--program-owner-accent, var(--uos-brand, #2563eb));
-}
-.program-register-drawer.has-viewport-floor .program-register-detail__layout {
-  max-height: calc(var(--program-drawer-max-height, 70vh) - 34px);
-  overflow: auto;
+/* Scroll belongs to each module's designated inner viewport, never to the
+   Register drawer, table cell, or containing Register list. */
+.program-register-module-host :is(
+  .program-scroll-region,
+  .program-table-wrap,
+  .program-list,
+  .program-inspector__body,
+  .planner-table-wrap,
+  .program-map-body,
+  .program-map-event-list,
+  .program-map-shape-list,
+  .program-cost-table-wrap,
+  .program-calculator-table-wrap,
+  .program-scheduler-list,
+  .program-scheduler-detail__body,
+  .program-quote-pane-body,
+  .program-quote-preview-viewport
+) {
   overscroll-behavior: contain;
-  scrollbar-gutter: stable;
-}
-
-/* The drawer's hard floor belongs to the visible table cell, not merely its
-   scrollable inner panel. That makes the owner-coloured boundary persistent
-   through detail re-renders and module mounting. */
-.program-register-drawer-row:not([hidden])[data-owner="NSA"] > td {
-  border-bottom: 4px solid var(--uos-brand, #15803d) !important;
-}
-
-.program-register-drawer-row:not([hidden])[data-owner="EVT"] > td {
-  border-bottom: 4px solid var(--uos-info, #0284c7) !important;
-}
-
-/* This is Register-only: the row grows intrinsically before its own viewport
-   cap applies. Its durable floor belongs to its table cell, outside the
-   inner scroller, for both NSA and EVT. */
-.program-register-drawer-row:not([hidden]) .program-register-drawer.has-viewport-floor {
-  border-bottom: 0 !important;
-}
-
-/* A module mounted inside a Register row follows the standard module-height
-   contract, not Register's intrinsic detail-height exception. The legacy
-   module workspace minimum can exceed the measured viewport allowance (CSS
-   resolves min-height over max-height), which pushes the table-cell floor off
-   screen. Fix the outer height first, then let the host and module consume it. */
-.program-register-drawer.has-viewport-floor.is-module-workspace {
-  display: flex;
-  flex-direction: column;
-  height: var(--program-drawer-max-height, 70vh) !important;
-  min-height: 0 !important;
-  max-height: var(--program-drawer-max-height, 70vh) !important;
-  overflow: hidden !important;
-}
-
-.program-register-drawer.has-viewport-floor.is-module-workspace > .program-register-module-host:not([hidden]) {
-  flex: 1 1 auto;
-  height: 100% !important;
-  min-height: 0 !important;
-  max-height: 100% !important;
-  overflow: hidden;
-}
-
-.program-register-drawer.has-viewport-floor.is-module-workspace > .program-register-module-host:not([hidden]) > .program-drawer-module {
-  height: 100% !important;
-  min-height: 0 !important;
-  max-height: 100% !important;
 }
 
 .program-register-drawer__columns {
@@ -10594,20 +10562,23 @@ body[data-drawer-module] .program-register-main-pane {
   flex-direction: column;
 }
 
-body[data-drawer-module] .program-register-main-pane > .program-table-wrap {
+body[data-register-drawer-open] .program-register-main-pane > .program-table-wrap {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;
+  /* A mounted module owns scrolling. Keeping the containing Register table
+     fixed prevents boundary scroll-chaining from moving the whole drawer. */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .program-register-drawer.is-module-workspace {
-  min-height: clamp(30rem, calc(100vh - 12.5rem), 62rem);
+  min-height: 0;
   padding: 0 !important;
   overflow: hidden;
 }
 .program-register-module-host {
   width: 100%;
-  height: clamp(30rem, calc(100vh - 12.5rem), 62rem);
+  height: 100%;
   min-width: 0;
   overflow: hidden;
   background: var(--panel-bg, #fff);
@@ -10766,7 +10737,7 @@ body[data-drawer-module] .program-register-module-host #shapeList > [data-shape-
 .program-scheduler-unscheduled .program-calendar-job { flex: 0 0 auto; width: auto; min-width: 7rem; }
 
 @media (max-width: 900px) {
-  .program-register-module-host { height: calc(100vh - 10rem); }
+  .program-register-module-host { height: 100%; }
   .program-register-module-host .program-costing-workspace,
   .program-register-module-host .program-quote-layout,
   .program-register-module-host .program-scheduler-layout,
@@ -11026,23 +10997,48 @@ html[data-suite-theme="dark"] .program-cost-table .program-category-pill[data-ca
 
 /* Annual Budget workspace and Register funding controls. */
 .program-header-nav__currency-icon { display: inline-flex; width: 24px; height: 24px; flex: 0 0 24px; align-items: center; justify-content: center; font-size: 21px; font-weight: 800; line-height: 1; }
+.program-header-budget-card { display: flex; align-items: center; justify-content: center; min-width: 98px; height: 38px; padding: 4px 12px; border: 1px solid var(--program-owner-border, var(--uos-border)); border-radius: var(--uos-radius-control, 6px); background: var(--uos-surface, #fff); color: var(--uos-text); line-height: 1; flex: 0 0 auto; }
+.program-header-budget-card strong { color: var(--program-owner-strong, var(--uos-text)); font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.program-header-warnings { position: relative; color: var(--uos-warning, #8a5a00); }
+.program-header-warnings__count { display: inline-flex; min-width: 17px; height: 17px; align-items: center; justify-content: center; padding: 0 4px; border-radius: 999px; background: var(--uos-warning, #8a5a00); color: #fff; font-size: 9px; font-weight: 900; line-height: 1; }
+.program-warnings-dialog { width: min(560px, calc(100vw - 28px)); }
+.program-warnings-dialog__list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.program-warnings-dialog__list li { padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--uos-warning, #8a5a00) 35%, var(--uos-border, #d5dcdf)); border-radius: var(--uos-radius-control, 6px); background: var(--uos-warning-soft, #fff4d8); color: var(--uos-text, #25313b); font-size: 13px; line-height: 1.45; }
 .program-budget:not([hidden]) { display: block; padding: 20px; overflow: auto; color: var(--uos-text, #25313b); }
 .program-budget .program-island { min-width: 0; }
-.program-budget__header, .program-budget__toolbar, .program-budget__section-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.program-budget__header, .program-budget__section-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .program-budget__header { padding: 20px 24px; }
 .program-budget__header h2 { margin: 2px 0 6px; }
 .program-budget__header p:last-child, .program-budget__section-head p { margin: 0; color: var(--uos-text-muted, #66737c); }
-.program-budget__toolbar { margin-top: 12px; padding: 12px 20px; flex-wrap: wrap; }
-.program-budget__toolbar .uos-field { min-width: 180px; }
-.program-budget__toolbar [data-budget-year-state] { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.program-budget__workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr); gap: 12px; margin-top: 0; align-items: start; }
+.program-budget__approvals { padding: 20px; }
+.program-budget__approvals .program-budget__section-head { margin-bottom: 14px; }
+.program-budget__approvals .program-budget__section-head h2 { margin: 2px 0 0; font-size: 22px; }
+.program-budget__section-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; align-self: flex-start; }
+.program-budget__year-field { display: grid; gap: 5px; width: 100%; margin-bottom: 12px; font-size: 12px; font-weight: 700; }
+.program-budget__year-field .uos-select { width: 100%; }
+.program-budget__approvals [data-budget-year-state] { display: block; min-width: 0; }
 .program-budget__status { display: inline-flex; align-items: center; padding: 4px 10px; border: 1px solid var(--panel-border, #d5dcdf); border-radius: 999px; background: var(--panel-bg, #fff); font-size: 12px; font-weight: 700; text-transform: capitalize; }
+.program-budget__status[data-state="draft"] { color: #53616c; background: #edf1f3; border-color: #cbd4d9; }
+.program-budget__status[data-state="open"], .program-budget__status[data-state="approved"] { color: #1f6534; background: #e5f4e9; border-color: #80bd91; }
+.program-budget__status[data-state="review required"] { color: #805300; background: #fff4d8; border-color: #e0b657; }
+.program-budget__status[data-state="closed"] { color: #39566b; background: #e6eff4; border-color: #9bb9ca; }
+.program-budget__status[data-state="rejected"] { color: #9d2b2b; background: #fbe9e9; border-color: #d98c8c; }
+.program-budget__approval-form { display: grid; gap: 12px; margin-top: 10px; }
+.program-budget__approval-intro { margin: 0; color: var(--uos-text-muted, #66737c); font-size: 13px; }
+.program-budget__approval-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+.program-budget__approval-actions { display: flex; justify-content: flex-end; }
+.program-budget__approval-details { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 10px 0; }
+.program-budget__approval-details div { padding-top: 8px; border-top: 1px solid var(--panel-border, #d5dcdf); }
+.program-budget__approval-details dt { color: var(--uos-text-muted, #66737c); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.program-budget__approval-details dd { margin: 3px 0 0; font-size: 13px; overflow-wrap: anywhere; }
 .program-budget__owner, .program-budget__muted { color: var(--uos-text-muted, #66737c); font-size: 13px; }
-.program-budget__metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 12px 0; }
+.program-budget__metrics { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin: 0; }
 .program-budget__metric { display: grid; gap: 5px; padding: 16px 20px; }
 .program-budget__metric span { color: var(--uos-text-muted, #66737c); font-size: 12px; font-weight: 600; }
 .program-budget__metric strong { font-size: clamp(18px, 2vw, 24px); font-variant-numeric: tabular-nums; }
-.program-budget__grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(260px, 1fr); gap: 12px; align-items: start; }
-.program-budget__grid > .program-island { padding: 18px 20px; }
+.program-budget__pending { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--panel-border, #d5dcdf); }
+.program-budget__pending h4 { margin: 0 0 8px; font-size: 14px; }
 .program-budget__section-head { margin-bottom: 14px; }
 .program-budget__section-head h3 { margin: 0 0 3px; font-size: 16px; }
 .program-budget__section-head p { font-size: 12px; }
@@ -11082,8 +11078,9 @@ html[data-suite-theme="dark"] .program-cost-table .program-category-pill[data-ca
 .program-register-allocate-btn { white-space: nowrap; }
 .program-register-action--allocate { font-weight: 800; }
 .program-register-cta-wrap--allocation { margin-top: 8px; }
-@media (max-width: 900px) { .program-budget__grid { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .program-budget:not([hidden]) { padding: 12px; } .program-budget__header, .program-budget__section-head { align-items: flex-start; flex-direction: column; } .program-budget__metrics { grid-template-columns: 1fr; } .program-budget__toolbar [data-budget-year-state] { justify-content: flex-start; } .program-budget__dialog-form { padding: 16px; } }
+@media (max-width: 900px) { .program-budget__workspace { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .program-header-budget-card { min-width: 92px; padding-inline: 7px; } }
+@media (max-width: 640px) { .program-budget:not([hidden]) { padding: 12px; } .program-budget__header, .program-budget__section-head { align-items: flex-start; flex-direction: column; } .program-budget__section-actions { width: 100%; justify-content: space-between; } .program-budget__approval-fields { grid-template-columns: 1fr; } .program-budget__dialog-form { padding: 16px; } }
 
 /* Keep long Rate Library categories within the visible label limit while
    preserving a dedicated action rail and a roomier description column. */
@@ -11211,6 +11208,22 @@ html[data-suite-theme="dark"] .program-cost-table .program-category-pill[data-ca
   min-height: var(--program-register-nsa-control-height, 36px);
   justify-self: start;
 }
+
+/* Unused Register actions remain neutral until their governed record exists. */
+.program-register-nsa-summary-group--project [data-register-action="create-project"].uos-button--secondary,
+.program-register-budget-action-row [data-register-action="allocate-budget"].uos-button--secondary {
+  border-color: var(--register-owner-primary, #059669);
+  color: var(--register-owner-primary-dark, #047857);
+  background: var(--panel-bg, #fff);
+  box-shadow: none;
+}
+
+.program-register-budget-action-row [data-register-action="allocate-budget"].uos-button--primary {
+  border-color: var(--register-owner-primary-dark, #047857);
+  color: #fff;
+  background: var(--register-owner-primary, #059669);
+  box-shadow: none;
+}
 .program-register-allocation-table {
   display: grid;
   box-sizing: border-box;
@@ -11221,6 +11234,35 @@ html[data-suite-theme="dark"] .program-cost-table .program-category-pill[data-ca
   border-radius: 3px;
   color: var(--register-owner-primary-dark, #047857);
   background: var(--panel-bg, #ffffff);
+}
+
+/* Planner task action rail: retain the task-type position while letting the
+   maintenance controls sit at the panel edge. */
+.planner-table .planner-cat-header-row th,
+.planner-table .planner-cat-header-row td {
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+.planner-table td.planner-col-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: auto;
+  min-width: 150px;
+  padding-right: 0 !important;
+}
+.planner-table .planner-task-maintenance-actions { margin-left: auto; }
+.planner-task-type-group.is-linked-job .planner-task-path {
+  box-sizing: border-box;
+  border: 2px solid var(--program-owner-strong, #047857) !important;
+  background: var(--program-owner-soft, #ecfdf5) !important;
+  color: var(--program-owner-strong, #047857) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--program-owner-strong, #047857) 24%, transparent);
+}
+.planner-task-type-group.is-linked-job .planner-task-path:hover,
+.planner-task-type-group.is-linked-job .planner-task-path:focus-visible {
+  background: var(--program-owner-soft, #ecfdf5) !important;
+  color: var(--program-owner-strong, #047857) !important;
 }
 .program-register-allocation-table__header,
 .program-register-allocation-table__row {

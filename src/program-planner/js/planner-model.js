@@ -112,6 +112,81 @@
     return { workspace: candidate, task: clone(candidate.entities.tasks.find(function (item) { return item.id === id; })) };
   }
 
+  function saveTask(input, projectId, taskId, values, options) {
+    values = object(values) ? values : {};
+    options = options || {};
+    var candidate = workspace(input);
+    var project = findProject(candidate, projectId);
+    var task = taskId ? findTask(candidate, project, taskId) : null;
+    var at = text(options.at) || new Date().toISOString();
+    var title = text(values.title);
+    var description = text(values.description);
+    var section = text(values.section);
+    var statusLabel = text(values.status) || "Not Started";
+    var dueDate = text(values.dueDate);
+    var sortOrder = Number(values.sortOrder);
+
+    if (!title) throw new Error("Planner task title is required.");
+    if (!description) throw new Error("Planner task description is required.");
+    if (!section) throw new Error("Planner task section is required.");
+    if (TASK_STATUSES.indexOf(statusLabel) < 0) throw new Error("Planner task status is invalid.");
+    if (!validDate(dueDate)) throw new Error("Planner task due date must be a valid YYYY-MM-DD date.");
+    if (!Number.isFinite(sortOrder) || sortOrder < 0) throw new Error("Planner task order must be zero or greater.");
+
+    if (!task) {
+      var created = createTask(candidate, project.id, {
+        title: title,
+        section: section,
+        description: description,
+        operational: false
+      }, { at: at });
+      candidate = created.workspace;
+      project = findProject(candidate, project.id);
+      task = findTask(candidate, project, created.task.id);
+    }
+
+    if (values.operational === false && (task.jobId || task.schedulerJobId)) {
+    if (options.deleteLinkedJob !== true) throw new Error("Confirm deletion of the linked Job before changing this task to a reminder item.");
+    var linked = linkedPlannerJob(candidate, task);
+    if (linked) {
+      candidate = model().deleteJob(candidate, linked.id);
+      project = findProject(candidate, project.id);
+      task = findTask(candidate, project, task.id);
+    }
+    }
+
+    task.title = title;
+    task.description = description;
+    task.section = section;
+    task.status = UOS.ProgramStatus && typeof UOS.ProgramStatus.codeFor === "function"
+      ? UOS.ProgramStatus.codeFor("task", statusLabel)
+      : statusLabel;
+    task.assigneeId = normalizeAssignment(values.assigneeId);
+    task.dueDate = dueDate;
+    task.notes = text(values.notes);
+    task.sortOrder = sortOrder;
+    task.operational = values.operational === true;
+    task.suppressed = false;
+    task.updatedAt = at;
+    candidate.updatedAt = at;
+
+    var linked = linkedPlannerJob(candidate, task);
+    if (linked) {
+      assertPlannerJob(linked, project, task);
+      linked.title = title;
+      linked.name = title;
+    }
+
+    candidate = model().normalize(candidate);
+    if (task.operational) return createDraftJob(candidate, project.id, task.id, { at: at });
+    return {
+      workspace: candidate,
+      task: clone(candidate.entities.tasks.find(function (item) { return item.id === task.id; })),
+      job: null,
+      created: !taskId
+    };
+  }
+
   function duplicateTasks(input, projectId, taskIds, options) {
     var candidate = workspace(input), project = findProject(candidate, projectId), selected = Array.isArray(taskIds) ? taskIds.map(text).filter(Boolean) : [text(taskIds)].filter(Boolean);
     if (!selected.length) throw new Error("Select at least one checklist task to duplicate.");
@@ -220,6 +295,7 @@
     isOperationalTask: schedulable,
     updateTask: updateTask,
     createTask: createTask,
+    saveTask: saveTask,
     duplicateTasks: duplicateTasks,
     createDraftJob: createDraftJob,
     scheduleTask: scheduleTask

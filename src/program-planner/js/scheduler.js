@@ -512,7 +512,7 @@
           var compactTitle = document.createElement("strong");
           compactTitle.textContent = title(job);
           var compactSchedule = document.createElement("span");
-          compactSchedule.textContent = job.startDate ? job.startDate + " · " + timeLabel(job) : "—";
+          compactSchedule.textContent = job.startDate ? ((window.UOS && window.UOS.imports && window.UOS.imports.formatDate ? window.UOS.imports.formatDate(job.startDate) : job.startDate) + " · " + timeLabel(job)) : "—";
           compactRow.appendChild(compactTitle);
           compactRow.appendChild(compactSchedule);
           compactRow.appendChild(statusPill(status(job)));
@@ -791,15 +791,36 @@
   function deleteSelectedJob() {
     var job = state.jobs.find(function (item) { return item.id === state.selectedId; });
     if (!job || !UOS.ProgramApp || !UOS.ProgramModel || typeof UOS.ProgramModel.deleteJob !== "function") return Promise.resolve(null);
-    function apply() {
-      return UOS.ProgramApp.updateWorkspace(function (workspace) { return UOS.ProgramModel.deleteJob(workspace, job.id); }).then(function (saved) {
+    function apply(deletePlannerTask) {
+      return UOS.ProgramApp.updateWorkspace(function (workspace) {
+        var next = UOS.ProgramModel.deleteJob(workspace, job.id);
+        if (deletePlannerTask && job.sourceKind === "planner") {
+          var task = next.entities.tasks.find(function (item) { return item.id === job.sourceEntityId; });
+          if (task) task.suppressed = true;
+        }
+        return typeof UOS.ProgramModel.normalize === "function" ? UOS.ProgramModel.normalize(next) : next;
+      }).then(function (saved) {
         state.selectedId = ""; state.detail = false; state.focusList = true; render();
         if (UOS.toast) UOS.toast("Job deleted. Its polygon remains available to create another job.", "success");
         return saved;
       });
     }
-    if (!UOS.dialogs || typeof UOS.dialogs.confirm !== "function") return apply();
-    return UOS.dialogs.confirm({ title: "Delete job?", message: "This deletes the Job and its related costing, task and inherited quote records. Its source polygon will remain mapped.", confirmLabel: "Delete job", cancelLabel: "Keep job", danger: true }).then(function (confirmed) { return confirmed ? apply() : null; });
+    if (!UOS.dialogs || typeof UOS.dialogs.open !== "function") return apply(false);
+    var linkedTask = job.sourceKind === "planner" && (UOS.ProgramApp.workspace().entities.tasks || []).find(function (item) { return item.id === job.sourceEntityId; });
+    var option = null;
+    if (linkedTask) {
+      option = document.createElement("label");
+      option.className = "uos-field";
+      option.innerHTML = '<input type="checkbox" data-scheduler-delete-planner-task> Also delete its Planner task';
+    }
+    return UOS.dialogs.open({
+      title: "Delete job?",
+      message: "This deletes the Job and its related costing and draft quote records. Its source polygon will remain mapped.",
+      node: option,
+      actions: [{ label: "Keep job", value: false }, { label: "Delete job", value: true, danger: true }]
+    }).then(function (confirmed) {
+      return confirmed ? apply(Boolean(option && option.querySelector("input").checked)) : null;
+    });
   }
   function onClick(event) {
     /* Shared mini-drawer contract: selection may rebuild the list, so run it
@@ -920,6 +941,14 @@
       writeSessionScroll(state.scrollTop);
     }, { passive: true });
     root.addEventListener("submit", function (event) { if (event.target.matches("[data-scheduler-form]")) { event.preventDefault(); saveSchedule(event.target); } });
+    /* Scheduler is already mounted when Planner selects a source job.  Refresh
+     * its detail state on that mutation instead of waiting for a full reload. */
+    document.addEventListener("uos:workspace-changed", function (event) {
+      var workspace = event.detail && event.detail.workspace;
+      if (!workspace || !workspace.workspace || workspace.workspace.destination !== "scheduler") return;
+      state.workspace = clone(workspace);
+      render();
+    });
     document.addEventListener("uos:program-ready", function (event) {
       var workspace = event.detail && event.detail.workspace;
       if (!workspace || !workspace.workspace || workspace.workspace.destination !== "scheduler") return;

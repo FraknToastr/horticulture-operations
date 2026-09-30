@@ -55,10 +55,12 @@ An active-project Job selected from the Job row-table or calendar opens Schedule
 
 **Reason:** the drawer floor is the user's persistent visual boundary for the expanded record. Losing it makes the drawer appear clipped or structurally unfinished and can place terminal controls off-screen.
 
-## ADR-012 — Register drawers grow intrinsically before internal scrolling
+## ADR-012 — Register drawers grow intrinsically before internal scrolling (superseded by ADR-016)
 **Accepted — v1.4a.** Register drawers use content-driven height while content fits. As Notes or other content grow, the drawer may descend until its floor reaches the usable viewport bottom. At that point the outer drawer stops growing and excess content becomes internally scrollable.
 
 **Reason:** short Register records should not create unnecessarily empty full-height drawers, while long records must remain fully usable without violating the always-visible floor contract.
+
+**Superseded:** ADR-016 replaces the Register-specific intrinsic-height exception. This paragraph is historical, not an active UI rule.
 
 ## ADR-013 — Annual budget authority is owner/year scoped
 **Accepted — 2026-09-28.** A July–June year has at most one Annual Budget for each of NSA and EVT. Register allocations retain their own year and owner, so one Register can receive allocations in successive years. Net allocations may not exceed net approved budget. Budget, allocations, commitments, actual spend and forecast remain separate. Legacy `project.funding.operationalAmount` and `approvedBudget` are migration inputs or compatibility projections only; neither is annual authority.
@@ -74,6 +76,12 @@ An active-project Job selected from the Job row-table or calendar opens Schedule
 **Accepted — 2026-09-28; amends PC-020 sections 5–8, 17, 22 and acceptance criteria where they imply automatic costing or Quote inclusion.** Inert Task has no Job. Operational Task creation/promotion creates or resolves exactly one Planner-origin Draft Job. Scheduling and costing are separate explicit actions on that Job; costing snapshots an evidenced basis. Inclusion of an eligible Costing Line in a Draft Quote is deliberate. The three Job origins are Planner Task, Calculator work and Space Map geometry; source identity must be exact and immutable.
 
 **Reason:** Draft delivery intent, scheduled commitment, priced work and customer-facing commercial inclusion are separate decisions. Existing records and issued Quote history remain protected; migration of mixed or unknown legacy origins requires review. Gate Q is the acceptance proof.
+
+## ADR-016 — One Register-row viewport floor and scroll owner
+
+**Accepted — 2026-09-30; supersedes ADR-012.** Native Register and every mounted module use the same full-height drawer, with a 4px floor 4px above the usable viewport bottom. Opening a row positions its header beneath the sticky column headings and locks the outer Register table; internal sections retain their own scrolling. Closing the last row restores the prior table position. Budget remains full-page with a hard floor. No Register-only height or scroll exceptions are permitted.
+
+**Reason:** separate Register and module sizing/scroll paths repeatedly hid sibling rows and displaced the hard floor. A single scroll owner and geometry rule is observable and testable across modules.
 
 ## Amendment record for ADR-013 through ADR-015
 

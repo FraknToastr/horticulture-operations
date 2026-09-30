@@ -10,6 +10,14 @@
   <style>html,body,iframe{width:100%;height:100%;margin:0;border:0}body{overflow:hidden;background:#173d2d}iframe{display:block}</style>
 </head>
 <body>
-  <iframe src="index.html?workspace=NSA" title="Nature Strip Applications workspace"><a href="index.html?workspace=NSA">Open the Nature Strip Applications workspace</a></iframe>
+  <script>
+    if (new URLSearchParams(window.location.search).get("factory-reset") === "1") {
+      window.sessionStorage.setItem("uos.factory-reset-intent.NSA", String(Date.now()));
+      var cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete("factory-reset");
+      window.history.replaceState({}, "", cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+    }
+  </script>
+  <iframe id="workspace-frame" src="index.html?workspace=NSA" title="Nature Strip Applications workspace"><a href="index.html?workspace=NSA">Open the Nature Strip Applications workspace</a></iframe>
 </body>
 </html>

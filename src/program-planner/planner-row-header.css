@@ -1,0 +1,15 @@
+/* Register summary row: compact factual columns, with an unbroken shortcut rail. */
+.program-register-layout .program-table-wrap,
+.program-register-table,
+.program-register-table tbody { overflow-anchor: none; }
+.program-register-table th,
+.program-register-table td { padding-inline: 8px !important; }
+.program-register-table__status-col, .program-register-table__status-cell { width: 104px !important; max-width: 104px !important; }
+.program-register-table__received-col, .program-register-table__received-cell { width: 88px !important; max-width: 88px !important; white-space: nowrap; }
+.program-register-table__reference-col, .program-register-table__reference-cell { width: 92px !important; max-width: 92px !important; white-space: nowrap; }
+.program-register-table__project-col, .program-register-table__project-cell { width: 104px !important; max-width: 104px !important; }
+.program-register-table__budget-col, .program-register-table__budget-cell { width: 92px !important; max-width: 92px !important; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.program-register-table__actions-col, .program-register-table__actions-cell { width: 286px !important; min-width: 286px !important; padding: 6px 8px !important; overflow: visible !important; text-align: right; }
+.program-register-table__actions-cell .program-register-mini-toolbar { display: inline-flex !important; flex-wrap: nowrap !important; align-items: center; justify-content: flex-end; gap: 8px !important; width: max-content !important; min-width: 0 !important; height: 46px !important; min-height: 46px !important; max-height: none !important; margin-left: auto; box-sizing: border-box; padding: 8px 10px !important; overflow: visible !important; background: var(--uos-surface, #fff) !important; }
+.program-register-table__actions-cell .program-register-mini-toolbar > button { flex: 0 0 auto !important; }
+#program-app .program-register-table .program-register-table__actions-cell .program-register-mini-toolbar > button[data-register-action="planner"] { border: 0 !important; border-radius: 0 !important; }

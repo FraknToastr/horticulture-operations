@@ -22,7 +22,8 @@
   <link rel="stylesheet" href="../shared/css/accessibility.css">
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
-  <link rel="stylesheet" href="styles.css?v=20260923-cost-library-pin-v3">
+<link rel="stylesheet" href="styles.css?v=20260930-planner-action-rail-v4">
+<link rel="stylesheet" href="planner-row-header.css?v=20260930-row-header-v4">
   <link rel="stylesheet" href="status-v5.css?v=20260913-status-history-review-v1">
   <link rel="stylesheet" href="reports.css">
 </head>
@@ -66,6 +67,9 @@
           <button class="program-header-nav__item" type="button" data-destination="budget" data-program-destination="budget" data-uos-tooltip="Annual Budget" data-uos-tooltip-pos="bottom" aria-label="Annual Budget">
             <span class="program-header-nav__currency-icon" aria-hidden="true">$</span><span>Budget</span>
           </button>
+          <div class="program-header-budget-card" data-budget-header-unallocated aria-live="polite" aria-label="Unallocated annual budget">
+            <span>Unallocated</span><strong data-budget-header-amount>$0.00</strong>
+          </div>
           <button class="program-header-nav__item" type="button" data-destination="dashboard" data-program-destination="dashboard" data-uos-tooltip="Dashboard" data-uos-tooltip-pos="bottom" aria-label="Dashboard" aria-current="page" hidden>
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Dashboard</span>
           </button>
@@ -264,10 +268,11 @@
                       <th scope="col" class="program-register-table__toggle-col"><span class="uos-sr-only">Expand</span></th>
                       <th scope="col">Title / Name</th>
                       <th scope="col">Location</th>
-                      <th scope="col" class="program-register-table__reference-col" data-register-sort-header="receipt"><button type="button" class="program-register-table__sort" data-register-table-sort="receipt"><span data-register-sort-label="receipt">Ref / Receipt</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
-                      <th scope="col" class="program-register-table__project-col">Project</th>
-                      <th scope="col" class="program-register-table__status-col">Status</th>
-                      <th scope="col" class="program-register-table__received-col" data-register-sort-header="date"><button type="button" class="program-register-table__sort" data-register-table-sort="date"><span>Received</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
+                    <th scope="col" class="program-register-table__status-col">Status</th>
+                    <th scope="col" class="program-register-table__received-col" data-register-sort-header="date"><button type="button" class="program-register-table__sort" data-register-table-sort="date"><span>Received</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
+                    <th scope="col" class="program-register-table__reference-col" data-register-sort-header="receipt"><button type="button" class="program-register-table__sort" data-register-table-sort="receipt"><span data-register-sort-label="receipt">Ref / Receipt</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
+                    <th scope="col" class="program-register-table__project-col">Project</th>
+                    <th scope="col" class="program-register-table__budget-col">Budget</th>
                       <th scope="col" class="program-register-table__actions-col">Actions</th>
                     </tr>
                   </thead>
@@ -620,11 +625,19 @@
             </section>
           </section>
           <section class="program-budget program-view" data-program-view="budget" aria-labelledby="budget-title" hidden>
-            <header class="program-budget__header program-island"><div><p class="uos-eyebrow">City operations</p><h2 id="budget-title">Annual Budget</h2><p>Approve annual authority, review pending changes, and close the year. Allocate funds from a Register record.</p></div><button class="uos-button uos-button--primary" type="button" data-budget-action="create">Create annual budget</button></header>
-            <p class="program-budget__notice" data-budget-notice role="status" hidden></p>
-            <div class="program-budget__toolbar program-island"><label class="uos-field"><span>Financial year</span><select class="uos-select" data-budget-year></select></label><div data-budget-year-state></div></div>
-            <div class="program-budget__metrics" data-budget-metrics></div>
-            <div class="program-budget__grid"><section class="program-island"><div class="program-budget__section-head"><div><h3>Register allocations</h3><p>Funds stay with the Register record even before a Project exists. Open the Register to allocate or adjust.</p></div></div><div class="program-budget__table-wrap"><table><thead><tr><th>Register record</th><th>Allocated</th><th>Committed</th><th>Actual</th><th>Available</th><th>Year-end review</th></tr></thead><tbody data-budget-allocations></tbody></table></div><h3>Pending changes</h3><ol class="program-budget__history" data-budget-pending></ol></section><section class="program-island"><div class="program-budget__section-head"><div><h3>History</h3><p>Approvals, changes, and carry-forwards are recorded.</p></div></div><ol class="program-budget__history" data-budget-history></ol></section></div>
+            <div class="program-budget__workspace program-island">
+              <section class="program-budget__approvals" aria-labelledby="budget-title">
+                <div class="program-budget__fixed-head program-budget__section-head"><div><p class="uos-eyebrow">Budget approvals</p><h2 id="budget-title">Annual Budgets</h2></div><div class="program-budget__section-actions"><span data-budget-status-slot></span></div></div>
+                <label class="program-budget__year-field"><span>Financial year</span><select class="uos-select" data-budget-year></select></label>
+                <div data-budget-year-state></div>
+                <p class="program-budget__notice" data-budget-notice role="status" hidden></p>
+                <div class="program-budget__records">
+                  <section class="program-budget__allocations" aria-labelledby="budget-allocations-title"><div class="program-budget__section-head"><div><h3 id="budget-allocations-title">Register allocations</h3><p>Approved funding by Register record.</p></div></div><div class="program-budget__table-wrap"><table><thead><tr><th>Register record</th><th>Allocated</th><th>Committed</th><th>Actual</th><th>Available</th><th>Year-end review</th></tr></thead><tbody data-budget-allocations></tbody></table></div></section>
+                  <section class="program-budget__pending" aria-labelledby="budget-pending-title"><div class="program-budget__section-head"><h3 id="budget-pending-title">Pending changes</h3></div><ol class="program-budget__history" data-budget-pending></ol></section>
+                </div>
+              </section>
+              <aside class="program-budget__dashboard" aria-label="Budget dashboard"><div class="program-budget__metrics" data-budget-metrics></div></aside>
+            </div>
           </section>
           <section class="program-reports program-view" data-program-view="reports" aria-labelledby="reports-title" hidden>
             <header class="program-reports__head program-island">
@@ -1147,23 +1160,30 @@
   <script defer src="js/reports-model.js"></script>
   <script defer src="js/reports.js?v=20260821-performance-hotfix"></script>
   <script defer src="js/card-visibility.js?v=20260830-disclosure-visibility-v12"></script>
-  <script defer src="js/disclosure-rows.js?v=20260911-scoped-disclosures-v1"></script>
-  <script defer src="js/register.js?v=20260913-register-context-v2"></script>
-  <script defer src="js/budget.js?v=20260928-budget-v1"></script>
+ <script defer src="js/disclosure-rows.js?v=20260930-fixed-register-frame-v5"></script>
+ <link rel="stylesheet" href="planner-editor.css?v=20260930-planner-editor-v2">
+ <style>
+ .planner-item-row[aria-selected="true"] td+td{border-left-color:transparent!important}.planner-col-action{display:flex;align-items:center;justify-content:flex-end}.planner-task-type-group{display:inline-flex;align-items:center;margin-right:16px;padding-right:14px;border-right:1px solid var(--uos-border,#dbe3ea)}.planner-task-type-group .planner-task-path{width:30px;height:30px;padding:0;justify-content:center}.planner-task-path svg,.planner-maintenance-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.planner-task-maintenance-actions{display:inline-flex;align-items:center;gap:8px}.planner-maintenance-icon{display:inline-grid!important;place-items:center;width:30px;min-width:30px;height:30px;min-height:30px;margin:0!important;padding:0!important;border:1px solid var(--uos-border,#cbd5e1)!important;border-radius:var(--uos-radius-control,6px)!important;background:#fff!important;color:var(--uos-text,#0f172a)!important}.program-register-allocation-table{border:2px solid var(--register-owner-primary-dark,#047857)!important;border-radius:var(--uos-radius-control,6px)!important;overflow:hidden}.program-budget:not([hidden]){height:calc(100dvh - var(--program-header-height,82px));min-height:620px;padding:0;overflow:hidden}.program-budget__workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:100%;min-height:0;border:2px solid var(--program-owner-strong,var(--uos-text,#0f172a));border-radius:0;background:var(--uos-surface,#fff);overflow:hidden}.program-budget__approvals{display:flex;min-height:0;flex-direction:column;padding:22px 24px;border-right:1px solid var(--uos-border,#dbe3ea)}.program-budget__fixed-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex:0 0 auto}.program-budget__fixed-head h2{margin:2px 0 14px}.program-budget__year-field{width:min(220px,100%);margin:0 0 14px}.program-budget__approvals>[data-budget-year-state]{flex:0 0 auto}.program-budget__allocations,.program-budget__pending{display:flex;min-height:0;flex:1 1 0;flex-direction:column;margin-top:16px}.program-budget__table-wrap,.program-budget__history{min-height:0;max-height:25dvh;overflow:auto}.program-budget__table-wrap thead{position:sticky;top:0;z-index:1;background:var(--uos-surface,#fff)}.program-budget__dashboard{min-height:0;padding:22px 24px}.program-budget__metrics{display:grid;grid-template-columns:1fr;gap:12px}.program-budget__metric{display:flex;align-items:center;justify-content:space-between;min-height:76px;padding:16px;border:1px solid var(--uos-border,#dbe3ea);border-radius:var(--uos-radius-control,6px);background:var(--uos-surface,#fff)}.program-budget__metric strong{font-size:22px}@media(max-width:900px){.program-budget:not([hidden]){height:auto;overflow:visible}.program-budget__workspace{grid-template-columns:1fr;height:auto;overflow:visible}.program-budget__approvals{border-right:0;border-bottom:1px solid var(--uos-border,#dbe3ea)}.program-budget__table-wrap,.program-budget__history{max-height:360px}}
+ </style>
+ <link rel="stylesheet" href="budget-layout.css?v=20260930-budget-workspace-v2">
+ <link rel="stylesheet" href="drawer-floor.css?v=20260930-unified-floor-v1">
+  <script defer src="js/register.js?v=20260930-register-drawer-stability-v6"></script>
+  <script defer src="js/budget.js?v=20260930-budget-workspace-v3"></script>
   <script defer src="js/register-open-project-fix.js?v=20260922-open-project"></script>
-  <script defer src="js/drawer-workspace.js?v=20260913-drawer-context-v3"></script>
+ <script defer src="js/drawer-workspace.js?v=20260930-unified-floor-v1"></script>
   <script defer src="js/scheduler-model.js?v=20260828-first-review-phase3-v1"></script>
   <script defer src="js/planner-model.js"></script>
-  <script defer src="js/scheduler.js?v=20260911-sidebar-state-v1"></script>
+ <script defer src="js/scheduler.js?v=20260930-planner-job-delete-v4"></script>
   <script defer src="js/costing.js?v=20260928-rate-library-ui-v1"></script>
   <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
   <script defer src="../shared/vendor/maplibre/maplibre-gl.js"></script>
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
-  <script defer src="../remediation-planner/js/map.js?v=20260824-pin-edit"></script>
+    <script defer src="../remediation-planner/js/map.js?v=20260930-seamless-raster-v2"></script>
   <script defer src="js/program-map.js?v=20260913-active-location-v2"></script>
-  <script defer src="js/map-floating-draw-toolbar.js?v=20260922-v1"></script>
-  <script defer src="js/planner.js?v=20260911-sidebar-state-v1"></script>
-  <script defer src="js/planner-section-headers.js?v=20260922-chevron-fix"></script>
+  <script defer src="js/map-floating-draw-toolbar.js?v=20260930-inset-v3"></script>
+ <script defer src="js/planner.js?v=20260930-task-lifecycle-v7"></script>
+ <script defer src="js/planner-section-headers.js?v=20260930-persistent-default-collapsed"></script>
+  <script defer src="js/planner-presentation.js?v=20260930-task-icons-v5"></script>
   <script defer src="js/quote-builder.js?v=20260911-sidebar-state-v1"></script>
 <script defer src="js/app.js?v=20260913-drawer-context-v3"></script>
   <script defer src="js/status-app.js?v=20260912-schema-v5"></script>

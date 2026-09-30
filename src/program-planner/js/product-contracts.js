@@ -269,14 +269,14 @@
     },
     {
       id: "PC-019",
-      key: "REGISTER_DRAWER_GROWTH",
-      title: "Register drawers grow until the usable viewport boundary",
+      key: "UNIFIED_DRAWER_SCROLL",
+      title: "Every Register-row drawer shares one floor and scroll owner",
       version: 1,
       criticality: "critical",
       state: "pending-proof",
-      promise: "Register drawers retain intrinsic height until their visible floor reaches the viewport boundary, then scroll internally.",
-      invariants: ["Short records do not fill empty viewport.", "Long content remains reachable above a visible floor."],
-      enforcement: ["DrawerWorkspace.viewport", "drawer-viewport.spec.js", "Release Gate N"]
+      promise: "Every expanded row uses the same full-height 4px floor; its row header aligns below sticky headings and the outer table stays fixed while internal sections scroll.",
+      invariants: ["No module-specific floor exception.", "All rows remain in the DOM.", "Closing the last row restores the previous table position."],
+      enforcement: ["DrawerWorkspace.scroll", "drawer-scroll-ownership.spec.js", "Release Gate N"]
     },
     { id: "PC-020", key: "PLANNER_TASK_MANAGEMENT", title: "Planner Task and Job lineage", version: 1, criticality: "critical", state: "pending-proof", promise: "Operational Planner Tasks create one canonical Draft Job before scheduling.", invariants: ["Inert Tasks have no delivery Job.", "Scheduling reuses the Planner Job."], enforcement: ["ProgramPlannerModel", "planner-draft-job.test.cjs", "Release Gate P"] },
     { id: "PC-021", key: "FINANCIAL_YEAR_CANON", title: "Financial year authority", version: 1, criticality: "critical", state: "pending-proof", promise: "Annual budgets are partitioned by owner and July–June financial year.", invariants: ["Years are consecutive YYYY-YY values.", "Owners never share a budget."], enforcement: ["ProgramBudget", "budget-model.test.cjs", "Release Gate O"] },

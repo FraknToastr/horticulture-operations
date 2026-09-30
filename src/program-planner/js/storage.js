@@ -335,6 +335,25 @@
     });
     return saveQueue;
   }
+  /* An unreadable or retired local workspace must never block a new operator.
+     Delete its canonical/recovery/migration state, then persist the normal empty
+     workspace with the governed default Rate Catalog. */
+  function factoryReset() {
+    var store = storage();
+    saveQueue = saveQueue.catch(function () { /* keep factory reset available after a failed save */ }).then(function () {
+      return durableGet().catch(function () { return null; }).then(function (raw) {
+        if (typeof store.removeWorkspaceState !== "function") throw new Error("Revision-aware workspace deletion unavailable.");
+        return store.removeWorkspaceState(CANONICAL.app, CANONICAL.name, revisionOf(raw), [
+          MIGRATION.key, LEGACY.nature.key, LEGACY.remediation.key
+        ]);
+      }).then(function () {
+        var fresh = model().blank();
+        fresh.workspace.destination = "register";
+        return commitNormalized(normalizeAndValidate(fresh), null, { baseRevision: 0, mutationKind: "business" });
+      });
+    });
+    return saveQueue;
+  }
 
   function isMigrationComplete() {
     return getMigrationState().then(function (state) {
@@ -355,6 +374,7 @@
     saveValidated: saveValidated,
     set: save,
     deleteStoredWorkspace: deleteStoredWorkspace,
+    factoryReset: factoryReset,
     stageLegacySources: stageLegacySources,
     getMigrationState: getMigrationState,
     setMigrationState: setMigrationState,

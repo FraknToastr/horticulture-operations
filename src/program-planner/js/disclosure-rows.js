@@ -172,9 +172,6 @@ var afterOpenWork = Object.create(null);
   }
 
 function emitDrawerMotionEnd(drawer, expanded) {
- if (expanded && drawer && drawer.tagName === "TR" && window.UOS && window.UOS.ProgramDrawerWorkspace && typeof window.UOS.ProgramDrawerWorkspace.applyViewportFloor === "function") {
-  window.UOS.ProgramDrawerWorkspace.applyViewportFloor(drawer.querySelector("[data-register-drawer-record]"));
- }
  document.dispatchEvent(new CustomEvent("uos:disclosure-motion-end", {
       detail: { key: drawer.getAttribute("data-disclosure-key") || "", drawer: drawer, expanded: expanded }
     }));
@@ -330,45 +327,6 @@ function syncAll(animateMotion) {
     document.dispatchEvent(new CustomEvent(name, { detail: { key: key, drawer: drawer } }));
   }
 
-  function findDisclosureRow(key) {
-    var match = null;
-    Array.prototype.some.call(document.querySelectorAll("[data-disclosure-row]"), function (row) {
-      if (row.getAttribute("data-disclosure-key") === key) {
-        match = row;
-        return true;
-      }
-      return false;
-    });
-    return match;
-  }
-
-  function alignRegisterRowBelowHeader(key) {
-    if (text(key).indexOf("register:") !== 0) return;
-    var align = function () {
-      var row = findDisclosureRow(key);
-      var scroller = row && row.closest ? row.closest(".program-table-wrap") : null;
-      var header = scroller && scroller.querySelector ? scroller.querySelector(".program-register-table thead th") : null;
-      if (!row || !scroller || !header) return;
-      var rowRect = row.getBoundingClientRect();
-      var headerRect = header.getBoundingClientRect();
-      var delta = rowRect.top - headerRect.bottom;
-      if (Math.abs(delta) < 0.5) return;
-      var nextTop = Math.max(0, scroller.scrollTop + delta);
-      scroller.scrollTop = nextTop;
-    };
-    align();
-    if (typeof window.requestAnimationFrame === "function") {
-      window.requestAnimationFrame(function () {
-        align();
-        window.requestAnimationFrame(align);
-      });
-    } else {
-      window.setTimeout(align, 0);
-    }
-    window.setTimeout(align, 40);
-    window.setTimeout(align, 120);
-  }
-
 function open(key, scopeOverride) {
     var nextKey = text(key);
     if (!nextKey) return;
@@ -386,7 +344,6 @@ function open(key, scopeOverride) {
     if (previousKey && previousKey !== nextKey) emit("uos:disclosure-close", previousKey);
     closedChildren.forEach(function (entry) { emit("uos:disclosure-close", entry.key); });
     emit("uos:disclosure-open", nextKey);
-    alignRegisterRowBelowHeader(nextKey);
   }
 
 function closeScope(scope) {
@@ -654,8 +611,11 @@ function runAfterOpen(key, callback) {
       var workspace = event.detail && event.detail.workspace;
       var destination = text(workspace && workspace.workspace && workspace.workspace.destination);
       var recordModules = ["planner", "map", "costing", "scheduler", "quotes"];
-      var staysInDrawer = recordModules.indexOf(destination) >= 0 && recordModules.indexOf(lastDestination) >= 0;
-      if (destination && lastDestination && destination !== lastDestination) {
+ var staysInDrawer = recordModules.indexOf(destination) >= 0 && recordModules.indexOf(lastDestination) >= 0;
+ var returningToOpenRegister = destination === "register" && activeKeyForScope("register");
+ if (destination && lastDestination && destination !== lastDestination) {
+ if (returningToOpenRegister) closeInnerScopesExcept("register");
+ else
         if (staysInDrawer) closeInnerScopesExcept(destination);
         else closeAll();
       }
@@ -664,7 +624,6 @@ function runAfterOpen(key, callback) {
 
     document.addEventListener("uos:disclosure-motion-end", function (event) {
       var detail = event.detail || {};
-      if (detail.expanded && isKeyActive(detail.key, scopeForKey(detail.key))) alignRegisterRowBelowHeader(detail.key);
     });
 
     if (window.MutationObserver) {
