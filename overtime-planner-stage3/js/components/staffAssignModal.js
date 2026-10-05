@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Crew Allocator / Staff Assignment Modal Component
 // Sole Public Facade for Staff Assignment: delegates UI rendering to sub-modules while retaining state and action handlers.
 function getHumanIneligibleReason(code) {
@@ -353,7 +356,7 @@ window.HortOpsStaffAssignModal = {
         '<div class="modal-header">' +
           '<div>' +
             '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-              '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + escAttr(shift.color || '#10b981') + ';"></span>' +
+              '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + escAttr(safeColor(shift.color, '#10b981')) + ';"></span>' +
               '<h2 style="font-size: 1rem; font-weight: 800; color: var(--slate-900);">' + escHtml(shift.jobName || '') + '</h2>' +
               '<span class="badge badge-slate">' + escHtml(shift.category || '') + '</span>' +
               (isExclusive ? '<span class="badge badge-amber">' + icons.render('lock', 'w-2.5 h-2.5') + 'Exclusive</span>' : '') +
@@ -1008,6 +1011,9 @@ window.HortOpsStaffAssignModal = {
 
     var proposedEnvelope = window.HortOpsStorage.createWorkspaceEnvelope({
       schemaVersion: 2,
+      poolTags: state.poolTags || [],
+      absences: state.absences || [],
+      refusalHistory: state.refusalHistory || [],
       jobs: state.jobs,
       roster: state.staffList,
       assignments: rosterRes.customAssignments,
@@ -1076,11 +1082,15 @@ window.HortOpsStaffAssignModal = {
 
     // Atomic adoption only AFTER successful verified commit
     state.customAssignments = rosterRes.customAssignments;
+    state.assignments = state.customAssignments;
     state.rostering = rosterRes.rosteringState;
     state.historicalSnapshots = planRes.snapshots;
     state.lastRosteringAudit = rosterRes.auditLog;
     state.storageStatus = (saveRes && saveRes.storageMode === 'session-only') ? 'session_only' : 'saved';
     window.HortOpsApp._authoritativeSnapshotCount = Object.keys(planRes.snapshots).length;
+    // The verified assignment save also commits UI and untouched workspace domains.
+    // Advance their conflict baselines so a later year/view change is not mistaken for a competing write.
+    window.HortOpsApp._updateDomainBaselines(proposedEnvelope);
 
     // Invalidate relevant boundary caches, recompute digest and refresh view
     window.HortOpsApp.recomputeDigest();
@@ -1088,3 +1098,5 @@ window.HortOpsStaffAssignModal = {
     this.close();
   }
 };
+
+})();

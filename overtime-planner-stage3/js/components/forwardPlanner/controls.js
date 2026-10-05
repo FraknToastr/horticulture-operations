@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Forward Planner Controls & Toolbar Sub-module
 // Manages filter drawer toggle, week window controls, and slideout filter drawer with monochrome job pills.
 window.HortOpsForwardPlannerControls = {
@@ -58,10 +61,10 @@ window.HortOpsForwardPlannerControls = {
           '<span class="badge" style="background: #ffffff; color: var(--emerald-900); font-weight: 800; font-size: 10px; padding: 0 5px; border-radius: 9999px;">' + activeFilterCount + '</span>' : '') +
       '</button>' +
       (selectedJob ?
-        ('<div style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; background: #ffffff; border: 1.5px solid ' + escAttr(selectedJob.color) + '; border-radius: 9999px; font-size: 11px; font-weight: 700; color: ' + escAttr(selectedJob.color) + ';" title="Isolating ' + escAttr(selectedJob.name) + '">' +
-          '<span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: ' + escAttr(selectedJob.color) + ';"></span>' +
+        ('<div style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; background: #ffffff; border: 1.5px solid ' + escAttr(safeColor(selectedJob.color, '#047857')) + '; border-radius: 9999px; font-size: 11px; font-weight: 700; color: ' + escAttr(safeColor(selectedJob.color, '#047857')) + ';" title="Isolating ' + escAttr(selectedJob.name) + '">' +
+          '<span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: ' + escAttr(safeColor(selectedJob.color, '#047857')) + ';"></span>' +
           '<span>' + esc(selectedJob.name) + '</span>' +
-          '<button onclick="window.HortOpsForwardPlanner.handleJobFilter(null)" style="background: none; border: none; cursor: pointer; color: ' + escAttr(selectedJob.color) + '; font-weight: 800; padding: 0 0 0 2px; line-height: 1; font-size: 13px;" title="Clear Job Filter">×</button>' +
+          '<button onclick="window.HortOpsForwardPlanner.handleJobFilter(null)" style="background: none; border: none; cursor: pointer; color: ' + escAttr(safeColor(selectedJob.color, '#047857')) + '; font-weight: 800; padding: 0 0 0 2px; line-height: 1; font-size: 13px;" title="Clear Job Filter">×</button>' +
         '</div>') : '') +
       (self.searchTerm ?
         ('<div style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.55rem; background: var(--slate-100); border: 1px solid var(--slate-300); border-radius: 9999px; font-size: 11px; color: var(--slate-700);">' +
@@ -126,8 +129,8 @@ window.HortOpsForwardPlannerControls = {
       var jobPillsHtml = activeJobs.map(function(job) {
         var isSelected = self.selectedJobId === job.id;
         if (isSelected) {
-          return '<button type="button" class="job-filter-pill is-selected" style="border: 2px solid ' + escAttr(job.color) + '; color: ' + escAttr(job.color) + '; background-color: #ffffff; box-shadow: 0 0 0 1px ' + escAttr(job.color) + ';" onclick="window.HortOpsForwardPlanner.handleJobFilter(\'' + escAttr(job.id) + '\')" title="Click to clear filter">' +
-            '<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: ' + escAttr(job.color) + ';"></span>' +
+          return '<button type="button" class="job-filter-pill is-selected" style="border: 2px solid ' + escAttr(safeColor(job.color, '#047857')) + '; color: ' + escAttr(safeColor(job.color, '#047857')) + '; background-color: #ffffff; box-shadow: 0 0 0 1px ' + escAttr(safeColor(job.color, '#047857')) + ';" onclick="window.HortOpsForwardPlanner.handleJobFilter(\'' + escAttr(job.id) + '\')" title="Click to clear filter">' +
+            '<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: ' + escAttr(safeColor(job.color, '#047857')) + ';"></span>' +
             '<span>' + esc(job.name) + '</span>' +
             '<span style="font-size: 10px; opacity: 0.85;">(' + job.shiftCount + ')</span>' +
           '</button>';
@@ -189,3 +192,5 @@ window.HortOpsForwardPlannerControls = {
     return toolbarHtml + drawerHtml;
   }
 };
+
+})();

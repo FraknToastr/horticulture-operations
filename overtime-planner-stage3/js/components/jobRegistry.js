@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Job Registry View & Slideout Inspector Component
 window.HortOpsJobRegistry = {
   selectedJobId: null,
@@ -111,7 +114,7 @@ window.HortOpsJobRegistry = {
         return '<tr style="cursor: pointer; background-color: ' + (isSelected ? 'var(--emerald-50)' : 'transparent') + ';" onclick="window.HortOpsJobRegistry.selectJob(\'' + job.id + '\')">' +
           '<td style="padding: 0.6rem 0.8rem;">' +
             '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-              '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + (job.color || '#10b981') + '; shrink: 0;"></span>' +
+              '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + safeColor(job.color, '#10b981') + '; shrink: 0;"></span>' +
               '<div>' +
                 '<div style="font-weight: 700; color: var(--slate-900);">' + esc(job.name) + '</div>' +
                 '<div style="font-size: 12px; color: var(--slate-500);">' + esc(job.locationDetails || '') + '</div>' +
@@ -152,7 +155,7 @@ window.HortOpsJobRegistry = {
       '<div class="slideout-drawer">' +
         '<div class="modal-header">' +
           '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-            '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + (selectedJob.color || '#10b981') + ';"></span>' +
+            '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + safeColor(selectedJob.color, '#10b981') + ';"></span>' +
             '<h3 style="font-size: 16px; font-weight: 800; color: var(--slate-900);">' + esc(selectedJob.name) + '</h3>' +
           '</div>' +
           '<button class="btn btn-secondary" style="padding: 0.25rem 0.4rem;" onclick="window.HortOpsJobRegistry.selectJob(null)">' + icons.render('x', 'w-4 h-4') + '</button>' +
@@ -334,3 +337,5 @@ window.HortOpsJobRegistry = {
     }
   }
 };
+
+})();

@@ -10,6 +10,8 @@
     "test:stage3": "node scripts/run_all_stage3_gates.cjs",
     "test:stage3:smoke": "node scripts/test_stage3_browser_smoke.cjs",
     "test:writer": "node scripts/test_single_writer_application.cjs",
+    "test:handoff": "node scripts/test_writer_domain_handoff.cjs",
+    "test:security": "node scripts/test_color_security.cjs",
     "test:tooling": "node scripts/test_release_tooling_portability.cjs && node scripts/test_browser_harness_portability.cjs",
     "test:inherited": "node scripts/run_inherited_probes.cjs",
     "probe:review64": "node scripts/run_inherited_probes.cjs --review64",
@@ -19,7 +21,10 @@
     "test:persistence": "node scripts/test_persistence.cjs",
     "test:smoke": "node scripts/test_browser_smoke.cjs",
     "test:contracts": "node scripts/test_dependency_contracts.cjs",
-    "test:ordering": "node scripts/test_candidate_ordering.cjs"
+    "test:ordering": "node scripts/test_candidate_ordering.cjs",
+    "test:runtime": "node scripts/test_runtime_qualification.cjs",
+    "test:planner:assignments": "node scripts/test_forward_planner_assignments.cjs",
+    "test:stage4b": "node scripts/test_staff_pools_work_patterns.cjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",

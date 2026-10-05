@@ -28,7 +28,7 @@ rtk proxy npm run build
 rtk proxy npm run test:tooling
 rtk proxy npm test
 rtk proxy npm run test:stage3
-rtk proxy npm run test:smoke
+rtk proxy node scripts/test_browser_smoke.cjs
 rtk proxy npm run test:stage3:smoke
 rtk proxy npm run test:inherited
 rtk proxy npm run probe:review64
@@ -51,7 +51,7 @@ inherited standalone bytes without changing application modules or styles.
 from `scripts/independent-probes/review64/`. Their exit zero means the script
 completed its reproduction contract; it does **not** mean the application is
 safe or accepted. Phase 3 reproduced three lost writes and two injection
-failures. These findings remain open. Later remediation must add positive
+failures. Those were Phase 3 observations; consult `CURRENT_REVIEW_STATUS.md` for current dispositions. Later remediation must add positive
 closure tests while preserving the original reproduction sources.
 
 ## Outputs and inactive tools
@@ -101,3 +101,38 @@ The browser client uses current-only storage/envelope modules. Historical
 compatibility tests. Fixtures use the virtual store and explicit ownership
 readiness rather than activating old browser data or fake ownership flags.
 See `MIGRATION_PHASE5_CHECKPOINT.md` before beginning the next phase.
+
+## Phase 6 colour/import security proof
+
+Run `rtk proxy npm run test:security` for seven positive Node/browser proof groups against the generated client. It tests rejected saves/imports without changing source bytes, the asynchronous file input, ten rendered component paths with mouseover dispatch, normal RGB/RGBA round trips and recovery. Results stay under ignored `test_reports/phase6/`.
+
+After Phase 6 the unchanged Review 64 security reproduction exits 1 because both hostile colours are rejected and neither handler appears. The unchanged raw-storage concurrency reproduction still exits 0 after reproducing three losses in compatibility paths outside the guarded client. Neither raw exit denotes release acceptance. `CURRENT_REVIEW_STATUS.md` supersedes historical stage attribution; the current checkpoint is `MIGRATION_PHASE6_CHECKPOINT.md`. No command generates packages or publishes GitHub.
+
+## Phase 7 domain handoff proof
+
+Run `rtk proxy npm run test:handoff` for 15 checks across three real domain edits using index/dist/modular clients. It verifies ownership transfer, denied stale commands, retained form callbacks after reacquisition, fresh absence edits and third-client cold reload. Results stay in ignored `test_reports/phase7/`. The current checkpoint is `MIGRATION_PHASE7_CHECKPOINT.md`; review commands and limits are in `REVIEW65_CANDIDATE_HANDOFF.md`. No packages or publication are generated.
+
+## Phase 8 runtime qualification
+
+```sh
+rtk proxy npm run test:runtime
+```
+
+Six checks use the same pinned child-local Chromium and actual offline index,
+distribution and modular clients. They supplement the retained regimes rather
+than becoming Stage 3 contract gates. Reports stay in `test_reports/phase8/`.
+They cover actual navigation/peer-save/return/reload and controlled storage/lock
+denial against valid saved data. Actual back/forward-cache restoration was not
+observed. `SUPPORTED_RUNTIME.md` states the qualification boundary; owner testing
+and release acceptance are separate evidence/decisions.
+
+## Forward Planner assigned-card regression
+
+```sh
+rtk proxy npm run test:planner:assignments
+```
+
+Six checks use real assignment buttons with clean synthetic User Table workforce
+input. Partial/full/reloaded one-off and recurring crews retain assigned cards and
+saved evidence. Reports stay in test_reports/forward-planner-assignments/. This is
+a supplemental regression, not an amendment to the frozen 24-suite runner.

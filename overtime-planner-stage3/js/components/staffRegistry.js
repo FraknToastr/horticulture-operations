@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Workforce Directory Component
 window.HortOpsStaffRegistry = {
   searchTerm: '',
@@ -172,7 +175,7 @@ window.HortOpsStaffRegistry = {
       return '<tr>' +
         '<td style="padding: 0.6rem 0.8rem;">' +
           '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-            '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + (staff.avatarColor || '#10b981') + '; shrink: 0;"></span>' +
+            '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + safeColor(staff.avatarColor, '#10b981') + '; shrink: 0;"></span>' +
             '<div>' +
               '<div style="font-weight: 700; color: var(--slate-900);">' + esc(staff.name) + '</div>' +
               '<div style="font-size: 12px; color: var(--slate-400);">' + esc(staff.email || '') + '</div>' +
@@ -265,3 +268,5 @@ window.HortOpsStaffRegistry = {
     window.HortOpsApp.renderCurrentView();
   }
 };
+
+})();

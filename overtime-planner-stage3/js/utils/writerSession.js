@@ -35,15 +35,17 @@
   guard(app, ['init', '_commitCanonicalProposal', 'saveCurrentWorkspace', 'updatePermit', 'updateShiftStaff', 'saveJob', 'deleteJob', 'restoreWorkspaceJson', 'resetToCleanSlate', 'reconcileStaffSnapshot', 'importStaffMembers', 'updateStaffMember', 'handleAutoStagger', 'saveAbsenceAndRefusalData', 'openStaffAssignModal', 'openAddJobModal', 'openEditJobModal', 'openImportModal', 'openResetWorkspaceModal']);
   guard(storage, ['set', 'remove', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'retireCompositeParentBundle', 'compactStorage', 'importWorkspaceJson', 'saveWorkspace']);
   guard(driver, ['set', 'remove', '_restoreRawStorageSnapshot', '_restoreEmergencyRecoveryMetadata', '_stageTransactionRecoveryBundle', '_stageEmergencyRecoveryArtifact', '_executeCompensatingRollback', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'retireCompositeParentBundle', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'compactStorage']);
-  [
+  var editorBoundaries = [
     [window.HortOpsStaffAssignModal, ['open','addStaff','openActiveContinuation','removeStaff','removeAllUnaccredited','removeAllFatigued','removeAllIneligible','autoFillTeam','updatePermit','updatePermitNotes','updateSlotMode','updateSlotRepeat','saveAllocation']],
     [window.HortOpsStaffExemptionModal, ['open','toggleExempt','setPreset','save']],
     [window.HortOpsStaffQualificationModal, ['open','addQualification','removeQualification','save']],
     [window.HortOpsStaffAbsenceModal, ['open','addAbsence','updateAbsence','removeAbsence','addRefusal','updateRefusal','removeRefusal','save']],
-    [window.HortOpsJobEditModal, ['open','handleSubmit']],
+    [window.HortOpsJobEditModal, ['open','handleSubmit','setPlanningField','togglePatternDay','setPoolSource','togglePoolTag']],
+    [window.HortOpsStaffPoolModal, ['open','save','createTag','setTagActive','setMembership']],
     [window.HortOpsImportModal, ['open','handleFileSelect','processJsonContent','processCsvContent','confirmSync','confirmJsonRestore']],
     [window.HortOpsResetWorkspaceModal, ['open','executeReset']]
-  ].forEach(function(entry) { guard(entry[0], entry[1]); });
+  ];
+  editorBoundaries.forEach(function(entry) { guard(entry[0], entry[1]); });
   // Recovery is current namespace/current schema only, including direct driver calls.
   var restore = driver.restoreEmergencyRecoveryArtifact;
   driver.restoreEmergencyRecoveryArtifact = function(input, options) {
@@ -131,6 +133,9 @@
   }
   function release() {
     generation++; releaseWanted = true; reason = 'Editing was released. Try editing to reload the latest saved workspace.';
+    // Discard editor models as well as their DOM. A retained save callback must
+    // not regain access to an old form when this tab later reacquires editing.
+    editorBoundaries.forEach(function(entry) { entry[0].close(); });
     document.querySelectorAll('[id$="-modal-root"]').forEach(function(root) { root.replaceChildren(); });
     while (window.HortOpsModalUtils.getActiveModalCount() > 0) window.HortOpsModalUtils.unlockBackgroundScroll();
     finishRelease(); decorate();

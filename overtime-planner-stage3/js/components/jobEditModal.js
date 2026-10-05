@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Job Add / Edit Modal Component
 // Sole Public Facade for Job Editing: delegates UI sections to sub-modules while retaining state and action handlers.
 window.HortOpsJobEditModal = {
@@ -129,7 +132,7 @@ window.HortOpsJobEditModal = {
       '<div class="modal-card modal-lg">' +
         '<div class="modal-header">' +
           '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-            '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + escapeAttr(data.color || '#047857') + ';"></span>' +
+            '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + escapeAttr(safeColor(data.color, '#047857')) + ';"></span>' +
             '<h2 style="font-size: 1.1rem; font-weight: 800; color: var(--slate-900);">' +
               (this.editingJobId ? ('Edit Job: ' + escHtml(data.name || '')) : 'Create New Horticultural Job') +
             '</h2>' +
@@ -157,7 +160,7 @@ window.HortOpsJobEditModal = {
               '</div>' +
               '<div>' +
                 '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Color Tag</label>' +
-                '<input type="color" class="form-input" style="height: 32px; padding: 2px;" value="' + escapeAttr(data.color || '#047857') + '" onchange="window.HortOpsJobEditModal.updateField(\'color\', this.value)" />' +
+                '<input type="color" class="form-input" style="height: 32px; padding: 2px;" value="' + escapeAttr(safeColor(data.color, '#047857')) + '" onchange="window.HortOpsJobEditModal.updateField(\'color\', this.value)" />' +
               '</div>' +
             '</div>' +
 
@@ -380,3 +383,5 @@ window.HortOpsJobEditModal = {
     this.close();
   }
 };
+
+})();

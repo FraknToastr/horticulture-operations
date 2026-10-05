@@ -110,6 +110,15 @@ window.HortOpsForwardPlanner = {
         });
       }
 
+      slot.shifts.forEach(function(shift) {
+        if (!days.some(function(d) { return d.dateStr === shift.date; })) {
+          days.push({day:shift.dayOfWeek,dateStr:shift.date,label:dateUtils.formatDisplayDate(shift.date),
+            holiday:slot.publicHolidays.find(function(h) { return h.date === shift.date; }),
+            availableShifts:slot.shifts.filter(function(s) { return s.date === shift.date; }),hasOvertime:true});
+        }
+      });
+      days.sort(function(a,b) { return a.dateStr.localeCompare(b.dateStr); });
+      days.forEach(function(d,i) { d.isFirstInWeekend = i === 0; });
       slotDayMap[slot.weekNumber] = days;
       totalActiveColumns += days.length;
     });

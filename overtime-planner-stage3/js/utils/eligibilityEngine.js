@@ -319,8 +319,17 @@ window.HortOpsEligibilityEngine = {
       }
     }
 
+    var poolJob = job || context.job || (window.HortOpsApp && window.HortOpsApp.state &&
+      (window.HortOpsApp.state.jobs || []).find(function(j) { return occurrence && j.id === occurrence.jobId; })) || occurrence || {};
+    var poolRules = window.HortOpsPlanningRules;
+    if (poolJob.exclusivePoolSource === 'tags') {
+      var catalogue = params.poolTags || context.poolTags || (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
+      if (!poolRules || !poolRules.matches(employee, poolJob.exclusivePoolTagIds || [], catalogue)) { reasons.push('POOL_NOT_ALLOWED'); hardBlock = true; }
+    }
     // 3. Exclusive Team Restriction Check
     var isExclusive = (occurrence && (occurrence.isExclusive || occurrence.isExclusiveTeams)) || (job && (job.isExclusive || job.isExclusiveTeams));
+    if (poolJob.exclusivePoolSource === 'tags' || poolJob.exclusivePoolSource === 'none') isExclusive = false;
+    if (poolJob.exclusivePoolSource === 'teams') isExclusive = true;
     var exclusiveTeams = (occurrence && occurrence.exclusiveTeams && occurrence.exclusiveTeams.length > 0) ? occurrence.exclusiveTeams : (job && job.exclusiveTeams ? job.exclusiveTeams : []);
     if (isExclusive && exclusiveTeams && exclusiveTeams.length > 0) {
       var staffTeam = (employee.team || '').toLowerCase();
@@ -484,6 +493,7 @@ window.HortOpsEligibilityEngine = {
       'EMPLOYMENT_ON_LEAVE': 'Employee is currently on leave',
       'UNKNOWN_EMPLOYMENT_STATUS': 'Employee has unknown employment status',
       'OVERTIME_EXEMPT': 'Employee has active overtime exemption',
+      'POOL_NOT_ALLOWED': 'Employee is outside the active exclusive staff tag pool',
       'TEAM_NOT_ALLOWED': 'Employee team not permitted under exclusive-team restrictions',
       'OVERLAPPING_SHIFT': 'Employee is already assigned to a concurrent overlapping shift',
       'INSUFFICIENT_REST': 'Employee has insufficient rest between work commitments (minimum 10 hours required)',
@@ -528,6 +538,7 @@ window.HortOpsEligibilityEngine = {
       'EMPLOYMENT_ON_LEAVE': 'On Leave',
       'UNKNOWN_EMPLOYMENT_STATUS': 'Unknown Status',
       'OVERTIME_EXEMPT': 'Exemption Active',
+      'POOL_NOT_ALLOWED': 'Outside Exclusive Staff Pool',
       'TEAM_NOT_ALLOWED': 'Non-Exclusive Team',
       'OVERLAPPING_SHIFT': 'Double-Booked',
       'INSUFFICIENT_REST': 'Insufficient Rest (< 10h)',

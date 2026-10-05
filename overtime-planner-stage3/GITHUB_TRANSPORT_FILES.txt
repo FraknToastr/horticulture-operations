@@ -15,10 +15,12 @@
 AGENTS.md
 ARCHITECTURE_DECOMPOSITION_AUDIT.md
 Antigravity-IDE Overtime Planner background.md
+CURRENT_REVIEW_STATUS.md
 Constitution/GEMINI_CONSTITUTION.md
 DELETIONS.txt
 DESIGN_CHALLENGE_B2.md
 DEVELOPMENT_TRANSITION.md
+FORWARD_PLANNER_ASSIGNMENT_FIX.md
 GATE_A_CHANGE_AND_EVIDENCE_REPORT.md
 GATE_B1_CHANGE_AND_EVIDENCE_REPORT.md
 GATE_B2_CHANGE_AND_EVIDENCE_REPORT.md
@@ -42,9 +44,13 @@ MIGRATION_PHASE2_CHECKPOINT.md
 MIGRATION_PHASE3_CHECKPOINT.md
 MIGRATION_PHASE4_CHECKPOINT.md
 MIGRATION_PHASE5_CHECKPOINT.md
+MIGRATION_PHASE6_CHECKPOINT.md
+MIGRATION_PHASE7_CHECKPOINT.md
+MIGRATION_PHASE8_CHECKPOINT.md
 NEW_MAINTAINER_HANDOFF_GUIDE.md
 Operational context.md
 PROCEED.md
+R64_SECURITY_BOUNDARY_CHANGE_REPORT.md
 R64_TOCTOU_DESIGN_DECISION.md
 README.md
 RESET_WORKSPACE_PLAN.md
@@ -80,6 +86,8 @@ REVIEW62_CROSS_DOMAIN_NEGATIVE_PROBES.cjs
 REVIEW62_PR26_06_FINDING_DISPOSITIONS.md
 REVIEW63_INDEPENDENT_NEGATIVE_PROBES.cjs
 REVIEW63_PR26_07_FINDING_DISPOSITIONS.md
+REVIEW64_PR26_08_FINDING_DISPOSITIONS.md
+REVIEW65_CANDIDATE_HANDOFF.md
 ROADMAP_TEST_ACCEPTANCE_AND_RELEASE_GATES.md
 ROSTERING_INTEGRITY_FREEZE.md
 STAGE1_ARCHITECTURE_AUDIT_AND_CANONICALISATION_PLAN.md
@@ -99,6 +107,10 @@ STAGE2_TRANSACTION_MODEL_DESIGN_SUBMISSION_09.md
 STAGE2_TRANSACTION_MODEL_DESIGN_SUBMISSION_10.md
 STAGE2_WORKSPACE_MANAGEMENT_CHANGE_AND_EVIDENCE_REPORT.md
 STAGE3_COMPLETION_AND_EVIDENCE_REPORT.md
+STAGE4A_CHECKPOINT.md
+STAGE4B_CHECKPOINT.md
+STAGE4_SMART_ROSTERING_BASELINE.md
+SUPPORTED_RUNTIME.md
 SYSTEM_ARCHITECTURE.md
 TOOLING.md
 UI Overhaul Objective.md
@@ -248,6 +260,7 @@ js/components/jobEditModal/recurrenceForm.js
 js/components/jobEditModal/teamPreferences.js
 js/components/jobRegistry.js
 js/components/peakWeekends.js
+js/components/planningEditors.js
 js/components/quarantineViewerModal.js
 js/components/resetWorkspaceModal.js
 js/components/staffAbsenceModal.js
@@ -272,6 +285,7 @@ js/utils/eligibilityEngine.js
 js/utils/fatigueEngine.js
 js/utils/icons.js
 js/utils/modalUtils.js
+js/utils/planningRules.js
 js/utils/qualifications.js
 js/utils/reconciliationEngine.js
 js/utils/rostering/commitmentPlanner.js
@@ -338,7 +352,9 @@ scripts/run_inherited_probes.cjs
 scripts/test_browser_harness_portability.cjs
 scripts/test_browser_smoke.cjs
 scripts/test_candidate_ordering.cjs
+scripts/test_color_security.cjs
 scripts/test_dependency_contracts.cjs
+scripts/test_forward_planner_assignments.cjs
 scripts/test_fr02_schedule_validation.cjs
 scripts/test_fr03_dst_rest.cjs
 scripts/test_gate_b1.cjs
@@ -362,9 +378,11 @@ scripts/test_review56_resolved.cjs
 scripts/test_rostering_engine.cjs
 scripts/test_rostering_lifecycle.cjs
 scripts/test_runner_contract.cjs
+scripts/test_runtime_qualification.cjs
 scripts/test_scheduler.cjs
 scripts/test_single_writer_application.cjs
 scripts/test_single_writer_design.cjs
+scripts/test_staff_pools_work_patterns.cjs
 scripts/test_stage2_browser_smoke.cjs
 scripts/test_stage2_transaction_model_closure_audit.cjs
 scripts/test_stage2_workspace_contract.cjs
@@ -378,6 +396,7 @@ scripts/test_stage3_qualification_matching_contract.cjs
 scripts/test_stage3_qualification_registry_contract.cjs
 scripts/test_static_release.cjs
 scripts/test_workforce.cjs
+scripts/test_writer_domain_handoff.cjs
 scripts/verify_deletions.cjs
 test_review56_resolved.cjs
 walkthrough.md

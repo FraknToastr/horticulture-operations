@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Staff Assignment Staged Crew Sub-module
 // Renders staged allocations for the selected shift, vacancy slot fill states, permit compliance, and commit actions.
 // Implements stable slot strategy management, source-owned downstream occurrence indicators, and historical protection.
@@ -152,7 +155,7 @@ window.HortOpsStaffAssignStagedCrew = {
       assignedStaffList.map(function(staff) {
         var dotHtml = (window.HortOpsData && window.HortOpsData.renderTeamDot) ?
           window.HortOpsData.renderTeamDot(staff.team) :
-          '<span class="team-dot" style="background-color: ' + (staff.avatarColor || '#10b981') + ';"></span>';
+          '<span class="team-dot" style="background-color: ' + safeColor(staff.avatarColor, '#10b981') + ';"></span>';
 
         var ineligItem = ineligibleAssignees.find(function(item) { return item.staff.id === staff.id; });
         var ineligBadge = ineligItem ?
@@ -324,3 +327,5 @@ window.HortOpsStaffAssignStagedCrew = {
     return this.render(ctx);
   }
 };
+
+})();

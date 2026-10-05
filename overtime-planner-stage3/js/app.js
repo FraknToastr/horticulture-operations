@@ -27,6 +27,7 @@ window.HortOpsApp = {
     var ws = storage.loadWorkspace([], [], scheduler.DEFAULT_BUDGET_SETTINGS);
     this.state = this.state || {};
     this.state.schemaVersion = 2;
+    this.state.poolTags = JSON.parse(JSON.stringify(ws.poolTags || []));
     this.state.jobs = ws.jobs;
     this.state.staffList = ws.roster;
     this.state.roster = ws.roster;
@@ -143,6 +144,7 @@ window.HortOpsApp = {
   _updateDomainBaselines: function(src) {
     if (!src || typeof src !== 'object') return;
     this._domainBaselines = {
+      poolTags: JSON.parse(JSON.stringify(src.poolTags || [])),
       jobs: JSON.parse(JSON.stringify(src.jobs || [])),
       roster: JSON.parse(JSON.stringify(src.roster || src.staffList || [])),
       assignments: JSON.parse(JSON.stringify(src.assignments || src.customAssignments || {})),
@@ -177,7 +179,8 @@ window.HortOpsApp = {
 
       // Review 62 (R62-P0-01): Identify explicit mutating domain intent
       var explicitMutatingDomains = new Set();
-      if (own.call(proposalOverrides, 'jobs')) explicitMutatingDomains.add('jobs');
+      if (own.call(proposalOverrides, 'poolTags')) explicitMutatingDomains.add('poolTags');
+    if (own.call(proposalOverrides, 'jobs')) explicitMutatingDomains.add('jobs');
       if (own.call(proposalOverrides, 'roster') || own.call(proposalOverrides, 'staffList')) explicitMutatingDomains.add('roster');
       if (own.call(proposalOverrides, 'assignments') || own.call(proposalOverrides, 'customAssignments')) explicitMutatingDomains.add('assignments');
       if (own.call(proposalOverrides, 'rostering')) explicitMutatingDomains.add('rostering');
@@ -196,7 +199,9 @@ window.HortOpsApp = {
       // Detect any in-memory domain changes vs established baseline (fail-closed, without masking)
       var activeMutatingDomains = new Set(explicitMutatingDomains);
       if (!isRestoreOrReset && this._domainBaselines) {
-        var currentJobs = this._resolveDomainState('jobs');
+        var currentPools = this.state.poolTags || [];
+      if (JSON.stringify(currentPools) !== JSON.stringify(this._domainBaselines.poolTags || [])) activeMutatingDomains.add('poolTags');
+      var currentJobs = this._resolveDomainState('jobs');
         if (JSON.stringify(currentJobs) !== JSON.stringify(this._domainBaselines.jobs)) activeMutatingDomains.add('jobs');
 
         var currentRoster = this._resolveDomainState('roster', 'staffList');
@@ -239,7 +244,8 @@ window.HortOpsApp = {
       }
 
       // Authoritative canonical domains: distinguish omitted from explicitly null/invalid; NEVER coerce with truthy defaults
-      var proposedJobs;
+      var proposedPools = own.call(proposalOverrides, 'poolTags') ? proposalOverrides.poolTags : (this.state.poolTags || []);
+    var proposedJobs;
       if (own.call(proposalOverrides, 'jobs')) {
         proposedJobs = proposalOverrides.jobs;
       } else {
@@ -441,7 +447,9 @@ window.HortOpsApp = {
         }
 
         // 1. Untouched domains preservation
-        if (!activeMutatingDomains.has('jobs') && Array.isArray(committedData.jobs)) {
+        if (!activeMutatingDomains.has('poolTags')) proposedPools = committedData.poolTags || [];
+      if (activeMutatingDomains.has('poolTags') && this._domainBaselines && JSON.stringify(committedData.poolTags || []) !== JSON.stringify(this._domainBaselines.poolTags || [])) return {success:false,error:'Pool catalogue changed; reopen the editor.'};
+      if (!activeMutatingDomains.has('jobs') && Array.isArray(committedData.jobs)) {
           proposedJobs = committedData.jobs;
         }
         if (!activeMutatingDomains.has('roster') && Array.isArray(committedData.roster)) {
@@ -728,9 +736,7 @@ window.HortOpsApp = {
         return { success: false, error: 'Canonical envelope constructor unavailable' };
       }
 
-      var candidateEnvelope = {
-        schemaVersion: 2
-      };
+      var candidateEnvelope = { schemaVersion: 2, poolTags: proposedPools };
       if (proposedJobs !== undefined) candidateEnvelope.jobs = proposedJobs;
       if (proposedRoster !== undefined) candidateEnvelope.roster = proposedRoster;
       if (proposedAssignments !== undefined) candidateEnvelope.assignments = proposedAssignments;
@@ -752,7 +758,8 @@ window.HortOpsApp = {
 
       // Review 63 (R63-P0-01 & R63-P1-02): Unconditionally synchronize ALL in-memory domain aliases to the committed envelope
       if (this.state) {
-        this.state.jobs = JSON.parse(JSON.stringify(candidateEnvelope.jobs || []));
+        this.state.poolTags = JSON.parse(JSON.stringify(candidateEnvelope.poolTags || []));
+      this.state.jobs = JSON.parse(JSON.stringify(candidateEnvelope.jobs || []));
 
         var syncedRoster = JSON.parse(JSON.stringify(candidateEnvelope.roster || []));
         this.state.roster = syncedRoster;
@@ -1161,6 +1168,7 @@ window.HortOpsApp = {
 
     var canonicalEnvelope = {
       schemaVersion: 2,
+      poolTags: JSON.parse(JSON.stringify(adoptedData.poolTags || [])),
       jobs: Array.isArray(adoptedData.jobs) ? JSON.parse(JSON.stringify(adoptedData.jobs)) : [],
       roster: Array.isArray(adoptedData.roster) ? JSON.parse(JSON.stringify(adoptedData.roster)) : [],
       assignments: (adoptedData.assignments && typeof adoptedData.assignments === 'object') ? JSON.parse(JSON.stringify(adoptedData.assignments)) : {},
@@ -1212,6 +1220,7 @@ window.HortOpsApp = {
     // Live state adopts exact detached values from canonicalEnvelope (ensuring live == committed == cold reload)
     this.state.schemaVersion = 2;
     this.state.jobs = JSON.parse(JSON.stringify(canonicalEnvelope.jobs));
+    this.state.poolTags = JSON.parse(JSON.stringify(canonicalEnvelope.poolTags || []));
     this.state.staffList = JSON.parse(JSON.stringify(canonicalEnvelope.roster));
     this.state.roster = this.state.staffList;
     this.state.customAssignments = JSON.parse(JSON.stringify(canonicalEnvelope.assignments));
@@ -1298,6 +1307,7 @@ window.HortOpsApp = {
     // 4. Reset in-memory state cleanly to clean slate
     this.state.schemaVersion = 2;
     this.state.jobs = [];
+    this.state.poolTags = [];
     this.state.staffList = [];
     this.state.roster = [];
     this.state.customAssignments = {};
@@ -1386,10 +1396,22 @@ window.HortOpsApp = {
     return { success: true, vacatedCount: result.vacatedCount };
   },
 
-  importStaffMembers: function(newStaffList) {
-    if (!newStaffList || !Array.isArray(newStaffList)) {
-      return { success: false, error: 'Invalid staff list: expected array' };
-    }
+    importStaffMembers: function(newStaffList) {
+        if (!newStaffList || !Array.isArray(newStaffList)) {
+            return { success: false, error: 'Invalid staff list: expected array' };
+        }
+        // Reconciliation intentionally retains existing presentation fields.
+        // Reject hostile incoming colours before that merge can discard them.
+        var validator = window.HortOpsSchemaValidator;
+        if (!validator || typeof validator.validateOptionalColor !== 'function') {
+            return { success: false, error: 'Colour validation unavailable' };
+        }
+        for (var colorIndex = 0; colorIndex < newStaffList.length; colorIndex++) {
+            var incomingStaff = newStaffList[colorIndex];
+            if (incomingStaff && !validator.validateOptionalColor(incomingStaff.avatarColor)) {
+                return { success: false, error: 'Staff member at index ' + colorIndex + ' has an invalid avatar colour.' };
+            }
+        }
     if (!window.HortOpsReconciliationEngine || typeof window.HortOpsReconciliationEngine.computeWorkforceReconciliation !== 'function') {
       return { success: false, error: 'Reconciliation engine unavailable' };
     }

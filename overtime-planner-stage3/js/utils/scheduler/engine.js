@@ -337,6 +337,10 @@ window.HortOpsSchedulerEngine = {
       return false;
     }
 
+    if (job.frequencyType === 'work_pattern') {
+      var rules = window.HortOpsPlanningRules;
+      return !!rules && rules.dates(job, parseInt(dateStr.slice(0,4),10)).indexOf(dateStr) !== -1;
+    }
     var freq = job.frequencyType || "recurring_weeks";
 
     // 1. One-off Job: only job.targetDate is canonical generated occurrence
@@ -690,7 +694,7 @@ window.HortOpsSchedulerEngine = {
           return;
         }
 
-        var slot = slots.find(function(s) {
+        var slot = (job && job.frequencyType === 'work_pattern' && window.HortOpsPlanningRules) ? window.HortOpsPlanningRules.slotFor(slots,hist.date) : slots.find(function(s) {
           if (hist.weekNumber !== undefined && hist.weekNumber !== null) return s.weekNumber === hist.weekNumber;
           return s.saturdayDate === hist.date || s.sundayDate === hist.date || s.fridayDate === hist.date || s.mondayDate === hist.date;
         });
@@ -704,15 +708,30 @@ window.HortOpsSchedulerEngine = {
           var assignedIds = customAssignments[hist.shiftId] || customAssignments[key] || customAssignments[dateKey] || hist.assignedStaffIds || [];
           var permitMeta = self.resolvePermitMeta(hist, dateKey, hist.shiftId || key, customPermits);
 
-          var histShift = Object.assign({}, hist, permitMeta, {
-            shiftId: hist.shiftId || (hist.jobId + '@' + hist.date),
-            jobId: hist.jobId,
-            jobName: hist.jobName || (job ? job.name : (hist.jobId || 'Unknown Job')),
-            assignedStaffIds: (assignedIds || []).slice(),
+                    var histShift = Object.assign({}, hist, permitMeta, {
+                        shiftId: hist.shiftId || (hist.jobId + '@' + hist.date),
+                        jobId: hist.jobId,
+                        jobName: hist.jobName || (job ? job.name : (hist.jobId || 'Unknown Job')),
+                        // Snapshot records carry canonical dates, not planner display coordinates.
+                        // Derive these on the runtime projection without changing saved history.
+                        weekNumber: slot.weekNumber,
+                        dayOfWeek: (job && job.frequencyType === 'work_pattern' && window.HortOpsPlanningRules) ? window.HortOpsPlanningRules.weekdays[new Date(hist.date+'T12:00:00Z').getUTCDay()] : hist.date === slot.saturdayDate ? 'Saturday' :
+                            hist.date === slot.sundayDate ? 'Sunday' :
+                            hist.date === slot.fridayDate ? 'Friday' :
+                            hist.date === slot.mondayDate ? 'Monday' : hist.dayOfWeek,
+                        assignedStaffIds: (assignedIds || []).slice(),
             isHistorical: hist.date < todayStr,
             isHistoricalCommitment: hist.date < todayStr,
             unverifiedSchedule: false
           });
+          // Derive current display metadata from the canonical date; never rewrite snapshots.
+          if (job && job.frequencyType === 'work_pattern') {
+            histShift.frequencyType = 'work_pattern';
+            var patternHoliday = window.HortOpsData.getPublicHolidaysForYear(year).find(function(h) { return h.date === hist.date; });
+            histShift.isPublicHoliday = !!patternHoliday;
+            histShift.publicHolidayName = patternHoliday ? patternHoliday.name : null;
+            if (patternHoliday && !slot.publicHolidays.some(function(h) { return h.date === hist.date; })) slot.publicHolidays.push(patternHoliday);
+          }
           slot.shifts.push(histShift);
           allShifts.push(histShift);
         }
@@ -727,6 +746,27 @@ window.HortOpsSchedulerEngine = {
     });
 
     eligibleJobs.forEach(function(job, jobIdx) {
+      if (job.frequencyType === 'work_pattern') {
+        var rules = window.HortOpsPlanningRules;
+        if (!rules) throw new Error('Work pattern engine unavailable');
+        rules.dates(job, year).forEach(function(date) {
+          var shiftId = job.id + '@' + date, dateKey = job.id + '_' + date;
+          if (seededShiftKeys.has(shiftId) || seededShiftKeys.has(dateKey)) return;
+          var slot = rules.slotFor(slots, date);
+          var holiday = window.HortOpsData.getPublicHolidaysForYear(year).find(function(h) { return h.date === date; });
+          var assigned = customAssignments[shiftId] || customAssignments[dateKey] || [];
+          var shift = Object.assign({}, job, self.resolvePermitMeta(job,dateKey,shiftId,customPermits), {
+            shiftId:shiftId,jobId:job.id,jobName:job.name,date:date,
+            weekNumber:slot.weekNumber,dayOfWeek:rules.weekdays[new Date(date+'T12:00:00Z').getUTCDay()],
+            assignedStaffIds:assigned.slice(),isPublicHoliday:!!holiday,holidayName:holiday ? holiday.name : undefined
+          });
+          self._applyHistoricalTimingToShift(shift,job,date,assigned,todayStr,customSnapshots,integrityIssues);
+          if (holiday && !slot.publicHolidays.some(function(h) { return h.date === date; })) slot.publicHolidays.push(holiday);
+          slot.shifts.push(shift); allShifts.push(shift); seededShiftKeys.add(shiftId); seededShiftKeys.add(dateKey);
+        });
+        return;
+      }
+
       // 1. Recurring Shift Engine (P0-04, P0-06, P0-08, P0-09)
       if ((job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence') && job.intervalWeeks) {
         var interval = job.intervalWeeks;
@@ -1215,7 +1255,7 @@ window.HortOpsSchedulerEngine = {
         (j.status || '') + ':' +
         (j.startTime || '') + ':' +
         (j.durationHours || '') + ':' +
-        (j.frequencyType || '') + ':' +
+        JSON.stringify(j.workPattern || null) + ':' + JSON.stringify(j.preferredPoolTagIds || []) + ':' + JSON.stringify(j.exclusivePoolTagIds || []) + ':' + (j.exclusivePoolSource || '') + ':' + (j.frequencyType || '') + ':' +
         (j.preferredDay || '') + ':' +
         (j.intervalWeeks || '') + ':' +
         (j.anchorWeek !== undefined ? j.anchorWeek : '') + ':' +

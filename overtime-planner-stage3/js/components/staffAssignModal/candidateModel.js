@@ -170,6 +170,13 @@ window.HortOpsStaffAssignCandidateModel = {
       var bQualFail = b._lacksQualifications ? 1 : 0;
       if (aQualFail !== bQualFail) return aQualFail - bQualFail;
 
+      var rules = window.HortOpsPlanningRules;
+      if (rules && (matchingJob.preferredPoolTagIds || []).length) {
+        var tags = (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
+        var tagA = rules.matches(a, matchingJob.preferredPoolTagIds, tags) ? 0 : 1;
+        var tagB = rules.matches(b, matchingJob.preferredPoolTagIds, tags) ? 0 : 1;
+        if (tagA !== tagB) return tagA - tagB;
+      }
       var prioA = self.getStaffPriority(a, prefs);
       var prioB = self.getStaffPriority(b, prefs);
       if (prioA !== prioB) return prioA - prioB;

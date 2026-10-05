@@ -171,8 +171,16 @@ window.HortOpsUserCsvParser = (function() {
       var isPlantOpRaw = isPlantOpIdx !== -1 && row[isPlantOpIdx] ? row[isPlantOpIdx].toUpperCase() : 'FALSE';
       var isPlantOperator = isPlantOpRaw === 'TRUE' || isPlantOpRaw === '1' || isPlantOpRaw === 'YES';
 
-      var stableId = '';
-      var existingMatch = null;
+    var stableId = '';
+    var existingMatch = null;
+    if (!(explicitId && currentById.has(explicitId.toUpperCase()))) {
+      var identityMatches = email ? (currentRoster || []).filter(function(person) { return String(person.email || '').toLowerCase() === email.toLowerCase(); }) : [];
+      if (!identityMatches.length) identityMatches = (currentRoster || []).filter(function(person) { return String(person.name || person.title || '').toLowerCase() === title.toLowerCase(); });
+      if (identityMatches.length > 1) {
+        errors.push('Ambiguous workforce identity on row ' + (i + 1) + '. Supply the existing employee ID. Pool memberships were not transferred.');
+        continue;
+      }
+    }
 
       if (explicitId && currentById.has(explicitId.toUpperCase())) {
         existingMatch = currentById.get(explicitId.toUpperCase());
@@ -220,6 +228,7 @@ window.HortOpsUserCsvParser = (function() {
         status: status,
         isContractor: isContractor,
         isPlantOperator: isPlantOperator,
+        poolTagIds: existingMatch ? (existingMatch.poolTagIds || []).slice() : [],
         skills: existingMatch ? (existingMatch.skills || []) : [],
         phone: existingMatch ? (existingMatch.phone || '') : '',
         avatarColor: (existingMatch && existingMatch.avatarColor) ? existingMatch.avatarColor : AVATAR_COLORS[parsedStaff.length % AVATAR_COLORS.length],

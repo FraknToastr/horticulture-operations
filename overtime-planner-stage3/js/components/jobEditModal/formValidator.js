@@ -7,6 +7,12 @@ window.HortOpsJobEditFormValidator = {
     }
 
     // P0-07, P0-09, N-P1-02: Validation by frequency type
+    if (formData.frequencyType === 'work_pattern') {
+      var patternRules = window.HortOpsPlanningRules;
+      if (!patternRules) return {valid:false,message:'Work pattern validation unavailable.'};
+      var patternCheck = patternRules.validatePattern(formData);
+      if (!patternCheck.valid) return {valid:false,message:patternCheck.error};
+    }
     if (formData.frequencyType === 'one_off') {
       if (!formData.targetDate) {
         return { valid: false, message: 'Please specify an overtime date for this one-off shift.' };
@@ -100,9 +106,10 @@ window.HortOpsJobEditFormValidator = {
   // Offline17.5i: Detects if proposed Job mutations alter operational occurrence generation
   doesProposedJobChangeOperationalSchedule: function(existingJob, proposedJob) {
     if (!existingJob || !proposedJob) return false;
-    var recurrenceFields = ['frequencyType', 'intervalWeeks', 'anchorDate', 'anchorWeek', 'targetDate', 'targetMonth', 'preferredDay', 'status'];
+    var recurrenceFields = ['frequencyType', 'intervalWeeks', 'anchorDate', 'anchorWeek', 'targetDate', 'targetMonth', 'preferredDay', 'status', 'workPattern'];
     return recurrenceFields.some(function(field) {
       if (proposedJob[field] === undefined && existingJob[field] === undefined) return false;
+      if (field === 'workPattern') return JSON.stringify(proposedJob[field] || null) !== JSON.stringify(existingJob[field] || null);
       return String(proposedJob[field] || '') !== String(existingJob[field] || '');
     });
   },
@@ -232,7 +239,9 @@ window.HortOpsJobEditFormValidator = {
 
           var isStillValid = false;
           if (String(candidateMergedJob.status || '').trim().toLowerCase() === 'active') {
-            if (window.HortOpsScheduler && typeof window.HortOpsScheduler.isCanonicalOperationalOccurrence === 'function') {
+            if (candidateMergedJob.frequencyType === 'work_pattern') {
+              isStillValid = !!window.HortOpsPlanningRules && window.HortOpsPlanningRules.dates(candidateMergedJob, parseInt(aDate.slice(0,4),10)).indexOf(aDate) !== -1;
+            } else if (window.HortOpsScheduler && typeof window.HortOpsScheduler.isCanonicalOperationalOccurrence === 'function') {
               isStillValid = window.HortOpsScheduler.isCanonicalOperationalOccurrence(candidateMergedJob, aDate);
             } else if (window.HortOpsSchedulerEngine && typeof window.HortOpsSchedulerEngine.isCanonicalOperationalOccurrence === 'function') {
               isStillValid = window.HortOpsSchedulerEngine.isCanonicalOperationalOccurrence(candidateMergedJob, aDate);

@@ -54,7 +54,7 @@ window.HortOpsRosteringEngine = {
     // Cross-year recurrence resolution if needed for recurring/annual jobs
     var isRecurring = job.frequencyType === 'recurring_weeks' ||
                       job.frequencyType === 'recurring_cadence' ||
-                      job.frequencyType === 'annual';
+                      job.frequencyType === 'annual' || job.frequencyType === 'work_pattern';
 
     // Source-relative remaining count (Defect A):
     var sourceIndex = sourceShiftId ? unique.findIndex(function(s) { return s.shiftId === sourceShiftId; }) : -1;
@@ -154,7 +154,7 @@ window.HortOpsRosteringEngine = {
     if (job.frequencyType === 'one_off') return 1;
 
     var remaining = this.resolveRemainingOccurrences(currentShiftId, allShifts, job, this.UI_REPEAT_CAP, jobs);
-    if (job.frequencyType === 'annual' || job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence') {
+    if (job.frequencyType === 'annual' || job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence' || job.frequencyType === 'work_pattern') {
       return Math.max(1, Math.min(remaining.length, this.UI_REPEAT_CAP));
     }
     return Math.max(1, remaining.length);
@@ -277,6 +277,13 @@ window.HortOpsRosteringEngine = {
       (typeof global !== 'undefined' && global.HortOpsApp && global.HortOpsApp.state && global.HortOpsApp.state.refusalHistory) || [];
 
     var deterministicSort = function(a, b) {
+      var poolRules = window.HortOpsPlanningRules;
+      if (poolRules && job && (job.preferredPoolTagIds || []).length) {
+        var poolTags = params.poolTags || (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
+        var preferredA = poolRules.matches(a, job.preferredPoolTagIds, poolTags) ? 0 : 1;
+        var preferredB = poolRules.matches(b, job.preferredPoolTagIds, poolTags) ? 0 : 1;
+        if (preferredA !== preferredB) return preferredA - preferredB;
+      }
       var tierA = getTier(a);
       var tierB = getTier(b);
       if (tierA !== tierB) return tierA - tierB;

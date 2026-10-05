@@ -6,19 +6,22 @@ window.HortOpsImportModal = {
   pendingJsonBackup: null,
   isJsonMode: false,
   activeTab: 'overview',
-  fileName: '',
+    fileName: '',
+    errorMessage: '',
 
   open: function() {
     this.currentDiff = null;
     this.pendingJsonBackup = null;
     this.isJsonMode = false;
     this.activeTab = 'overview';
-    this.fileName = '';
+        this.fileName = '';
+        this.errorMessage = '';
     if (window.HortOpsModalUtils) window.HortOpsModalUtils.lockBackgroundScroll();
     this.renderModal();
   },
 
-  close: function() {
+    close: function() {
+        this.errorMessage = '';
     this.currentDiff = null;
     this.pendingJsonBackup = null;
     this.isJsonMode = false;
@@ -32,7 +35,8 @@ window.HortOpsImportModal = {
     if (!el) return;
     var icons = window.HortOpsIcons;
     var diff = this.currentDiff;
-    var jsonBackup = this.pendingJsonBackup;
+        var jsonBackup = this.pendingJsonBackup;
+        var escapeText = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml) || function() { return 'File import unavailable'; };
 
     var modalHtml = '<div class="modal-overlay" onclick="if(event.target === this) window.HortOpsImportModal.close()">' +
       '<div class="modal-card modal-lg" style="max-width: 850px; max-height: 90vh; display: flex; flex-direction: column;">' +
@@ -68,7 +72,7 @@ window.HortOpsImportModal = {
             '<input type="file" id="staff-csv-file-input" accept=".csv,.json" style="display: none;" onchange="window.HortOpsImportModal.handleFileSelect(event)" />' +
             '<div style="margin-bottom: 0.4rem; color: var(--emerald-700);">' + icons.render('upload', 'w-6 h-6') + '</div>' +
             '<div style="font-size: 13px; font-weight: 700; color: var(--slate-800);">' +
-              (this.fileName ? this.fileName : 'Click to select or drop users.csv or workspace.json backup') +
+                    (this.fileName ? escapeText(this.fileName) : 'Click to select or drop users.csv or workspace.json backup') +
             '</div>' +
             '<div style="font-size: 11px; color: var(--slate-500); margin-top: 0.2rem;">' +
               'Supported formats: .CSV (authoritative workforce table) or .JSON (full workspace system backup)' +
@@ -76,7 +80,7 @@ window.HortOpsImportModal = {
           '</div>' +
 
           // Error Area
-          '<div id="import-error-area" style="display: none; background: var(--rose-50); border: 1px solid var(--rose-200); border-radius: 6px; padding: 0.75rem 1rem; font-size: 12px; color: var(--rose-700);"></div>' +
+                '<div id="import-error-area" role="alert" style="display: ' + (this.errorMessage ? 'block' : 'none') + '; background: var(--rose-50); border: 1px solid var(--rose-200); border-radius: 6px; padding: 0.75rem 1rem; font-size: 12px; color: var(--rose-700);">' + escapeText(this.errorMessage) + '</div>' +
 
           // Previews
           (this.isJsonMode && jsonBackup ? this.renderJsonPreviewHtml(jsonBackup) : (diff ? this.renderDiffPreviewHtml(diff) : '')) +
@@ -276,7 +280,8 @@ window.HortOpsImportModal = {
     }
   },
 
-  processJsonContent: function(jsonText) {
+    processJsonContent: function(jsonText) {
+        this.errorMessage = '';
     var errEl = document.getElementById('import-error-area');
     var esc = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml) || function(s) { return s || ''; };
     try {
@@ -319,8 +324,10 @@ window.HortOpsImportModal = {
       this.backupSourceVersion = sourceVersion;
       this.currentDiff = null;
       this.renderModal();
-    } catch(e) {
-      this.pendingJsonBackup = null;
+        } catch(e) {
+            this.pendingJsonBackup = null;
+            this.currentDiff = null;
+            this.errorMessage = 'JSON Backup Error: ' + (e.message || String(e));
       if (errEl) {
         errEl.style.display = 'block';
         errEl.innerHTML = '<strong>JSON Backup Error:</strong><br/>' + esc(e.message || String(e));
@@ -329,7 +336,8 @@ window.HortOpsImportModal = {
     }
   },
 
-  processCsvContent: function(csvText) {
+    processCsvContent: function(csvText) {
+        this.errorMessage = '';
     var currentRoster = window.HortOpsApp.state.staffList || [];
     var customAssignments = window.HortOpsApp.state.customAssignments || {};
     var allShifts = window.HortOpsApp.state.allShifts || [];
@@ -338,7 +346,8 @@ window.HortOpsImportModal = {
 
     var errEl = document.getElementById('import-error-area');
     var esc = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml) || function(s) { return s || ''; };
-    if (!parsedResult.success) {
+        if (!parsedResult.success) {
+            this.errorMessage = 'Parsing Errors: ' + (parsedResult.errors || []).join('; ');
       if (errEl) {
         errEl.style.display = 'block';
         errEl.innerHTML = '<strong>Parsing Errors:</strong><br/>' + (parsedResult.errors || []).map(esc).join('<br/>');

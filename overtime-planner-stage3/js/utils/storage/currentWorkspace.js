@@ -24,6 +24,7 @@ window.HortOpsMigrationEngine = {
       schemaVersion: 2,
       lastSaved: data.lastSaved === undefined ? new Date().toISOString() : data.lastSaved
     };
+    if (own.call(data, 'poolTags')) candidate.poolTags = data.poolTags;
     if (own.call(data, 'jobs')) candidate.jobs = data.jobs;
     if (own.call(data, 'roster')) candidate.roster = data.roster;
     if (own.call(data, 'assignments')) candidate.assignments = data.assignments;

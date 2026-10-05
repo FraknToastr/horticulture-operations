@@ -139,6 +139,7 @@ function buildEnv(localStorageMock, options) {
   load('js/utils/icons.js', ctx);
   load('js/utils/securityUtils.js', ctx);
   load('js/utils/dateUtils.js', ctx);
+  load('js/utils/planningRules.js', ctx);
   load('js/utils/storage/schemaValidator.js', ctx);
   load('js/utils/storage/migrationEngine.js', ctx);
   load('js/utils/storage/storageDriver.js', ctx);

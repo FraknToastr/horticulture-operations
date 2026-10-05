@@ -19,6 +19,15 @@ if (typeof require !== "undefined") {
 window.HortOpsSchemaValidator = {
   WORKSPACE_SCHEMA_VERSION: 2,
 
+  // CSS tokens only: no declarations, functions, escapes or HTML.
+  isColorToken: function(value) {
+    return typeof value === 'string' && /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value);
+  },
+
+  validateOptionalColor: function(value) {
+    return value === undefined || value === null || value === '' || this.isColorToken(value);
+  },
+
   /**
    * Deterministically normalizes legacy Schema v2 workspace instructions without lineage annotations.
    * Chained lineage links and terminal active statuses are reconstructed for non-overlapping sequential instructions.
@@ -264,8 +273,23 @@ window.HortOpsSchemaValidator = {
       return { valid: false, error: 'Missing or invalid "roster" array in workspace backup.' };
     }
 
+    var planning = window.HortOpsPlanningRules;
+    if (!planning && typeof require !== 'undefined') { try { require('../planningRules.js'); planning = window.HortOpsPlanningRules; } catch (e) {} }
+    if (!planning) {
+      // Retained isolated validators can still assess old Schema v2 records.
+      // Declaring any extension, even empty/null, always requires the real rules.
+      var ownPlanning = Object.prototype.hasOwnProperty;
+      var extended = ownPlanning.call(parsed, 'poolTags') || parsed.roster.some(function(person) { return ownPlanning.call(person, 'poolTagIds') || ownPlanning.call(person, 'poolTagHistory'); }) || parsed.jobs.some(function(job) {
+        return job.frequencyType === 'work_pattern' || ['workPattern','preferredPoolTagIds','exclusivePoolTagIds','exclusivePoolSource'].some(function(field) { return ownPlanning.call(job,field); });
+      });
+      if (extended) return { valid: false, error: 'Pool/pattern validation unavailable' };
+    } else {
+      var planningCheck = planning.validateWorkspace(parsed);
+      if (!planningCheck.valid) return planningCheck;
+    }
+
     var validDays = ['friday', 'saturday', 'sunday', 'monday', 'friday_pre_holiday', 'monday_post_holiday'];
-    var validFreqs = ['recurring_weeks', 'recurring_cadence', 'annual', 'one_off'];
+    var validFreqs = ['recurring_weeks', 'recurring_cadence', 'annual', 'one_off', 'work_pattern'];
     var seenJobIds = new Set();
 
     for (var i = 0; i < parsed.jobs.length; i++) {
@@ -275,6 +299,9 @@ window.HortOpsSchemaValidator = {
       }
       if (!j.id || !j.name) {
         return { valid: false, error: 'Job at index ' + i + ' missing required id or name.' };
+      }
+      if (!this.validateOptionalColor(j.color)) {
+        return { valid: false, error: 'Job at index ' + i + ' has an invalid colour. Use a hexadecimal RGB or RGBA colour.' };
       }
       if (!/^[A-Za-z0-9_-]+$/.test(String(j.id))) {
         return { valid: false, error: 'Job ID "' + j.id + '" contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted.' };
@@ -368,6 +395,9 @@ window.HortOpsSchemaValidator = {
       }
       if (!s.id || !s.name) {
         return { valid: false, error: 'Staff member at index ' + k + ' missing required id or name.' };
+      }
+      if (!this.validateOptionalColor(s.avatarColor)) {
+        return { valid: false, error: 'Staff member at index ' + k + ' has an invalid avatar colour. Use a hexadecimal RGB or RGBA colour.' };
       }
       if (!/^[A-Za-z0-9_-]+$/.test(String(s.id))) {
         return { valid: false, error: 'Staff ID "' + s.id + '" contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted.' };
@@ -897,6 +927,7 @@ window.HortOpsSchemaValidator = {
     var envelope = {
       schemaVersion: 2,
       jobs: [job],
+      poolTags: (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [],
       roster: [],
       assignments: {},
       rostering: { instructions: {}, provenance: {} },
@@ -930,6 +961,10 @@ window.HortOpsSchemaValidator = {
     }
     if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
       return { valid: false, error: 'Historical snapshot "' + key + '" must be an object.' };
+    }
+    if (!this.validateOptionalColor(snapshot.color) ||
+        (snapshot.job && !this.validateOptionalColor(snapshot.job.color))) {
+      return { valid: false, error: 'Historical snapshot has an invalid colour. Use a hexadecimal RGB or RGBA colour.' };
     }
     var shiftId = snapshot.shiftId;
     if (!shiftId || typeof shiftId !== 'string') {

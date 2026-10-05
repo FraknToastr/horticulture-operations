@@ -1,6 +1,6 @@
 # Overtime Planner Stage 3 development transition
 
-Status: Phase 5 clean-client and cooperative single-writer integration complete; stopped before Phase 6. This current transition supersedes earlier migration checkpoints without rewriting inherited contracts or signed review history.
+Status: Phase 8 closed and corrected Stage 3 baseline accepted by explicit owner authority. Stage 4A design/policy baseline complete; stopped before 4B. Earlier phase stop/acceptance statements below are historical. No independent Review 65 verdict or expanded runtime certification is claimed.
 
 ## Identity, source and selected copy
 
@@ -23,14 +23,14 @@ Codex and explicitly assigned agents are the current operators. Explicit current
 
 Review 64 rejected candidate PR26_07 for Stage 3 release closure on 4 October 2026. The original handoff saying Review 64 is pending is stale. Stage 3 remains open and authorised; Stage 1/2 remain frozen; Stage 4 remains unauthorised. Next corrective candidate is PR26_08, next independent review is Review 65, and release closure requires the authorised independent/owner decision.
 
-Unresolved findings:
+Original Review 64 findings (current candidate dispositions are in `REVIEW64_PR26_08_FINDING_DISPOSITIONS.md`):
 
 - R64-P0-01: cross-tab read/write race can silently lose qualification, absence and budget changes.
 - R64-P1-02: imported job/staff colour values can introduce unsafe HTML event attributes.
 - R64-P2-03: checksum inventories include invalid self-digests.
 - R64-P2-04: current governance is stale and misattributes retained test suites to Stage 3.
 
-- The client starts with empty Workforce and Job registries and current Schema v2 only. Populate Workforce from its User Table and Jobs from client input. Namespace-bound storage and private lifetime-lock controls are implemented; no legacy data is adopted. Release acceptance and security remediation remain pending.
+- The client starts with empty Workforce and Job registries and current Schema v2 only. Populate Workforce from its User Table and Jobs from client input. Namespace-bound storage and private lifetime-lock controls are implemented; no legacy data is adopted. Colour/import security is corrected in the candidate; independent review and release acceptance remain pending.
 
 Finish this inherited corrective and review sequence before future smart/automatic rostering. Retained research documents are historical references only; deferred experimental application/algorithm code is not part of the activated project.
 
@@ -66,3 +66,61 @@ The latest owner publication direction targets `github-replacement` with approve
 Do not automatically stage, commit, merge or push as part of this phase. Before executing authorised publication, verify remote/tracking and give the permanent branch reminder; inspect the complete transport Git tree and reachable history using an explicit reviewed allowlist. Necessary source, self-contained tests/fixtures, dependency/build configuration and current governance may be transported. Peer-review packages/results, legacy archives, historical hash inventories, raw logs, screenshots and private workspace/roster data remain local and must not leak through earlier commits or force-added ignored files.
 
 Nothing in this transition authorises deletion of remote history, history rewriting or app integration. Preserve the root permanent transport policy and report exact updated branches/commit links after an authorised publication.
+
+## Phase 6 current update
+
+Colour/import rendering security and traceability corrections are complete; see `MIGRATION_PHASE6_CHECKPOINT.md`, `R64_SECURITY_BOUNDARY_CHANGE_REPORT.md`, `CURRENT_REVIEW_STATUS.md` and `REVIEW64_PR26_08_FINDING_DISPOSITIONS.md`. Earlier phase paragraphs above remain historical checkpoint observations. The current candidate rejects invalid colours before persistence/reconciliation and renders only validated tokens. Stage 3 remains open; independent Review 65 and owner acceptance are pending. Stop before Phase 7 owner resumption. Phase 7 is corrective-candidate verification and review handoff, with no automatic packages or smart/automatic rostering implementation.
+
+## Phase 7 current update
+
+The real domain handoff proof exposed retained editor models after release. `writerSession.js` now closes registered editors to discard models, alongside blocking writes and clearing DOM. All 15 new handoff checks and the complete retained regime passed. See `MIGRATION_PHASE7_CHECKPOINT.md` and `REVIEW65_CANDIDATE_HANDOFF.md`. Earlier phase statements are historical; Stage 3 is still open, independent/owner acceptance is pending and Stage 4 algorithms are unauthorised. Stop before Phase 8 until resumed. No automatic packages or publication.
+
+## Phase 8 current update
+
+The owner approved Phase 8 and reported runtime testing. Six new qualification
+checks verify real offline navigation and peer handoff across all three entry
+points, plus failure preservation under denied storage reads/writes and rejected
+lock requests. No application or schema change was required. See
+`MIGRATION_PHASE8_CHECKPOINT.md` and `SUPPORTED_RUNTIME.md` for the exact qualified
+Linux Chromium configuration, unqualified combinations and pending owner details.
+Technical qualification is complete; Stage 3 acceptance remains an explicit
+independent/owner verdict. Stage 4 direction is flexibility and fairness, alongside
+greater capability and robustness. This direction does not approve policy choices
+or algorithms. No automatic packages, publication or next-phase implementation.
+
+## Phase 8 owner-report follow-up — current disposition
+
+The owner supplied Windows 11, browser version 154.0.4258.53 (product name
+unspecified), and double-clicked index.html. Their disappearing assigned-job
+observation was reproduced: committed snapshots lacked planner display week/day
+coordinates in the scheduler projection. The projection is corrected without
+rewriting saved history. Six new assignment checks and the complete corrective
+regression run pass; see FORWARD_PLANNER_ASSIGNMENT_FIX.md and the updated
+MIGRATION_PHASE8_CHECKPOINT.md. This supersedes earlier Phase 8 statements that
+runtime identity was entirely pending or no application changes were required.
+Acceptance of the corrected candidate is still an explicit independent/owner
+decision. Original signed reviews remain unchanged. Stage 4 implementation is not
+authorised; flexibility and fairness remain its owner's leading design goals.
+
+## Owner closure and Stage 4A — current authority
+
+The owner explicitly states: "Phase 8 is authorised to be closed, and Stage 4 Smart
+Rostering is authorised to begin." Record this as owner closure of migration Phase 8
+and acceptance of corrected PR26_08 for the transition from Stage 3 to Stage 4.
+No independent Review 65 verdict, additional browser certification or owner retest
+is invented. Earlier pending-owner statements are historical checkpoint observations.
+
+Stage 4A is the approved documentation-only first increment, now complete. The owner
+selects balancing overtime hours, mixed staffing policies, and cross-team tag pools
+with tagged staff first and any-selected-tag membership. The source-grounded design,
+policy register and roadmap are in STAGE4_SMART_ROSTERING_BASELINE.md. See
+STAGE4A_CHECKPOINT.md. Stop before 4B until resumed; pending policy decisions and
+implementation of tags or algorithms are not authorised by this checkpoint.
+
+## Stage 4B completed increment — current transition
+
+The owner resumed Stage 4B after the documented Stage 4A baseline. Approved implementation adds cross-team `poolTags`, staff `poolTagIds`, preferred tag union ranking and explicit `exclusivePoolSource` (`none`/`teams`/`tags`) with `exclusivePoolTagIds`. Optional missing fields remain empty; stable identity, import membership/qualification preservation, ambiguity rejection and fail-closed exclusive references are current contracts. Retirement retains references and historical assignments.
+
+Bounded `work_pattern` recurrence supports consecutive cyclic weekly weekdays (maximum four), optional full-day SA public holidays with date exclusions taking precedence, and one-off one-to-four-day runs. Job/date unions are deduplicated and each daily occurrence is staffed separately, including Easter and year crossings. This increment does not implement a new allocation algorithm, legacy migration or saved-history rewriting.
+
+`STAGE4B_CHECKPOINT.md` records the exact scope and completed parent-coordinated verification: 30 focused checks with zero browser errors, 24 retained suites, six Stage 3 contracts and seven browser checks, 18 writer checks, 15 handoff checks, seven security groups, six runtime checks, six existing Planner assignment checks, two tooling groups and ten inherited Review 55–63 scripts. These are local technical results, not a new independent Review 65 verdict or additional Windows/browser certification. Stage 4A's D02/D03 implementation boundary is settled only for these described contracts; remaining fairness, fixed fallback and regular-hours policy choices are not authorised defaults. Stage 4B is complete locally. Stop until the owner explicitly resumes Stage 4C. App isolation, original constitution/review preservation, manual packaging and publication boundaries remain unchanged.

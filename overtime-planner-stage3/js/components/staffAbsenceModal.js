@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Standalone Offline - Staff Absence & Refusal Management Modal Component (Stage 3 Gate 3D & Review 56 R56-P1-06 & Review 57 R57-P2-07)
 // Provides supervisor-facing operational Full CRUD (Create, Read, Update, Delete) with identity retention
 // for dated absence intervals (annual, sick, RDO, training) and refusal history logging with fair-share score impact and live shift conflict detection.
@@ -377,7 +380,7 @@
         // Modal Header
         '<div class="modal-header" style="padding: 1.25rem 1.5rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex: 0 0 auto;">' +
           '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
-            '<div style="width: 40px; height: 40px; border-radius: 50%; background: ' + escAttr(staff.avatarColor) + '; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px;">' +
+            '<div style="width: 40px; height: 40px; border-radius: 50%; background: ' + escAttr(safeColor(staff.avatarColor, '#10b981')) + '; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px;">' +
               esc(staff.name.slice(0, 2).toUpperCase()) +
             '</div>' +
             '<div>' +
@@ -679,4 +682,6 @@
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = HortOpsStaffAbsenceModal;
   }
+})();
+
 })();

@@ -69,7 +69,29 @@ window.HortOpsSecurityUtils = (function() {
     return lines.join('\r\n');
   }
 
+  // Validate before interpolation; HTML encoding alone does not constrain CSS.
+  // Missing validation capability fails closed to a fixed token.
+  function safeColor(value, fallback) {
+    var validator = window.HortOpsSchemaValidator;
+    var valid = validator && typeof validator.isColorToken === 'function';
+    if (valid && validator.isColorToken(value)) return value;
+    return valid && validator.isColorToken(fallback) ? fallback : '#10b981';
+  }
+
+  function colorWithAlpha(value, alpha) {
+    var color = safeColor(value);
+    var rgb = color.slice(1);
+    if (rgb.length === 3 || rgb.length === 4) {
+      rgb = rgb.slice(0, 3).split('').map(function(c) { return c + c; }).join('');
+    } else {
+      rgb = rgb.slice(0, 6);
+    }
+    return '#' + rgb + (/^[0-9a-f]{2}$/i.test(alpha) ? alpha : '55');
+  }
+
   return {
+    safeColor: safeColor,
+    colorWithAlpha: colorWithAlpha,
     escapeHtml: escapeHtml,
     escapeHtmlAttr: escapeHtmlAttr,
     serializeCsv: serializeCsv

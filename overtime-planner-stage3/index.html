@@ -1341,6 +1341,7 @@ body.modal-scroll-locked {
   <div id="quarantine-viewer-modal-root"></div>
   <div id="staff-qualification-modal-root"></div>
   <div id="staff-absence-modal-root"></div>
+  <div id="pool-modal-root"></div>
 
   <!-- 1. Data Scripts (Public calendar data only; zero prototype seeds) -->
   <script data-source="js/data/holidays.js">
@@ -1726,7 +1727,29 @@ window.HortOpsSecurityUtils = (function() {
     return lines.join('\r\n');
   }
 
+  // Validate before interpolation; HTML encoding alone does not constrain CSS.
+  // Missing validation capability fails closed to a fixed token.
+  function safeColor(value, fallback) {
+    var validator = window.HortOpsSchemaValidator;
+    var valid = validator && typeof validator.isColorToken === 'function';
+    if (valid && validator.isColorToken(value)) return value;
+    return valid && validator.isColorToken(fallback) ? fallback : '#10b981';
+  }
+
+  function colorWithAlpha(value, alpha) {
+    var color = safeColor(value);
+    var rgb = color.slice(1);
+    if (rgb.length === 3 || rgb.length === 4) {
+      rgb = rgb.slice(0, 3).split('').map(function(c) { return c + c; }).join('');
+    } else {
+      rgb = rgb.slice(0, 6);
+    }
+    return '#' + rgb + (/^[0-9a-f]{2}$/i.test(alpha) ? alpha : '55');
+  }
+
   return {
+    safeColor: safeColor,
+    colorWithAlpha: colorWithAlpha,
     escapeHtml: escapeHtml,
     escapeHtmlAttr: escapeHtmlAttr,
     serializeCsv: serializeCsv
@@ -2826,6 +2849,93 @@ if (typeof require !== 'undefined') {
 })();
 
 </script>
+  <script data-source="js/utils/planningRules.js">
+/* === INLINED: js/utils/planningRules.js === */
+// Overtime-owned pool and occurrence contracts. No allocation algorithm lives here.
+(function () {
+    'use strict';
+    if (typeof window === 'undefined') global.window = global;
+    var weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    function fail(error) { return {valid:false,error:error}; }
+    function ymd(value) {
+        if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+        var d = new Date(value + 'T12:00:00Z');
+        return Number.isFinite(d.getTime()) && d.toISOString().slice(0,10) === value;
+    }
+    function ids(value) { return Array.isArray(value) && value.every(function(v) {
+        return typeof v === 'string' && /^POOL-[A-Za-z0-9_-]+$/.test(v);
+    }) && new Set(value).size === value.length; }
+    function source(job) { return job.exclusivePoolSource || ((job.isExclusiveTeams || job.isExclusive) ? 'teams' : 'none'); }
+    function matches(staff, tagIds, catalogue) {
+        var active = new Set((catalogue || []).filter(function(t) { return t.active; }).map(function(t) { return t.id; }));
+        return (tagIds || []).some(function(id) { return active.has(id) && (staff.poolTagIds || []).indexOf(id) !== -1; });
+    }
+    function validatePattern(job) {
+        if (job.frequencyType !== 'work_pattern') return {valid:true};
+        var p = job.workPattern;
+        if (!p || typeof p !== 'object' || Array.isArray(p)) return fail('Work pattern is required.');
+        if (!ymd(p.startDate) || (p.endDate !== undefined && !ymd(p.endDate)) || (p.endDate && p.endDate < p.startDate)) return fail('Work pattern requires valid start/end dates.');
+        if (['weekly','run'].indexOf(p.mode) === -1) return fail('Unknown work pattern mode.');
+        if (typeof p.includePublicHolidays !== 'boolean') return fail('Choose whether the pattern includes public holidays.');
+        if (!Array.isArray(p.excludedDates) || new Set(p.excludedDates).size !== p.excludedDates.length || !p.excludedDates.every(ymd)) return fail('Excluded dates must be unique valid dates.');
+        if (p.mode === 'run') {
+            if (!Number.isInteger(p.runLength) || p.runLength < 1 || p.runLength > 4 || p.includePublicHolidays) return fail('A one-off run must contain one to four days.');
+        } else {
+            if (!Array.isArray(p.days) || p.days.length > 4 || new Set(p.days).size !== p.days.length || !p.days.every(function(d) { return Number.isInteger(d) && d >= 0 && d <= 6; })) return fail('Choose up to four recurring days.');
+            if (!p.days.length && !p.includePublicHolidays) return fail('Choose recurring days or public holidays.');
+            if (p.days.length && !p.days.some(function(first) {
+                return p.days.every(function(d) { return (d - first + 7) % 7 < p.days.length; });
+            })) return fail('Recurring days must form a consecutive run of up to four days.');
+        }
+        return {valid:true};
+    }
+    function validateWorkspace(data) {
+        var catalogue = data.poolTags === undefined ? [] : data.poolTags;
+        if (!Array.isArray(catalogue)) return fail('poolTags must be an array.');
+        var seen = new Set(), labels = new Set();
+        for (var t of catalogue) {
+            if (!t || !ids([t.id]) || typeof t.label !== 'string' || !/^[A-Za-z][A-Za-z0-9_-]{0,39}$/.test(t.label) || typeof t.active !== 'boolean') return fail('Invalid pool tag: use a short alphanumeric hashtag.');
+            if (seen.has(t.id) || labels.has(t.label.toLowerCase())) return fail('Duplicate pool tag ID or label.');
+            seen.add(t.id); labels.add(t.label.toLowerCase());
+        }
+        var records = (data.roster || []).concat(data.jobs || []);
+        for (var record of records) {
+            for (var field of ['poolTagIds','preferredPoolTagIds','exclusivePoolTagIds']) {
+                if (record[field] !== undefined && (!ids(record[field]) || !record[field].every(function(id) { return seen.has(id); }))) return fail('Unknown or duplicate pool reference in ' + field + '.');
+            }
+        }
+        for (var job of data.jobs || []) {
+            if (job.exclusivePoolSource !== undefined && ['none','teams','tags'].indexOf(job.exclusivePoolSource) === -1) return fail('Invalid exclusive pool source.');
+            if (source(job) === 'tags' && (job.isExclusiveTeams || job.isExclusive)) return fail('Choose team or tag exclusivity, not both.');
+            var pattern = validatePattern(job);
+            if (!pattern.valid) return pattern;
+        }
+        return {valid:true};
+    }
+    function dates(job, year) {
+        if (!validatePattern(job).valid || job.frequencyType !== 'work_pattern') return [];
+        var p = job.workPattern, excluded = new Set(p.excludedDates), holidays = new Set(
+            (window.HortOpsData.getPublicHolidaysForYear(year) || []).map(function(h) { return h.date; }));
+        var end = p.endDate || year + '-12-31', results = [];
+        for (var d = new Date(Date.UTC(year,0,1)); d.getUTCFullYear() === year; d.setUTCDate(d.getUTCDate()+1)) {
+            var date = d.toISOString().slice(0,10);
+            if (date < p.startDate || date > end || excluded.has(date)) continue;
+            var elapsed = Math.round((d - new Date(p.startDate + 'T00:00:00Z'))/86400000);
+            var selected = p.mode === 'run' ? elapsed >= 0 && elapsed < p.runLength :
+                p.days.indexOf(d.getUTCDay()) !== -1 || (p.includePublicHolidays && holidays.has(date));
+            if (selected) results.push(date);
+        }
+        return results;
+    }
+    function slotFor(slots, date) {
+        return slots.find(function(s) { return [s.fridayDate,s.saturdayDate,s.sundayDate,s.mondayDate].indexOf(date) !== -1; }) ||
+            slots.filter(function(s) { return s.saturdayDate <= date; }).slice(-1)[0] || slots[0];
+    }
+    window.HortOpsPlanningRules = {validateWorkspace:validateWorkspace,validatePattern:validatePattern,
+        dates:dates,slotFor:slotFor,source:source,matches:matches,weekdays:weekdays,isRealDate:ymd};
+}());
+
+</script>
   <script data-source="js/utils/storage/schemaValidator.js">
 /* === INLINED: js/utils/storage/schemaValidator.js === */
 // Canonical Schema v2 Envelope & Entity Validator
@@ -2848,6 +2958,15 @@ if (typeof require !== "undefined") {
 
 window.HortOpsSchemaValidator = {
   WORKSPACE_SCHEMA_VERSION: 2,
+
+  // CSS tokens only: no declarations, functions, escapes or HTML.
+  isColorToken: function(value) {
+    return typeof value === 'string' && /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value);
+  },
+
+  validateOptionalColor: function(value) {
+    return value === undefined || value === null || value === '' || this.isColorToken(value);
+  },
 
   /**
    * Deterministically normalizes legacy Schema v2 workspace instructions without lineage annotations.
@@ -3094,8 +3213,23 @@ window.HortOpsSchemaValidator = {
       return { valid: false, error: 'Missing or invalid "roster" array in workspace backup.' };
     }
 
+    var planning = window.HortOpsPlanningRules;
+    if (!planning && typeof require !== 'undefined') { try { require('../planningRules.js'); planning = window.HortOpsPlanningRules; } catch (e) {} }
+    if (!planning) {
+      // Retained isolated validators can still assess old Schema v2 records.
+      // Declaring any extension, even empty/null, always requires the real rules.
+      var ownPlanning = Object.prototype.hasOwnProperty;
+      var extended = ownPlanning.call(parsed, 'poolTags') || parsed.roster.some(function(person) { return ownPlanning.call(person, 'poolTagIds') || ownPlanning.call(person, 'poolTagHistory'); }) || parsed.jobs.some(function(job) {
+        return job.frequencyType === 'work_pattern' || ['workPattern','preferredPoolTagIds','exclusivePoolTagIds','exclusivePoolSource'].some(function(field) { return ownPlanning.call(job,field); });
+      });
+      if (extended) return { valid: false, error: 'Pool/pattern validation unavailable' };
+    } else {
+      var planningCheck = planning.validateWorkspace(parsed);
+      if (!planningCheck.valid) return planningCheck;
+    }
+
     var validDays = ['friday', 'saturday', 'sunday', 'monday', 'friday_pre_holiday', 'monday_post_holiday'];
-    var validFreqs = ['recurring_weeks', 'recurring_cadence', 'annual', 'one_off'];
+    var validFreqs = ['recurring_weeks', 'recurring_cadence', 'annual', 'one_off', 'work_pattern'];
     var seenJobIds = new Set();
 
     for (var i = 0; i < parsed.jobs.length; i++) {
@@ -3105,6 +3239,9 @@ window.HortOpsSchemaValidator = {
       }
       if (!j.id || !j.name) {
         return { valid: false, error: 'Job at index ' + i + ' missing required id or name.' };
+      }
+      if (!this.validateOptionalColor(j.color)) {
+        return { valid: false, error: 'Job at index ' + i + ' has an invalid colour. Use a hexadecimal RGB or RGBA colour.' };
       }
       if (!/^[A-Za-z0-9_-]+$/.test(String(j.id))) {
         return { valid: false, error: 'Job ID "' + j.id + '" contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted.' };
@@ -3198,6 +3335,9 @@ window.HortOpsSchemaValidator = {
       }
       if (!s.id || !s.name) {
         return { valid: false, error: 'Staff member at index ' + k + ' missing required id or name.' };
+      }
+      if (!this.validateOptionalColor(s.avatarColor)) {
+        return { valid: false, error: 'Staff member at index ' + k + ' has an invalid avatar colour. Use a hexadecimal RGB or RGBA colour.' };
       }
       if (!/^[A-Za-z0-9_-]+$/.test(String(s.id))) {
         return { valid: false, error: 'Staff ID "' + s.id + '" contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted.' };
@@ -3727,6 +3867,7 @@ window.HortOpsSchemaValidator = {
     var envelope = {
       schemaVersion: 2,
       jobs: [job],
+      poolTags: (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [],
       roster: [],
       assignments: {},
       rostering: { instructions: {}, provenance: {} },
@@ -3760,6 +3901,10 @@ window.HortOpsSchemaValidator = {
     }
     if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
       return { valid: false, error: 'Historical snapshot "' + key + '" must be an object.' };
+    }
+    if (!this.validateOptionalColor(snapshot.color) ||
+        (snapshot.job && !this.validateOptionalColor(snapshot.job.color))) {
+      return { valid: false, error: 'Historical snapshot has an invalid colour. Use a hexadecimal RGB or RGBA colour.' };
     }
     var shiftId = snapshot.shiftId;
     if (!shiftId || typeof shiftId !== 'string') {
@@ -4022,6 +4167,7 @@ window.HortOpsMigrationEngine = {
       schemaVersion: 2,
       lastSaved: data.lastSaved === undefined ? new Date().toISOString() : data.lastSaved
     };
+    if (own.call(data, 'poolTags')) candidate.poolTags = data.poolTags;
     if (own.call(data, 'jobs')) candidate.jobs = data.jobs;
     if (own.call(data, 'roster')) candidate.roster = data.roster;
     if (own.call(data, 'assignments')) candidate.assignments = data.assignments;
@@ -7228,8 +7374,17 @@ window.HortOpsEligibilityEngine = {
       }
     }
 
+    var poolJob = job || context.job || (window.HortOpsApp && window.HortOpsApp.state &&
+      (window.HortOpsApp.state.jobs || []).find(function(j) { return occurrence && j.id === occurrence.jobId; })) || occurrence || {};
+    var poolRules = window.HortOpsPlanningRules;
+    if (poolJob.exclusivePoolSource === 'tags') {
+      var catalogue = params.poolTags || context.poolTags || (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
+      if (!poolRules || !poolRules.matches(employee, poolJob.exclusivePoolTagIds || [], catalogue)) { reasons.push('POOL_NOT_ALLOWED'); hardBlock = true; }
+    }
     // 3. Exclusive Team Restriction Check
     var isExclusive = (occurrence && (occurrence.isExclusive || occurrence.isExclusiveTeams)) || (job && (job.isExclusive || job.isExclusiveTeams));
+    if (poolJob.exclusivePoolSource === 'tags' || poolJob.exclusivePoolSource === 'none') isExclusive = false;
+    if (poolJob.exclusivePoolSource === 'teams') isExclusive = true;
     var exclusiveTeams = (occurrence && occurrence.exclusiveTeams && occurrence.exclusiveTeams.length > 0) ? occurrence.exclusiveTeams : (job && job.exclusiveTeams ? job.exclusiveTeams : []);
     if (isExclusive && exclusiveTeams && exclusiveTeams.length > 0) {
       var staffTeam = (employee.team || '').toLowerCase();
@@ -7393,6 +7548,7 @@ window.HortOpsEligibilityEngine = {
       'EMPLOYMENT_ON_LEAVE': 'Employee is currently on leave',
       'UNKNOWN_EMPLOYMENT_STATUS': 'Employee has unknown employment status',
       'OVERTIME_EXEMPT': 'Employee has active overtime exemption',
+      'POOL_NOT_ALLOWED': 'Employee is outside the active exclusive staff tag pool',
       'TEAM_NOT_ALLOWED': 'Employee team not permitted under exclusive-team restrictions',
       'OVERLAPPING_SHIFT': 'Employee is already assigned to a concurrent overlapping shift',
       'INSUFFICIENT_REST': 'Employee has insufficient rest between work commitments (minimum 10 hours required)',
@@ -7437,6 +7593,7 @@ window.HortOpsEligibilityEngine = {
       'EMPLOYMENT_ON_LEAVE': 'On Leave',
       'UNKNOWN_EMPLOYMENT_STATUS': 'Unknown Status',
       'OVERTIME_EXEMPT': 'Exemption Active',
+      'POOL_NOT_ALLOWED': 'Outside Exclusive Staff Pool',
       'TEAM_NOT_ALLOWED': 'Non-Exclusive Team',
       'OVERLAPPING_SHIFT': 'Double-Booked',
       'INSUFFICIENT_REST': 'Insufficient Rest (< 10h)',
@@ -7537,7 +7694,7 @@ window.HortOpsRosteringEngine = {
     // Cross-year recurrence resolution if needed for recurring/annual jobs
     var isRecurring = job.frequencyType === 'recurring_weeks' ||
                       job.frequencyType === 'recurring_cadence' ||
-                      job.frequencyType === 'annual';
+                      job.frequencyType === 'annual' || job.frequencyType === 'work_pattern';
 
     // Source-relative remaining count (Defect A):
     var sourceIndex = sourceShiftId ? unique.findIndex(function(s) { return s.shiftId === sourceShiftId; }) : -1;
@@ -7637,7 +7794,7 @@ window.HortOpsRosteringEngine = {
     if (job.frequencyType === 'one_off') return 1;
 
     var remaining = this.resolveRemainingOccurrences(currentShiftId, allShifts, job, this.UI_REPEAT_CAP, jobs);
-    if (job.frequencyType === 'annual' || job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence') {
+    if (job.frequencyType === 'annual' || job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence' || job.frequencyType === 'work_pattern') {
       return Math.max(1, Math.min(remaining.length, this.UI_REPEAT_CAP));
     }
     return Math.max(1, remaining.length);
@@ -7760,6 +7917,13 @@ window.HortOpsRosteringEngine = {
       (typeof global !== 'undefined' && global.HortOpsApp && global.HortOpsApp.state && global.HortOpsApp.state.refusalHistory) || [];
 
     var deterministicSort = function(a, b) {
+      var poolRules = window.HortOpsPlanningRules;
+      if (poolRules && job && (job.preferredPoolTagIds || []).length) {
+        var poolTags = params.poolTags || (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
+        var preferredA = poolRules.matches(a, job.preferredPoolTagIds, poolTags) ? 0 : 1;
+        var preferredB = poolRules.matches(b, job.preferredPoolTagIds, poolTags) ? 0 : 1;
+        if (preferredA !== preferredB) return preferredA - preferredB;
+      }
       var tierA = getTier(a);
       var tierB = getTier(b);
       if (tierA !== tierB) return tierA - tierB;
@@ -9010,7 +9174,7 @@ window.HortOpsCostCalculator = {
       var remHours = Math.max(0, hours - 2);
       totalLaborForOneWorker = (first2h * hourlyBaseRate * satMultiplierFirst2h) + (remHours * hourlyBaseRate * satMultiplierAfter2h);
     } else {
-      // Friday or Monday weekday overtime (1.5x first 2h, 2.0x thereafter)
+      // Non-holiday weekday overtime retains the existing rate calculation.
       var first2hW = Math.min(2, hours);
       var remHoursW = Math.max(0, hours - 2);
       totalLaborForOneWorker = (first2hW * hourlyBaseRate * satMultiplierFirst2h) + (remHoursW * hourlyBaseRate * satMultiplierAfter2h);
@@ -9372,6 +9536,10 @@ window.HortOpsSchedulerEngine = {
       return false;
     }
 
+    if (job.frequencyType === 'work_pattern') {
+      var rules = window.HortOpsPlanningRules;
+      return !!rules && rules.dates(job, parseInt(dateStr.slice(0,4),10)).indexOf(dateStr) !== -1;
+    }
     var freq = job.frequencyType || "recurring_weeks";
 
     // 1. One-off Job: only job.targetDate is canonical generated occurrence
@@ -9725,7 +9893,7 @@ window.HortOpsSchedulerEngine = {
           return;
         }
 
-        var slot = slots.find(function(s) {
+        var slot = (job && job.frequencyType === 'work_pattern' && window.HortOpsPlanningRules) ? window.HortOpsPlanningRules.slotFor(slots,hist.date) : slots.find(function(s) {
           if (hist.weekNumber !== undefined && hist.weekNumber !== null) return s.weekNumber === hist.weekNumber;
           return s.saturdayDate === hist.date || s.sundayDate === hist.date || s.fridayDate === hist.date || s.mondayDate === hist.date;
         });
@@ -9739,15 +9907,30 @@ window.HortOpsSchedulerEngine = {
           var assignedIds = customAssignments[hist.shiftId] || customAssignments[key] || customAssignments[dateKey] || hist.assignedStaffIds || [];
           var permitMeta = self.resolvePermitMeta(hist, dateKey, hist.shiftId || key, customPermits);
 
-          var histShift = Object.assign({}, hist, permitMeta, {
-            shiftId: hist.shiftId || (hist.jobId + '@' + hist.date),
-            jobId: hist.jobId,
-            jobName: hist.jobName || (job ? job.name : (hist.jobId || 'Unknown Job')),
-            assignedStaffIds: (assignedIds || []).slice(),
+                    var histShift = Object.assign({}, hist, permitMeta, {
+                        shiftId: hist.shiftId || (hist.jobId + '@' + hist.date),
+                        jobId: hist.jobId,
+                        jobName: hist.jobName || (job ? job.name : (hist.jobId || 'Unknown Job')),
+                        // Snapshot records carry canonical dates, not planner display coordinates.
+                        // Derive these on the runtime projection without changing saved history.
+                        weekNumber: slot.weekNumber,
+                        dayOfWeek: (job && job.frequencyType === 'work_pattern' && window.HortOpsPlanningRules) ? window.HortOpsPlanningRules.weekdays[new Date(hist.date+'T12:00:00Z').getUTCDay()] : hist.date === slot.saturdayDate ? 'Saturday' :
+                            hist.date === slot.sundayDate ? 'Sunday' :
+                            hist.date === slot.fridayDate ? 'Friday' :
+                            hist.date === slot.mondayDate ? 'Monday' : hist.dayOfWeek,
+                        assignedStaffIds: (assignedIds || []).slice(),
             isHistorical: hist.date < todayStr,
             isHistoricalCommitment: hist.date < todayStr,
             unverifiedSchedule: false
           });
+          // Derive current display metadata from the canonical date; never rewrite snapshots.
+          if (job && job.frequencyType === 'work_pattern') {
+            histShift.frequencyType = 'work_pattern';
+            var patternHoliday = window.HortOpsData.getPublicHolidaysForYear(year).find(function(h) { return h.date === hist.date; });
+            histShift.isPublicHoliday = !!patternHoliday;
+            histShift.publicHolidayName = patternHoliday ? patternHoliday.name : null;
+            if (patternHoliday && !slot.publicHolidays.some(function(h) { return h.date === hist.date; })) slot.publicHolidays.push(patternHoliday);
+          }
           slot.shifts.push(histShift);
           allShifts.push(histShift);
         }
@@ -9762,6 +9945,27 @@ window.HortOpsSchedulerEngine = {
     });
 
     eligibleJobs.forEach(function(job, jobIdx) {
+      if (job.frequencyType === 'work_pattern') {
+        var rules = window.HortOpsPlanningRules;
+        if (!rules) throw new Error('Work pattern engine unavailable');
+        rules.dates(job, year).forEach(function(date) {
+          var shiftId = job.id + '@' + date, dateKey = job.id + '_' + date;
+          if (seededShiftKeys.has(shiftId) || seededShiftKeys.has(dateKey)) return;
+          var slot = rules.slotFor(slots, date);
+          var holiday = window.HortOpsData.getPublicHolidaysForYear(year).find(function(h) { return h.date === date; });
+          var assigned = customAssignments[shiftId] || customAssignments[dateKey] || [];
+          var shift = Object.assign({}, job, self.resolvePermitMeta(job,dateKey,shiftId,customPermits), {
+            shiftId:shiftId,jobId:job.id,jobName:job.name,date:date,
+            weekNumber:slot.weekNumber,dayOfWeek:rules.weekdays[new Date(date+'T12:00:00Z').getUTCDay()],
+            assignedStaffIds:assigned.slice(),isPublicHoliday:!!holiday,holidayName:holiday ? holiday.name : undefined
+          });
+          self._applyHistoricalTimingToShift(shift,job,date,assigned,todayStr,customSnapshots,integrityIssues);
+          if (holiday && !slot.publicHolidays.some(function(h) { return h.date === date; })) slot.publicHolidays.push(holiday);
+          slot.shifts.push(shift); allShifts.push(shift); seededShiftKeys.add(shiftId); seededShiftKeys.add(dateKey);
+        });
+        return;
+      }
+
       // 1. Recurring Shift Engine (P0-04, P0-06, P0-08, P0-09)
       if ((job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence') && job.intervalWeeks) {
         var interval = job.intervalWeeks;
@@ -10250,7 +10454,7 @@ window.HortOpsSchedulerEngine = {
         (j.status || '') + ':' +
         (j.startTime || '') + ':' +
         (j.durationHours || '') + ':' +
-        (j.frequencyType || '') + ':' +
+        JSON.stringify(j.workPattern || null) + ':' + JSON.stringify(j.preferredPoolTagIds || []) + ':' + JSON.stringify(j.exclusivePoolTagIds || []) + ':' + (j.exclusivePoolSource || '') + ':' + (j.frequencyType || '') + ':' +
         (j.preferredDay || '') + ':' +
         (j.intervalWeeks || '') + ':' +
         (j.anchorWeek !== undefined ? j.anchorWeek : '') + ':' +
@@ -10704,8 +10908,16 @@ window.HortOpsUserCsvParser = (function() {
       var isPlantOpRaw = isPlantOpIdx !== -1 && row[isPlantOpIdx] ? row[isPlantOpIdx].toUpperCase() : 'FALSE';
       var isPlantOperator = isPlantOpRaw === 'TRUE' || isPlantOpRaw === '1' || isPlantOpRaw === 'YES';
 
-      var stableId = '';
-      var existingMatch = null;
+    var stableId = '';
+    var existingMatch = null;
+    if (!(explicitId && currentById.has(explicitId.toUpperCase()))) {
+      var identityMatches = email ? (currentRoster || []).filter(function(person) { return String(person.email || '').toLowerCase() === email.toLowerCase(); }) : [];
+      if (!identityMatches.length) identityMatches = (currentRoster || []).filter(function(person) { return String(person.name || person.title || '').toLowerCase() === title.toLowerCase(); });
+      if (identityMatches.length > 1) {
+        errors.push('Ambiguous workforce identity on row ' + (i + 1) + '. Supply the existing employee ID. Pool memberships were not transferred.');
+        continue;
+      }
+    }
 
       if (explicitId && currentById.has(explicitId.toUpperCase())) {
         existingMatch = currentById.get(explicitId.toUpperCase());
@@ -10753,6 +10965,7 @@ window.HortOpsUserCsvParser = (function() {
         status: status,
         isContractor: isContractor,
         isPlantOperator: isPlantOperator,
+        poolTagIds: existingMatch ? (existingMatch.poolTagIds || []).slice() : [],
         skills: existingMatch ? (existingMatch.skills || []) : [],
         phone: existingMatch ? (existingMatch.phone || '') : '',
         avatarColor: (existingMatch && existingMatch.avatarColor) ? existingMatch.avatarColor : AVATAR_COLORS[parsedStaff.length % AVATAR_COLORS.length],
@@ -10999,7 +11212,10 @@ window.HortOpsReconciliationEngine = (function() {
           role: incoming.role || match.role,
           isContractor: !!incoming.isContractor,
           isPlantOperator: !!incoming.isPlantOperator,
-          skills: match.skills || [],
+        skills: match.skills || [],
+        poolTagIds: (match.poolTagIds || []).slice(),
+        poolTagHistory: JSON.parse(JSON.stringify(match.poolTagHistory || [])),
+        qualifications: JSON.parse(JSON.stringify(match.qualifications || [])),
           phone: match.phone || '',
           avatarColor: match.avatarColor || '#10b981',
           status: incoming.status || match.status || 'active',
@@ -11702,6 +11918,9 @@ window.HortOpsForwardPlannerHeader = {
 </script>
   <script data-source="js/components/forwardPlanner/controls.js">
 /* === INLINED: js/components/forwardPlanner/controls.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Forward Planner Controls & Toolbar Sub-module
 // Manages filter drawer toggle, week window controls, and slideout filter drawer with monochrome job pills.
 window.HortOpsForwardPlannerControls = {
@@ -11762,10 +11981,10 @@ window.HortOpsForwardPlannerControls = {
           '<span class="badge" style="background: #ffffff; color: var(--emerald-900); font-weight: 800; font-size: 10px; padding: 0 5px; border-radius: 9999px;">' + activeFilterCount + '</span>' : '') +
       '</button>' +
       (selectedJob ?
-        ('<div style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; background: #ffffff; border: 1.5px solid ' + escAttr(selectedJob.color) + '; border-radius: 9999px; font-size: 11px; font-weight: 700; color: ' + escAttr(selectedJob.color) + ';" title="Isolating ' + escAttr(selectedJob.name) + '">' +
-          '<span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: ' + escAttr(selectedJob.color) + ';"></span>' +
+        ('<div style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; background: #ffffff; border: 1.5px solid ' + escAttr(safeColor(selectedJob.color, '#047857')) + '; border-radius: 9999px; font-size: 11px; font-weight: 700; color: ' + escAttr(safeColor(selectedJob.color, '#047857')) + ';" title="Isolating ' + escAttr(selectedJob.name) + '">' +
+          '<span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: ' + escAttr(safeColor(selectedJob.color, '#047857')) + ';"></span>' +
           '<span>' + esc(selectedJob.name) + '</span>' +
-          '<button onclick="window.HortOpsForwardPlanner.handleJobFilter(null)" style="background: none; border: none; cursor: pointer; color: ' + escAttr(selectedJob.color) + '; font-weight: 800; padding: 0 0 0 2px; line-height: 1; font-size: 13px;" title="Clear Job Filter">×</button>' +
+          '<button onclick="window.HortOpsForwardPlanner.handleJobFilter(null)" style="background: none; border: none; cursor: pointer; color: ' + escAttr(safeColor(selectedJob.color, '#047857')) + '; font-weight: 800; padding: 0 0 0 2px; line-height: 1; font-size: 13px;" title="Clear Job Filter">×</button>' +
         '</div>') : '') +
       (self.searchTerm ?
         ('<div style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.55rem; background: var(--slate-100); border: 1px solid var(--slate-300); border-radius: 9999px; font-size: 11px; color: var(--slate-700);">' +
@@ -11830,8 +12049,8 @@ window.HortOpsForwardPlannerControls = {
       var jobPillsHtml = activeJobs.map(function(job) {
         var isSelected = self.selectedJobId === job.id;
         if (isSelected) {
-          return '<button type="button" class="job-filter-pill is-selected" style="border: 2px solid ' + escAttr(job.color) + '; color: ' + escAttr(job.color) + '; background-color: #ffffff; box-shadow: 0 0 0 1px ' + escAttr(job.color) + ';" onclick="window.HortOpsForwardPlanner.handleJobFilter(\'' + escAttr(job.id) + '\')" title="Click to clear filter">' +
-            '<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: ' + escAttr(job.color) + ';"></span>' +
+          return '<button type="button" class="job-filter-pill is-selected" style="border: 2px solid ' + escAttr(safeColor(job.color, '#047857')) + '; color: ' + escAttr(safeColor(job.color, '#047857')) + '; background-color: #ffffff; box-shadow: 0 0 0 1px ' + escAttr(safeColor(job.color, '#047857')) + ';" onclick="window.HortOpsForwardPlanner.handleJobFilter(\'' + escAttr(job.id) + '\')" title="Click to clear filter">' +
+            '<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: ' + escAttr(safeColor(job.color, '#047857')) + ';"></span>' +
             '<span>' + esc(job.name) + '</span>' +
             '<span style="font-size: 10px; opacity: 0.85;">(' + job.shiftCount + ')</span>' +
           '</button>';
@@ -11894,9 +12113,15 @@ window.HortOpsForwardPlannerControls = {
   }
 };
 
+})();
+
 </script>
   <script data-source="js/components/forwardPlanner/matrixRenderer.js">
 /* === INLINED: js/components/forwardPlanner/matrixRenderer.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
+var colorWithAlpha = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.colorWithAlpha) || function() { return '#10b98155'; };
 // Forward Planner Matrix Renderer Sub-module
 // Renders the horizontal matrix body rows: grouped vacancies, department/team staff rows, and shift cards.
 // Offline17.1: Realigned vacancy denominator to totalShiftVacancies, removed staff-level Plant pill.
@@ -11923,7 +12148,7 @@ window.HortOpsForwardPlannerMatrix = {
       if (rowItem.type === 'vacancy') {
         var vacancy = rowItem.vacancy || rowItem;
         var shift = vacancy.shift;
-        var jobColor = shift.color || '#047857';
+        var jobColor = safeColor(shift.color, '#047857');
         var isSelected = self.selectedStaffId === vacancy.id;
         var tickHtml = isSelected ? '<span style="color: var(--emerald-600); font-weight: 800; margin-right: 4px;">✓</span>' : '';
         var locationStr = shift.locationDetails ? shift.locationDetails.split('/')[0].trim() : 'Adelaide';
@@ -11950,7 +12175,7 @@ window.HortOpsForwardPlannerMatrix = {
         var totalVac = vacancy.totalShiftVacancies || Math.max(1, (shift.crewSizeRequired || shift.crewSize || 1) - (shift.assignedStaffIds ? shift.assignedStaffIds.length : 0));
 
         var vacStickyHtml = '<td class="sticky-hierarchy-col" style="background-color: #ffffff; border-right: 1px solid var(--slate-200); padding: 0.2rem 0.35rem; vertical-align: middle;">' +
-          '<div class="unallocated-slot-card animate-subdued-flash" style="background-color: #ffffff; border: 2px dashed ' + escAttr(jobColor) + '; border-radius: 6px; padding: 0.2rem 0.5rem; display: flex; align-items: center; justify-content: space-between; gap: 0.45rem; width: 100%; box-sizing: border-box; height: 54px; min-height: 54px; max-height: 54px; --vacancy-glow: ' + escAttr(jobColor) + '55;" title="Unallocated Slot — ' + escAttr(shift.jobName) + '">' +
+                '<div class="unallocated-slot-card animate-subdued-flash" style="background-color: #ffffff; border: 2px dashed ' + escAttr(jobColor) + '; border-radius: 6px; padding: 0.2rem 0.5rem; display: flex; align-items: center; justify-content: space-between; gap: 0.45rem; width: 100%; box-sizing: border-box; height: 54px; min-height: 54px; max-height: 54px; --vacancy-glow: ' + escAttr(colorWithAlpha(jobColor, '55')) + ';" title="Unallocated Slot — ' + escAttr(shift.jobName) + '">' +
             '<div style="display: flex; align-items: center; gap: 0.45rem; overflow: hidden; flex: 1;">' +
               // Left: V1, V2... vacancy badge
               '<div style="width: 24px; height: 24px; min-width: 24px; border-radius: 50%; border: 1.5px solid ' + escAttr(jobColor) + '; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: ' + escAttr(jobColor) + '; flex-shrink: 0;">' +
@@ -12093,7 +12318,7 @@ window.HortOpsForwardPlannerMatrix = {
                   icons.render('alertTriangle', 'w-3.5 h-3.5') +
                 '</div>') : '';
 
-              return '<button class="shift-card-btn" style="background-color: ' + escAttr(sh.color || '#10b981') + '; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 0.3rem 0.5rem;" onclick="event.stopPropagation(); window.HortOpsApp.openStaffAssignModal(\'' + escAttr(sh.shiftId) + '\')">' +
+              return '<button class="shift-card-btn" style="background-color: ' + escAttr(safeColor(sh.color, '#10b981')) + '; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 0.3rem 0.5rem;" onclick="event.stopPropagation(); window.HortOpsApp.openStaffAssignModal(\'' + escAttr(sh.shiftId) + '\')">' +
                 '<div style="overflow: hidden; flex: 1; text-align: left;">' +
                   conflictBadge +
                   '<div class="shift-card-title">' + esc(sh.jobName) + '</div>' +
@@ -12132,6 +12357,8 @@ window.HortOpsForwardPlannerMatrix = {
 
 window.HortOpsForwardPlannerMatrix.renderMatrixBody = window.HortOpsForwardPlannerMatrix.renderTbody;
 window.HortOpsForwardPlannerRenderer = window.HortOpsForwardPlannerMatrix;
+
+})();
 
 </script>
   <script data-source="js/components/forwardPlanner.js">
@@ -12248,6 +12475,15 @@ window.HortOpsForwardPlanner = {
         });
       }
 
+      slot.shifts.forEach(function(shift) {
+        if (!days.some(function(d) { return d.dateStr === shift.date; })) {
+          days.push({day:shift.dayOfWeek,dateStr:shift.date,label:dateUtils.formatDisplayDate(shift.date),
+            holiday:slot.publicHolidays.find(function(h) { return h.date === shift.date; }),
+            availableShifts:slot.shifts.filter(function(s) { return s.date === shift.date; }),hasOvertime:true});
+        }
+      });
+      days.sort(function(a,b) { return a.dateStr.localeCompare(b.dateStr); });
+      days.forEach(function(d,i) { d.isFirstInWeekend = i === 0; });
       slotDayMap[slot.weekNumber] = days;
       totalActiveColumns += days.length;
     });
@@ -12567,6 +12803,9 @@ window.HortOpsForwardPlanner = {
 </script>
   <script data-source="js/components/calendarView.js">
 /* === INLINED: js/components/calendarView.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Monthly Operational Calendar View Component
 window.HortOpsCalendarView = {
   selectedMonth: (new Date().getMonth() + 1),
@@ -12588,8 +12827,13 @@ window.HortOpsCalendarView = {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
+    // A weekday pattern occurrence can belong to a different month than its Saturday bucket.
     var monthSlots = slots.filter(function(s) {
-      return s.month === self.selectedMonth;
+      return s.month === self.selectedMonth || s.shifts.some(function(sh) {
+        return sh.frequencyType === 'work_pattern' &&
+          Number(String(sh.date).slice(5, 7)) === self.selectedMonth &&
+          Number(String(sh.date).slice(0, 4)) === Number(state.currentYear);
+      });
     });
 
     var monthNav = '<div style="display: flex; gap: 0.25rem; flex-wrap: wrap; align-items: center;">' +
@@ -12651,6 +12895,10 @@ window.HortOpsCalendarView = {
         }
       });
       dayCols.sort(function(a, b) { return a.date.localeCompare(b.date); });
+      var patternRange = slot.shifts.some(function(sh) { return sh.frequencyType === 'work_pattern'; });
+      var displayRange = patternRange ?
+        dateUtils.formatDisplayDate(dayCols[0].date) + ' – ' + dateUtils.formatDisplayDate(dayCols[dayCols.length - 1].date) :
+        dateUtils.formatDisplayWeekendRange(slot.saturdayDate, slot.sundayDate);
 
       var dayColsHtml = dayCols.map(function(dCol) {
         var dayShifts = slot.shifts.filter(function(sh) { return sh.date === dCol.date; });
@@ -12670,7 +12918,7 @@ window.HortOpsCalendarView = {
             var durStr = (sh.durationHours !== undefined) ? (sh.durationHours + 'h') : '';
             var timeMeta = startStr && durStr ? (startStr + ' (' + durStr + ')') : (startStr || durStr);
 
-            return '<div style="border: 1px solid var(--slate-200); border-radius: 6px; padding: 0.65rem 0.75rem; background: #ffffff; border-left: 4px solid ' + escAttr(sh.color || '#10b981') + '; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" onclick="window.HortOpsApp.openStaffAssignModal(\'" + escAttr(sh.shiftId) + "\')">' +
+            return '<div style="border: 1px solid var(--slate-200); border-radius: 6px; padding: 0.65rem 0.75rem; background: #ffffff; border-left: 4px solid ' + escAttr(safeColor(sh.color, '#10b981')) + '; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" onclick="window.HortOpsApp.openStaffAssignModal(\'" + escAttr(sh.shiftId) + "\')">' +
               '<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">' +
                 '<span style="font-weight: 700; font-size: 12px; color: var(--slate-900); display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">' + esc(sh.jobName) + crewConflictBadge + '</span>' +
                 '<span class="badge ' + (isFull ? 'badge-emerald' : 'badge-amber') + '" style="font-size: 10px; flex-shrink: 0;">' + assignedCount + '/' + sh.crewSize + ' Crew</span>' +
@@ -12705,7 +12953,7 @@ window.HortOpsCalendarView = {
         '<div class="panel-header" style="background: ' + (isCurrentWeek ? '#f0fdf4' : 'var(--slate-100)') + ';">' +
           '<div style="display: flex; align-items: center; flex-wrap: wrap;">' +
             '<span style="font-weight: 800; color: var(--emerald-800); margin-right: 0.5rem;">Week ' + slot.weekNumber + '</span>' +
-            '<span style="font-family: var(--font-mono); color: var(--slate-600);">' + dateUtils.formatDisplayWeekendRange(slot.saturdayDate, slot.sundayDate) + '</span>' +
+            '<span style="font-family: var(--font-mono); color: var(--slate-600);">' + displayRange + '</span>' +
             currentWeekBadge +
             holidaysHtml +
           '</div>' +
@@ -12733,9 +12981,14 @@ window.HortOpsCalendarView = {
   }
 };
 
+})();
+
 </script>
   <script data-source="js/components/jobRegistry.js">
 /* === INLINED: js/components/jobRegistry.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Job Registry View & Slideout Inspector Component
 window.HortOpsJobRegistry = {
   selectedJobId: null,
@@ -12849,7 +13102,7 @@ window.HortOpsJobRegistry = {
         return '<tr style="cursor: pointer; background-color: ' + (isSelected ? 'var(--emerald-50)' : 'transparent') + ';" onclick="window.HortOpsJobRegistry.selectJob(\'' + job.id + '\')">' +
           '<td style="padding: 0.6rem 0.8rem;">' +
             '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-              '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + (job.color || '#10b981') + '; shrink: 0;"></span>' +
+              '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + safeColor(job.color, '#10b981') + '; shrink: 0;"></span>' +
               '<div>' +
                 '<div style="font-weight: 700; color: var(--slate-900);">' + esc(job.name) + '</div>' +
                 '<div style="font-size: 12px; color: var(--slate-500);">' + esc(job.locationDetails || '') + '</div>' +
@@ -12890,7 +13143,7 @@ window.HortOpsJobRegistry = {
       '<div class="slideout-drawer">' +
         '<div class="modal-header">' +
           '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-            '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + (selectedJob.color || '#10b981') + ';"></span>' +
+            '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + safeColor(selectedJob.color, '#10b981') + ';"></span>' +
             '<h3 style="font-size: 16px; font-weight: 800; color: var(--slate-900);">' + esc(selectedJob.name) + '</h3>' +
           '</div>' +
           '<button class="btn btn-secondary" style="padding: 0.25rem 0.4rem;" onclick="window.HortOpsJobRegistry.selectJob(null)">' + icons.render('x', 'w-4 h-4') + '</button>' +
@@ -13073,9 +13326,14 @@ window.HortOpsJobRegistry = {
   }
 };
 
+})();
+
 </script>
   <script data-source="js/components/staffRegistry.js">
 /* === INLINED: js/components/staffRegistry.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Workforce Directory Component
 window.HortOpsStaffRegistry = {
   searchTerm: '',
@@ -13250,7 +13508,7 @@ window.HortOpsStaffRegistry = {
       return '<tr>' +
         '<td style="padding: 0.6rem 0.8rem;">' +
           '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-            '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + (staff.avatarColor || '#10b981') + '; shrink: 0;"></span>' +
+            '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + safeColor(staff.avatarColor, '#10b981') + '; shrink: 0;"></span>' +
             '<div>' +
               '<div style="font-weight: 700; color: var(--slate-900);">' + esc(staff.name) + '</div>' +
               '<div style="font-size: 12px; color: var(--slate-400);">' + esc(staff.email || '') + '</div>' +
@@ -13344,9 +13602,14 @@ window.HortOpsStaffRegistry = {
   }
 };
 
+})();
+
 </script>
   <script data-source="js/components/peakWeekends.js">
 /* === INLINED: js/components/peakWeekends.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Peak Weekends & Clashes Component
 window.HortOpsPeakWeekends = {
   render: function(state) {
@@ -13406,6 +13669,10 @@ window.HortOpsPeakWeekends = {
           }
         });
         dayCols.sort(function(a, b) { return a.date.localeCompare(b.date); });
+      var patternRange = slot.shifts.some(function(sh) { return sh.frequencyType === 'work_pattern'; });
+      var displayRange = patternRange ?
+        dateUtils.formatDisplayDate(dayCols[0].date) + ' – ' + dateUtils.formatDisplayDate(dayCols[dayCols.length - 1].date) :
+        dateUtils.formatDisplayWeekendRange(slot.saturdayDate, slot.sundayDate);
 
         var dayColsHtml = dayCols.map(function(dCol) {
           var dayShifts = slot.shifts.filter(function(sh) { return sh.date === dCol.date; });
@@ -13419,7 +13686,7 @@ window.HortOpsPeakWeekends = {
               var crewConflictBadge = (sh.hasCrewConflict || (sh.crewIntegrityIssues && sh.crewIntegrityIssues.length > 0)) ?
                 ('<span class="badge" style="font-size: 10px; margin-left: 4px; background: #fef2f2; color: #b91c1c; border: 1px solid #f87171;" title="' + escAttr((sh.crewIntegrityIssues && sh.crewIntegrityIssues[0]) ? sh.crewIntegrityIssues[0].message : 'Plant Operator Required') + '">⚠ Plant Op</span>') : '';
 
-              return '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0.65rem; border-left: 3px solid ' + escAttr(sh.color || '#10b981') + '; background: #ffffff; border: 1px solid var(--slate-200); border-left-width: 3px; border-radius: 6px; gap: 0.5rem;">' +
+              return '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0.65rem; border-left: 3px solid ' + escAttr(safeColor(sh.color, '#10b981')) + '; background: #ffffff; border: 1px solid var(--slate-200); border-left-width: 3px; border-radius: 6px; gap: 0.5rem;">' +
                 '<div style="overflow: hidden; flex: 1;">' +
                   '<div style="font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 3px;">' + esc(sh.jobName) + crewConflictBadge + '</div>' +
                   '<div style="font-size: 11px; color: var(--slate-500); margin-top: 0.15rem;">' + esc(sh.startTime) + ' (' + esc(sh.durationHours) + 'h) • ' + esc(sh.category) + '</div>' +
@@ -13449,7 +13716,7 @@ window.HortOpsPeakWeekends = {
           '<div class="panel-header" style="background: var(--slate-50);">' +
             '<div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">' +
               '<span style="font-weight: 800; color: var(--emerald-800);">Week ' + slot.weekNumber + '</span>' +
-              '<span style="font-family: var(--font-mono); color: var(--slate-600);">' + dateUtils.formatDisplayWeekendRange(slot.saturdayDate, slot.sundayDate) + '</span>' +
+              '<span style="font-family: var(--font-mono); color: var(--slate-600);">' + displayRange + '</span>' +
               badges.join(' ') +
             '</div>' +
             '<span style="font-size: 13px; font-weight: 700; color: var(--slate-600);">' + slot.totalCrewHours + ' Crew Hours</span>' +
@@ -13473,6 +13740,8 @@ window.HortOpsPeakWeekends = {
     window.HortOpsApp.handleAutoStagger();
   }
 };
+
+})();
 
 </script>
   <script data-source="js/components/analytics.js">
@@ -13913,6 +14182,9 @@ window.HortOpsStaffAssignFilterBar = {
 </script>
   <script data-source="js/components/staffAssignModal/candidateList.js">
 /* === INLINED: js/components/staffAssignModal/candidateList.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Staff Assignment Candidate List Sub-module
 // Renders candidate staff cards, suitability scoring, availability pills, and conflict warnings.
 window.HortOpsStaffAssignCandidateList = {
@@ -13994,7 +14266,7 @@ window.HortOpsStaffAssignCandidateList = {
 
         var candDotHtml = (window.HortOpsData && window.HortOpsData.renderTeamDot) ?
           window.HortOpsData.renderTeamDot(staff.team) :
-          '<span class="team-dot" style="background-color: ' + (staff.avatarColor || '#10b981') + ';"></span>';
+          '<span class="team-dot" style="background-color: ' + safeColor(staff.avatarColor, '#10b981') + ';"></span>';
 
         return '<div class="candidate-card ' + (isAssigned ? 'is-assigned' : '') + '">' +
           '<div style="display: flex; align-items: center; gap: 0.5rem; flex: 1 1 auto; min-width: 0; overflow: hidden;">' +
@@ -14019,9 +14291,14 @@ window.HortOpsStaffAssignCandidateList = {
   }
 };
 
+})();
+
 </script>
   <script data-source="js/components/staffAssignModal/stagedCrew.js">
 /* === INLINED: js/components/staffAssignModal/stagedCrew.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Staff Assignment Staged Crew Sub-module
 // Renders staged allocations for the selected shift, vacancy slot fill states, permit compliance, and commit actions.
 // Implements stable slot strategy management, source-owned downstream occurrence indicators, and historical protection.
@@ -14176,7 +14453,7 @@ window.HortOpsStaffAssignStagedCrew = {
       assignedStaffList.map(function(staff) {
         var dotHtml = (window.HortOpsData && window.HortOpsData.renderTeamDot) ?
           window.HortOpsData.renderTeamDot(staff.team) :
-          '<span class="team-dot" style="background-color: ' + (staff.avatarColor || '#10b981') + ';"></span>';
+          '<span class="team-dot" style="background-color: ' + safeColor(staff.avatarColor, '#10b981') + ';"></span>';
 
         var ineligItem = ineligibleAssignees.find(function(item) { return item.staff.id === staff.id; });
         var ineligBadge = ineligItem ?
@@ -14348,6 +14625,8 @@ window.HortOpsStaffAssignStagedCrew = {
     return this.render(ctx);
   }
 };
+
+})();
 
 </script>
   <script data-source="js/components/staffAssignModal/candidateModel.js">
@@ -14524,6 +14803,13 @@ window.HortOpsStaffAssignCandidateModel = {
       var bQualFail = b._lacksQualifications ? 1 : 0;
       if (aQualFail !== bQualFail) return aQualFail - bQualFail;
 
+      var rules = window.HortOpsPlanningRules;
+      if (rules && (matchingJob.preferredPoolTagIds || []).length) {
+        var tags = (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
+        var tagA = rules.matches(a, matchingJob.preferredPoolTagIds, tags) ? 0 : 1;
+        var tagB = rules.matches(b, matchingJob.preferredPoolTagIds, tags) ? 0 : 1;
+        if (tagA !== tagB) return tagA - tagB;
+      }
       var prioA = self.getStaffPriority(a, prefs);
       var prioB = self.getStaffPriority(b, prefs);
       if (prioA !== prioB) return prioA - prioB;
@@ -14635,6 +14921,9 @@ window.HortOpsStaffAssignCandidateModel = {
 </script>
   <script data-source="js/components/staffAssignModal.js">
 /* === INLINED: js/components/staffAssignModal.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Crew Allocator / Staff Assignment Modal Component
 // Sole Public Facade for Staff Assignment: delegates UI rendering to sub-modules while retaining state and action handlers.
 function getHumanIneligibleReason(code) {
@@ -14990,7 +15279,7 @@ window.HortOpsStaffAssignModal = {
         '<div class="modal-header">' +
           '<div>' +
             '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-              '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + escAttr(shift.color || '#10b981') + ';"></span>' +
+              '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + escAttr(safeColor(shift.color, '#10b981')) + ';"></span>' +
               '<h2 style="font-size: 1rem; font-weight: 800; color: var(--slate-900);">' + escHtml(shift.jobName || '') + '</h2>' +
               '<span class="badge badge-slate">' + escHtml(shift.category || '') + '</span>' +
               (isExclusive ? '<span class="badge badge-amber">' + icons.render('lock', 'w-2.5 h-2.5') + 'Exclusive</span>' : '') +
@@ -15645,6 +15934,9 @@ window.HortOpsStaffAssignModal = {
 
     var proposedEnvelope = window.HortOpsStorage.createWorkspaceEnvelope({
       schemaVersion: 2,
+      poolTags: state.poolTags || [],
+      absences: state.absences || [],
+      refusalHistory: state.refusalHistory || [],
       jobs: state.jobs,
       roster: state.staffList,
       assignments: rosterRes.customAssignments,
@@ -15713,11 +16005,15 @@ window.HortOpsStaffAssignModal = {
 
     // Atomic adoption only AFTER successful verified commit
     state.customAssignments = rosterRes.customAssignments;
+    state.assignments = state.customAssignments;
     state.rostering = rosterRes.rosteringState;
     state.historicalSnapshots = planRes.snapshots;
     state.lastRosteringAudit = rosterRes.auditLog;
     state.storageStatus = (saveRes && saveRes.storageMode === 'session-only') ? 'session_only' : 'saved';
     window.HortOpsApp._authoritativeSnapshotCount = Object.keys(planRes.snapshots).length;
+    // The verified assignment save also commits UI and untouched workspace domains.
+    // Advance their conflict baselines so a later year/view change is not mistaken for a competing write.
+    window.HortOpsApp._updateDomainBaselines(proposedEnvelope);
 
     // Invalidate relevant boundary caches, recompute digest and refresh view
     window.HortOpsApp.recomputeDigest();
@@ -15725,6 +16021,8 @@ window.HortOpsStaffAssignModal = {
     this.close();
   }
 };
+
+})();
 
 </script>
     <script data-source="js/components/jobEditModal/teamPreferences.js">
@@ -15941,6 +16239,12 @@ window.HortOpsJobEditFormValidator = {
     }
 
     // P0-07, P0-09, N-P1-02: Validation by frequency type
+    if (formData.frequencyType === 'work_pattern') {
+      var patternRules = window.HortOpsPlanningRules;
+      if (!patternRules) return {valid:false,message:'Work pattern validation unavailable.'};
+      var patternCheck = patternRules.validatePattern(formData);
+      if (!patternCheck.valid) return {valid:false,message:patternCheck.error};
+    }
     if (formData.frequencyType === 'one_off') {
       if (!formData.targetDate) {
         return { valid: false, message: 'Please specify an overtime date for this one-off shift.' };
@@ -16034,9 +16338,10 @@ window.HortOpsJobEditFormValidator = {
   // Offline17.5i: Detects if proposed Job mutations alter operational occurrence generation
   doesProposedJobChangeOperationalSchedule: function(existingJob, proposedJob) {
     if (!existingJob || !proposedJob) return false;
-    var recurrenceFields = ['frequencyType', 'intervalWeeks', 'anchorDate', 'anchorWeek', 'targetDate', 'targetMonth', 'preferredDay', 'status'];
+    var recurrenceFields = ['frequencyType', 'intervalWeeks', 'anchorDate', 'anchorWeek', 'targetDate', 'targetMonth', 'preferredDay', 'status', 'workPattern'];
     return recurrenceFields.some(function(field) {
       if (proposedJob[field] === undefined && existingJob[field] === undefined) return false;
+      if (field === 'workPattern') return JSON.stringify(proposedJob[field] || null) !== JSON.stringify(existingJob[field] || null);
       return String(proposedJob[field] || '') !== String(existingJob[field] || '');
     });
   },
@@ -16166,7 +16471,9 @@ window.HortOpsJobEditFormValidator = {
 
           var isStillValid = false;
           if (String(candidateMergedJob.status || '').trim().toLowerCase() === 'active') {
-            if (window.HortOpsScheduler && typeof window.HortOpsScheduler.isCanonicalOperationalOccurrence === 'function') {
+            if (candidateMergedJob.frequencyType === 'work_pattern') {
+              isStillValid = !!window.HortOpsPlanningRules && window.HortOpsPlanningRules.dates(candidateMergedJob, parseInt(aDate.slice(0,4),10)).indexOf(aDate) !== -1;
+            } else if (window.HortOpsScheduler && typeof window.HortOpsScheduler.isCanonicalOperationalOccurrence === 'function') {
               isStillValid = window.HortOpsScheduler.isCanonicalOperationalOccurrence(candidateMergedJob, aDate);
             } else if (window.HortOpsSchedulerEngine && typeof window.HortOpsSchedulerEngine.isCanonicalOperationalOccurrence === 'function') {
               isStillValid = window.HortOpsSchedulerEngine.isCanonicalOperationalOccurrence(candidateMergedJob, aDate);
@@ -16219,9 +16526,13 @@ window.HortOpsJobEditFormValidator = {
     return this.validateSchedulingCompatibility(existingJob, formData, workspace);
   }
 };
+
 </script>
   <script data-source="js/components/jobEditModal.js">
 /* === INLINED: js/components/jobEditModal.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Job Add / Edit Modal Component
 // Sole Public Facade for Job Editing: delegates UI sections to sub-modules while retaining state and action handlers.
 window.HortOpsJobEditModal = {
@@ -16353,7 +16664,7 @@ window.HortOpsJobEditModal = {
       '<div class="modal-card modal-lg">' +
         '<div class="modal-header">' +
           '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-            '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + escapeAttr(data.color || '#047857') + ';"></span>' +
+            '<span style="width: 12px; height: 12px; border-radius: 50%; background: ' + escapeAttr(safeColor(data.color, '#047857')) + ';"></span>' +
             '<h2 style="font-size: 1.1rem; font-weight: 800; color: var(--slate-900);">' +
               (this.editingJobId ? ('Edit Job: ' + escHtml(data.name || '')) : 'Create New Horticultural Job') +
             '</h2>' +
@@ -16381,7 +16692,7 @@ window.HortOpsJobEditModal = {
               '</div>' +
               '<div>' +
                 '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Color Tag</label>' +
-                '<input type="color" class="form-input" style="height: 32px; padding: 2px;" value="' + escapeAttr(data.color || '#047857') + '" onchange="window.HortOpsJobEditModal.updateField(\'color\', this.value)" />' +
+                '<input type="color" class="form-input" style="height: 32px; padding: 2px;" value="' + escapeAttr(safeColor(data.color, '#047857')) + '" onchange="window.HortOpsJobEditModal.updateField(\'color\', this.value)" />' +
               '</div>' +
             '</div>' +
 
@@ -16604,6 +16915,8 @@ window.HortOpsJobEditModal = {
     this.close();
   }
 };
+
+})();
 
 </script>
   <script data-source="js/components/exportModal.js">
@@ -16889,19 +17202,22 @@ window.HortOpsImportModal = {
   pendingJsonBackup: null,
   isJsonMode: false,
   activeTab: 'overview',
-  fileName: '',
+    fileName: '',
+    errorMessage: '',
 
   open: function() {
     this.currentDiff = null;
     this.pendingJsonBackup = null;
     this.isJsonMode = false;
     this.activeTab = 'overview';
-    this.fileName = '';
+        this.fileName = '';
+        this.errorMessage = '';
     if (window.HortOpsModalUtils) window.HortOpsModalUtils.lockBackgroundScroll();
     this.renderModal();
   },
 
-  close: function() {
+    close: function() {
+        this.errorMessage = '';
     this.currentDiff = null;
     this.pendingJsonBackup = null;
     this.isJsonMode = false;
@@ -16915,7 +17231,8 @@ window.HortOpsImportModal = {
     if (!el) return;
     var icons = window.HortOpsIcons;
     var diff = this.currentDiff;
-    var jsonBackup = this.pendingJsonBackup;
+        var jsonBackup = this.pendingJsonBackup;
+        var escapeText = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml) || function() { return 'File import unavailable'; };
 
     var modalHtml = '<div class="modal-overlay" onclick="if(event.target === this) window.HortOpsImportModal.close()">' +
       '<div class="modal-card modal-lg" style="max-width: 850px; max-height: 90vh; display: flex; flex-direction: column;">' +
@@ -16951,7 +17268,7 @@ window.HortOpsImportModal = {
             '<input type="file" id="staff-csv-file-input" accept=".csv,.json" style="display: none;" onchange="window.HortOpsImportModal.handleFileSelect(event)" />' +
             '<div style="margin-bottom: 0.4rem; color: var(--emerald-700);">' + icons.render('upload', 'w-6 h-6') + '</div>' +
             '<div style="font-size: 13px; font-weight: 700; color: var(--slate-800);">' +
-              (this.fileName ? this.fileName : 'Click to select or drop users.csv or workspace.json backup') +
+                    (this.fileName ? escapeText(this.fileName) : 'Click to select or drop users.csv or workspace.json backup') +
             '</div>' +
             '<div style="font-size: 11px; color: var(--slate-500); margin-top: 0.2rem;">' +
               'Supported formats: .CSV (authoritative workforce table) or .JSON (full workspace system backup)' +
@@ -16959,7 +17276,7 @@ window.HortOpsImportModal = {
           '</div>' +
 
           // Error Area
-          '<div id="import-error-area" style="display: none; background: var(--rose-50); border: 1px solid var(--rose-200); border-radius: 6px; padding: 0.75rem 1rem; font-size: 12px; color: var(--rose-700);"></div>' +
+                '<div id="import-error-area" role="alert" style="display: ' + (this.errorMessage ? 'block' : 'none') + '; background: var(--rose-50); border: 1px solid var(--rose-200); border-radius: 6px; padding: 0.75rem 1rem; font-size: 12px; color: var(--rose-700);">' + escapeText(this.errorMessage) + '</div>' +
 
           // Previews
           (this.isJsonMode && jsonBackup ? this.renderJsonPreviewHtml(jsonBackup) : (diff ? this.renderDiffPreviewHtml(diff) : '')) +
@@ -17159,7 +17476,8 @@ window.HortOpsImportModal = {
     }
   },
 
-  processJsonContent: function(jsonText) {
+    processJsonContent: function(jsonText) {
+        this.errorMessage = '';
     var errEl = document.getElementById('import-error-area');
     var esc = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml) || function(s) { return s || ''; };
     try {
@@ -17202,8 +17520,10 @@ window.HortOpsImportModal = {
       this.backupSourceVersion = sourceVersion;
       this.currentDiff = null;
       this.renderModal();
-    } catch(e) {
-      this.pendingJsonBackup = null;
+        } catch(e) {
+            this.pendingJsonBackup = null;
+            this.currentDiff = null;
+            this.errorMessage = 'JSON Backup Error: ' + (e.message || String(e));
       if (errEl) {
         errEl.style.display = 'block';
         errEl.innerHTML = '<strong>JSON Backup Error:</strong><br/>' + esc(e.message || String(e));
@@ -17212,7 +17532,8 @@ window.HortOpsImportModal = {
     }
   },
 
-  processCsvContent: function(csvText) {
+    processCsvContent: function(csvText) {
+        this.errorMessage = '';
     var currentRoster = window.HortOpsApp.state.staffList || [];
     var customAssignments = window.HortOpsApp.state.customAssignments || {};
     var allShifts = window.HortOpsApp.state.allShifts || [];
@@ -17221,7 +17542,8 @@ window.HortOpsImportModal = {
 
     var errEl = document.getElementById('import-error-area');
     var esc = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml) || function(s) { return s || ''; };
-    if (!parsedResult.success) {
+        if (!parsedResult.success) {
+            this.errorMessage = 'Parsing Errors: ' + (parsedResult.errors || []).join('; ');
       if (errEl) {
         errEl.style.display = 'block';
         errEl.innerHTML = '<strong>Parsing Errors:</strong><br/>' + (parsedResult.errors || []).map(esc).join('<br/>');
@@ -17844,6 +18166,9 @@ window.HortOpsStaffQualificationModal = {
 </script>
   <script data-source="js/components/staffAbsenceModal.js">
 /* === INLINED: js/components/staffAbsenceModal.js === */
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Standalone Offline - Staff Absence & Refusal Management Modal Component (Stage 3 Gate 3D & Review 56 R56-P1-06 & Review 57 R57-P2-07)
 // Provides supervisor-facing operational Full CRUD (Create, Read, Update, Delete) with identity retention
 // for dated absence intervals (annual, sick, RDO, training) and refusal history logging with fair-share score impact and live shift conflict detection.
@@ -18223,7 +18548,7 @@ window.HortOpsStaffQualificationModal = {
         // Modal Header
         '<div class="modal-header" style="padding: 1.25rem 1.5rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex: 0 0 auto;">' +
           '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
-            '<div style="width: 40px; height: 40px; border-radius: 50%; background: ' + escAttr(staff.avatarColor) + '; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px;">' +
+            '<div style="width: 40px; height: 40px; border-radius: 50%; background: ' + escAttr(safeColor(staff.avatarColor, '#10b981')) + '; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px;">' +
               esc(staff.name.slice(0, 2).toUpperCase()) +
             '</div>' +
             '<div>' +
@@ -18525,6 +18850,8 @@ window.HortOpsStaffQualificationModal = {
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = HortOpsStaffAbsenceModal;
   }
+})();
+
 })();
 
 </script>
@@ -19798,7 +20125,85 @@ window.HortOpsQuarantineViewerModal = window.HortOpsQuarantineModal;
 </script>
 
   <!-- 4. Application Controller & State Store -->
-    <script data-source="js/app.js">
+  <script data-source="js/components/planningEditors.js">
+/* === INLINED: js/components/planningEditors.js === */
+// Overtime-owned staff pool and work-pattern editors. No allocation algorithm.
+(function () {
+  'use strict';
+  var clone = function (v) { return JSON.parse(JSON.stringify(v)); };
+  var esc = function (v) { return window.HortOpsSecurityUtils.escapeHtml(String(v == null ? '' : v)); };
+  var attr = function (v) { return window.HortOpsSecurityUtils.escapeHtmlAttr(String(v == null ? '' : v)); };
+  var state = function () { return window.HortOpsApp.state; };
+  var baseline = function () { return JSON.stringify({tags:state().poolTags || [], roster:state().staffList || [], jobs:state().jobs || [], assignments:state().customAssignments || {}, rostering:state().rostering || {}}); };
+  var panel = 'background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:12px;';
+  function tagChecks(tags, selected, attribute) {
+    return tags.map(function (t) { return '<label style="display:inline-flex;align-items:center;gap:6px;margin:5px"><input type="checkbox" '+attribute+'="'+attr(t.id)+'" '+(selected.indexOf(t.id)>=0?'checked':'')+' '+(!t.active && selected.indexOf(t.id)<0?'disabled':'')+'>#'+esc(t.label)+(t.active?'':' (retired)')+'</label>'; }).join('') || '<p>No pools yet. Create pools in Workforce Registry.</p>';
+  }
+  window.HortOpsStaffPoolModal = {
+    model:null,
+    open:function (staffId) {
+      this.model={staffId:staffId || null, tags:clone(state().poolTags || []), roster:clone(state().staffList || []), base:baseline(), error:''};
+      if (window.HortOpsModalUtils) window.HortOpsModalUtils.lockBackgroundScroll();
+      this.render();
+    },
+    close:function () { this.model=null; var root=document.getElementById('pool-modal-root'); if(root)root.innerHTML=''; if(window.HortOpsModalUtils)window.HortOpsModalUtils.unlockBackgroundScroll(); },
+    createTag:function (label) {
+      if(!this.model)return;
+      label=String(label || '').trim().replace(/^#/,'');
+      if(!/^[A-Za-z][A-Za-z0-9_-]{0,39}$/.test(label) || this.model.tags.some(function(t){return t.label.toLowerCase()===label.toLowerCase();})) {this.model.error='Use a unique tag: a letter followed by up to 39 letters, digits, underscores or hyphens.';this.render();return;}
+      var id='POOL-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9);
+      this.model.tags.push({id:id,label:label,active:true,history:[{at:new Date().toISOString(),action:'created'}]}); this.model.error=''; this.render();
+    },
+    setTagActive:function(id,active){ if(!this.model)return;var t=this.model.tags.find(function(t){return t.id===id;});if(!t)return;t.history=t.history || [];t.history.push({at:new Date().toISOString(),action:active?'reactivated':'retired',before:t.active,after:active});t.active=active;this.render(); },
+    setMembership:function(id,checked){if(!this.model)return;var s=this.model.roster.find(function(s){return s.id===this.model.staffId;},this);if(!s)return;var ids=s.poolTagIds || [];s.poolTagIds=checked?Array.from(new Set(ids.concat(id))):ids.filter(function(v){return v!==id;});this.render();},
+    save:function(){
+      if(!this.model)return;
+      if(baseline()!==this.model.base){this.model.error='Workspace changed while this editor was open. Cancel and reopen to review current values.';this.render();return;}
+      var m=this.model, now=new Date().toISOString();
+      m.roster.forEach(function(s){var before=(state().staffList || []).find(function(v){return v.id===s.id;});var old=before && before.poolTagIds || [];if(JSON.stringify(old)!==JSON.stringify(s.poolTagIds || [])){s.poolTagHistory=clone(before.poolTagHistory || []);s.poolTagHistory.push({at:now,before:old.slice(),after:(s.poolTagIds || []).slice()});}});
+      var result=window.HortOpsApp._commitCanonicalProposal({poolTags:m.tags,roster:m.roster});
+      if(!result || result.success===false){m.error=result && result.error || 'Could not save pool changes.';this.render();return;}
+      this.close();window.HortOpsApp.recomputeDigest();window.HortOpsApp.renderCurrentView();
+    },
+    render:function(){
+      if(!this.model)return;var m=this.model, root=document.getElementById('pool-modal-root');if(!root)return;
+      var staff=m.roster.find(function(s){return s.id===m.staffId;});
+      var changed=m.tags.filter(function(t){var before=(state().poolTags || []).find(function(b){return b.id===t.id;});return !before || before.active!==t.active;}).map(function(t){return t.id;});
+      if(staff){var previous=((state().staffList || []).find(function(s){return s.id===staff.id;}) || {}).poolTagIds || [], next=staff.poolTagIds || [];changed=changed.concat(previous.filter(function(id){return next.indexOf(id)<0;}),next.filter(function(id){return previous.indexOf(id)<0;}));}
+      var jobs=(state().jobs || []).filter(function(j){return (j.preferredPoolTagIds || []).concat(j.exclusivePoolTagIds || []).some(function(id){return changed.indexOf(id)>=0;});});
+      var today=window.HortOpsDateUtils.getLocalDateKey(), affectedIds=jobs.map(function(j){return j.id;});
+      var future=(state().allShifts || []).filter(function(s){return s.date>=today && affectedIds.indexOf(s.jobId)>=0 && (s.assignedStaffIds || []).length;});
+      var impacts='<div style="'+panel+'"><strong>Assignment impact review</strong><p>'+jobs.length+' job definitions reference the affected pools'+(jobs.length?': '+jobs.map(function(j){return esc(j.name);}).join(', '):'.')+'</p><p>'+future.length+' currently staffed future occurrences may need review. Existing assignments are retained. Future staffing is checked against active pool membership; review affected jobs before saving.</p></div>';
+      root.innerHTML='<div class="modal-overlay"><div class="modal-card modal-lg"><div class="modal-header"><h2>'+ (staff?'Staff pools: '+esc(staff.name):'Manage workforce pools')+'</h2><button type="button" class="btn btn-secondary" data-pool-close>Close</button></div><div class="modal-body" style="background:#f8fafc">'+(m.error?'<p role="alert" style="color:#991b1b">'+esc(m.error)+'</p>':'')+(staff?'<section style="'+panel+'"><h3>Cross-team memberships</h3>'+tagChecks(m.tags,staff.poolTagIds || [],'data-membership')+'</section>':'')+'<section style="margin-top:12px"><h3>Pool catalogue</h3><div style="display:flex;gap:8px"><input class="form-input" id="pool-new-label" aria-label="New pool tag" placeholder="ParkRanger" maxlength="40"><button type="button" class="btn btn-secondary" data-pool-create>Create tag</button></div>'+m.tags.map(function(t){return '<div style="display:flex;justify-content:space-between;margin-top:8px"><strong>#'+esc(t.label)+(t.active?'':' (retired)')+'</strong><button type="button" class="btn btn-secondary" data-pool-active="'+attr(t.id)+'">'+(t.active?'Retire':'Reactivate')+'</button></div>';}).join('')+'</section>'+impacts+'</div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-pool-close>Cancel</button><button type="button" class="btn btn-primary" data-pool-save>Save pools</button></div></div></div>';
+      root.onclick=function(e){var b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-pool-close'))window.HortOpsStaffPoolModal.close();if(b.hasAttribute('data-pool-create'))window.HortOpsStaffPoolModal.createTag(document.getElementById('pool-new-label').value);if(b.hasAttribute('data-pool-save'))window.HortOpsStaffPoolModal.save();if(b.hasAttribute('data-pool-active')){var id=b.getAttribute('data-pool-active'),t=m.tags.find(function(t){return t.id===id;});window.HortOpsStaffPoolModal.setTagActive(id,!t.active);}};
+      root.onchange=function(e){if(e.target.hasAttribute('data-membership'))window.HortOpsStaffPoolModal.setMembership(e.target.getAttribute('data-membership'),e.target.checked);};
+    }
+  };
+  // Existing registry keeps its own filters, typography and actions.
+  var registry=window.HortOpsStaffRegistry, oldRegistryRender=registry.render;
+  registry.render=function(s){var html=oldRegistryRender.call(this,s);html=html.replace('<div class="panel-header">','<div class="panel-header"><button type="button" class="btn btn-secondary" onclick="window.HortOpsStaffPoolModal.open()">Manage pools</button>');
+    (s.staffList || []).forEach(function(person){var safeId=attr(person.id), marker="window.HortOpsStaffQualificationModal.open('"+safeId+"')";var location=html.indexOf(marker);if(location<0)return;var start=html.lastIndexOf('<button',location);var encodedId=attr(JSON.stringify(person.id));var chips=(person.poolTagIds || []).map(function(id){var t=(s.poolTags || []).find(function(t){return t.id===id;});return t?'<span class="badge badge-emerald">#'+esc(t.label)+(t.active?'':' (retired)')+'</span>':'';}).join('');html=html.slice(0,start)+'<span style="display:flex;gap:4px;flex-wrap:wrap">'+chips+'</span><button type="button" class="btn btn-secondary" onclick="window.HortOpsStaffPoolModal.open('+encodedId+')">Pools</button>'+html.slice(start);});return html;};
+  var job=window.HortOpsJobEditModal, recurrence=window.HortOpsJobEditRecurrenceForm, oldRecurrence=recurrence.render, oldRender=job.renderModal, oldExclusiveCheck=job.toggleExclusiveCheck;
+  job.toggleExclusiveCheck=function(checked){if(!this.formData)return;this.formData.exclusivePoolSource=checked?'teams':'none';this.formData.isExclusive=false;return oldExclusiveCheck.call(this,checked);};
+  function patternDefault(){return {mode:'weekly',startDate:new Date().getFullYear()+'-01-01',days:[6,0],runLength:1,includePublicHolidays:false,excludedDates:[]};}
+  recurrence.render=function(ctx){var d=ctx.data;if(d.frequencyType!=='work_pattern')return oldRecurrence.call(this,ctx).replace('</select>','<option value="work_pattern">Multiple days / public holidays</option></select>');
+    var p=d.workPattern || patternDefault();d.workPattern=p;
+    var year=Number(p.startDate.slice(0,4)), dates=window.HortOpsPlanningRules.dates(d,year);
+    return '<section style="'+panel+'"><label>Frequency Cadence<select class="form-select" data-planning-frequency><option value="recurring_weeks">Recurring Every N Weeks</option><option value="annual">Annual Shift</option><option value="one_off">One-off Shift</option><option value="work_pattern" selected>Multiple days / public holidays</option></select></label><label>Pattern<select class="form-select" data-pattern="mode"><option value="weekly" '+(p.mode==='weekly'?'selected':'')+'>Weekly weekdays plus public holidays</option><option value="run" '+(p.mode==='run'?'selected':'')+'>One-off consecutive run (1–4 days)</option></select></label><div style="display:flex;gap:12px"><label>Start date<input type="date" class="form-input" data-pattern="startDate" value="'+attr(p.startDate)+'"></label>'+(p.mode==='weekly'?'<label>End date (optional)<input type="date" class="form-input" data-pattern="endDate" value="'+attr(p.endDate || '')+'"></label>':'<label>Consecutive days<input type="number" min="1" max="4" class="form-input" data-pattern="runLength" value="'+p.runLength+'"></label>')+'</div>'+(p.mode==='weekly'?'<fieldset><legend>Recurring weekdays (up to four consecutive days)</legend>'+['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(function(n,i){return '<label style="margin:5px"><input type="checkbox" data-pattern-day="'+i+'" '+(p.days.indexOf(i)>=0?'checked':'')+'>'+n+'</label>';}).join('')+'</fieldset><label><input type="checkbox" data-pattern="includePublicHolidays" '+(p.includePublicHolidays?'checked':'')+'>Include full-day South Australian public holidays</label>':'')+'<label style="display:block">Excluded dates (one YYYY-MM-DD per line)<textarea class="form-input" data-pattern="excludedDates" rows="3">'+esc(p.excludedDates.join('\n'))+'</textarea></label><p>Overlapping weekday and holiday rules create one occurrence per date. Staffing is independent for each daily occurrence.</p><details><summary>'+dates.length+' occurrences in '+year+' — preview exact dates</summary><p>'+dates.map(esc).join(' · ')+'</p></details></section>';
+  };
+  job.setPlanningField=function(field,value){if(!this.formData)return;if(field==='frequencyType'){this.formData.frequencyType=value;if(value==='work_pattern'&&!this.formData.workPattern)this.formData.workPattern=patternDefault();}else{var p=this.formData.workPattern || patternDefault();if(field==='endDate'&&!value)delete p.endDate;else p[field]=value;if(p.mode==='run')p.includePublicHolidays=false;this.formData.workPattern=p;}this.renderModal();};
+  job.togglePatternDay=function(day,checked){if(!this.formData)return;var p=this.formData.workPattern;p.days=checked?Array.from(new Set(p.days.concat(day))):p.days.filter(function(d){return d!==day;});this.renderModal();};
+  job.setPoolSource=function(value){if(!this.formData)return;this.formData.exclusivePoolSource=value;this.formData.isExclusiveTeams=value==='teams';this.formData.isExclusive=false;if(value==='teams'&&!(this.formData.exclusiveTeams || []).length){var primary=this.formData.primaryTeam || this.formData.defaultTeam;this.formData.exclusiveTeams=primary?[primary]:[];}this.renderModal();};
+  job.togglePoolTag=function(field,id,checked){if(!this.formData)return;var a=this.formData[field] || [];this.formData[field]=checked?Array.from(new Set(a.concat(id))):a.filter(function(v){return v!==id;});this.renderModal();};
+  job.renderModal=function(){if(this._planningRendering)return;this._planningRendering=true;try{oldRender.call(this);if(!this.formData)return;var root=document.getElementById('job-edit-modal-root'),body=root && root.querySelector('.modal-body');if(!body)return;var d=this.formData,source=window.HortOpsPlanningRules.source(d), section=document.createElement('section');section.style.cssText=panel;
+    section.innerHTML='<h3>Cross-team staff pools</h3><p>Tags select pools, not qualifications. Preferred tagged candidates rank first; all safety and eligibility checks still apply.</p><strong>Preferred pools (any selected tag)</strong><div>'+tagChecks(state().poolTags || [],d.preferredPoolTagIds || [],'data-preferred-pool')+'</div><label>Exclusive pool source<select class="form-select" data-pool-source><option value="none" '+(source==='none'?'selected':'')+'>Unrestricted</option><option value="teams" '+(source==='teams'?'selected':'')+'>Existing team restrictions</option><option value="tags" '+(source==='tags'?'selected':'')+'>Tagged staff only</option></select></label>'+(source==='tags'?'<strong>Exclusive pools (any selected tag)</strong><div>'+tagChecks(state().poolTags || [],d.exclusivePoolTagIds || [],'data-exclusive-pool')+'</div><p>An empty exclusive pool cannot be filled automatically or manually.</p>':'');body.insertBefore(section,body.children[2] || null);
+    root.onchange=function(e){if(job._planningRendering)return;var t=e.target;if(t.hasAttribute('data-planning-frequency'))job.setPlanningField('frequencyType',t.value);if(t.hasAttribute('data-pattern')){var f=t.getAttribute('data-pattern'),v=t.value;if(f==='includePublicHolidays')v=t.checked;if(f==='runLength')v=Number(v);if(f==='excludedDates')v=v.split(/[\s,]+/).filter(Boolean);job.setPlanningField(f,v);}if(t.hasAttribute('data-pattern-day'))job.togglePatternDay(Number(t.getAttribute('data-pattern-day')),t.checked);if(t.hasAttribute('data-pool-source'))job.setPoolSource(t.value);if(t.hasAttribute('data-preferred-pool'))job.togglePoolTag('preferredPoolTagIds',t.getAttribute('data-preferred-pool'),t.checked);if(t.hasAttribute('data-exclusive-pool'))job.togglePoolTag('exclusivePoolTagIds',t.getAttribute('data-exclusive-pool'),t.checked);};
+    }finally{this._planningRendering=false;}
+  };
+})();
+
+</script>
+  <script data-source="js/app.js">
 /* === INLINED: js/app.js === */
 // Main Application Controller & State Store
 window.HortOpsApp = {
@@ -19829,6 +20234,7 @@ window.HortOpsApp = {
     var ws = storage.loadWorkspace([], [], scheduler.DEFAULT_BUDGET_SETTINGS);
     this.state = this.state || {};
     this.state.schemaVersion = 2;
+    this.state.poolTags = JSON.parse(JSON.stringify(ws.poolTags || []));
     this.state.jobs = ws.jobs;
     this.state.staffList = ws.roster;
     this.state.roster = ws.roster;
@@ -19945,6 +20351,7 @@ window.HortOpsApp = {
   _updateDomainBaselines: function(src) {
     if (!src || typeof src !== 'object') return;
     this._domainBaselines = {
+      poolTags: JSON.parse(JSON.stringify(src.poolTags || [])),
       jobs: JSON.parse(JSON.stringify(src.jobs || [])),
       roster: JSON.parse(JSON.stringify(src.roster || src.staffList || [])),
       assignments: JSON.parse(JSON.stringify(src.assignments || src.customAssignments || {})),
@@ -19979,7 +20386,8 @@ window.HortOpsApp = {
 
       // Review 62 (R62-P0-01): Identify explicit mutating domain intent
       var explicitMutatingDomains = new Set();
-      if (own.call(proposalOverrides, 'jobs')) explicitMutatingDomains.add('jobs');
+      if (own.call(proposalOverrides, 'poolTags')) explicitMutatingDomains.add('poolTags');
+    if (own.call(proposalOverrides, 'jobs')) explicitMutatingDomains.add('jobs');
       if (own.call(proposalOverrides, 'roster') || own.call(proposalOverrides, 'staffList')) explicitMutatingDomains.add('roster');
       if (own.call(proposalOverrides, 'assignments') || own.call(proposalOverrides, 'customAssignments')) explicitMutatingDomains.add('assignments');
       if (own.call(proposalOverrides, 'rostering')) explicitMutatingDomains.add('rostering');
@@ -19998,7 +20406,9 @@ window.HortOpsApp = {
       // Detect any in-memory domain changes vs established baseline (fail-closed, without masking)
       var activeMutatingDomains = new Set(explicitMutatingDomains);
       if (!isRestoreOrReset && this._domainBaselines) {
-        var currentJobs = this._resolveDomainState('jobs');
+        var currentPools = this.state.poolTags || [];
+      if (JSON.stringify(currentPools) !== JSON.stringify(this._domainBaselines.poolTags || [])) activeMutatingDomains.add('poolTags');
+      var currentJobs = this._resolveDomainState('jobs');
         if (JSON.stringify(currentJobs) !== JSON.stringify(this._domainBaselines.jobs)) activeMutatingDomains.add('jobs');
 
         var currentRoster = this._resolveDomainState('roster', 'staffList');
@@ -20041,7 +20451,8 @@ window.HortOpsApp = {
       }
 
       // Authoritative canonical domains: distinguish omitted from explicitly null/invalid; NEVER coerce with truthy defaults
-      var proposedJobs;
+      var proposedPools = own.call(proposalOverrides, 'poolTags') ? proposalOverrides.poolTags : (this.state.poolTags || []);
+    var proposedJobs;
       if (own.call(proposalOverrides, 'jobs')) {
         proposedJobs = proposalOverrides.jobs;
       } else {
@@ -20243,7 +20654,9 @@ window.HortOpsApp = {
         }
 
         // 1. Untouched domains preservation
-        if (!activeMutatingDomains.has('jobs') && Array.isArray(committedData.jobs)) {
+        if (!activeMutatingDomains.has('poolTags')) proposedPools = committedData.poolTags || [];
+      if (activeMutatingDomains.has('poolTags') && this._domainBaselines && JSON.stringify(committedData.poolTags || []) !== JSON.stringify(this._domainBaselines.poolTags || [])) return {success:false,error:'Pool catalogue changed; reopen the editor.'};
+      if (!activeMutatingDomains.has('jobs') && Array.isArray(committedData.jobs)) {
           proposedJobs = committedData.jobs;
         }
         if (!activeMutatingDomains.has('roster') && Array.isArray(committedData.roster)) {
@@ -20530,9 +20943,7 @@ window.HortOpsApp = {
         return { success: false, error: 'Canonical envelope constructor unavailable' };
       }
 
-      var candidateEnvelope = {
-        schemaVersion: 2
-      };
+      var candidateEnvelope = { schemaVersion: 2, poolTags: proposedPools };
       if (proposedJobs !== undefined) candidateEnvelope.jobs = proposedJobs;
       if (proposedRoster !== undefined) candidateEnvelope.roster = proposedRoster;
       if (proposedAssignments !== undefined) candidateEnvelope.assignments = proposedAssignments;
@@ -20554,7 +20965,8 @@ window.HortOpsApp = {
 
       // Review 63 (R63-P0-01 & R63-P1-02): Unconditionally synchronize ALL in-memory domain aliases to the committed envelope
       if (this.state) {
-        this.state.jobs = JSON.parse(JSON.stringify(candidateEnvelope.jobs || []));
+        this.state.poolTags = JSON.parse(JSON.stringify(candidateEnvelope.poolTags || []));
+      this.state.jobs = JSON.parse(JSON.stringify(candidateEnvelope.jobs || []));
 
         var syncedRoster = JSON.parse(JSON.stringify(candidateEnvelope.roster || []));
         this.state.roster = syncedRoster;
@@ -20963,6 +21375,7 @@ window.HortOpsApp = {
 
     var canonicalEnvelope = {
       schemaVersion: 2,
+      poolTags: JSON.parse(JSON.stringify(adoptedData.poolTags || [])),
       jobs: Array.isArray(adoptedData.jobs) ? JSON.parse(JSON.stringify(adoptedData.jobs)) : [],
       roster: Array.isArray(adoptedData.roster) ? JSON.parse(JSON.stringify(adoptedData.roster)) : [],
       assignments: (adoptedData.assignments && typeof adoptedData.assignments === 'object') ? JSON.parse(JSON.stringify(adoptedData.assignments)) : {},
@@ -21014,6 +21427,7 @@ window.HortOpsApp = {
     // Live state adopts exact detached values from canonicalEnvelope (ensuring live == committed == cold reload)
     this.state.schemaVersion = 2;
     this.state.jobs = JSON.parse(JSON.stringify(canonicalEnvelope.jobs));
+    this.state.poolTags = JSON.parse(JSON.stringify(canonicalEnvelope.poolTags || []));
     this.state.staffList = JSON.parse(JSON.stringify(canonicalEnvelope.roster));
     this.state.roster = this.state.staffList;
     this.state.customAssignments = JSON.parse(JSON.stringify(canonicalEnvelope.assignments));
@@ -21100,6 +21514,7 @@ window.HortOpsApp = {
     // 4. Reset in-memory state cleanly to clean slate
     this.state.schemaVersion = 2;
     this.state.jobs = [];
+    this.state.poolTags = [];
     this.state.staffList = [];
     this.state.roster = [];
     this.state.customAssignments = {};
@@ -21188,10 +21603,22 @@ window.HortOpsApp = {
     return { success: true, vacatedCount: result.vacatedCount };
   },
 
-  importStaffMembers: function(newStaffList) {
-    if (!newStaffList || !Array.isArray(newStaffList)) {
-      return { success: false, error: 'Invalid staff list: expected array' };
-    }
+    importStaffMembers: function(newStaffList) {
+        if (!newStaffList || !Array.isArray(newStaffList)) {
+            return { success: false, error: 'Invalid staff list: expected array' };
+        }
+        // Reconciliation intentionally retains existing presentation fields.
+        // Reject hostile incoming colours before that merge can discard them.
+        var validator = window.HortOpsSchemaValidator;
+        if (!validator || typeof validator.validateOptionalColor !== 'function') {
+            return { success: false, error: 'Colour validation unavailable' };
+        }
+        for (var colorIndex = 0; colorIndex < newStaffList.length; colorIndex++) {
+            var incomingStaff = newStaffList[colorIndex];
+            if (incomingStaff && !validator.validateOptionalColor(incomingStaff.avatarColor)) {
+                return { success: false, error: 'Staff member at index ' + colorIndex + ' has an invalid avatar colour.' };
+            }
+        }
     if (!window.HortOpsReconciliationEngine || typeof window.HortOpsReconciliationEngine.computeWorkforceReconciliation !== 'function') {
       return { success: false, error: 'Reconciliation engine unavailable' };
     }
@@ -21419,15 +21846,17 @@ if (typeof document !== 'undefined') {
   guard(app, ['init', '_commitCanonicalProposal', 'saveCurrentWorkspace', 'updatePermit', 'updateShiftStaff', 'saveJob', 'deleteJob', 'restoreWorkspaceJson', 'resetToCleanSlate', 'reconcileStaffSnapshot', 'importStaffMembers', 'updateStaffMember', 'handleAutoStagger', 'saveAbsenceAndRefusalData', 'openStaffAssignModal', 'openAddJobModal', 'openEditJobModal', 'openImportModal', 'openResetWorkspaceModal']);
   guard(storage, ['set', 'remove', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'retireCompositeParentBundle', 'compactStorage', 'importWorkspaceJson', 'saveWorkspace']);
   guard(driver, ['set', 'remove', '_restoreRawStorageSnapshot', '_restoreEmergencyRecoveryMetadata', '_stageTransactionRecoveryBundle', '_stageEmergencyRecoveryArtifact', '_executeCompensatingRollback', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'retireCompositeParentBundle', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'compactStorage']);
-  [
+  var editorBoundaries = [
     [window.HortOpsStaffAssignModal, ['open','addStaff','openActiveContinuation','removeStaff','removeAllUnaccredited','removeAllFatigued','removeAllIneligible','autoFillTeam','updatePermit','updatePermitNotes','updateSlotMode','updateSlotRepeat','saveAllocation']],
     [window.HortOpsStaffExemptionModal, ['open','toggleExempt','setPreset','save']],
     [window.HortOpsStaffQualificationModal, ['open','addQualification','removeQualification','save']],
     [window.HortOpsStaffAbsenceModal, ['open','addAbsence','updateAbsence','removeAbsence','addRefusal','updateRefusal','removeRefusal','save']],
-    [window.HortOpsJobEditModal, ['open','handleSubmit']],
+    [window.HortOpsJobEditModal, ['open','handleSubmit','setPlanningField','togglePatternDay','setPoolSource','togglePoolTag']],
+    [window.HortOpsStaffPoolModal, ['open','save','createTag','setTagActive','setMembership']],
     [window.HortOpsImportModal, ['open','handleFileSelect','processJsonContent','processCsvContent','confirmSync','confirmJsonRestore']],
     [window.HortOpsResetWorkspaceModal, ['open','executeReset']]
-  ].forEach(function(entry) { guard(entry[0], entry[1]); });
+  ];
+  editorBoundaries.forEach(function(entry) { guard(entry[0], entry[1]); });
   // Recovery is current namespace/current schema only, including direct driver calls.
   var restore = driver.restoreEmergencyRecoveryArtifact;
   driver.restoreEmergencyRecoveryArtifact = function(input, options) {
@@ -21515,6 +21944,9 @@ if (typeof document !== 'undefined') {
   }
   function release() {
     generation++; releaseWanted = true; reason = 'Editing was released. Try editing to reload the latest saved workspace.';
+    // Discard editor models as well as their DOM. A retained save callback must
+    // not regain access to an old form when this tab later reacquires editing.
+    editorBoundaries.forEach(function(entry) { entry[0].close(); });
     document.querySelectorAll('[id$="-modal-root"]').forEach(function(root) { root.replaceChildren(); });
     while (window.HortOpsModalUtils.getActiveModalCount() > 0) window.HortOpsModalUtils.unlockBackgroundScroll();
     finishRelease(); decorate();

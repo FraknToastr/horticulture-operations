@@ -29,6 +29,7 @@
   <div id="quarantine-viewer-modal-root"></div>
   <div id="staff-qualification-modal-root"></div>
   <div id="staff-absence-modal-root"></div>
+  <div id="pool-modal-root"></div>
 
   <!-- 1. Data Scripts (Public calendar data only; zero prototype seeds) -->
   <script src="js/data/holidays.js"></script>
@@ -40,6 +41,7 @@
   <script src="js/utils/qualifications.js"></script>
   <script src="js/utils/fatigueEngine.js"></script>
   <script src="js/utils/absences.js"></script>
+  <script src="js/utils/planningRules.js"></script>
   <script src="js/utils/storage/schemaValidator.js"></script>
     <script src="js/utils/storage/currentWorkspace.js"></script>
     <script src="js/utils/storage/clientStorage.js"></script>
@@ -88,7 +90,8 @@
   <script src="js/components/quarantineViewerModal.js"></script>
 
   <!-- 4. Application Controller & State Store -->
-    <script src="js/app.js"></script>
+  <script src="js/components/planningEditors.js"></script>
+  <script src="js/app.js"></script>
     <script src="js/utils/writerSession.js"></script>
 </body>
 </html>

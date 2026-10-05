@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Staff Assignment Candidate List Sub-module
 // Renders candidate staff cards, suitability scoring, availability pills, and conflict warnings.
 window.HortOpsStaffAssignCandidateList = {
@@ -79,7 +82,7 @@ window.HortOpsStaffAssignCandidateList = {
 
         var candDotHtml = (window.HortOpsData && window.HortOpsData.renderTeamDot) ?
           window.HortOpsData.renderTeamDot(staff.team) :
-          '<span class="team-dot" style="background-color: ' + (staff.avatarColor || '#10b981') + ';"></span>';
+          '<span class="team-dot" style="background-color: ' + safeColor(staff.avatarColor, '#10b981') + ';"></span>';
 
         return '<div class="candidate-card ' + (isAssigned ? 'is-assigned' : '') + '">' +
           '<div style="display: flex; align-items: center; gap: 0.5rem; flex: 1 1 auto; min-width: 0; overflow: hidden;">' +
@@ -103,3 +106,5 @@ window.HortOpsStaffAssignCandidateList = {
     '</div>';
   }
 };
+
+})();

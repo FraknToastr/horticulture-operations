@@ -57,7 +57,7 @@ window.HortOpsCostCalculator = {
       var remHours = Math.max(0, hours - 2);
       totalLaborForOneWorker = (first2h * hourlyBaseRate * satMultiplierFirst2h) + (remHours * hourlyBaseRate * satMultiplierAfter2h);
     } else {
-      // Friday or Monday weekday overtime (1.5x first 2h, 2.0x thereafter)
+      // Non-holiday weekday overtime retains the existing rate calculation.
       var first2hW = Math.min(2, hours);
       var remHoursW = Math.max(0, hours - 2);
       totalLaborForOneWorker = (first2hW * hourlyBaseRate * satMultiplierFirst2h) + (remHoursW * hourlyBaseRate * satMultiplierAfter2h);

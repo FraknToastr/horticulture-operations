@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Peak Weekends & Clashes Component
 window.HortOpsPeakWeekends = {
   render: function(state) {
@@ -57,6 +60,10 @@ window.HortOpsPeakWeekends = {
           }
         });
         dayCols.sort(function(a, b) { return a.date.localeCompare(b.date); });
+      var patternRange = slot.shifts.some(function(sh) { return sh.frequencyType === 'work_pattern'; });
+      var displayRange = patternRange ?
+        dateUtils.formatDisplayDate(dayCols[0].date) + ' – ' + dateUtils.formatDisplayDate(dayCols[dayCols.length - 1].date) :
+        dateUtils.formatDisplayWeekendRange(slot.saturdayDate, slot.sundayDate);
 
         var dayColsHtml = dayCols.map(function(dCol) {
           var dayShifts = slot.shifts.filter(function(sh) { return sh.date === dCol.date; });
@@ -70,7 +77,7 @@ window.HortOpsPeakWeekends = {
               var crewConflictBadge = (sh.hasCrewConflict || (sh.crewIntegrityIssues && sh.crewIntegrityIssues.length > 0)) ?
                 ('<span class="badge" style="font-size: 10px; margin-left: 4px; background: #fef2f2; color: #b91c1c; border: 1px solid #f87171;" title="' + escAttr((sh.crewIntegrityIssues && sh.crewIntegrityIssues[0]) ? sh.crewIntegrityIssues[0].message : 'Plant Operator Required') + '">⚠ Plant Op</span>') : '';
 
-              return '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0.65rem; border-left: 3px solid ' + escAttr(sh.color || '#10b981') + '; background: #ffffff; border: 1px solid var(--slate-200); border-left-width: 3px; border-radius: 6px; gap: 0.5rem;">' +
+              return '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0.65rem; border-left: 3px solid ' + escAttr(safeColor(sh.color, '#10b981')) + '; background: #ffffff; border: 1px solid var(--slate-200); border-left-width: 3px; border-radius: 6px; gap: 0.5rem;">' +
                 '<div style="overflow: hidden; flex: 1;">' +
                   '<div style="font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 3px;">' + esc(sh.jobName) + crewConflictBadge + '</div>' +
                   '<div style="font-size: 11px; color: var(--slate-500); margin-top: 0.15rem;">' + esc(sh.startTime) + ' (' + esc(sh.durationHours) + 'h) • ' + esc(sh.category) + '</div>' +
@@ -100,7 +107,7 @@ window.HortOpsPeakWeekends = {
           '<div class="panel-header" style="background: var(--slate-50);">' +
             '<div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">' +
               '<span style="font-weight: 800; color: var(--emerald-800);">Week ' + slot.weekNumber + '</span>' +
-              '<span style="font-family: var(--font-mono); color: var(--slate-600);">' + dateUtils.formatDisplayWeekendRange(slot.saturdayDate, slot.sundayDate) + '</span>' +
+              '<span style="font-family: var(--font-mono); color: var(--slate-600);">' + displayRange + '</span>' +
               badges.join(' ') +
             '</div>' +
             '<span style="font-size: 13px; font-weight: 700; color: var(--slate-600);">' + slot.totalCrewHours + ' Crew Hours</span>' +
@@ -124,3 +131,5 @@ window.HortOpsPeakWeekends = {
     window.HortOpsApp.handleAutoStagger();
   }
 };
+
+})();

@@ -1,4 +1,4 @@
-# Overtime Planner Stage 3 agent instructions
+# Independent Overtime Planner agent instructions
 
 These instructions apply only to `overtime-planner-stage3/` and its descendants. Inherit the host repository's permanent branch reminder, Overtime transport policy and required `rtk` command wrapper. Current explicit owner instructions take precedence over historical process wording. Read `DEVELOPMENT_TRANSITION.md` before significant work, then the original constitution, current checkpoint and task-specific inherited contract material.
 
@@ -12,9 +12,9 @@ These instructions apply only to `overtime-planner-stage3/` and its descendants.
 
 ## Current phase and acceptance
 
-- Phase 5 implements isolated current-schema-only clean startup and cooperative single-writer controls. Read `MIGRATION_PHASE5_CHECKPOINT.md` before continuing. Existing historical compatibility files are outside the client source graph.
-- PR26_07 was rejected for Stage 3 release closure by Review 64. Stage 3 is open and authorised; next corrective candidate is PR26_08 and next independent review is Review 65. Stage 4 and new smart/automatic rostering algorithms are unauthorised.
-- The client starts with empty Workforce and Job registries and current Schema v2 only. Populate Workforce from its User Table and Jobs from client input. Namespace-bound storage and private lifetime-lock controls are implemented; no legacy data is adopted. Release acceptance and security remediation remain pending.
+- Phase 8 is closed and the corrected Stage 3 baseline accepted by explicit owner authority for transition to Stage 4. Stage 4B is implemented and verified locally; stop before Stage 4C until the owner resumes. Read `STAGE4B_CHECKPOINT.md`, `STAGE4_SMART_ROSTERING_BASELINE.md` and `CURRENT_REVIEW_STATUS.md`. Existing domain/form, current-only storage, colour security and historical protections remain in force.
+- PR26_07 was rejected by Review 64; corrected PR26_08 is the owner-accepted Stage 3 baseline. No independent Review 65 verdict or additional runtime certification is claimed. Stage 4B implements approved cross-team pools and bounded work patterns without a new allocation algorithm. Further increments require explicit resumption.
+- The client starts with empty Workforce and Job registries and current Schema v2 only. Populate Workforce from its User Table and Jobs from client input. Namespace-bound storage and private lifetime-lock controls are implemented; no legacy data is adopted. Owner acceptance is recorded; known runtime/compatibility boundaries remain explicit and are not expanded by acceptance.
 - Preserve Schema v2, frozen Stage 1/2 contracts, completed/published history, qualification/absence/fatigue protections, fail-closed persistence and offline runtime. Migration success does not mean release acceptance.
 - Maintain the independent regime: 24 retained suites (17 Stage 1 plus seven Stage 2), six separate Stage 3 gates, retained Review 55–64 probes and live browser proofs. Review 64 probes reproduce vulnerabilities; interpret their outcomes according to their original contracts rather than requiring post-fix exit zero.
 
@@ -23,7 +23,7 @@ These instructions apply only to `overtime-planner-stage3/` and its descendants.
 - Each authorised phase ends with a durable checkpoint reporting scope, changes, verification, unresolved issues and the exact next phase. Stop until the owner explicitly resumes; do not automatically begin later work.
 - Use agents only when requested or authorised. Assign bounded tasks and write ownership; agents cannot self-approve release closure or broaden the authorised phase.
 - Preserve original constitution and signed historical reviews byte-for-byte. Put relocation, current authority and process changes in current transition/checkpoint documents, citing affected inherited clauses rather than rewriting history.
-- Phase 5 is complete. Stop before Phase 6 until the owner explicitly resumes. Read `MIGRATION_PHASE5_CHECKPOINT.md`; no Stage 3 release acceptance or smart/automatic rostering work is authorised.
+- Stage 4B is authorised for cross-team pool catalogue/memberships, preferred/exclusive pool controls and weekly/public-holiday or one-to-four-day work patterns. Completed local verification is recorded in `STAGE4B_CHECKPOINT.md`; stop before Stage 4C until the owner resumes. Tagged candidates rank first using any-selected-tag union, with all current hard safety checks preserved. Optional missing fields mean empty; no migration/history rewriting or new allocation algorithm is authorised. Remaining fairness, fixed fallback and regular-hours policies remain explicit pending decisions. Developer self-approval of independent reviews remains prohibited.
 - Never generate peer-review ZIPs or evidence packages automatically. Create them locally only upon explicit owner request. Never publish those packages, historical evidence or raw results to GitHub.
 
 ## Git and publication

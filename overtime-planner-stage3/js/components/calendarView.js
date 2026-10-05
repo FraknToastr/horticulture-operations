@@ -1,3 +1,6 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
 // Monthly Operational Calendar View Component
 window.HortOpsCalendarView = {
   selectedMonth: (new Date().getMonth() + 1),
@@ -19,8 +22,13 @@ window.HortOpsCalendarView = {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
+    // A weekday pattern occurrence can belong to a different month than its Saturday bucket.
     var monthSlots = slots.filter(function(s) {
-      return s.month === self.selectedMonth;
+      return s.month === self.selectedMonth || s.shifts.some(function(sh) {
+        return sh.frequencyType === 'work_pattern' &&
+          Number(String(sh.date).slice(5, 7)) === self.selectedMonth &&
+          Number(String(sh.date).slice(0, 4)) === Number(state.currentYear);
+      });
     });
 
     var monthNav = '<div style="display: flex; gap: 0.25rem; flex-wrap: wrap; align-items: center;">' +
@@ -82,6 +90,10 @@ window.HortOpsCalendarView = {
         }
       });
       dayCols.sort(function(a, b) { return a.date.localeCompare(b.date); });
+      var patternRange = slot.shifts.some(function(sh) { return sh.frequencyType === 'work_pattern'; });
+      var displayRange = patternRange ?
+        dateUtils.formatDisplayDate(dayCols[0].date) + ' – ' + dateUtils.formatDisplayDate(dayCols[dayCols.length - 1].date) :
+        dateUtils.formatDisplayWeekendRange(slot.saturdayDate, slot.sundayDate);
 
       var dayColsHtml = dayCols.map(function(dCol) {
         var dayShifts = slot.shifts.filter(function(sh) { return sh.date === dCol.date; });
@@ -101,7 +113,7 @@ window.HortOpsCalendarView = {
             var durStr = (sh.durationHours !== undefined) ? (sh.durationHours + 'h') : '';
             var timeMeta = startStr && durStr ? (startStr + ' (' + durStr + ')') : (startStr || durStr);
 
-            return '<div style="border: 1px solid var(--slate-200); border-radius: 6px; padding: 0.65rem 0.75rem; background: #ffffff; border-left: 4px solid ' + escAttr(sh.color || '#10b981') + '; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" onclick="window.HortOpsApp.openStaffAssignModal(\'" + escAttr(sh.shiftId) + "\')">' +
+            return '<div style="border: 1px solid var(--slate-200); border-radius: 6px; padding: 0.65rem 0.75rem; background: #ffffff; border-left: 4px solid ' + escAttr(safeColor(sh.color, '#10b981')) + '; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" onclick="window.HortOpsApp.openStaffAssignModal(\'" + escAttr(sh.shiftId) + "\')">' +
               '<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">' +
                 '<span style="font-weight: 700; font-size: 12px; color: var(--slate-900); display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">' + esc(sh.jobName) + crewConflictBadge + '</span>' +
                 '<span class="badge ' + (isFull ? 'badge-emerald' : 'badge-amber') + '" style="font-size: 10px; flex-shrink: 0;">' + assignedCount + '/' + sh.crewSize + ' Crew</span>' +
@@ -136,7 +148,7 @@ window.HortOpsCalendarView = {
         '<div class="panel-header" style="background: ' + (isCurrentWeek ? '#f0fdf4' : 'var(--slate-100)') + ';">' +
           '<div style="display: flex; align-items: center; flex-wrap: wrap;">' +
             '<span style="font-weight: 800; color: var(--emerald-800); margin-right: 0.5rem;">Week ' + slot.weekNumber + '</span>' +
-            '<span style="font-family: var(--font-mono); color: var(--slate-600);">' + dateUtils.formatDisplayWeekendRange(slot.saturdayDate, slot.sundayDate) + '</span>' +
+            '<span style="font-family: var(--font-mono); color: var(--slate-600);">' + displayRange + '</span>' +
             currentWeekBadge +
             holidaysHtml +
           '</div>' +
@@ -163,3 +175,5 @@ window.HortOpsCalendarView = {
     window.HortOpsApp.renderCurrentView();
   }
 };
+
+})();

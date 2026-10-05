@@ -1,3 +1,7 @@
+(function() {
+// Imported colours never enter CSS/HTML without token validation.
+var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
+var colorWithAlpha = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.colorWithAlpha) || function() { return '#10b98155'; };
 // Forward Planner Matrix Renderer Sub-module
 // Renders the horizontal matrix body rows: grouped vacancies, department/team staff rows, and shift cards.
 // Offline17.1: Realigned vacancy denominator to totalShiftVacancies, removed staff-level Plant pill.
@@ -24,7 +28,7 @@ window.HortOpsForwardPlannerMatrix = {
       if (rowItem.type === 'vacancy') {
         var vacancy = rowItem.vacancy || rowItem;
         var shift = vacancy.shift;
-        var jobColor = shift.color || '#047857';
+        var jobColor = safeColor(shift.color, '#047857');
         var isSelected = self.selectedStaffId === vacancy.id;
         var tickHtml = isSelected ? '<span style="color: var(--emerald-600); font-weight: 800; margin-right: 4px;">✓</span>' : '';
         var locationStr = shift.locationDetails ? shift.locationDetails.split('/')[0].trim() : 'Adelaide';
@@ -51,7 +55,7 @@ window.HortOpsForwardPlannerMatrix = {
         var totalVac = vacancy.totalShiftVacancies || Math.max(1, (shift.crewSizeRequired || shift.crewSize || 1) - (shift.assignedStaffIds ? shift.assignedStaffIds.length : 0));
 
         var vacStickyHtml = '<td class="sticky-hierarchy-col" style="background-color: #ffffff; border-right: 1px solid var(--slate-200); padding: 0.2rem 0.35rem; vertical-align: middle;">' +
-          '<div class="unallocated-slot-card animate-subdued-flash" style="background-color: #ffffff; border: 2px dashed ' + escAttr(jobColor) + '; border-radius: 6px; padding: 0.2rem 0.5rem; display: flex; align-items: center; justify-content: space-between; gap: 0.45rem; width: 100%; box-sizing: border-box; height: 54px; min-height: 54px; max-height: 54px; --vacancy-glow: ' + escAttr(jobColor) + '55;" title="Unallocated Slot — ' + escAttr(shift.jobName) + '">' +
+                '<div class="unallocated-slot-card animate-subdued-flash" style="background-color: #ffffff; border: 2px dashed ' + escAttr(jobColor) + '; border-radius: 6px; padding: 0.2rem 0.5rem; display: flex; align-items: center; justify-content: space-between; gap: 0.45rem; width: 100%; box-sizing: border-box; height: 54px; min-height: 54px; max-height: 54px; --vacancy-glow: ' + escAttr(colorWithAlpha(jobColor, '55')) + ';" title="Unallocated Slot — ' + escAttr(shift.jobName) + '">' +
             '<div style="display: flex; align-items: center; gap: 0.45rem; overflow: hidden; flex: 1;">' +
               // Left: V1, V2... vacancy badge
               '<div style="width: 24px; height: 24px; min-width: 24px; border-radius: 50%; border: 1.5px solid ' + escAttr(jobColor) + '; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: ' + escAttr(jobColor) + '; flex-shrink: 0;">' +
@@ -194,7 +198,7 @@ window.HortOpsForwardPlannerMatrix = {
                   icons.render('alertTriangle', 'w-3.5 h-3.5') +
                 '</div>') : '';
 
-              return '<button class="shift-card-btn" style="background-color: ' + escAttr(sh.color || '#10b981') + '; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 0.3rem 0.5rem;" onclick="event.stopPropagation(); window.HortOpsApp.openStaffAssignModal(\'' + escAttr(sh.shiftId) + '\')">' +
+              return '<button class="shift-card-btn" style="background-color: ' + escAttr(safeColor(sh.color, '#10b981')) + '; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 0.3rem 0.5rem;" onclick="event.stopPropagation(); window.HortOpsApp.openStaffAssignModal(\'' + escAttr(sh.shiftId) + '\')">' +
                 '<div style="overflow: hidden; flex: 1; text-align: left;">' +
                   conflictBadge +
                   '<div class="shift-card-title">' + esc(sh.jobName) + '</div>' +
@@ -233,3 +237,5 @@ window.HortOpsForwardPlannerMatrix = {
 
 window.HortOpsForwardPlannerMatrix.renderMatrixBody = window.HortOpsForwardPlannerMatrix.renderTbody;
 window.HortOpsForwardPlannerRenderer = window.HortOpsForwardPlannerMatrix;
+
+})();
