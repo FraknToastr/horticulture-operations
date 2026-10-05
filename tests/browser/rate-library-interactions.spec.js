@@ -67,7 +67,10 @@ test("Rate Item headers sort full values accessibly and retain state through fil
 
   const editRow = frame.locator('[data-rate-item-row="RATE-SORT-003"]');
   await editRow.locator('[data-costing-edit-rate="RATE-SORT-003"]').click();
+  await expect(frame.locator('[data-costing-rate-dialog]')).toBeVisible();
   await expect(frame.locator('[data-costing-rate-form] [name="description"]')).toHaveValue("Sort target Alpha");
+  // These two rows share a description; the price confirms the selected rate.
+  await expect(frame.locator('[data-costing-rate-form] [name="unitRate"]')).toHaveValue("30");
   await frame.locator("[data-costing-rate-cancel]").first().click();
   await editRow.locator('[data-costing-add-rate="RATE-SORT-003"]').click();
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.some((line) => line.rateItemId === "RATE-SORT-003"))).toBe(true);

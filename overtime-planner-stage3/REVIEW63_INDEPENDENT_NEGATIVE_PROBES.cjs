@@ -1,0 +1,29 @@
+'use strict';
+/** Independent Review 63 probes: NO source modifications. Exit 1 on reproduced regression. */
+const assert=require('node:assert/strict'),path=require('node:path');
+const root=process.env.HORTOPS_ROOT;
+if (!root){console.error('Set HORTOPS_ROOT to extracted candidate root');process.exit(2)}
+global.window=global;
+const disk=new Map();let writes=0;
+global.localStorage={getItem:k=>disk.has(k)?disk.get(k):null,setItem:(k,v)=>{disk.set(k,String(v));writes++;},removeItem:k=>disk.delete(k),clear:()=>disk.clear(),key:i=>[...disk.keys()][i]||null,get length(){return disk.size}};
+for (const f of ['js/utils/storage/schemaValidator.js','js/utils/storage/migrationEngine.js','js/utils/storage/storageDriver.js','js/utils/storage.js','js/app.js']) require(path.join(root,f));
+const app=global.HortOpsApp,storage=global.HortOpsStorage;
+const copy=x=>JSON.parse(JSON.stringify(x));
+function fixture(){return {schemaVersion:2,jobs:[],roster:[{id:'S1',name:'Alex',status:'active',team:'Parks',qualifications:[{code:'WHITE_CARD',status:'active',issuedDate:'2025-01-01'}]}],assignments:{},rostering:{instructions:{},provenance:{}},historicalSnapshots:{},permits:{},budgetSettings:{annualTarget:1200,defaultStandardHoursPerShift:8},uiState:{activeView:'staff_registry',currentYear:2026,selectedDepartment:'horticulture',selectedTeam:'Parks',onlyPreferredCrew:true,searchTerm:'Alex'},absences:[{id:'A1',staffId:'S1',type:'rdo',startDate:'2026-10-10',endDate:'2026-10-10',notes:'original'}],refusalHistory:[{id:'R1',staffId:'S1',date:'2026-10-01',reason:'original'}]}}
+function reset(){disk.clear();writes=0;const fx=fixture();const v=global.HortOpsSchemaValidator.validateCurrentV2ForBoundary(fx);assert.equal(v.valid,true,`fixture invalid ${v.error}`);disk.set(storage.WORKSPACE_STORAGE_KEY,JSON.stringify(fx));global.HortOpsScheduler={DEFAULT_BUDGET_SETTINGS:{}};app.recomputeDigest=()=>{};app.renderCurrentView=()=>{};app.state={schemaVersion:2};app._autosaveBlocked=false;app._domainBaselines=undefined;app.init();return fx;}
+function stored(){return JSON.parse(disk.get(storage.WORKSPACE_STORAGE_KEY));}
+let passed=0, failed=0;
+function t(id,name,fn){try{fn();passed++;console.log('PASS',id,name)}catch(e){failed++;console.log('FAIL',id,name,'|',e.message)}}
+// Control: original targeted R62 protection remains sound.
+t('R63-C1','Untouched concurrent budget change is preserved during an absence edit',()=>{reset();const b=stored();const c=stored();c.budgetSettings.annualTarget=9000;disk.set(storage.WORKSPACE_STORAGE_KEY,JSON.stringify(c));const a=copy(b.absences);a[0].notes='changed';const r=app.saveAbsenceAndRefusalData(a,undefined,{baseAbsences:b.absences});assert.equal(r.success,true,JSON.stringify(r));assert.equal(stored().budgetSettings.annualTarget,9000);});
+// Review 63 negative 1: untouched uiState must not be truncated just by autosave.
+t('R63-01','Unrelated save does not destroy persisted UI filter properties',()=>{reset();const res=app.saveCurrentWorkspace();assert.equal(res,true);const u=stored().uiState;assert.equal(u.selectedDepartment,'horticulture',`uiState after save ${JSON.stringify(u)}`);assert.equal(u.selectedTeam,'Parks');assert.equal(u.searchTerm,'Alex');});
+// Review 63 negative 2: updating staff followed by saveCurrentWorkspace must be idempotent.
+t('R63-02','Successful qualification suspension survives subsequent ordinary workspace save',()=>{reset();app.setActiveView('forward_planner');const s=copy(app.state.staffList[0]);s.qualifications[0].status='suspended';const r=app.updateStaffMember(s);assert.equal(r.success,true,JSON.stringify(r));assert.equal(stored().roster[0].qualifications[0].status,'suspended');app.setActiveView('staff_registry');assert.equal(stored().roster[0].qualifications[0].status,'suspended');});
+// Review 63 negative 3: untouched UI changes from another tab should not block a safety ledger save.
+t('R63-03','Concurrent UI-only change does not spuriously block independent leave edit',()=>{reset();const base=stored();const ext=stored();ext.uiState.selectedTeam='CBD';disk.set(storage.WORKSPACE_STORAGE_KEY,JSON.stringify(ext));const next=copy(base.absences);next[0].notes='approved leave';const r=app.saveAbsenceAndRefusalData(next,undefined,{baseAbsences:base.absences});assert.equal(r.success,true,JSON.stringify(r));assert.equal(stored().uiState.selectedTeam,'CBD');assert.equal(stored().absences[0].notes,'approved leave');});
+// Review 63 negative 4: repeated save must be stable even when another tab changed roster (R62 fix).
+t('R63-04','Consecutive independent leave saves preserve concurrent staff departure',()=>{reset();const base=stored();const ext=stored();ext.roster[0].status='departed';disk.set(storage.WORKSPACE_STORAGE_KEY,JSON.stringify(ext));const a=copy(base.absences);a[0].notes='first';const r1=app.saveAbsenceAndRefusalData(a,undefined,{baseAbsences:base.absences});assert.equal(r1.success,true,JSON.stringify(r1));assert.equal(stored().roster[0].status,'departed');const b=copy(a);b[0].notes='second';const r2=app.saveAbsenceAndRefusalData(b,undefined,{baseAbsences:a});assert.equal(r2.success,true,JSON.stringify(r2));assert.equal(stored().roster[0].status,'departed');assert.equal(stored().absences[0].notes,'second');});
+t('R63-05','Successfully saved shift permit must survive a subsequent navigation autosave',()=>{reset();app.setActiveView('forward_planner');const r=app.updatePermit('SHIFT-1',{notes:'Safety permit retained'});assert.equal(r.success,true,JSON.stringify(r));assert.equal(stored().permits['SHIFT-1']?.notes,'Safety permit retained','permit not saved on initial update');app.setActiveView('staff_registry');assert.equal(stored().permits['SHIFT-1']?.notes,'Safety permit retained','permit lost on navigation autosave');});
+console.log(`REVIEW63 INDEPENDENT: ${passed} PASS / ${failed} FAIL / ${passed+failed} ASSERTIONS`);
+process.exitCode=failed?1:0;

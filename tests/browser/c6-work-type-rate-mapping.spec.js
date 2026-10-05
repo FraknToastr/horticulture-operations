@@ -247,6 +247,9 @@ test("C6-BR-DUAL-02: Editing a manual Rate into a dual-path Rate preserves one r
   await expect(row.locator(`[data-costing-add-rate="${rateId}"]`)).not.toHaveClass(/program-rate-btn--map/);
   await row.locator(`[data-costing-edit-rate="${rateId}"]`).click();
   const form = frame.locator('[data-costing-rate-form]');
+  await expect(frame.locator('[data-costing-rate-dialog]')).toBeVisible();
+  await expect(form.locator('[name="description"]')).toHaveValue("C6 Topdressing Pair");
+  await expect(form.locator('[name="unitRate"]')).toHaveValue("8");
   await form.locator('[name="spatialEnabled"]').check();
   await form.locator('[name="workTypeKey"]').selectOption("topdressing");
   await form.locator('[data-costing-rate-submit]').click();

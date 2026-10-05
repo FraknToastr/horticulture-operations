@@ -1,3 +1,16 @@
 /node_modules/
 /test-results/
 /playwright-report/
+
+# Overtime local migration review and history are not GitHub transport files.
+/Offline/Overtime Stage3 Migration Review/
+/overtime-planner-stage3/history/
+/overtime-planner-stage3/test_reports/
+/overtime-planner-stage3/node_modules/
+/overtime-planner-stage3/test-results/
+/overtime-planner-stage3/playwright-report/
+/overtime-planner-stage3/**/*.zip
+/overtime-planner-stage3/**/*.sha256
+/overtime-planner-stage3/**/*.sha512
+/overtime-planner-stage3/**/SHA256SUMS*
+/overtime-planner-stage3/**/SHA512SUMS*

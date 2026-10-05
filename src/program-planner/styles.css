@@ -11460,8 +11460,10 @@ html .program-scheduler-detail > .program-scheduler-inspector__head {border-bott
 
 /* Table truncation must not cut off the focused editor's outside ring. */
 .program-quote-builder-table td:focus-within,
-.program-calculator-table td:focus-within,
-.program-cost-table td:focus-within {overflow:visible!important;position:relative;z-index:1;}
+.program-calculator-table td:focus-within {overflow:visible!important;position:relative;z-index:1;}
+.program-cost-table td:focus-within {overflow:visible!important;}
+/* Keep focused action buttons anchored while the library scrolls horizontally. */
+.program-cost-table td:last-child:focus-within {position:sticky;right:0;z-index:2;}
 
 .program-quote-preview-toolbar {flex-wrap:wrap;gap:8px;}
 .program-quote-preview-toolbar > div:first-child {flex-wrap:wrap;}

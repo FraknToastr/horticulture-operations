@@ -32,7 +32,9 @@ test('individual additions, flag settings, exact Scheduler navigation and calend
   const errors = []; page.on('pageerror', e => errors.push(e.stack));
   const { child, frame, projectId } = await setup(page);
   const add = frame.locator('[data-costing-add-rate="RATE-BROWSER-LABOUR"]');
-  await add.click(); await add.click();
+  await add.click();
+  await expect.poll(() => child.evaluate(id => UOS.ProgramApp.workspace().entities.costingLines.filter(l => l.projectId === id).length, projectId)).toBe(1);
+  await add.click();
   await expect.poll(() => child.evaluate(id => UOS.ProgramApp.workspace().entities.costingLines.filter(l => l.projectId === id).length, projectId)).toBe(2);
   const lines = await child.evaluate(id => UOS.ProgramApp.workspace().entities.costingLines.filter(l => l.projectId === id), projectId);
   expect(errors).toEqual([]);
@@ -73,10 +75,13 @@ test('individual additions, flag settings, exact Scheduler navigation and calend
   const frameHeight = await info.evaluate(el => parseFloat(getComputedStyle(el.closest('table')).getPropertyValue('--commercial-frame-height')));
   expect(dimensions).toEqual([frameHeight, frameHeight]);
   await frame.locator('[data-costing-edit-rate="RATE-BROWSER-LABOUR"]').click();
+  await expect(frame.locator('[data-costing-rate-dialog]')).toBeVisible();
+  await expect(frame.locator('[data-costing-rate-form] [name="description"]')).toHaveValue('RATE-BROWSER-LABOUR');
   const flag = frame.locator('[data-costing-rate-form] [name="schedulerEnabled"]');
   await expect(flag).toBeChecked();
   await flag.uncheck();
   await frame.locator('[data-costing-rate-submit]').click();
+  await expect(frame.locator('[data-costing-rate-dialog]')).not.toBeVisible();
   await expect(info).toHaveCount(0);
   await expect.poll(() => child.evaluate(() => UOS.ProgramApp.workspace().entities.rateItems.find(r => r.id === 'RATE-BROWSER-LABOUR').schedulerEnabled)).toBe(false);
   await add.click();
@@ -88,6 +93,35 @@ test('individual additions, flag settings, exact Scheduler navigation and calend
   const reloaded = page.frames().find(f => f !== page.mainFrame());
   await reloaded.waitForFunction(() => UOS.ProgramApp?.snapshot().phase === 'ready');
   expect(await reloaded.evaluate(id => UOS.ProgramApp.workspace().entities.costingLines.filter(l => l.projectId === id).length, projectId)).toBe(3);
+});
+
+test('rapid repeated additions create separate work with reciprocal job links and survive reload', async ({ page }) => {
+  const { child, frame, projectId } = await setup(page);
+  const add = frame.locator('[data-costing-add-rate="RATE-BROWSER-LABOUR"]');
+  // No saved-state wait between clicks: each intentional activation must be retained.
+  await add.click();
+  await add.click();
+  await expect.poll(() => child.evaluate(id => UOS.ProgramApp.workspace().entities.costingLines.filter(line => line.projectId === id).length, projectId)).toBe(2);
+  const state = await child.evaluate(id => {
+    const workspace = UOS.ProgramApp.workspace();
+    const lines = workspace.entities.costingLines.filter(line => line.projectId === id);
+    return {
+      lineIds: lines.map(line => line.id),
+      operationIds: lines.map(line => line.operationId),
+      jobIds: lines.map(line => line.jobId),
+      reciprocal: lines.every(line => workspace.entities.jobs.some(job => job.id === line.jobId && job.sourceCostingLineId === line.id && job.sourceIdentity === line.sourceIdentity)),
+    };
+  }, projectId);
+  for (const key of ['lineIds', 'operationIds', 'jobIds']) {
+    expect(state[key].every(Boolean)).toBe(true);
+    expect(new Set(state[key]).size).toBe(2);
+  }
+  expect(state.reciprocal).toBe(true);
+  await page.reload();
+  const reloaded = page.frames().find(f => f !== page.mainFrame());
+  await reloaded.waitForFunction(() => UOS.ProgramApp?.snapshot().phase === 'ready');
+  const restored = await reloaded.evaluate(id => UOS.ProgramApp.workspace().entities.costingLines.filter(line => line.projectId === id).map(line => ({ id: line.id, jobId: line.jobId })), projectId);
+  expect(restored).toEqual(state.lineIds.map((id, index) => ({ id, jobId: state.jobIds[index] })));
 });
 
 test('job deletion defaults to retaining the line and deliberately recreates one draft', async ({ page }) => {
