@@ -1,0 +1,37 @@
+/* A full civil day remains visible for around-the-clock depot operations. */
+.program-scheduler-calendar>.program-scheduler-head{flex:0 0 auto;position:relative;z-index:30}
+.program-scheduler-calendar>.program-calendar-scroll{isolation:isolate;min-width:0}
+.program-calendar.program-calendar--week{display:block;min-width:1036px;background:var(--panel-bg,#fff);overflow:visible}
+.scheduler-week-head,.scheduler-week-body{display:grid;grid-template-columns:56px repeat(7,minmax(140px,1fr));gap:0}
+.scheduler-week-head{position:sticky;top:0;z-index:20;background:var(--panel-bg,#fff);border-bottom:1px solid var(--panel-border,#dbe3ea)}
+.scheduler-week-head .program-calendar__weekday{position:static;padding:10px 6px;text-align:center;border-right:1px solid var(--panel-border,#dbe3ea);font-size:11px;min-width:0}
+.scheduler-week-head .program-calendar__date{margin:4px 0 0;font-size:16px}
+.scheduler-week-head .is-today{box-shadow:inset 0 3px 0 var(--uos-brand)}
+.scheduler-week-corner,.scheduler-week-all-day-label{position:sticky;left:0;background:var(--panel-bg,#fff);z-index:22;font-size:10px;color:var(--uos-text-muted);padding:10px 4px}
+.scheduler-week-all-day-label{grid-column:1;display:flex;align-items:center;font-weight:800}
+.scheduler-week-all-day{padding:4px;border-right:1px solid var(--panel-border,#dbe3ea);min-width:0;min-height:38px}
+.scheduler-week-all-day .program-calendar-job{margin:2px 0}
+.scheduler-week-body{height:1152px;position:relative;margin-bottom:20px}
+.scheduler-week-gutter{position:sticky;left:0;z-index:10;height:1152px;background:var(--panel-bg,#fff);border-right:1px solid var(--panel-border,#dbe3ea)}
+.scheduler-week-hour-label{position:absolute;left:0;right:0;height:16px;padding:2px 4px;font-size:10px;font-weight:700;color:var(--uos-text-muted);background:var(--panel-bg,#fff);line-height:12px}
+.program-calendar--week .program-calendar__day.scheduler-week-day{position:relative;height:1152px;min-height:0;padding:0;border-right:1px solid var(--panel-border,#dbe3ea);box-sizing:border-box;overflow:visible}
+.scheduler-week-hour{height:48px;box-sizing:border-box;border-top:1px solid var(--panel-border,#dbe3ea);background:linear-gradient(to bottom,transparent 23px,color-mix(in srgb,var(--panel-border,#dbe3ea) 45%,transparent) 23px,color-mix(in srgb,var(--panel-border,#dbe3ea) 45%,transparent) 24px,transparent 24px)}
+.scheduler-week-hour:last-of-type{border-bottom:1px solid var(--panel-border,#dbe3ea)}
+.program-calendar-job.scheduler-week-job{position:absolute;box-sizing:border-box;margin:0!important;min-height:0!important;min-width:0;padding:2px 4px!important;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;font-size:11px;line-height:14px;border-radius:4px}
+/* Marching ants need a positioned card, while timed cards must stay in their slot. */
+.program-calendar.program-calendar--week .program-calendar-job.scheduler-week-job{position:absolute}
+.scheduler-week-job .program-calendar-job__title{display:block;width:100%;flex:0 0 auto}
+.scheduler-week-job .program-calendar-job__time{font-size:10px;white-space:nowrap;display:block;flex:0 0 auto;color:inherit;opacity:.9}
+.scheduler-week-job.is-short .program-calendar-job__time{display:none}
+.program-calendar-job.scheduler-week-job.is-short{padding-block:0!important;border-block-width:0}
+.scheduler-week-job:focus-visible{z-index:12;outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:-2px}
+.program-scheduler-export-action{display:flex;justify-content:center;margin-top:12px}
+.scheduler-outlook-options{display:grid;gap:14px}
+.scheduler-outlook-options p{margin:0;line-height:1.5}
+.scheduler-outlook-times{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scheduler-outlook-times[hidden]{display:none}
+.scheduler-outlook-options label{display:grid;gap:6px}
+.scheduler-outlook-options input,.scheduler-outlook-options select{min-width:0;width:100%;box-sizing:border-box;min-height:36px;border:1px solid var(--uos-border);border-radius:6px;padding:6px 8px;background:var(--uos-surface,#fff);color:var(--uos-text)}
+.scheduler-outlook-options [role=alert]{color:var(--uos-danger,#b91c1c)}
+.scheduler-outlook-options button{justify-self:end}
+@media(max-width:480px){.scheduler-outlook-times{grid-template-columns:1fr}}

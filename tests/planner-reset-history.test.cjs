@@ -4,11 +4,12 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 function fixture(owner) {
-  const context = { console, structuredClone, TextEncoder, TextDecoder, URLSearchParams, setTimeout, clearTimeout };
+  const context = { console, structuredClone, TextEncoder, TextDecoder, Uint8Array, DataView, ArrayBuffer, DecompressionStream, crypto, URL, URLSearchParams, setTimeout, clearTimeout, document: { currentScript: { src: 'https://example.test/src/shared/js/imports.js' } } };
   context.window = context;
-  context.UOS = { ProgramAppConfig: { current: () => ({ appId: `uos.horticulture.${owner.toLowerCase()}`, workspaceKind: owner, owner }) } };
+  context.UOS = { ProgramAppConfig: { current: () => ({ appId: `uos.horticulture.${owner === 'NSA' ? 'nsa' : 'events'}`, workspaceKind: owner, owner }) } };
   vm.createContext(context);
-  for (const file of ['status.js', 'default-rate-catalog.js', 'model.js', 'status-model.js', 'planner-model.js']) {
+  vm.runInContext(fs.readFileSync('src/shared/js/imports.js', 'utf8'), context, { filename: 'imports.js' });
+  for (const file of ['status.js', 'default-rate-catalog.js', 'model.js', 'status-model.js', 'planner-model.js', 'data-workspace.js']) {
     vm.runInContext(fs.readFileSync(`src/program-planner/js/${file}`, 'utf8'), context, { filename: file });
   }
   const { ProgramModel: model, ProgramPlannerModel: planner, ProgramStatus: status } = context.UOS;
@@ -17,12 +18,12 @@ function fixture(owner) {
   initial.entities[owner === 'NSA' ? 'applications' : 'events'].push(record);
   const promoted = model.promoteRegisterRecord(initial, record.id);
   const workspace = status.migrate(promoted.workspace);
-  return { model, planner, status, workspace, projectId: promoted.project.id, task: workspace.entities.tasks.find(task => task.projectId === promoted.project.id) };
+  return { model, planner, status, data: context.UOS.ProgramData, workspace, projectId: promoted.project.id, task: workspace.entities.tasks.find(task => task.projectId === promoted.project.id) };
 }
 
 for (const owner of ['NSA', 'EVT']) {
   test(`${owner}: backward reasons and reset history survive round trip and do not count as work`, () => {
-    const { model, planner, status, workspace, projectId, task } = fixture(owner);
+    const { model, planner, status, data, workspace, projectId, task } = fixture(owner);
     const changed = status.reconcileMutation(workspace, planner.saveTask(workspace, projectId, task.id, { ...task, status: 'In Progress', notes: 'Changed', title: 'Edited' }).workspace, { actor: 'Officer' });
     assert.throws(() => planner.resetTask(changed, projectId, task.id, {}, { actor: 'Officer' }), /reason/);
     const before = JSON.stringify(changed);
@@ -38,6 +39,11 @@ for (const owner of ['NSA', 'EVT']) {
     assert.equal(restored.plannerHistoryVisible, true);
     assert.equal(restored.plannerResetEvents[0].reason, 'Work did not start');
     assert.equal(restored.plannerResetEvents[0].actor, 'Officer');
+    assert.equal(restored.plannerResetEvents[0].taskTitle, 'Edited');
+    assert.equal(restored.plannerResetEvents[0].restoredTaskTitle, task.title);
+    for (const backup of [model.normalize(JSON.parse(data.exportJson(saved, owner))), data.importBundle(data.exportBundle(saved, owner), null, { expectedApp: owner })]) {
+      assert.deepEqual(JSON.parse(JSON.stringify(backup.entities.tasks.find(item => item.id === task.id).plannerResetEvents)), JSON.parse(JSON.stringify(restored.plannerResetEvents)));
+    }
     assert.equal(planner.taskState(reloaded, restored).hasWork, false);
     assert.ok(reloaded.entities.statusEvents.some(event => event.entityId === task.id && event.fromStatus === 'in_progress' && event.toStatus === 'not_started' && event.reason === 'Work did not start'));
     const resetAgain = planner.resetTask(reloaded, projectId, task.id, {}, { actor: 'Officer' });
@@ -86,5 +92,43 @@ for (const owner of ['NSA', 'EVT']) {
       delivery.entities.jobs.find(item => item.id === draft.job.id).status = status;
       assert.throws(() => planner.resetTask(delivery, projectId, task.id, {}, { actor: 'Officer', deleteLinkedJob: true }), /delivery history/);
     }
+  });
+}
+
+for (const owner of ['NSA', 'EVT']) {
+  test(`${owner}: title snapshots are immutable metadata, round-trip through backups and preserve legacy history`, () => {
+    const { model, planner, status, data, workspace, projectId, task } = fixture(owner);
+    const legacy = JSON.stringify(workspace.entities.statusEvents);
+    const created = planner.saveTask(workspace, projectId, null, { title: 'Original <task> & work', description: 'Named audit test', section: task.section, operational: false, status: 'Not Started' });
+    const established = status.reconcileMutation(workspace, created.workspace, { actor: 'Officer', at: '2026-10-05T01:00:00Z' });
+    const initial = established.entities.statusEvents.find(event => event.entityId === created.task.id);
+    assert.equal(initial.taskTitle, 'Original <task> & work');
+    const changed = planner.saveTask(established, projectId, created.task.id, { ...created.task, title: 'Renamed during transition', status: 'In Progress' });
+    const advanced = status.reconcileMutation(established, changed.workspace, { actor: 'Officer', at: '2026-10-05T02:00:00Z' });
+    const event = advanced.entities.statusEvents.find(event => event.entityId === created.task.id && event.toStatus === 'in_progress');
+    assert.equal(event.taskTitle, 'Renamed during transition');
+    const count = advanced.entities.statusEvents.length;
+    const renamed = planner.saveTask(advanced, projectId, created.task.id, { ...changed.task, status: 'In Progress', title: 'Current task name' });
+    const saved = status.reconcileMutation(advanced, renamed.workspace, { actor: 'Officer', at: '2026-10-05T03:00:00Z' });
+    assert.equal(saved.entities.statusEvents.length, count, 'rename alone adds no status event');
+    assert.equal(saved.entities.statusEvents.find(item => item.id === event.id).taskTitle, 'Renamed during transition');
+    assert.equal(JSON.stringify(saved.entities.statusEvents.filter(event => event.entityId !== created.task.id)), legacy);
+    const noOp = status.transition(saved, { entityId: created.task.id, entityType: 'task', to: 'in_progress', actor: 'Officer', at: '2026-10-05T02:00:00Z' });
+    assert.equal(noOp.entities.statusEvents.length, count);
+    for (const restored of [model.normalize(JSON.parse(JSON.stringify(saved))), model.normalize(JSON.parse(data.exportJson(saved, owner))), data.importBundle(data.exportBundle(saved, owner), null, { expectedApp: owner })]) {
+      const ordered = events => JSON.parse(JSON.stringify(events)).sort((a, b) => a.id.localeCompare(b.id));
+      assert.deepEqual(ordered(restored.entities.statusEvents), ordered(saved.entities.statusEvents));
+      assert.equal(restored.schemaVersion, saved.schemaVersion);
+    }
+    const duplicate = planner.duplicateTasks(saved, projectId, [created.task.id]);
+    const copied = status.reconcileMutation(saved, duplicate.workspace, { actor: 'Officer', at: '2026-10-05T04:00:00Z' });
+    const ownEvents = copied.entities.statusEvents.filter(event => event.entityId === duplicate.tasks[0].id);
+    assert.equal(ownEvents.length, 1);
+    assert.equal(ownEvents[0].taskTitle, duplicate.tasks[0].title);
+    assert.equal(duplicate.tasks[0].plannerResetEvents, undefined);
+    const historical = JSON.parse(JSON.stringify(saved));
+    historical.entities.statusEvents.forEach(entry => { delete entry.taskTitle; });
+    const before = JSON.stringify(historical.entities.statusEvents);
+    assert.equal(JSON.stringify(status.migrate(model.normalize(historical)).entities.statusEvents), before, 'load/migration does not invent historical names');
   });
 }

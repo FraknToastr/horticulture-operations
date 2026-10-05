@@ -71,6 +71,8 @@
 
   function ensureVisible(card, options) {
     if (!card || card.isConnected === false || typeof card.getBoundingClientRect !== "function") return false;
+    // Selecting a job in the sidebar must not move the 24-hour calendar viewport.
+    if (card.matches && card.matches(".program-calendar-job") && card.closest(".program-calendar--week")) return false;
     var scroller = options && options.scroller || nearestScroller(card);
     if (!scroller || typeof scroller.getBoundingClientRect !== "function") return false;
 

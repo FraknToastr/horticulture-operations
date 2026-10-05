@@ -211,10 +211,64 @@
     button.appendChild(name);
     return button;
   }
+  function renderWeek(calendar, days, conflicts) {
+    var head = document.createElement("div"); head.className = "scheduler-week-head";
+    var corner = document.createElement("div"); corner.className = "scheduler-week-corner"; corner.textContent = "Adelaide"; head.appendChild(corner);
+    days.forEach(function (entry, index) {
+      var day = document.createElement("div"); day.className = "program-calendar__weekday" + (entry.date === today() ? " is-today" : "");
+      day.textContent = weekdays[index];
+      var date = document.createElement("time"); date.className = "program-calendar__date"; date.dateTime = entry.date; date.textContent = String(Number(entry.date.slice(8))); day.appendChild(date); head.appendChild(day);
+    });
+    var allDayLabel = document.createElement("div"); allDayLabel.className = "scheduler-week-all-day-label"; allDayLabel.textContent = "All day"; head.appendChild(allDayLabel);
+    days.forEach(function (entry) {
+      var band = document.createElement("div"); band.className = "scheduler-week-all-day"; band.setAttribute("data-scheduler-all-day-date", entry.date); band.setAttribute("aria-label", "All-day jobs for " + entry.date);
+      jobsForDay(entry.date).filter(function (job) { return job.allDay; }).forEach(function (job) { band.appendChild(calendarJob(job, conflicts)); }); head.appendChild(band);
+    }); calendar.appendChild(head);
+    var body = document.createElement("div"); body.className = "scheduler-week-body";
+    var gutter = document.createElement("div"); gutter.className = "scheduler-week-gutter";
+    for (var hour = 0; hour <= 24; hour++) {
+      var label = document.createElement("span"); label.className = "scheduler-week-hour-label"; label.style.top = hour * 48 + "px"; label.textContent = String(hour).padStart(2, "0") + ":00"; gutter.appendChild(label);
+    } body.appendChild(gutter);
+    var activeProject = getProjectsForActiveOwner().find(function (project) { return project.id === state.selectedProjectId; });
+    days.forEach(function (entry) {
+      var segments = UOS.SchedulerCalendarTools.daySegments(state.calendarVisible, entry.date);
+      var activeDelivery = activeProject && jobsForDay(entry.date).some(function (job) { return isJobInProject(job, activeProject) && ["draft", "scheduled"].indexOf(text(job.status).toLowerCase()) >= 0; });
+      var day = document.createElement("section"); day.className = "program-calendar__day scheduler-week-day" + (entry.date === today() ? " is-today" : "") + (activeDelivery ? " is-active-project-day" : "");
+      day.setAttribute("data-scheduler-date", entry.date); day.setAttribute("aria-label", "Timed jobs for " + entry.date);
+      if (activeDelivery) day.setAttribute("data-active-project-day", "true");
+      for (var hour = 0; hour < 24; hour++) {
+        var cell = document.createElement("div"); cell.className = "scheduler-week-hour"; cell.setAttribute("data-scheduler-hour", String(hour)); cell.setAttribute("aria-hidden", "true"); day.appendChild(cell);
+      }
+      segments.forEach(function (segment) {
+        var card = calendarJob(segment.job, conflicts); card.classList.add("scheduler-week-job");
+        if (segment.end - segment.start < 45) card.classList.add("is-short");
+        card.style.top = segment.start / 1440 * 100 + "%"; card.style.height = (segment.end - segment.start) / 1440 * 100 + "%";
+        card.style.left = "calc(" + segment.lane / segment.lanes * 100 + "% + 2px)"; card.style.width = "calc(" + 100 / segment.lanes + "% - 4px)";
+        var continuation = (segment.continuesBefore ? "Continued from previous day. " : "") + (segment.continuesAfter ? "Continues next day. " : "");
+        card.title = continuation + card.title; card.setAttribute("aria-label", continuation + card.getAttribute("aria-label"));
+        if (continuation) card.querySelector(".program-calendar-job__title").textContent = (segment.continuesBefore ? "← " : "") + title(segment.job) + (segment.continuesAfter ? " →" : "");
+        var time = document.createElement("span"); time.className = "program-calendar-job__time"; time.textContent = timeLabel(segment.job); card.appendChild(time); day.appendChild(card);
+      }); body.appendChild(day);
+    }); calendar.appendChild(body);
+  }
   function renderCalendar(conflicts) {
     var calendar = one("[data-scheduler-calendar]"); if (!calendar) return;
+    var scroller = calendar.closest(".program-calendar-scroll");
+    var scrollTop = state.calendarRenderedMode === state.mode && scroller ? (scroller.scrollTop || state.calendarScrollTop || 0) : 0;
+    state.calendarRendering = true;
+    var scrollLeft = scroller ? scroller.scrollLeft : 0;
     var days = periodDays(); while (calendar.firstChild) calendar.removeChild(calendar.firstChild);
     calendar.className = "program-calendar program-calendar--" + state.mode;
+    if (state.mode === "week") {
+      renderWeek(calendar, days, conflicts);
+      var period = one("[data-scheduler-period]"); if (period) period.textContent = periodLabel(days);
+      state.calendarRenderedMode = state.mode;
+      if (scroller) { scroller.scrollTop = scrollTop; scroller.scrollLeft = scrollLeft; }
+      state.calendarScrollTop = scrollTop;
+      requestAnimationFrame(function () { if (scroller && state.mode === "week") { scroller.scrollTop = state.calendarScrollTop || 0; } state.calendarRendering = false; });
+      return;
+    }
+    state.calendarRenderedMode = state.mode; state.calendarScrollTop = 0; state.calendarRendering = false;
     weekdays.forEach(function (label) { var node = document.createElement("div"); node.className = "program-calendar__weekday"; node.textContent = label; calendar.appendChild(node); });
  var activeProject = getProjectsForActiveOwner().find(function (project) { return project.id === state.selectedProjectId; });
  days.forEach(function (entry) {
@@ -805,7 +859,8 @@ function updatePillPicker() {
   function movePeriod(direction) { var cursor = state.cursor || today(); var next = state.mode === "month" ? addMonths(cursor, direction) : model().addDays(cursor, direction * 7); return persist(function (scheduler, workspace) { scheduler.cursor = next; workspace.calendarCursor = next; }); }
   function setFilter(name, value) { return persist(function (scheduler) { scheduler.filters = scheduler.filters || {}; scheduler.filters[name] = value === "all" ? [] : [value]; }); }
   function setSort(value) { return persist(function (scheduler) { scheduler.sort = ["priority", "id"].indexOf(value) >= 0 ? value : "date"; }); }
-  function saveSchedule(form) {
+  function saveSchedule(form, propagateError) {
+    var selectedId = state.selectedId;
     var values = new FormData(form);
     var startTimeVal = text(values.get("startTime"));
     var endTimeVal = text(values.get("endTime"));
@@ -824,8 +879,8 @@ function updatePillPicker() {
     };
     var errorNode = one("[data-scheduler-form-error]");
     return UOS.ProgramApp.updateWorkspace(function (workspace) {
-      var next = model().scheduleJob(workspace, state.selectedId, changes);
-      var plannerJob = next.entities.jobs.find(function (item) { return item.id === state.selectedId && item.sourceKind === "planner"; });
+      var next = model().scheduleJob(workspace, selectedId, changes);
+      var plannerJob = next.entities.jobs.find(function (item) { return item.id === selectedId && item.sourceKind === "planner"; });
       if (plannerJob) {
         var plannerTask = next.entities.tasks.find(function (item) { return item.id === plannerJob.sourceEntityId; });
         if (plannerTask) {
@@ -836,18 +891,68 @@ function updatePillPicker() {
       }
       next.workspace = next.workspace || {};
       next.workspace.scheduler = next.workspace.scheduler || {};
-      next.workspace.scheduler.selectedId = state.selectedId;
+      next.workspace.scheduler.selectedId = selectedId;
       next.workspace.scheduler.detail = true;
       next.workspace.scheduler.inspectorMode = "detail";
       return next;
     }, { source: "automatic", command: "Planner Job scheduled" }).then(function () {
       if (UOS.toast) UOS.toast("Schedule updated successfully.", "success");
+      return UOS.ProgramApp.workspace().entities.jobs.find(function (job) { return job.id === selectedId; });
     }).catch(function (error) {
       if (errorNode) {
         errorNode.textContent = error.message;
         errorNode.hidden = false;
       }
+      if (propagateError) throw error;
       return null;
+    });
+  }
+  function createOutlookFile() {
+    var form = one("[data-scheduler-form]");
+    var job = state.jobs.find(function (item) { return item.id === state.selectedId; });
+    if (!form || !job || !state.detail || !UOS.dialogs) return;
+    var node = document.createElement("form"); node.className = "scheduler-outlook-options"; node.setAttribute("data-scheduler-outlook-form", ""); node.noValidate = true;
+    node.innerHTML = '<p><strong>' + esc(title(job)) + '</strong><br>' + esc(form.elements.startDate.value || "No start date") + ' – ' + esc(form.elements.sameDay.checked ? form.elements.startDate.value : form.elements.endDate.value) + '<br>Time zone: Australia/Adelaide</p>' +
+      '<label data-outlook-mode-field><span>Calendar event</span><select name="eventMode"><option value="allDay">Keep all day</option><option value="timed">Add start/end times</option></select></label>' +
+      '<div class="scheduler-outlook-times" data-outlook-times><label><span>Start time</span><input type="time" name="exportStartTime" required></label><label><span>End time</span><input type="time" name="exportEndTime" required></label></div>' +
+      '<p>Save and download saves all current schedule changes. A nominated job can also update application status through the existing scheduling rules.</p><p data-outlook-dst hidden></p><p role="alert" data-outlook-error hidden></p><button type="submit" class="uos-button uos-button--primary" data-outlook-download>Save and download</button>';
+    var mode = node.elements.eventMode, start = node.elements.exportStartTime, end = node.elements.exportEndTime;
+    mode.value = form.elements.allDay.checked ? "allDay" : "timed";
+    node.querySelector("[data-outlook-mode-field]").hidden = !form.elements.allDay.checked;
+    start.value = form.elements.allDay.checked ? "" : form.elements.startTime.value;
+    end.value = form.elements.allDay.checked ? "" : form.elements.endTime.value;
+    function candidate() { return Object.assign({}, job, { startDate: form.elements.startDate.value, endDate: form.elements.sameDay.checked ? form.elements.startDate.value : form.elements.endDate.value, allDay: mode.value === "allDay", startTime: start.value, endTime: end.value }); }
+    function preview() {
+      var timed = mode.value === "timed"; node.querySelector("[data-outlook-times]").hidden = !timed;
+      start.disabled = end.disabled = !timed;
+      var notice = node.querySelector("[data-outlook-dst]"); notice.hidden = true;
+      try { if (UOS.SchedulerCalendarTools.validate(candidate()).ambiguous) { notice.textContent = "This time occurs twice when daylight saving ends. The earlier occurrence will be used."; notice.hidden = false; } } catch (error) { /* Validation appears on confirmation. */ }
+    }
+    node.addEventListener("input", preview); node.addEventListener("change", preview); preview();
+    UOS.dialogs.open({ title: "Create Outlook file", node: node, modalClass: "scheduler-outlook-dialog", actions: [{ label: "Cancel", value: false }] });
+    var backdrop = node.closest(".uos-modal-backdrop");
+    node.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      var submit = node.querySelector("[data-outlook-download]"), errorNode = node.querySelector("[data-outlook-error]");
+      if (submit.disabled) return;
+      errorNode.hidden = true;
+      try {
+        var proposed = candidate(); UOS.SchedulerCalendarTools.validate(proposed);
+        if (state.selectedId !== job.id) throw new Error("The selected job changed. Close this modal and try again.");
+        form.elements.allDay.checked = proposed.allDay;
+        form.elements.startTime.value = proposed.allDay ? "" : proposed.startTime;
+        form.elements.endTime.value = proposed.allDay ? "" : proposed.endTime;
+        syncScheduleDateControls(form); captureEditorDraft();
+        submit.disabled = true; submit.textContent = "Saving…";
+        var saved = await saveSchedule(form, true);
+        var privacy = UOS.ProgramPrivacy;
+        var file = UOS.SchedulerCalendarTools.outlookFile(saved, { includeLocation: !(privacy && privacy.isEnabled()) });
+        UOS.imports.download(file.filename, file.contents, "text/calendar;charset=utf-8");
+        UOS.dialogs.close(backdrop, true);
+      } catch (error) {
+        errorNode.textContent = error.message || "Could not save and create the Outlook file."; errorNode.hidden = false;
+        submit.disabled = false; submit.textContent = "Save and download";
+      }
     });
   }
   function deleteSelectedJob() {
@@ -887,6 +992,7 @@ function updatePillPicker() {
     });
   }
   function onClick(event) {
+    if (event.target.closest("[data-scheduler-outlook]")) { createOutlookFile(); return; }
     var calendarScope = event.target.closest("[data-scheduler-calendar-scope]");
     if (calendarScope) {
       var nextScope = calendarScope.getAttribute("data-scheduler-calendar-scope");
@@ -1010,6 +1116,10 @@ function updatePillPicker() {
         root.style.setProperty("--scheduler-header-height", calendarHeader.getBoundingClientRect().height + "px");
       }).observe(calendarHeader);
     }
+    var calendarScroller = one(".program-calendar-scroll");
+    if (calendarScroller) calendarScroller.addEventListener("scroll", function () {
+      if (state.mode === "week" && !state.calendarRendering && calendarScroller.getClientRects().length) state.calendarScrollTop = calendarScroller.scrollTop;
+    });
     root.addEventListener("input", captureEditorDraft); root.addEventListener("change", captureEditorDraft);
     document.addEventListener("click", onClick); document.addEventListener("change", function (event) { var source = event.target.closest("[data-scheduler-source-filter]"); if (source) { state.sourceFilter = source.value || "all"; render(); return; } var input = event.target.closest("[data-scheduler-filter]"); if (input) setFilter(input.getAttribute("data-scheduler-filter"), input.value); var sort = event.target.closest("[data-scheduler-sort]"); if (sort) setSort(sort.value); var allDay = event.target.closest('[name="allDay"]'); var sameDay = event.target.closest('[name="sameDay"]'); var startDate = event.target.closest('[name="startDate"]'); if (allDay || sameDay || startDate) syncScheduleDateControls(event.target.closest("[data-scheduler-form]")); }); root.addEventListener("keydown", onKeydown);
     document.addEventListener("keydown", function (event) {

@@ -270,7 +270,7 @@ function hasLifecycleAction(actions, names) {
     var agreement = UOS.ProgramQuotes.agreementStatus(customerQuote());
     Array.prototype.forEach.call(rootNode.querySelectorAll("[data-customer-agreement]"), function (node) { node.textContent = "— " + agreement; });
     var coverage = rootNode.querySelector("[data-proposed-coverage-note]");
-    if (coverage) coverage.textContent = "Proposed coverage (ex GST). Customer agreement: " + agreement + ".";
+    if (coverage) coverage.replaceChildren(document.createTextNode("Proposed coverage (ex GST)."), document.createElement("br"), document.createTextNode("Customer Agreement: " + agreement + "."));
   }
 
   function privacyDisplay(value, semanticField) {

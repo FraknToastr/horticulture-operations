@@ -11319,7 +11319,7 @@ html[data-suite-theme="dark"] .program-cost-table .program-category-pill[data-ca
 .program-scheduler-form__nomination .program-scheduler-form__check {align-items:flex-start;min-height:0;}
 .program-scheduler-form__nomination .program-scheduler-form__check input {flex-shrink:0;margin:0;}
 html .program-scheduler-detail > .program-scheduler-inspector__head {border-bottom:1px solid var(--panel-border)!important;box-shadow:none!important;background:var(--uos-surface,#fff)!important;}
-.program-scheduler-detail__body > [data-scheduler-detail-title] {display:flex;align-items:center;gap:10px;margin:4px 0 16px;font-size:22px;font-weight:800;line-height:1.3;}
+.program-scheduler-detail__body > [data-scheduler-detail-title] {display:flex;align-items:center;gap:10px;margin:4px 0 16px;font-size:18px;font-weight:800;line-height:1.3;}
 .program-scheduler-detail__body > [data-scheduler-detail-title] > span {min-width:0;overflow-wrap:anywhere;}
 .program-scheduler-detail__body .program-scheduler-detail__source-icon {flex:0 0 36px!important;width:36px!important;height:36px!important;margin:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--uos-brand-text);}
 .program-scheduler-calendar {display:flex!important;flex-direction:column!important;}

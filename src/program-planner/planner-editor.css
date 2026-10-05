@@ -45,7 +45,10 @@
 }
 .planner-task-editor [data-planner-task-reason][hidden],.planner-task-editor [data-planner-task-history][hidden],.planner-task-editor [data-planner-task-reset-notice][hidden]{display:none!important}
 .planner-task-history{padding-top:16px;border-top:1px solid var(--uos-border,#dbe3ea);min-width:0}
-.planner-task-history h3{margin:0 0 12px;font-size:16px}
+.planner-task-history summary{padding:4px 2px;border-radius:4px;font-size:16px;font-weight:800;color:var(--uos-text);cursor:pointer}
+.planner-task-history[open] summary{margin-bottom:12px}
+.planner-task-history summary:focus-visible{outline:2px solid var(--program-owner-strong,var(--uos-focus));outline-offset:2px}
+.planner-task-history__name{margin-top:0!important}
 .planner-task-history ol{display:grid;gap:12px;margin:0;padding:0;list-style:none}
 .planner-task-history li{padding:12px 14px;border:1px solid var(--uos-border,#dbe3ea);border-radius:var(--uos-radius-control,6px);background:var(--uos-surface-subtle,#f8fafc);overflow-wrap:anywhere}
 .planner-task-history p{margin:6px 0 0;white-space:pre-wrap}
@@ -58,3 +61,13 @@
 
 /* White documentation cards remain readable inside coloured editor dialogs in either theme. */
 .planner-task-editor .planner-task-editor__job{--uos-text:#0f172a;--uos-text-muted:#475569;--uos-border:#dbe3ea;--uos-surface-subtle:#f8fafc;background:#fff;color:var(--uos-text)}
+[data-planner-task-job]{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+.planner-guide-column{display:grid;gap:14px;min-width:0}
+.planner-guide-column h3{margin:0;font-size:14px;color:var(--uos-text)}
+.planner-guide-symbols{display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
+.planner-task-editor__job .planner-guide-arrow{display:inline-grid;place-items:center;width:32px;font-size:32px;font-weight:900;line-height:1;color:var(--program-owner-strong,#047857)}
+.planner-guide-edit{padding:0}
+.planner-guide-edit svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.planner-guide-conversion{align-items:flex-start;flex-wrap:wrap}
+.planner-guide-conversion>span:last-child{flex:1 1 160px}
+@media(max-width:640px){[data-planner-task-job]{grid-template-columns:minmax(0,1fr)}}

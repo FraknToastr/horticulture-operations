@@ -401,7 +401,9 @@ The status-model layer validates canonical status codes, event ownership, recomm
 
 ## Planner Task history and reset baselines
 
-The Task Editor suppresses Order while preserving stored ordering. A conditional Reason field occupies its former position. After the first saved reason-bearing transition, Task history appears below the calendar guide and remains visible permanently. It lists status events and saved resets with operator, timestamp, and reason. History does not count as current Planner work.
+The Task Editor suppresses Order while preserving stored ordering. A conditional Reason field occupies its former position. Whenever saved history exists, a Task history disclosure appears below the calendar guide. It starts collapsed on every editor opening; expanding it does not save the workspace or create an audit event. Entries retain operator, timestamp, and reason. History does not count as current Planner work.
+
+New task status events, including initial status establishment, record an optional `taskTitle` snapshot from the saved task. New reset records snapshot the pre-reset `taskTitle` and include `restoredTaskTitle` when the reset changes its title. Later renames do not rewrite these snapshots or create status events. Legacy and imported historical events remain unchanged; entries without snapshots display the current title explicitly labelled **Current task name**. These optional metadata fields do not change the schema version, event identity, deduplication, transition rules, source linkage, or automation gates.
 
 Reset restores built-in template defaults, or the creation baseline for custom and duplicated tasks. Existing custom tasks capture their saved state before the first edit under this feature. Reset populates the editor for review; Save applies it atomically after any required reason and linked-job deletion confirmation. Closing the modal discards the staged reset. Baselines and reset audit entries persist with the task and are not inherited from the source when a task is duplicated.
 

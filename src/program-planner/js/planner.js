@@ -685,9 +685,16 @@ function displayDate(value) {
     function icon(tick) {
       return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M3 10h18' + (tick ? 'M8 16l2.5 2.5L16.5 13' : '') + '"></path></svg>';
     }
-    return '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" aria-hidden="true">' + icon(false) + '</span><span>Click to schedule a job</span></div>' +
+    var edit = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"></path><path d="m13.5 6.5 4 4"></path></svg>';
+    var reminder = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="1"></circle><circle cx="6" cy="12" r="1"></circle><circle cx="6" cy="17" r="1"></circle><path d="M10 7h8M10 12h8M10 17h8"></path></svg>';
+    return '<div class="planner-guide-column"><h3>Edit task</h3>' +
+      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon planner-guide-edit" aria-hidden="true">' + edit + '</span><span>Edit task details, purpose and status.</span></div>' +
+      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" aria-hidden="true">' + reminder + '</span><span>Reminder task</span></div>' +
+      '<div class="planner-calendar-guide__row planner-guide-conversion"><span class="planner-guide-symbols" aria-hidden="true"><span class="planner-calendar-guide__icon">' + reminder + '</span><span class="planner-guide-arrow">→</span><span class="planner-calendar-guide__icon">' + icon(false) + '</span></span><span>Any Reminder task can have its purpose changed to “Add to Scheduler”, allowing it to be added to the job and calendar system.</span></div></div>' +
+      '<div class="planner-guide-column"><h3>Scheduler</h3>' +
+      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" aria-hidden="true">' + icon(false) + '</span><span>Click to schedule a job</span></div>' +
       '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon is-linked-job" aria-hidden="true">' + icon(false) + '</span><span>Job Schedule not finalised</span></div>' +
-      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon is-linked-job" aria-hidden="true">' + icon(true) + '</span><span>Job Schedule finalised</span></div>';
+      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon is-linked-job" aria-hidden="true">' + icon(true) + '</span><span>Job Schedule finalised</span></div></div>';
   }
 
  function syncTaskReason(form) {
@@ -701,14 +708,17 @@ function displayDate(value) {
  function renderTaskHistory(form, task) {
  var history = form.querySelector("[data-planner-task-history]");
  var events = task ? (getWorkspace().entities.statusEvents || []).filter(function (event) { return event.entityId === task.id; }) : [];
- history.hidden = !task || !(task.plannerHistoryVisible || events.some(function (event) { return text(event.reason); }));
  var entries = events.filter(function (event) { return event.action !== "Planner.resetTask"; }).concat(task && task.plannerResetEvents || []);
  entries.sort(function (a, b) { return text(b.timestamp).localeCompare(text(a.timestamp)); });
- history.innerHTML = '<h3>Task history</h3><ol>' + entries.map(function (entry) {
+ history.hidden = !task || !entries.length;
+ history.innerHTML = '<summary>Task history</summary><ol>' + entries.map(function (entry) {
  var transition = entry.fromStatus ? window.UOS.ProgramStatus.labelFor("task", entry.fromStatus) + ' → ' + window.UOS.ProgramStatus.labelFor("task", entry.toStatus) : window.UOS.ProgramStatus.labelFor("task", entry.toStatus);
  var heading = entry.action === "Task reset" ? "Task reset" + (entry.fromStatus !== entry.toStatus ? " — " + transition : "") : transition;
  var date = new Date(entry.timestamp), displayTime = Number.isNaN(date.getTime()) ? entry.timestamp : date.toLocaleString("en-AU", { dateStyle: "medium", timeStyle: "short" });
- return '<li><strong>' + esc(heading) + '</strong><p>' + esc(entry.actor || "Status engine") + ' · <time datetime="' + esc(entry.timestamp) + '">' + esc(displayTime) + '</time></p>' + (entry.reason ? '<p>' + esc(entry.reason) + '</p>' : '') + '</li>';
+ var name = text(entry.taskTitle);
+ var nameLabel = name ? 'Task name: ' + name : 'Current task name: ' + text(task && task.title);
+ var restoredName = text(entry.restoredTaskTitle);
+ return '<li><p class="planner-task-history__name"><strong>' + esc(nameLabel) + '</strong></p>' + (restoredName ? '<p>Restored task name: ' + esc(restoredName) + '</p>' : '') + '<strong>' + esc(heading) + '</strong><p>' + esc(entry.actor || "Status engine") + ' · <time datetime="' + esc(entry.timestamp) + '">' + esc(displayTime) + '</time></p>' + (entry.reason ? '<p>' + esc(entry.reason) + '</p>' : '') + '</li>';
  }).join('') + '</ol>';
  }
  function stageTaskReset(form) {
@@ -780,7 +790,7 @@ function displayDate(value) {
  '<label class="uos-field planner-task-editor__wide" data-planner-task-reason hidden><span>Reason for status change</span><textarea class="uos-input" name="reason" rows="2" disabled></textarea></label>' +
       '<label class="uos-field planner-task-editor__wide"><span>Notes</span><textarea class="uos-input" name="notes" rows="3"></textarea></label>' +
       '<section class="planner-task-editor__job planner-task-editor__wide" data-planner-task-job aria-label="Scheduler calendar guide">' + calendarGuide() + '</section>' +
- '<section class="planner-task-history planner-task-editor__wide" data-planner-task-history hidden aria-label="Task history"></section>' +
+ '<details class="planner-task-history planner-task-editor__wide" data-planner-task-history hidden aria-label="Task history"></details>' +
   '<section class="planner-task-delete-confirm planner-task-editor__wide" data-planner-task-delete-confirm hidden aria-label="Confirm linked Job deletion"><h3></h3><p></p><div><button type="button" class="uos-button uos-button--secondary" data-planner-task-keep-job>Keep Job</button><button type="button" class="uos-button uos-button--danger" data-planner-task-confirm-delete>Delete Job and continue</button></div></section>' +
  '</div><p class="program-form-error" data-planner-task-error hidden></p>' +
       '<footer class="planner-task-editor__actions"><button type="button" class="uos-button uos-button--secondary" data-planner-task-cancel>Cancel</button>' +
@@ -839,6 +849,7 @@ function displayDate(value) {
     form.elements.assigneeId.value = view.owner || "Not assigned";
     form.elements.dueDate.value = task ? task.dueDate || "" : "";
  syncTaskReason(form);
+ form.querySelector("[data-planner-task-history]").open = false;
  renderTaskHistory(form, task);
     form.elements.notes.value = task ? task.notes || "" : "";
     dialog.querySelector("[data-planner-task-dialog-title]").textContent = task ? "Edit task" : "Add task";

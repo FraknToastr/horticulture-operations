@@ -130,7 +130,7 @@
  found.record.status = to;
  if (found.domain === "task" && text(command.reason)) found.record.plannerHistoryVisible = true;
     found.record.updatedAt = at;
-    workspace.entities.statusEvents.push({ id: id, owner: found.record.owner, type: "statusEvent", entityId: found.record.id, entityType: found.record.type, domain: found.domain, fromStatus: from, toStatus: to, action: text(command.action) || (labelFor(found.domain, from) + " to " + labelFor(found.domain, to)), reason: text(command.reason), actor: actor, timestamp: at, source: source, initiatingOperator: automatic ? text(command.initiatingOperator || workspace.statusControl && workspace.statusControl.operatorName) : "" });
+    workspace.entities.statusEvents.push(Object.assign({ id: id, owner: found.record.owner, type: "statusEvent", entityId: found.record.id, entityType: found.record.type, domain: found.domain, fromStatus: from, toStatus: to, action: text(command.action) || (labelFor(found.domain, from) + " to " + labelFor(found.domain, to)), reason: text(command.reason), actor: actor, timestamp: at, source: source, initiatingOperator: automatic ? text(command.initiatingOperator || workspace.statusControl && workspace.statusControl.operatorName) : "" }, found.domain === "task" ? { taskTitle: text(found.record.title) } : {}));
     return workspace;
   }
   function addRecommendation(workspace, values) {
@@ -216,7 +216,7 @@
           delete record.statusHistory; if (record.payload && typeof record.payload === "object") delete record.payload.statusHistory;
           workspace.entities.statusEvents = Array.isArray(workspace.entities.statusEvents) ? workspace.entities.statusEvents : [];
           var establishedAt = timestamp(settings.at || record.createdAt || record.updatedAt), establishedId = eventId(record.owner, record.id, "", record.status, establishedAt, "automatic");
-          if (!workspace.entities.statusEvents.some(function (item) { return item.id === establishedId; })) workspace.entities.statusEvents.push({ id: establishedId, owner: record.owner, type: "statusEvent", entityId: record.id, entityType: record.type, domain: domain, fromStatus: "", toStatus: record.status, action: collection === "applications" || collection === "events" ? "Register received" : "Initial status established", reason: "", actor: ENGINE_ACTOR, timestamp: establishedAt, source: "automatic", initiatingOperator: text(settings.actor) });
+          if (!workspace.entities.statusEvents.some(function (item) { return item.id === establishedId; })) workspace.entities.statusEvents.push(Object.assign({ id: establishedId, owner: record.owner, type: "statusEvent", entityId: record.id, entityType: record.type, domain: domain, fromStatus: "", toStatus: record.status, action: collection === "applications" || collection === "events" ? "Register received" : "Initial status established", reason: "", actor: ENGINE_ACTOR, timestamp: establishedAt, source: "automatic", initiatingOperator: text(settings.actor) }, domain === "task" ? { taskTitle: text(record.title) } : {}));
           return;
         }
         var from = codeFor(domain, existing.status), to = codeFor(domain, record.status);

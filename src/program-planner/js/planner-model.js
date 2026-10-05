@@ -103,9 +103,9 @@
  task = findTask(outcome.workspace, findProject(outcome.workspace, projectId), taskId);
  task.suppressed = restored.suppressed === true;
  task.plannerResetEvents = Array.isArray(task.plannerResetEvents) ? task.plannerResetEvents : [];
- task.plannerResetEvents.push({ timestamp: text(options.at) || new Date().toISOString(), actor: text(options.actor),
+ task.plannerResetEvents.push(Object.assign({ taskTitle: text(original.title), timestamp: text(options.at) || new Date().toISOString(), actor: text(options.actor),
  reason: text(options.reason), action: "Task reset", fromStatus: from, toStatus: to,
- changedFields: RESET_FIELDS.filter(function (field) { return JSON.stringify(original[field]) !== JSON.stringify(task[field]); }) });
+ changedFields: RESET_FIELDS.filter(function (field) { return JSON.stringify(original[field]) !== JSON.stringify(task[field]); }) }, text(original.title) !== text(task.title) ? { restoredTaskTitle: text(task.title) } : {}));
  if (text(options.reason)) task.plannerHistoryVisible = true;
  outcome.workspace = model().normalize(outcome.workspace);
  outcome.task = clone(outcome.workspace.entities.tasks.find(function (item) { return item.id === taskId; }));
