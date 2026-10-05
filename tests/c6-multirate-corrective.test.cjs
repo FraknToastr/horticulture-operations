@@ -39,7 +39,7 @@ function workspaceWithProject(UOS) {
     applicationId: "NSA-APP-C6-CORRECTIVE", title: "C6 corrective",
     status: "planning", funding: { operationalAmount: 1000000000 }
   });
-  return ws;
+  return UOS.ProgramStatus.migrate(UOS.ProgramModel.normalize(ws));
 }
 
 function rateInput(id, unit, unitRate, options = {}) {

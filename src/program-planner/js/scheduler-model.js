@@ -81,7 +81,7 @@
       id: text(raw.id) || "scheduler-job-" + (index + 1), owner: owner,
       ownerLabel: ownerLabel(owner), categoryLabel: ownerLabel(owner),
       title: text(raw.title || raw.name) || "Untitled job", startDate: startDate, endDate: endDate,
-      startTime: allDay ? "" : startTime, endTime: allDay ? "" : endTime, allDay: allDay,
+      startTime: allDay ? "" : startTime, endTime: allDay ? "" : endTime, allDay: allDay, updatesApplicationStatus: raw.updatesApplicationStatus === true,
       durationMinutes: Math.round((endMs - startMs) / 60000), crewId: text(raw.crewId || raw.crew),
       locationId: text(raw.locationId), location: text(raw.location), sourceKind: sourceKind(raw), canonicalSourceKind: canonicalSourceKind(raw), sourceLabel: sourceLabel(raw), sourceEntityId: text(raw.sourceEntityId || raw.taskId || raw.sourceGeometryId || raw.geometryId || raw.provenance && raw.provenance.sourceId) || null, _startMs: startMs, _endMs: endMs
     });
@@ -205,21 +205,23 @@
     var jobs = next.entities.jobs;
     var jobIndex = jobs.findIndex(function (job) { return job.id === text(id); });
     if (jobIndex < 0) throw new Error('Job "' + text(id) + '" was not found.');
-    var allowed = ["title", "category", "priority", "startDate", "endDate", "startTime", "endTime", "allDay", "durationMinutes", "crewId", "locationId", "location"];
+    var allowed = ["title", "category", "priority", "startDate", "endDate", "startTime", "endTime", "allDay", "updatesApplicationStatus", "durationMinutes", "crewId", "locationId", "location"];
     var patch = changes && typeof changes === "object" && !Array.isArray(changes) ? changes : {};
+    if (Object.prototype.hasOwnProperty.call(patch, "updatesApplicationStatus") && typeof patch.updatesApplicationStatus !== "boolean") throw new Error("updatesApplicationStatus must be a boolean.");
     var unknown = Object.keys(patch).filter(function (field) { return allowed.indexOf(field) < 0; });
     if (unknown.length) throw new Error("Unsupported scheduling field" + (unknown.length === 1 ? "" : "s") + ": " + unknown.join(", ") + ".");
     var updated = Object.assign({}, jobs[jobIndex]);
     allowed.forEach(function (field) { if (Object.prototype.hasOwnProperty.call(patch, field)) updated[field] = patch[field]; });
-    if (updated.allDay === true) {
-      updated.startTime = "";
-      updated.endTime = "";
-    }
     var scheduled = normalizeJob(updated, jobIndex);
-    ["title", "status", "category", "priority", "startDate", "endDate", "startTime", "endTime", "allDay", "durationMinutes", "crewId", "locationId", "location"].forEach(function (field) {
+    ["title", "status", "category", "priority", "startDate", "endDate", "startTime", "endTime", "allDay", "updatesApplicationStatus", "durationMinutes", "crewId", "locationId", "location"].forEach(function (field) {
       updated[field] = scheduled[field];
     });
     jobs[jobIndex] = updated;
+    if (["calculator", "space-map"].indexOf(updated.sourceKind) >= 0 && scheduled.startDate && text(updated.status).toLowerCase() === "draft") updated.status = "scheduled";
+    if (updated.sourceKind === "planner" && scheduled.startDate &&
+        UOS.ProgramStatus && UOS.ProgramStatus.codeFor("job", updated.status) === "draft") {
+      updated.status = "scheduled";
+    }
     if (at != null && text(at)) next.updatedAt = text(at);
     return programModel.normalize(next);
   }

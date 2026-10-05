@@ -62,10 +62,60 @@
     var parsed = new Date(next + "T00:00:00Z");
     return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === next;
   }
-  function updateTask(input, projectId, taskId, patch, options) {
+ var RESET_FIELDS = ["title", "description", "section", "status", "operational", "assigneeId", "dueDate", "notes", "sortOrder", "suppressed"];
+ function snapshotTask(task) {
+ var result = {};
+ RESET_FIELDS.forEach(function (field) { result[field] = clone(task[field]); });
+ return result;
+ }
+ function resetValues(task) {
+ var template = !(task.provenance && task.provenance.duplicatedFromTaskId) && model().checklistTemplates(task.owner).find(function (item) {
+ return text(item.id) === text(task.templateKey || task.legacyChecklistId);
+ });
+ if (template) return { title: template.title, description: template.description, section: template.section,
+ status: "not_started", operational: template.operational === true || template.schedulable === true,
+ assigneeId: null, dueDate: "", notes: "", sortOrder: template.sortOrder, suppressed: false };
+ return clone(task.plannerResetBaseline || snapshotTask(task));
+ }
+ function ensureResetBaseline(task) {
+ if (!object(task.plannerResetBaseline)) task.plannerResetBaseline = snapshotTask(task);
+ }
+ function resetTask(input, projectId, taskId, values, options) {
+ options = options || {};
+ if (!text(options.actor)) throw new Error("Enter a session operator name before resetting a task.");
+ var candidate = workspace(input), project = findProject(candidate, projectId), task = findTask(candidate, project, taskId);
+ ensureResetBaseline(task);
+ var original = snapshotTask(task), restored = Object.assign(resetValues(task), values || {});
+ var from = UOS.ProgramStatus.codeFor("task", task.status), to = UOS.ProgramStatus.codeFor("task", restored.status);
+ if (UOS.ProgramStatus.reasonRequired("task", from, to) && !text(options.reason)) throw new Error("A reason is required for this status transition.");
+ var linked = linkedPlannerJob(candidate, task);
+ if (linked) {
+ if (options.deleteLinkedJob !== true) throw new Error("Confirm deletion of the linked Scheduler job before resetting this task.");
+ var deliveryStates = ["in_progress", "completed"];
+ var hasDeliveryHistory = deliveryStates.indexOf(UOS.ProgramStatus.codeFor("job", linked.status)) >= 0 || (candidate.entities.statusEvents || []).some(function (event) {
+ return event.entityId === linked.id && (deliveryStates.indexOf(event.fromStatus) >= 0 || deliveryStates.indexOf(event.toStatus) >= 0);
+ });
+ if (hasDeliveryHistory) throw new Error("Job delivery history must be retained. This task cannot be reset while it is linked to that Job.");
+ candidate = model().deleteJob(candidate, linked.id);
+ }
+ restored.status = UOS.ProgramStatus.labelFor("task", restored.status);
+ var outcome = saveTask(candidate, projectId, taskId, restored, options);
+ task = findTask(outcome.workspace, findProject(outcome.workspace, projectId), taskId);
+ task.suppressed = restored.suppressed === true;
+ task.plannerResetEvents = Array.isArray(task.plannerResetEvents) ? task.plannerResetEvents : [];
+ task.plannerResetEvents.push({ timestamp: text(options.at) || new Date().toISOString(), actor: text(options.actor),
+ reason: text(options.reason), action: "Task reset", fromStatus: from, toStatus: to,
+ changedFields: RESET_FIELDS.filter(function (field) { return JSON.stringify(original[field]) !== JSON.stringify(task[field]); }) });
+ if (text(options.reason)) task.plannerHistoryVisible = true;
+ outcome.workspace = model().normalize(outcome.workspace);
+ outcome.task = clone(outcome.workspace.entities.tasks.find(function (item) { return item.id === taskId; }));
+ return outcome;
+ }
+ function updateTask(input, projectId, taskId, patch, options) {
     var candidate = workspace(input), project = findProject(candidate, projectId), task = findTask(candidate, project, taskId);
     if (!object(patch)) throw new Error("A Planner task patch is required.");
-    var allowed = { assigneeId: true, dueDate: true, notes: true, suppressed: true, operational: true };
+ ensureResetBaseline(task);
+ var allowed = { assigneeId: true, dueDate: true, notes: true, suppressed: true, operational: true };
     Object.keys(patch).forEach(function (field) {
       if (!allowed[field]) throw new Error('Planner task field "' + field + '" cannot be changed through the Planner.');
     });
@@ -106,7 +156,8 @@
       operational: values.operational === true,
       createdAt: at, updatedAt: at, provenance: { owner: project.owner, sourceApp: model().appId, sourceVersion: model().schemaVersion, sourceId: id, importedAt: at }
     };
-    candidate.entities.tasks.push(task);
+ ensureResetBaseline(task);
+ candidate.entities.tasks.push(task);
     candidate.updatedAt = at;
     candidate = model().normalize(candidate);
     return { workspace: candidate, task: clone(candidate.entities.tasks.find(function (item) { return item.id === id; })) };
@@ -118,20 +169,21 @@
     var candidate = workspace(input);
     var project = findProject(candidate, projectId);
     var task = taskId ? findTask(candidate, project, taskId) : null;
-    var at = text(options.at) || new Date().toISOString();
-    var title = text(values.title);
+ var at = text(options.at) || new Date().toISOString();
+ if (task) ensureResetBaseline(task);
+ var title = text(values.title);
     var description = text(values.description);
     var section = text(values.section);
     var statusLabel = text(values.status) || "Not Started";
     var dueDate = text(values.dueDate);
-    var sortOrder = Number(values.sortOrder);
+ var sortOrder = values.sortOrder == null ? (task ? Number(task.sortOrder) : candidate.entities.tasks.filter(function (item) { return item.projectId === project.id; }).reduce(function (highest, item) { return Math.max(highest, Number(item.sortOrder) || 0); }, -1) + 1) : Number(values.sortOrder);
 
     if (!title) throw new Error("Planner task title is required.");
     if (!description) throw new Error("Planner task description is required.");
     if (!section) throw new Error("Planner task section is required.");
     if (TASK_STATUSES.indexOf(statusLabel) < 0) throw new Error("Planner task status is invalid.");
     if (!validDate(dueDate)) throw new Error("Planner task due date must be a valid YYYY-MM-DD date.");
-    if (!Number.isFinite(sortOrder) || sortOrder < 0) throw new Error("Planner task order must be zero or greater.");
+    if (!Number.isInteger(sortOrder) || sortOrder < 0) throw new Error("Planner task order must be a whole number of zero or greater.");
 
     if (!task) {
       var created = createTask(candidate, project.id, {
@@ -170,19 +222,22 @@
     task.updatedAt = at;
     candidate.updatedAt = at;
 
-    var linked = linkedPlannerJob(candidate, task);
-    if (linked) {
-      assertPlannerJob(linked, project, task);
+ if (!taskId) {
+ task.plannerResetBaseline = snapshotTask(task);
+ task.plannerResetBaseline.status = "not_started";
+ }
+ var linked = linkedPlannerJob(candidate, task);
+ if (linked) {
+ assertPlannerJob(linked, project, task);
       linked.title = title;
       linked.name = title;
     }
 
     candidate = model().normalize(candidate);
-    if (task.operational) return createDraftJob(candidate, project.id, task.id, { at: at });
     return {
       workspace: candidate,
       task: clone(candidate.entities.tasks.find(function (item) { return item.id === task.id; })),
-      job: null,
+      job: linked ? clone(candidate.entities.jobs.find(function (item) { return item.id === linked.id; })) : null,
       created: !taskId
     };
   }
@@ -211,7 +266,12 @@
       copy.provenance = object(copy.provenance) ? clone(copy.provenance) : {};
       copy.provenance.owner = project.owner;
       copy.provenance.duplicatedFromTaskId = task.id;
-      copy.provenance.duplicatedAt = at;
+ copy.provenance.duplicatedAt = at;
+ delete copy.plannerResetBaseline;
+ delete copy.plannerResetEvents;
+ delete copy.plannerHistoryVisible;
+ copy.status = "not_started";
+ ensureResetBaseline(copy);
       output.push(copy);
       candidate.entities.tasks.push(copy); // Reserve the ID for later duplicates in this transaction.
       duplicated.push(clone(copy));
@@ -288,11 +348,39 @@
     return { workspace: candidate, task: clone(candidate.entities.tasks.find(function (item) { return item.id === task.id; })), job: clone(candidate.entities.jobs.find(function (item) { return item.id === job.id; })), created: draft.created };
   }
 
+  // Read current commercial-free Planner state without changing the workspace.
+  // Classification and timestamps alone are not evidence of checklist work.
+  function taskState(input, task) {
+    var jobs = input && input.entities && input.entities.jobs || [];
+    var linkedIds = [text(task.jobId), text(task.schedulerJobId)].filter(Boolean);
+    var job = jobs.find(function (item) {
+      return item.owner === task.owner && item.projectId === task.projectId &&
+        (linkedIds.indexOf(item.id) >= 0 || (item.sourceKind === "planner" && item.sourceEntityId === task.id));
+    }) || null;
+    var template = model().checklistTemplates(task.owner).find(function (item) {
+      return text(item.id) === text(task.templateKey || task.legacyChecklistId);
+    });
+    var changedContent = !template || ["title", "description", "section"].some(function (field) {
+      return text(task[field]) !== text(template[field]);
+    }) || Number(task.sortOrder) !== Number(template.sortOrder);
+    return {
+      job: job,
+      scheduled: Boolean(job && text(job.startDate) && text(job.status).toLowerCase() !== "draft"),
+      hasWork: Boolean(job || changedContent || task.suppressed ||
+        task.provenance && task.provenance.duplicatedFromTaskId ||
+        normalizeAssignment(task.assigneeId) || text(task.dueDate) || text(task.notes) ||
+        ["not started", "not_started", ""].indexOf(text(task.status).toLowerCase()) < 0)
+    };
+  }
+
   UOS.ProgramPlannerModel = {
     eventTemplates: function () { return clone(EVENT_TEMPLATES); },
     schedulableTemplateKeys: SCHEDULABLE_TEMPLATE_KEYS.slice(),
     taskStatuses: TASK_STATUSES.slice(),
     isOperationalTask: schedulable,
+ taskState: taskState,
+ resetValues: resetValues,
+ resetTask: resetTask,
     updateTask: updateTask,
     createTask: createTask,
     saveTask: saveTask,

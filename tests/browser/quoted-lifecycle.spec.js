@@ -248,6 +248,7 @@ test("PC-013 C2: Quote Builder evaluates prospective customer funding and allows
 
   // Issue the Quote
   await issueBtn.click();
+  await frame.getByRole("dialog").getByRole("button", { name: "Issue quote", exact: true }).click();
 
   // Verify Quote status is updated to Issued in the workspace
   await expect.poll(async () => child.evaluate((projectId) => {

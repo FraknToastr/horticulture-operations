@@ -151,5 +151,8 @@ test("Register row shortcut remains usable while Planner is active", async ({ pa
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().workspace.selectedEntityId)).toBe(recordId);
   await expect(registerButton).toHaveClass(/is-current-module/);
   await expect(registerButton).toHaveAttribute("aria-current", "page");
-  await expect(registerButton).toBeDisabled();
+  await expect(registerButton).toBeEnabled();
+  await registerButton.click();
+  await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().workspace.destination)).toBe("register");
+  await expect(frame.locator(`[data-disclosure-toggle][data-disclosure-key="register:${recordId}"]`)).toHaveAttribute("aria-expanded", "true");
 });

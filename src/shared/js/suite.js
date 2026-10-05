@@ -66,12 +66,85 @@
     modalStack = modalStack.filter(function (item) { return item !== backdrop; });
     document.body.classList.toggle("uos-modal-open", modalStack.length > 0);
     if (backdrop._uosResolve) backdrop._uosResolve(result);
-    if (backdrop._uosOpener && backdrop._uosOpener.isConnected) backdrop._uosOpener.focus();
+    if (backdrop._uosOpener && backdrop._uosOpener.isConnected) backdrop._uosOpener.focus({ preventScroll: true });
   }
+
+  // One Escape owner for shared overlays and every native dialog, including
+  // dialogs created by modules after startup. Run before drawer/map handlers.
+  var modalSequence = 0;
+  function topModal() {
+    return Array.prototype.slice.call(document.querySelectorAll("dialog[open], .uos-modal-backdrop")).sort(function (a, b) {
+      return (a._uosModalOrder || 0) - (b._uosModalOrder || 0);
+    }).pop();
+  }
+  if (typeof HTMLDialogElement !== "undefined") {
+    ["show", "showModal"].forEach(function (method) {
+      var original = HTMLDialogElement.prototype[method];
+      HTMLDialogElement.prototype[method] = function () {
+        var opener = document.activeElement, dialog = this;
+        var result = original.apply(dialog, arguments);
+        dialog._uosModalOrder = ++modalSequence;
+        dialog._uosModalOpener = opener;
+        if (!dialog._uosRestoreFocus) {
+          dialog._uosRestoreFocus = true;
+          dialog.addEventListener("close", function () {
+            var target = dialog._uosModalOpener;
+            // Native close events are queued: a newer modal may already own focus.
+            var active = topModal();
+            if (active && active._uosModalOrder > dialog._uosModalOrder) return;
+            if (target && target.isConnected) target.focus({ preventScroll: true });
+          });
+        }
+        return result;
+      };
+    });
+  }
+  // Native focus scrolling may reveal only a textarea's caret, clipping its ring.
+  // Reveal the control inside modal scroll regions without moving the workspace.
+  document.addEventListener("focusin", function (event) {
+    var target = event.target;
+    var modal = target.closest && target.closest("dialog[open], .uos-modal");
+    if (!modal) return;
+    window.requestAnimationFrame(function () {
+      if (!modal.isConnected || document.activeElement !== target) return;
+      var style = window.getComputedStyle(target);
+      var clearance = Math.max(8, (parseFloat(style.outlineWidth) || 0) + Math.max(0, parseFloat(style.outlineOffset) || 0));
+      for (var parent = target.parentElement; parent; parent = parent.parentElement) {
+        var css = window.getComputedStyle(parent);
+        var box = parent.getBoundingClientRect();
+        var rect = target.getBoundingClientRect();
+        var left = box.left + parent.clientLeft + clearance;
+        var top = box.top + parent.clientTop + clearance;
+        var width = parent.clientWidth - 2 * clearance;
+        var height = parent.clientHeight - 2 * clearance;
+        if (/auto|scroll/.test(css.overflowY) && rect.height <= height) {
+          if (rect.top < top) parent.scrollTop += rect.top - top;
+          else if (rect.bottom > top + height) parent.scrollTop += rect.bottom - top - height;
+        }
+        if (/auto|scroll/.test(css.overflowX) && rect.width <= width) {
+          if (rect.left < left) parent.scrollLeft += rect.left - left;
+          else if (rect.right > left + width) parent.scrollLeft += rect.right - left - width;
+        }
+        if (parent === modal) break;
+      }
+    });
+  });
+  window.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    var top = topModal();
+    if (!top) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (top.tagName.toLowerCase() === "dialog") {
+      var cancel = new Event("cancel", { cancelable: true });
+      if (top.dispatchEvent(cancel) && top.open) top.close();
+    } else closeModal(top, false);
+  }, true);
 
   function openDialog(options) {
     options = options || {};
     var backdrop = document.createElement("div");
+    backdrop._uosModalOrder = ++modalSequence;
     backdrop.className = "uos-modal-backdrop";
     backdrop._uosOpener = document.activeElement;
     var openerMenu = backdrop._uosOpener && backdrop._uosOpener.closest ? backdrop._uosOpener.closest("[data-uos-menu-panel]") : null;
@@ -85,6 +158,7 @@
     backdrop.innerHTML = '<section class="uos-modal" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '">' +
       '<header class="uos-modal__head"><h2 id="' + titleId + '"></h2><button class="uos-icon-button" type="button" data-uos-close aria-label="Close">×</button></header>' +
       '<div class="uos-modal__body"></div><footer class="uos-modal__foot"></footer></section>';
+    if (options.modalClass) backdrop.querySelector(".uos-modal").classList.add(options.modalClass);
     backdrop.querySelector("h2").textContent = options.title || "Dialog";
     if (options.headerNode) backdrop.querySelector(".uos-modal__head").insertBefore(options.headerNode, backdrop.querySelector("[data-uos-close]"));
     var body = backdrop.querySelector(".uos-modal__body");
@@ -106,7 +180,10 @@
     document.body.classList.add("uos-modal-open");
     modalStack.push(backdrop);
     trapModal(backdrop);
-    setTimeout(function () { (footer.querySelector(".uos-button--primary") || footer.querySelector("button") || backdrop.querySelector("[data-uos-close]")).focus(); }, 0);
+    setTimeout(function () {
+      if (topModal() !== backdrop || backdrop._uosModalOrder !== modalSequence) return;
+      (footer.querySelector(".uos-button--primary") || footer.querySelector("button") || backdrop.querySelector("[data-uos-close]")).focus({ preventScroll: true });
+    }, 0);
     return new Promise(function (resolve) { backdrop._uosResolve = resolve; });
   }
 
@@ -303,34 +380,66 @@
       } catch (e) {}
       return false;
     }
+    var pointer = null, leaveTimer = null;
+    function scheduleLeave() {
+      if (leaveTimer) return;
+      leaveTimer = setTimeout(function () { leaveTimer = null; if (!tooltip.matches(":hover") && active && !isHoveredOrKeyFocused(active)) hide(); }, 220);
+    }
+    tooltip.addEventListener("pointerenter", function () { clearTimeout(leaveTimer); leaveTimer = null; });
+    var GAP = 48, EDGE = 8;
+    function normalizeTips(node) {
+      if (!node || node.nodeType !== 1) return;
+      var targets = node.hasAttribute("title") ? [node] : [];
+      targets = targets.concat(Array.prototype.slice.call(node.querySelectorAll("[title]")));
+      targets.forEach(function (target) {
+        var label = target.getAttribute("title");
+        if (label && !target.hasAttribute("data-uos-tooltip")) target.setAttribute("data-uos-tooltip", label);
+        if (label && !target.hasAttribute("aria-label") && !target.hasAttribute("aria-labelledby") && !target.textContent.trim() && !target.labels?.length && target.matches("button,input,select,[role=img]")) target.setAttribute("aria-label", label);
+        target.removeAttribute("title");
+      });
+    }
+    normalizeTips(document.documentElement);
+    new MutationObserver(function (records) {
+      records.forEach(function (record) {
+        if (record.type === "attributes") normalizeTips(record.target);
+        else Array.prototype.forEach.call(record.addedNodes, normalizeTips);
+      });
+      if (active && !active.isConnected) hide();
+    }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["title"] });
     function position(target) {
       var rect = target.getBoundingClientRect();
-      var tooltipRect = tooltip.getBoundingClientRect();
-      var isRailItem = Boolean(target.closest && target.closest(".uos-rail"));
-      var posAttr = target.getAttribute("data-uos-tooltip-pos");
-
-      if (isRailItem || posAttr === "right") {
-        var left = rect.right + 28;
-        var top = rect.top + rect.height / 2 - tooltipRect.height / 2;
-        left = Math.max(8, Math.min(window.innerWidth - tooltipRect.width - 8, left));
-        top = Math.max(8, Math.min(window.innerHeight - tooltipRect.height - 8, top));
-        tooltip.style.left = Math.round(left) + "px";
-        tooltip.style.top = Math.round(top) + "px";
-      } else if (posAttr === "top") {
-        var left = rect.left + rect.width / 2 - tooltipRect.width / 2;
-        left = Math.max(8, Math.min(window.innerWidth - tooltipRect.width - 8, left));
-        var top = rect.top - tooltipRect.height - 28;
-        if (top < 8) top = rect.bottom + 28;
-        tooltip.style.left = Math.round(left) + "px";
-        tooltip.style.top = Math.round(Math.max(8, top)) + "px";
-      } else {
-        var left = rect.left + rect.width / 2 - tooltipRect.width / 2;
-        left = Math.max(8, Math.min(window.innerWidth - tooltipRect.width - 8, left));
-        var top = rect.bottom + 28;
-        if (top + tooltipRect.height > window.innerHeight - 8) top = rect.top - tooltipRect.height - 28;
-        tooltip.style.left = Math.round(left) + "px";
-        tooltip.style.top = Math.round(Math.max(8, top)) + "px";
+      var viewport = window.visualViewport;
+      var bounds = { left: viewport ? viewport.offsetLeft : 0, top: viewport ? viewport.offsetTop : 0, width: viewport ? viewport.width : window.innerWidth, height: viewport ? viewport.height : window.innerHeight };
+      var right = bounds.left + bounds.width - EDGE, bottom = bounds.top + bounds.height - EDGE;
+      var leftEdge = bounds.left + EDGE, topEdge = bounds.top + EDGE;
+      tooltip.style.maxWidth = Math.max(1, Math.min(320, bounds.width - 2 * EDGE)) + "px";
+      tooltip.style.maxHeight = Math.max(1, bounds.height - 2 * EDGE) + "px";
+      var point = pointer || { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      var preferred = target.closest(".uos-rail") ? "right" : target.getAttribute("data-uos-tooltip-pos") || "bottom";
+      var order = [preferred, {top:"bottom",bottom:"top",right:"left",left:"right"}[preferred] || "top", "right", "left", "bottom", "top"].filter(function (side,index,all) { return all.indexOf(side) === index; });
+      var size = tooltip.getBoundingClientRect();
+      var choices = order.map(function (side) {
+        var horizontal = side === "right" || side === "left";
+        var start = horizontal ? (side === "right" ? Math.max(rect.right,point.x) + GAP : leftEdge) : (side === "bottom" ? Math.max(rect.bottom,point.y) + GAP : topEdge);
+        var end = horizontal ? (side === "left" ? Math.min(rect.left,point.x) - GAP : right) : (side === "top" ? Math.min(rect.top,point.y) - GAP : bottom);
+        return { side:side, horizontal:horizontal, available:Math.max(0,end-start), start:start, end:end, fits:end-start >= (horizontal ? size.width : size.height) };
+      });
+      var choice = choices.find(function (item) { return item.fits; }) || choices.sort(function (a,b) { return b.available-a.available; })[0];
+      if (!choice.fits) {
+        if (choice.horizontal) tooltip.style.maxWidth = Math.max(1, choice.available) + "px";
+        else tooltip.style.maxHeight = Math.max(1, choice.available) + "px";
+        size = tooltip.getBoundingClientRect();
       }
+      var x = rect.left + rect.width / 2 - size.width / 2, y = rect.top + rect.height / 2 - size.height / 2;
+      if (choice.side === "right") x = choice.start;
+      if (choice.side === "left") x = choice.end - size.width;
+      if (choice.side === "bottom") y = choice.start;
+      if (choice.side === "top") y = choice.end - size.height;
+      tooltip.style.left = Math.max(leftEdge, Math.min(right - size.width, x)) + "px";
+      tooltip.style.top = Math.max(topEdge, Math.min(bottom - size.height, y)) + "px";
+      // Overflowing help needs pointer access for scrolling; ordinary tips
+      // allow clicks through to the controls below them.
+      tooltip.style.pointerEvents = tooltip.scrollHeight > tooltip.clientHeight || tooltip.scrollWidth > tooltip.clientWidth ? "auto" : "none";
     }
     function show(target) {
       if (!target || !target.isConnected) return;
@@ -358,6 +467,7 @@
       timer = setTimeout(function () { scheduled = null; show(target); }, delay);
     }
     function hide() {
+      clearTimeout(leaveTimer); leaveTimer = null;
       clearTimeout(timer);
       timer = null;
       scheduled = null;
@@ -370,6 +480,8 @@
       previousDescription = null;
     }
     document.addEventListener("pointerover", function (event) {
+      pointer = { x: event.clientX, y: event.clientY };
+      normalizeTips(event.target);
       var target = candidate(event.target);
       if (!target || active === target || scheduled === target) return;
       var replaceImmediately = Boolean(active && !tooltip.hidden);
@@ -377,19 +489,23 @@
       schedule(target, replaceImmediately ? 0 : 140);
     });
     document.addEventListener("pointerout", function (event) {
+      if (event.relatedTarget && tooltip.contains(event.relatedTarget)) return;
       var target = candidate(event.target);
       var next = candidate(event.relatedTarget);
       if (!target || target === next) return;
+      if (active && !next) { scheduleLeave(); return; }
       var replaceImmediately = Boolean(next && active && !tooltip.hidden);
       hide();
       if (next && isHoveredOrKeyFocused(next)) schedule(next, replaceImmediately ? 0 : 140);
     });
-    document.addEventListener("pointermove", function () {
-      if (active && !isHoveredOrKeyFocused(active)) {
-        hide();
-      }
+    document.addEventListener("pointermove", function (event) {
+      pointer = { x: event.clientX, y: event.clientY };
+      if (tooltip.contains(event.target)) return;
+      if (active && isHoveredOrKeyFocused(active)) position(active);
+      if (active && !isHoveredOrKeyFocused(active)) scheduleLeave();
     });
     document.addEventListener("focusin", function (event) {
+      pointer = null;
       var target = candidate(event.target);
       if (target && isHoveredOrKeyFocused(target)) {
         schedule(target, 0);
@@ -398,10 +514,12 @@
       }
     });
     document.addEventListener("focusout", function (event) { if (candidate(event.target)) hide(); });
-    document.addEventListener("click", hide);
+    tooltip.addEventListener("pointerleave", function (event) { if (!active || !active.contains(event.relatedTarget)) hide(); });
+    tooltip.addEventListener("scroll", function (event) { event.stopPropagation(); });
+    document.addEventListener("click", function (event) { if (!tooltip.contains(event.target)) hide(); });
     document.addEventListener("keydown", function (event) { if (event.key === "Escape") hide(); });
     window.addEventListener("resize", hide);
-    window.addEventListener("scroll", hide, true);
+    window.addEventListener("scroll", function (event) { if (event.target !== tooltip) hide(); }, true);
     window.addEventListener("blur", hide);
     window.addEventListener("focus", hide);
     document.addEventListener("mouseleave", hide);

@@ -1561,9 +1561,9 @@ var selectedSpatialFilter = null;
     return linked && linked.owner === owner ? linked : null;
   }
 
-  function syncGeometry(candidate, geometryId) {
+  function syncGeometry(candidate, geometryId, options) {
     if (!root.UOS.WorkAreaService) throw new Error("WorkAreaService is unavailable.");
-    return root.UOS.WorkAreaService.syncGeometry(candidate, geometryId);
+    return root.UOS.WorkAreaService.syncGeometry(candidate, geometryId, options);
   }
 
   function geometryHasJob(candidate, geometryId) {
@@ -1580,7 +1580,7 @@ var selectedSpatialFilter = null;
   }
 
   function syncExistingGeometryWork(candidate, geometryId) {
-    return geometryHasJob(candidate, geometryId) ? syncGeometry(candidate, geometryId) : markGeometryAwaitingJob(candidate, geometryId);
+    return geometryHasJob(candidate, geometryId) || (candidate.entities.costingLines || []).some(function (line) { return line.sourceGeometryId === geometryId; }) ? syncGeometry(candidate, geometryId) : markGeometryAwaitingJob(candidate, geometryId);
   }
 
   function closeMapMenus(except) {
@@ -2262,7 +2262,7 @@ var selectedSpatialFilter = null;
               rateItemId: selectedJobRateId,
               payload: { workTypeKey: selectedJobWorkType, type: selectedJobWorkType, rateItemId: selectedJobRateId }
             });
-            if (!geometryHasJob(candidate, geometry.id)) candidate = syncGeometry(candidate, geometry.id);
+            candidate = syncGeometry(candidate, geometry.id, { explicit: true });
             var project = (candidate.entities.projects || []).find(function (item) { return item.id === geometry.projectId; });
             if (project) {
               candidate.workspace = candidate.workspace || {};

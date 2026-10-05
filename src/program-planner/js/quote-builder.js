@@ -8,6 +8,7 @@
   var quoteJobFilter = "all";
   var quoteStatusFilters = [];
   var preserveProjectListUntil = 0;
+  var pendingDraftSaves = 0;
 
 
   var state = {
@@ -28,6 +29,8 @@
     discountRate: 0,
     contingencyRate: 0,
     operationalAmount: 0,
+    fundingMode: "customer",
+    proposedCustomerContribution: null,
     scopeNotes: "",
     terms: "",
     viewMode: "itemised",
@@ -43,9 +46,31 @@ function workspaceSnapshot() {
     return liveWorkspace || state.workspace;
 }
 
+function customerDetailsForProject(project, workspace) {
+  var model = UOS.ProgramModel;
+  var source = model && typeof model.registerForProject === "function" ? model.registerForProject(workspace, project) : null;
+  source = source || project;
+  function first(names) {
+    var containers = [source, source && source.raw, source && source.payload];
+    for (var i = 0; i < names.length; i += 1) {
+      for (var j = 0; j < containers.length; j += 1) {
+        var value = containers[j] && containers[j][names[i]];
+        if (typeof value === "string" && value.trim()) return value.trim();
+      }
+    }
+    return "";
+  }
+  return {
+    name: first(["customerName", "applicantName", "contactName", "clientName", "contactPerson"]) || text(source && (source.name || source.eventName || source.title)) || text(project.name || project.title),
+    address: first(["address", "siteAddress"]) || (model && typeof model.displayAddressForProject === "function" ? model.displayAddressForProject(workspace, project) : text(project.address || project.location)),
+    email: first(["customerEmail", "email", "emailAddress", "contactEmail"])
+  };
+}
+
 function lifecycleActionKeys() {
     var quotes = window.UOS && window.UOS.ProgramQuotes;
-    if (!state.quoteId || !quotes || typeof quotes.lifecycleActions !== "function") return [];
+    if (!state.quoteId) return state.selectedEntityId ? ["issue"] : [];
+  if (!quotes || typeof quotes.lifecycleActions !== "function") return [];
     var result = quotes.lifecycleActions(workspaceSnapshot(), state.quoteId);
     if (Array.isArray(result)) return result.map(text);
     if (result && Array.isArray(result.actions)) return result.actions.map(text);
@@ -135,6 +160,18 @@ function hasLifecycleAction(actions, names) {
     return str;
   }
 
+  function quoteLineKind(line) {
+    if (line.kind) return line.kind;
+    var ws = workspaceSnapshot();
+    var costing = (ws.entities.costingLines || []).find(function (item) { return item.id === (line.costingLineId || line.id); });
+    if (costing && costing.kind) return costing.kind;
+    var rateId = line.rateItemId || line.catalogId || costing && (costing.rateItemId || costing.catalogId);
+    var rate = (ws.entities.rateItems || []).find(function (item) { return item.id === rateId; });
+    if (rate && rate.kind) return rate.kind;
+    var legacy = { Material: 'Materials', Materials: 'Materials', Labour: 'Labour', Contractor: 'Contractors', Contractors: 'Contractors', Equipment: 'Equipment', Sundry: 'Sundry' };
+    return legacy[line.category] || 'Sundry';
+  }
+
   function getCategoryGroups() {
     var defaultCategories = ["Materials", "Labour", "Contractor", "Sundry"];
     var groups = {};
@@ -144,7 +181,7 @@ function hasLifecycleAction(actions, names) {
     });
 
     state.lines.forEach(function (line) {
-      var rawCat = text(line.category || "Sundry");
+      var rawCat = text(quoteLineKind(line));
       var key = rawCat.toLowerCase();
       if (key === "material") key = "materials";
       if (key === "labor" || key === "labour") key = "labour";
@@ -169,7 +206,7 @@ function hasLifecycleAction(actions, names) {
     state.lines.forEach(function (line) {
       var t = num(line.total);
       subtotal += t;
-      var c = text(line.category).toLowerCase();
+      var c = text(quoteLineKind(line)).toLowerCase();
       if (c === "materials" || c === "material") materialsTotal += t;
       else if (c === "labour" || c === "labor") labourTotal += t;
       else equipmentTotal += t;
@@ -180,6 +217,11 @@ function hasLifecycleAction(actions, names) {
     var subtotalExGst = subtotal + contingencyAmount - discountAmount;
     var gstAmount = Math.round(subtotalExGst * 0.10 * 100) / 100;
     var grandTotal = Math.round((subtotalExGst + gstAmount) * 100) / 100;
+    var saved = state.quoteId && workspaceSnapshot().entities.quotes.find(function (quote) { return quote.id === state.quoteId; });
+    if (saved && ["Issued", "Accepted", "Declined", "Superseded"].indexOf(saved.status) >= 0) {
+      subtotal = saved.subtotal; gstAmount = saved.gst; grandTotal = saved.grandTotal;
+      subtotalExGst = Math.round((grandTotal - gstAmount) * 100) / 100;
+    }
 
     return {
       subtotal: subtotal,
@@ -192,6 +234,43 @@ function hasLifecycleAction(actions, names) {
       gstAmount: gstAmount,
       grandTotal: grandTotal
     };
+  }
+
+  function customerQuote(totals) {
+    totals = totals || calculateTotals();
+    return { id: state.quoteId, projectId: state.selectedEntityId, status: state.status,
+      fundingMode: state.fundingMode, proposedCustomerContribution: state.proposedCustomerContribution,
+      grandTotal: totals.grandTotal, gst: totals.gstAmount };
+  }
+  function suggestedCustomerAmount() {
+    var quote = customerQuote();
+    var position = UOS.ProjectFunding.position(workspaceSnapshot(), state.selectedEntityId, { quote: quote });
+    return UOS.ProgramQuotes.suggestedContribution(quote, position.availableCityAllocation);
+  }
+  function renderFundingChoice(locked) {
+    Array.prototype.forEach.call(rootNode.querySelectorAll("[data-quote-funding-mode]"), function (input) {
+      input.checked = input.value === state.fundingMode; input.disabled = locked || !state.selectedEntityId;
+    });
+    var note = rootNode.querySelector("[data-funding-choice-note]");
+    if (note) note.textContent = !state.fundingMode ? "Choose a funding arrangement" : state.fundingMode === "city" ? "No customer payment required" : "Issuing offers the proposed amount. Customer acceptance confirms agreement.";
+    var allocationNote = rootNode.querySelector("[data-city-allocation-note]");
+    if (allocationNote) allocationNote.textContent = state.fundingMode === "customer" ? "Available — excluded from this Quote" : "Allocation is managed separately in Budget.";
+    var field = rootNode.querySelector("[data-mixed-contribution-field]");
+    if (field) field.hidden = state.fundingMode !== "mixed";
+    var input = rootNode.querySelector("[data-quote-customer-contribution]");
+    if (input) {
+      input.disabled = locked || !state.selectedEntityId;
+      if (document.activeElement !== input) input.value = state.proposedCustomerContribution == null ? "" : state.proposedCustomerContribution;
+    }
+    var suggestion = state.selectedEntityId ? suggestedCustomerAmount() : 0;
+    var hint = rootNode.querySelector("[data-customer-suggestion]");
+    if (hint) hint.textContent = "Suggested contribution: " + money(suggestion) + " ex GST";
+    var useButton = rootNode.querySelector("[data-use-suggested-contribution]");
+    if (useButton) { useButton.hidden = state.fundingMode !== "mixed" || Math.abs(suggestion - num(state.proposedCustomerContribution)) < 0.005; useButton.disabled = locked; }
+    var agreement = UOS.ProgramQuotes.agreementStatus(customerQuote());
+    Array.prototype.forEach.call(rootNode.querySelectorAll("[data-customer-agreement]"), function (node) { node.textContent = "— " + agreement; });
+    var coverage = rootNode.querySelector("[data-proposed-coverage-note]");
+    if (coverage) coverage.textContent = "Proposed coverage (ex GST). Customer agreement: " + agreement + ".";
   }
 
   function privacyDisplay(value, semanticField) {
@@ -224,8 +303,14 @@ function hasLifecycleAction(actions, names) {
   }
 
   function renderBuilder() {
+    if (quoteSectionNavigation) quoteSectionNavigation.schedule();
+    // Drawer transitions may replace the form node while persistence is in flight.
+    rootNode = document.querySelector("[data-program-view='quotes']") || rootNode;
     if (!rootNode) return;
 
+    var drawerUI = UOS.ProgramDrawerWorkspace;
+    var position = drawerUI && drawerUI.captureQuotePosition();
+    rootNode.setAttribute("data-quote-position-context", (state.quoteId || "new") + ":" + state.selectedEntityId + ":" + state.revision);
     var numInput = rootNode.querySelector("[data-quote-num]");
     var dateInput = rootNode.querySelector("[data-quote-date]");
     var expiryInput = rootNode.querySelector("[data-quote-expiry]");
@@ -245,6 +330,7 @@ function hasLifecycleAction(actions, names) {
   var lifecycleActions = lifecycleActionKeys();
     var immutable = ["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0;
     var financialLocked = Boolean(state.quoteId && window.UOS.ProgramQuotes && typeof window.UOS.ProgramQuotes.commerciallyLocked === "function" && window.UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId));
+    renderFundingChoice(immutable || financialLocked);
     var paymentSummary = state.quoteId && window.UOS.ProgramQuotes && window.UOS.ProgramApp
       ? window.UOS.ProgramQuotes.paymentSummary(workspaceSnapshot(), state.quoteId)
       : null;
@@ -254,7 +340,7 @@ function hasLifecycleAction(actions, names) {
     if (dateInput && document.activeElement !== dateInput) dateInput.value = state.quoteDate;
     if (expiryInput && document.activeElement !== expiryInput) expiryInput.value = state.expiryDate;
     syncPiiInput(clientInput, state.clientName, "clientName", "text");
-    if (addrInput && document.activeElement !== addrInput) addrInput.value = state.address;
+    syncPiiInput(addrInput, state.address, "quoteAddress", "text");
     syncPiiInput(emailInput, state.email, "email", "email");
     if (prepInput && document.activeElement !== prepInput) prepInput.value = state.preparedBy;
     if (discInput && document.activeElement !== discInput) discInput.value = state.discountRate;
@@ -262,7 +348,7 @@ function hasLifecycleAction(actions, names) {
     if (scopeInput && document.activeElement !== scopeInput) scopeInput.value = state.scopeNotes;
     if (termsInput && document.activeElement !== termsInput) termsInput.value = state.terms;
     if (operationalInput) {
-      operationalInput.readOnly = Boolean(window.UOS.ProgramBudget && workspaceSnapshot().entities.annualBudgets.length);
+      operationalInput.readOnly = state.fundingMode === "customer" || Boolean(window.UOS.ProgramBudget && workspaceSnapshot().entities.annualBudgets.length);
       operationalInput.title = operationalInput.readOnly ? "Allocated to the Register record in Annual Budget" : "Legacy Project amount; reconcile in Annual Budget";
       if (document.activeElement !== operationalInput) operationalInput.value = state.operationalAmount;
     }
@@ -276,7 +362,12 @@ function hasLifecycleAction(actions, names) {
       revisionButton.disabled = isSettled;
       if (isSettled) revisionButton.title = "Account is settled. Create Revision is disabled."; else revisionButton.removeAttribute("title");
     }
-    if (statusInput) statusInput.textContent = state.status;
+    if (statusInput) {
+      var currentQuote = state.quoteId && (workspaceSnapshot().entities.quotes || []).find(function (quote) { return quote.id === state.quoteId; });
+      var statusDate = currentQuote && state.status !== "Draft" ? quoteDisplayDate(quoteLifecycleDate(currentQuote, state.status)) : "";
+      statusInput.textContent = state.status + (statusDate ? " · " + statusDate : "");
+      statusInput.setAttribute("data-quote-state", state.status);
+    }
     if (revisionButton) {
       revisionButton.hidden = !hasLifecycleAction(lifecycleActions, ["createRevision", "revise"]);
       revisionButton.disabled = false;
@@ -326,20 +417,17 @@ function hasLifecycleAction(actions, names) {
         var locked = line.readOnly || immutable || financialLocked;
         var disabled = locked ? " disabled" : "";
         return '<tr data-line-id="' + esc(line.id) + '">' +
-          '<td><input type="text" class="uos-input uos-input--sm" data-line-field="description" value="' + esc(line.description) + '"' + disabled + '></td>' +
-          '<td>' +
-            '<select class="uos-select uos-select--sm" data-line-field="category"' + disabled + '>' +
-              '<option value="Materials"' + (line.category === "Materials" ? ' selected' : '') + '>Materials</option>' +
-              '<option value="Labour"' + (line.category === "Labour" ? ' selected' : '') + '>Labour</option>' +
-              '<option value="Contractor"' + (line.category === "Contractor" ? ' selected' : '') + '>Contractor</option>' +
-              '<option value="Sundry"' + (line.category === "Sundry" || line.category === "Equipment" ? ' selected' : '') + '>Sundry</option>' +
-            '</select>' +
+          '<td class="program-quote-builder-table__description"><input type="text" class="uos-input uos-input--sm" data-line-field="description" title="' + esc(line.description) + '" data-uos-tooltip="' + esc(line.description) + '" value="' + esc(line.description) + '"' + disabled + '></td>' +
+          '<td class="program-quote-builder-table__category">' +
+          (line.readOnly ? '<input type="text" class="uos-input uos-input--sm" value="' + esc(quoteLineKind(line)) + '" readonly aria-label="Kind">' :
+            '<select class="uos-select uos-select--sm" data-line-field="kind" aria-label="Kind"' + disabled + '>' +
+            ['Materials', 'Labour', 'Contractors', 'Equipment', 'Sundry'].map(function (kind) { return '<option value="' + kind + '"' + (quoteLineKind(line) === kind ? ' selected' : '') + '>' + kind + '</option>'; }).join('') + '</select>') +
           '</td>' +
-          '<td><input type="number" step="0.5" min="0" class="uos-input uos-input--sm" data-line-field="quantity" value="' + line.quantity + '" style="width: 70px;"' + disabled + '></td>' +
-          '<td><input type="text" class="uos-input uos-input--sm" data-line-field="unit" value="' + esc(line.unit) + '" style="width: 60px;"' + disabled + '></td>' +
-          '<td><input type="number" step="0.5" min="0" class="uos-input uos-input--sm" data-line-field="rate" value="' + line.rate + '" style="width: 80px;"' + disabled + '></td>' +
-          '<td style="text-align: right; font-weight: 700; vertical-align: middle;">' + money(line.total) + '</td>' +
-          '<td>' + (locked ? '' : '<button type="button" class="uos-button uos-button--subtle uos-button--sm" data-remove-line="' + esc(line.id) + '" title="Remove adjustment">&times;</button>') + '</td>' +
+          '<td class="program-quote-builder-table__quantity"><input type="number" step="0.5" min="0" class="uos-input uos-input--sm" data-line-field="quantity" value="' + line.quantity + '"' + disabled + '></td>' +
+          '<td class="program-quote-builder-table__unit"><input type="text" class="uos-input uos-input--sm" data-line-field="unit" value="' + esc(line.unit) + '"' + disabled + '></td>' +
+          '<td class="program-quote-builder-table__rate"><input type="number" step="0.5" min="0" class="uos-input uos-input--sm" data-line-field="rate" value="' + line.rate + '"' + disabled + '></td>' +
+          '<td class="program-quote-builder-table__total"><input type="text" class="uos-input uos-input--sm" value="' + money(line.total) + '" readonly aria-label="Total"></td>' +
+          '<td class="program-quote-builder-table__actions">' + (locked ? '' : '<button type="button" class="uos-button uos-button--subtle uos-button--sm" data-remove-line="' + esc(line.id) + '" title="Remove adjustment">&times;</button>') + '</td>' +
         '</tr>';
       }).join("");
       tbody.innerHTML = linesHtml;
@@ -351,6 +439,7 @@ function hasLifecycleAction(actions, names) {
         : { paid: 0 };
       var activeQuote = {
         id: state.quoteId,
+        fundingMode: state.fundingMode, proposedCustomerContribution: state.proposedCustomerContribution,
         status: state.status,
         subtotalExGst: activeTotals.subtotalExGst,
         discount: activeTotals.discountAmount,
@@ -371,6 +460,7 @@ function hasLifecycleAction(actions, names) {
           : key === "total" ? funding.totalFunding
           : key === "gap" ? funding.fundingGap
           : key === "customerTotal" ? funding.customerGrandTotal
+          : key === "customerGst" ? UOS.ProgramQuotes.customerAmounts(activeQuote).gst
           : key === "paymentsPaid" ? funding.paymentsPaid
           : key === "customerOutstanding" ? funding.customerOutstanding
           : key === "positionGst" ? Math.max(0, Number(funding.customerOutstanding || 0) - Number(funding.customerOutstanding || 0) / 1.10)
@@ -399,6 +489,7 @@ function hasLifecycleAction(actions, names) {
     renderPreview();
     renderPaymentLedger();
     renderQuoteHistory();
+    if (position) drawerUI.restoreQuotePosition(position);
   }
 
   function renderPreview() {
@@ -407,7 +498,15 @@ function hasLifecycleAction(actions, names) {
     if (!previewContainer) return;
 
     var totals = calculateTotals();
+    var customer = UOS.ProgramQuotes.customerAmounts(customerQuote(totals));
     var ledger = state.quoteId && window.UOS && window.UOS.ProgramQuotes ? window.UOS.ProgramQuotes.paymentSummary(workspaceSnapshot(), state.quoteId) : { depositPaid: 0, paid: 0, balanceDue: totals.grandTotal };
+    var savedQuote = state.quoteId && workspaceSnapshot().entities.quotes.find(function (quote) { return quote.id === state.quoteId; });
+    var documentFunding = state.selectedEntityId ? UOS.ProjectFunding.position(workspaceSnapshot(), state.selectedEntityId, { quote: customerQuote(totals) }) : null;
+    var cityFunding = savedQuote && savedQuote.cityFundingAmount !== undefined ? savedQuote.cityFundingAmount : documentFunding ? documentFunding.operationalAmount : 0;
+    var deliveryCost = savedQuote && savedQuote.estimatedDeliveryCost !== undefined ? savedQuote.estimatedDeliveryCost : documentFunding ? documentFunding.calculatedDeliveryCost : totals.subtotal;
+    var fundingStatement = state.fundingMode === "city" ? "Fully funded by City of Adelaide — no customer payment required."
+      : state.fundingMode === "mixed" ? "Co-funded by City of Adelaide and customer. Proposed customer contribution: " + money(customer.contribution) + " ex GST."
+      : "Customer-funded work. Proposed customer contribution: " + money(customer.contribution) + " ex GST.";
 
     var formatDate = window.UOS && window.UOS.imports && window.UOS.imports.formatDate;
     var formattedDate = formatDate ? formatDate(state.quoteDate) : (state.quoteDate || "—");
@@ -415,7 +514,7 @@ function hasLifecycleAction(actions, names) {
 
     var allRows = [];
     if (!state.lines.length) {
-      allRows.push('<tr><td colspan="4" style="text-align: center; color: var(--uos-text-muted); padding: 24px;">No items included in quotation.</td></tr>');
+    allRows.push('<tr><td colspan="3" style="text-align: center; color: var(--uos-text-muted); padding: 24px;">No items included in quotation.</td></tr>');
     } else if (state.viewMode === "summary") {
       var groups = getCategoryGroups();
       var summaryIdx = 0;
@@ -426,8 +525,7 @@ function hasLifecycleAction(actions, names) {
         allRows.push(
           '<tr>' +
             '<td>' + summaryIdx + '</td>' +
-            '<td><span class="uos-badge uos-badge--subtle">' + esc(grp.name) + '</span></td>' +
-            '<td><strong>' + esc(grp.name) + '</strong></td>' +
+        '<td><strong>' + esc(grp.name) + '</strong></td>' +
             '<td style="text-align: right; font-weight: 700;">' + money(grp.total) + '</td>' +
           '</tr>'
         );
@@ -441,7 +539,7 @@ function hasLifecycleAction(actions, names) {
         if (!grp.lines.length) return;
         allRows.push(
           '<tr class="uos-quote-sheet__section-row">' +
-            '<td colspan="4" style="background: #f8fafc; color: #0f172a; font-weight: 800; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; border-top: 2px solid #cbd5e1;">' +
+            '<td colspan="3" style="background: #f8fafc; color: #0f172a; font-weight: 800; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; border-top: 2px solid #cbd5e1;">' +
               esc(grp.name.toUpperCase()) +
             '</td>' +
           '</tr>'
@@ -453,7 +551,6 @@ function hasLifecycleAction(actions, names) {
           allRows.push(
             '<tr>' +
               '<td>' + itemIdx + '</td>' +
-              '<td><span class="uos-badge uos-badge--subtle">' + esc(line.category || grp.name) + '</span></td>' +
               '<td><strong>' + esc(cleanDescription(line.description)) + '</strong></td>' +
               '<td style="text-align: right; font-weight: 700;">' + money(line.total) + '</td>' +
             '</tr>'
@@ -462,7 +559,7 @@ function hasLifecycleAction(actions, names) {
       });
 
       if (renderedCount === 0) {
-        allRows = ['<tr><td colspan="4" style="text-align: center; color: var(--uos-text-muted); padding: 24px;">No items included in quotation.</td></tr>'];
+        allRows = ['<tr><td colspan="3" style="text-align: center; color: var(--uos-text-muted); padding: 24px;">No items included in quotation.</td></tr>'];
       }
     }
 
@@ -512,7 +609,7 @@ function hasLifecycleAction(actions, names) {
             '<div class="uos-quote-sheet__party">' +
               '<h4>Prepared For</h4>' +
               '<strong>' + esc(privacyDisplay(state.clientName, "clientName") || "—") + '</strong>' +
-              '<p>' + esc(state.address || "—") + '</p>' +
+              '<p>' + esc(privacyDisplay(state.address || "—", "quoteAddress")) + '</p>' +
               '<p>Email: ' + esc(privacyDisplay(state.email, "email") || "—") + '</p>' +
             '</div>' +
             '<div class="uos-quote-sheet__party">' +
@@ -540,7 +637,6 @@ function hasLifecycleAction(actions, names) {
           '<thead>' +
             '<tr>' +
               '<th>#</th>' +
-              '<th>Category</th>' +
               '<th>Description</th>' +
               '<th style="text-align: right;">Total (AUD)</th>' +
             '</tr>' +
@@ -569,19 +665,21 @@ function hasLifecycleAction(actions, names) {
         }
 
         pageHtml +=
-                '<dt>Subtotal Excl. GST</dt><dd>' + money(totals.subtotalExGst) + '</dd>' +
-                '<dt>GST (10%)</dt><dd>' + money(totals.gstAmount) + '</dd>' +
-          '<dt class="uos-quote-sheet__grand-total-label">Grand Total (Inc. GST)</dt>' +
-          '<dd class="uos-quote-sheet__grand-total-val">' + money(totals.grandTotal) + '</dd>' +
+                '<dt>' + (state.fundingMode ? 'Estimated work subtotal after allowances (ex GST)' : 'Subtotal Excl. GST') + '</dt><dd>' + money(totals.subtotalExGst) + '</dd>' +
+                (state.fundingMode ? '<dt>Estimated delivery cost (ex GST)</dt><dd>' + money(deliveryCost) + '</dd><dt>Applicable City of Adelaide funding (ex GST)</dt><dd>' + money(cityFunding) + '</dd><dt>Proposed customer contribution (ex GST)</dt><dd data-preview-contribution>' + money(customer.contribution) + '</dd>' : '') +
+                '<dt>' + (state.fundingMode ? 'Customer GST (10%)' : 'GST (10%)') + '</dt><dd data-preview-customer-gst>' + money(customer.gst) + '</dd>' +
+          '<dt class="uos-quote-sheet__grand-total-label">' + (state.fundingMode ? 'Customer amount payable (inc GST)' : 'Grand Total (Inc. GST)') + '</dt>' +
+          '<dd class="uos-quote-sheet__grand-total-val">' + money(customer.payable) + '</dd>' +
           '<dt>Deposits received</dt><dd data-preview-deposits>-' + money(ledger.depositPaid || 0) + '</dd>' +
           '<dt>All payments received</dt><dd data-preview-payments>-' + money(ledger.paid || 0) + '</dd>' +
-          '<dt class="uos-quote-sheet__balance-label">Balance due</dt><dd class="uos-quote-sheet__balance-value" data-preview-balance>' + money(ledger.balanceDue == null ? Math.max(0, totals.grandTotal - (ledger.paid || 0)) : ledger.balanceDue) + '</dd>' +
+          '<dt class="uos-quote-sheet__balance-label">Balance due</dt><dd class="uos-quote-sheet__balance-value" data-preview-balance>' + money(state.fundingMode ? Math.max(0, customer.payable - (ledger.paid || 0)) : ledger.balanceDue) + '</dd>' +
           '</dl>' +
             '</div>' +
           '</div>' +
 
           '<div class="uos-quote-sheet__terms">' +
-            '<h4>Terms & Conditions</h4>' +
+              (state.fundingMode ? '<p data-preview-funding-statement>' + esc(fundingStatement) + '</p><p>Customer agreement: ' + esc(UOS.ProgramQuotes.agreementStatus(customerQuote(totals))) + '</p>' : '') +
+              '<h4>Terms & Conditions</h4>' +
             '<p>' + esc(state.terms) + '</p>' +
           '</div>';
       }
@@ -597,6 +695,31 @@ function hasLifecycleAction(actions, names) {
     }
 
     previewContainer.innerHTML = '<div class="uos-quote-sheet-inner">' + pagesHtml.join("") + '</div>';
+  }
+
+  function prepareQuotePrint() {
+    var sheet = rootNode && rootNode.querySelector("[data-quote-preview-sheet]");
+    if (!sheet || !sheet.querySelector(".uos-quote-sheet-page")) return false;
+    var host = document.querySelector("[data-quote-print-host]");
+    if (!host) {
+      host = document.createElement("div");
+      host.className = "program-quote-print-host";
+      host.setAttribute("data-quote-print-host", "");
+      document.body.appendChild(host);
+    }
+    // Register drawers and module depots can be hidden or clipped during print.
+    // Print the current document at the body root, independent of that UI tree.
+    var copy = sheet.cloneNode(true);
+    Array.prototype.forEach.call(copy.querySelectorAll("[id]"), function (node) { node.removeAttribute("id"); });
+    host.replaceChildren(copy);
+    document.body.classList.add("is-printing-quote");
+    return true;
+  }
+
+  function cleanupQuotePrint() {
+    var host = document.querySelector("[data-quote-print-host]");
+    if (host) host.remove();
+    document.body.classList.remove("is-printing-quote");
   }
 
   function renderPaymentLedger() {
@@ -616,17 +739,19 @@ function hasLifecycleAction(actions, names) {
     if (paidNode) paidNode.textContent = money(summary.paid);
     if (balanceNode) balanceNode.textContent = money(summary.balance);
     var hasSavedQuote = Boolean(state.quoteId);
-    var payable = hasSavedQuote && ["Issued", "Accepted"].indexOf(state.status) >= 0;
+    var noCustomerPayment = state.fundingMode === "city";
+    if (noCustomerPayment && statusNode) statusNode.textContent = "No customer payment required";
+    var payable = !noCustomerPayment && hasSavedQuote && ["Issued", "Accepted"].indexOf(state.status) >= 0;
     if (form) {
       Array.prototype.forEach.call(form.elements, function (input) {
         if (input.matches("[data-payment-record]")) input.disabled = !payable;
-        else if (input.matches("[data-deposit-record]")) input.disabled = !hasSavedQuote || state.status === "Superseded";
-        else input.disabled = !hasSavedQuote;
+        else if (input.matches("[data-deposit-record]")) input.disabled = noCustomerPayment || !hasSavedQuote || state.status === "Superseded";
+        else input.disabled = noCustomerPayment || !hasSavedQuote;
       });
       var paymentDate = form.elements.paymentDate;
       if (paymentDate && !paymentDate.value) paymentDate.value = new Date().toISOString().slice(0, 10);
     }
-    if (formNote) formNote.textContent = !state.quoteId
+    if (formNote) formNote.textContent = noCustomerPayment ? "No customer payment required" : !state.quoteId
       ? "Save the Quote, then issue or accept it before recording payments."
       : payable ? "Payments and deposits are recorded against this Quote revision."
       : state.status === "Superseded" ? "Payments cannot be recorded against a superseded Quote."
@@ -657,6 +782,37 @@ function hasLifecycleAction(actions, names) {
     });
   }
 
+  function quoteLifecycleDate(quote, target) {
+    var ws = workspaceSnapshot();
+    var events = (ws && ws.entities.quoteEvents || []).filter(function (event) {
+      return event.quoteId === quote.id && event.payload && event.payload.newStatus === target;
+    }).sort(function (a, b) { return text(a.timestamp).localeCompare(text(b.timestamp)); });
+    return events.length ? events[0].timestamp : (quote.status === target ? quote.statusChangedAt || "" : "");
+  }
+  function quoteDisplayDate(value) {
+    if (!value) return "";
+    var date = new Date(value);
+    return isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", year: "numeric" }).format(date);
+  }
+  function quoteStatusPill(status) {
+    return '<span class="program-quote-status-pill program-quote-status-pill--slim" data-quote-state="' + esc(status) + '">' + esc(status) + '</span>';
+  }
+  function quoteCardDates(quote) {
+    var dates = [];
+    if (quote.status === "Draft") {
+      var saved = quoteDisplayDate(quote.updatedAt);
+      if (saved) dates.push("Saved " + saved);
+    } else {
+      var issued = quoteDisplayDate(quoteLifecycleDate(quote, "Issued"));
+      if (issued) dates.push("Issued " + issued);
+      if (["Accepted", "Declined", "Superseded"].indexOf(quote.status) >= 0) {
+        var resolved = quoteDisplayDate(quoteLifecycleDate(quote, quote.status));
+        if (resolved) dates.push(quote.status + " " + resolved);
+      }
+    }
+    if (!dates.length && quote.quoteDate) dates.push("Quote date " + quoteDisplayDate(quote.quoteDate));
+    return dates.join(" • ");
+  }
   function renderQuoteHistory() {
     if (!rootNode) return;
     var list = rootNode.querySelector("[data-quote-history-list]");
@@ -664,26 +820,22 @@ function hasLifecycleAction(actions, names) {
     if (!list) return;
     var quotes = projectQuoteHistory();
     if (count) count.textContent = quotes.length + (quotes.length === 1 ? " quote" : " quotes");
-    if (!state.selectedEntityId) {
-      list.innerHTML = '<p class="program-quote-history__empty">Select a delivery project to view its quote history.</p>';
-      return;
-    }
-    if (!quotes.length) {
-      list.innerHTML = '<p class="program-quote-history__empty">No saved quotes for this project yet.</p>';
+    if (!state.selectedEntityId || !quotes.length) {
+      list.innerHTML = '<p class="program-quote-history__empty">' + (state.selectedEntityId ? "No saved quotes for this project yet." : "Select a delivery project to view its quote history.") + '</p>';
       return;
     }
     list.innerHTML = quotes.map(function (quote) {
       var active = quote.id === state.quoteId;
       var label = quote.auditNumber || quote.quoteNumber || quote.id;
       return '<article class="program-quote-history__item' + (active ? ' is-active' : '') + '" role="listitem" data-quote-history-item="' + esc(quote.id) + '"' + (active ? ' aria-current="true"' : '') + '>' +
-        '<div><strong>' + esc(label) + '</strong><span>Revision ' + esc(quote.revision || 1) + ' · ' + esc(quote.status || "Draft") + '</span></div>' +
-        '<button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quote-load="' + esc(quote.id) + '"' + (active ? ' disabled aria-label="Currently loaded quote ' + esc(label) + '"' : ' aria-label="Load quote ' + esc(label) + '"') + '>' + (active ? "Loaded" : "Load") + '</button>' +
-      '</article>';
+        '<div class="program-quote-history__row">' + quoteStatusPill(quote.status || "Draft") + '<strong>' + esc(label) + '</strong><span>Revision ' + esc(quote.revision || 1) + '</span><span class="program-quote-history__dates">' + esc(quoteCardDates(quote)) + '</span></div>' +
+        '<button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quote-load="' + esc(quote.id) + '"' + (active ? ' disabled aria-label="Currently loaded quote ' + esc(label) + '"' : ' aria-label="Load quote ' + esc(label) + '"') + '>' + (active ? "Loaded" : "Load") + '</button></article>';
     }).join("");
   }
 
   function loadQuoteRecord(entity, quote) {
     var ws = workspaceSnapshot();
+    var customer = customerDetailsForProject(entity, ws);
     state.selectedEntityId = entity.id;
     state.quoteId = quote ? quote.id : "";
     state.auditNumber = quote ? quote.auditNumber || "" : "";
@@ -692,14 +844,16 @@ function hasLifecycleAction(actions, names) {
     state.status = quote ? quote.status || "Draft" : "Draft";
     state.revision = quote ? Number(quote.revision) || 1 : 1;
     state.quoteNumber = quote ? quote.quoteNumber || entity.id : entity.id;
-    state.clientName = quote ? quote.clientName || entity.title || entity.name || "" : entity.title || entity.name || entity.applicantName || "";
-    state.address = quote ? quote.address || "" : state.address;
-    state.email = quote ? quote.email || "" : state.email;
+    state.clientName = quote ? quote.clientName || "" : customer.name;
+    state.address = quote ? quote.address || "" : customer.address;
+    state.email = quote ? quote.email || "" : customer.email;
     state.preparedBy = quote ? quote.preparedBy || "" : state.preparedBy;
     state.quoteDate = quote ? quote.quoteDate || state.quoteDate : state.quoteDate;
     state.expiryDate = quote ? quote.expiryDate || state.expiryDate : state.expiryDate;
     state.discountRate = quote ? Number(quote.discountRate) || 0 : 0;
     state.contingencyRate = quote ? Number(quote.contingencyRate) || 0 : 0;
+    state.fundingMode = quote ? quote.fundingMode || null : "customer";
+    state.proposedCustomerContribution = quote && quote.proposedCustomerContribution != null ? Number(quote.proposedCustomerContribution) : null;
     state.scopeNotes = quote ? quote.scopeNotes || "" : "";
     state.terms = quote ? quote.terms || "" : "";
     var viewModel = quote && typeof window.UOS.ProgramQuotes.quoteViewModel === "function" ? window.UOS.ProgramQuotes.quoteViewModel(ws, quote.id) : null;
@@ -732,14 +886,13 @@ function hasLifecycleAction(actions, names) {
     var entity = project;
     if (!entity || !window.UOS.ProgramQuotes) return;
 
+    if (state.selectedEntityId !== entity.id) resetQuoteEditor();
     state.selectedEntityId = entity.id;
-    state.clientName = entity.title || entity.name || entity.applicantName || state.clientName;
-    state.address = model && typeof model.displayAddressForProject === "function" ? (model.displayAddressForProject(ws, entity) || state.address) : (entity.location || entity.address || state.address);
+    var customer = customerDetailsForProject(entity, ws);
+    state.clientName = customer.name;
+    state.address = customer.address;
+    state.email = customer.email;
     state.operationalAmount = window.UOS.ProgramBudget && ws.entities.annualBudgets.length ? window.UOS.ProgramBudget.projectAmount(ws, entity.id) : entity.funding && Number(entity.funding.operationalAmount) || 0;
-    if (entity.raw) {
-      state.email = entity.raw.email || entity.raw.emailAddress || state.email;
-    }
-
     var projectQuotes = (ws.entities.quotes || []).filter(function (quote) { return quote.projectId === entity.id; }).sort(function (a, b) { return String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")) || Number(b.revision || 1) - Number(a.revision || 1); });
     var latest = projectQuotes[0] || null;
     loadQuoteRecord(entity, latest);
@@ -762,7 +915,7 @@ function hasLifecycleAction(actions, names) {
     var tot = Math.round(qty * r * 100) / 100;
     state.lines.push({
       id: newId,
-      category: item.category || "Materials",
+      kind: item.kind || "Sundry", category: item.category || "Adjustment",
       description: item.description || "New Quote Item",
       unit: item.unit || "item",
       quantity: qty,
@@ -785,17 +938,22 @@ function hasLifecycleAction(actions, names) {
   function saveToWorkspace() {
     if (!state.selectedEntityId || !window.UOS || !window.UOS.ProgramQuotes || !window.UOS.ProgramApp || typeof window.UOS.ProgramApp.updateWorkspace !== "function") return Promise.resolve(null);
     var custom = state.lines.filter(function (line) { return line.sourceKind === "custom" && !line.readOnly; });
-    return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
-      return window.UOS.ProgramQuotes.saveDraft(workspace, {
+    var draftInput = JSON.parse(JSON.stringify({
         id: state.quoteId || undefined, projectId: state.selectedEntityId, quoteNumber: state.quoteNumber, revision: state.revision,
         clientName: state.clientName, address: state.address, email: state.email, preparedBy: state.preparedBy,
         quoteDate: state.quoteDate, expiryDate: state.expiryDate, discountRate: state.discountRate, contingencyRate: state.contingencyRate,
-        scopeNotes: state.scopeNotes, terms: state.terms, customLines: custom
-      });
+        scopeNotes: state.scopeNotes, terms: state.terms, customLines: custom,
+        fundingMode: state.fundingMode, proposedCustomerContribution: state.proposedCustomerContribution
+    }));
+    pendingDraftSaves += 1;
+    return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
+      // Capture the user's offer before asynchronous persistence re-renders the form.
+      if (!draftInput.id && state.selectedEntityId === draftInput.projectId) draftInput.id = state.quoteId || undefined;
+      return window.UOS.ProgramQuotes.saveDraft(workspace, draftInput);
     }).then(function (workspace) {
       state.workspace = workspace;
       var quote = workspace && workspace.entities.quotes.filter(function (item) { return item.projectId === state.selectedEntityId && item.status === "Draft"; }).sort(function (a, b) { return Number(b.revision) - Number(a.revision); })[0];
-      if (quote) {
+      if (quote && state.selectedEntityId === draftInput.projectId) {
         state.quoteId = quote.id;
         state.auditNumber = quote.auditNumber || "";
         state.status = quote.status;
@@ -803,7 +961,7 @@ function hasLifecycleAction(actions, names) {
         renderBuilder();
       }
       return workspace;
-    });
+    }).finally(function () { pendingDraftSaves -= 1; });
   }
 
   function onInput(event) {
@@ -814,6 +972,7 @@ function hasLifecycleAction(actions, names) {
     }
     var target = event.target;
     if (!target) return;
+    if (!target.isConnected) return;
 
     if (target.matches("[data-quote-num]")) state.quoteNumber = target.value;
     else if (target.matches("[data-quote-date]")) state.quoteDate = target.value;
@@ -828,6 +987,16 @@ function hasLifecycleAction(actions, names) {
       }
     }
     else if (target.matches("[data-quote-prepared]")) state.preparedBy = target.value;
+    else if (target.matches("[data-quote-funding-mode]")) {
+      if (["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0 || state.quoteId && UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return;
+      state.fundingMode = target.value;
+      if (state.fundingMode === "mixed" && state.proposedCustomerContribution == null) state.proposedCustomerContribution = suggestedCustomerAmount();
+    }
+    else if (target.matches("[data-quote-customer-contribution]")) {
+      if (!target.validity.valid || target.value === "") return;
+      if (["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0 || state.quoteId && UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return;
+      state.proposedCustomerContribution = Math.round(Number(target.value) * 100) / 100;
+    }
     else if (target.matches("[data-quote-discount]")) state.discountRate = num(target.value);
     else if (target.matches("[data-quote-contingency]")) state.contingencyRate = num(target.value);
     else if (target.matches("[data-quote-scope]")) state.scopeNotes = target.value;
@@ -859,8 +1028,39 @@ function hasLifecycleAction(actions, names) {
     saveToWorkspace();
   }
 
+  var revisionDialogPending = false;
+    var acceptDialogPending = false;
+    var issueDialogPending = false;
+  function confirmQuoteIssue() {
+    var node = document.createElement("div");
+    var source = document.createElement("div");
+    source.className = "program-quote-issue-funding";
+    var caption = document.createElement("span"); caption.textContent = "Funding source";
+    var value = document.createElement("strong");
+    value.textContent = { city: "City of Adelaide", customer: "Customer", mixed: "City of Adelaide and customer" }[state.fundingMode] || "Not selected";
+    source.appendChild(caption); source.appendChild(value); node.appendChild(source);
+    var missing = [];
+    if (!text(state.scopeNotes)) missing.push("Scope/Description is empty.");
+    if (!text(state.terms)) missing.push("Terms and Conditions are empty.");
+    if (missing.length) {
+      var warnings = document.createElement("div"); warnings.className = "program-quote-issue-warnings"; warnings.setAttribute("role", "alert");
+      missing.forEach(function (message) { var warning = document.createElement("p"); warning.textContent = message; warnings.appendChild(warning); });
+      var advice = document.createElement("p"); advice.textContent = "These sections will be blank on the issued quote. Cancel to complete them, or issue the quote with these sections empty.";
+      warnings.appendChild(advice); node.appendChild(warnings);
+    }
+    var note = document.createElement("p"); note.textContent = "Issuing locks this revision and offers it to the customer. Record acceptance when the customer agrees."; node.appendChild(note);
+    return UOS.dialogs.open({ title: "Issue Quote", node: node, modalClass: "program-quote-issue-dialog", actions: [{ label: "Cancel", value: false }, { label: "Issue quote", value: true, primary: true }] });
+  }
   function onClick(event) {
+    if (event.target.closest("[data-use-suggested-contribution]")) {
+      if (["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0 || state.quoteId && UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return;
+      state.proposedCustomerContribution = suggestedCustomerAmount();
+      renderBuilder(); saveToWorkspace(); return;
+    }
     var projectCard = event.target.closest("[data-quote-project-id]");
+    // A restored Register drawer may itself carry Quote project context. Only
+    // selection rows inside this Quote surface should consume its action clicks.
+    if (projectCard && !rootNode.contains(projectCard)) projectCard = null;
     // Match Calculator: expanding a row also selects and loads its project.
     if (projectCard && event.target.closest("[data-disclosure-toggle]")) {
       var quoteDisclosureToggle = event.target.closest("[data-disclosure-toggle]");
@@ -1002,20 +1202,47 @@ function hasLifecycleAction(actions, names) {
       window.UOS.ProgramApp.updateWorkspace(function (workspace) {
           return window.UOS.ProgramQuotes.refreshDraftFromCurrentCosts(workspace, state.quoteId, { confirmed: true });
       }).then(function () { populateClientFromEntity(state.selectedEntityId, true); });
-    } else if (issueBtn && state.quoteId) {
-      window.UOS.ProgramApp.updateWorkspace(function (workspace) {
-        return window.UOS.ProgramQuotes.issue(workspace, state.quoteId);
-      }).then(function () { populateClientFromEntity(state.selectedEntityId, true); });
+    } else if (issueBtn && state.selectedEntityId) {
+      if (issueDialogPending) return;
+      issueDialogPending = true;
+      saveToWorkspace().then(function () { return confirmQuoteIssue(); }).then(function (confirmed) {
+        if (!confirmed) return;
+        var quoteId = state.quoteId;
+        return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
+          return window.UOS.ProgramQuotes.issue(workspace, quoteId);
+        }).then(function () {
+          populateClientFromEntity(state.selectedEntityId, true);
+          window.UOS.dialogs.alert({ title: "Quote Issued", message: "The quote has been issued and is awaiting customer acceptance. When the customer agrees to this quote, click Accept to record their acceptance. Issuing does not record payment or schedule the work." });
+        });
+      }).catch(function (error) {
+        window.UOS.dialogs.alert({ title: "Quote Not Issued", message: error.message || "The quote could not be issued." });
+      }).finally(function () { issueDialogPending = false; });
     } else if (acceptBtn && state.quoteId) {
-      window.UOS.ProgramApp.updateWorkspace(function (workspace) {
+      if (acceptDialogPending) return;
+      acceptDialogPending = true;
+      UOS.dialogs.open({ title: "Accept Quote", message: "Record acceptance only when the customer has agreed to this quote. Payments and scheduling are recorded separately.", actions: [{ label: "Cancel", value: false }, { label: "Accept quote", value: true, variant: "primary" }] }).then(function (confirmed) {
+        if (!confirmed) return;
+        return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
         return window.UOS.ProgramQuotes.setStatus(workspace, state.quoteId, "Accepted");
-      }).then(function () { populateClientFromEntity(state.selectedEntityId, true); });
+      }).then(function () {
+        populateClientFromEntity(state.selectedEntityId, true);
+        window.UOS.dialogs.alert({ title: "Customer Acceptance Recorded", message: "Customer acceptance has been recorded for this quote. This confirms agreement to the quote; payments and scheduling are recorded separately." });
+      }).catch(function (error) {
+        window.UOS.dialogs.alert({ title: "Acceptance Not Recorded", message: error.message || "Customer acceptance could not be recorded." });
+      });
+      }).finally(function () { acceptDialogPending = false; });
     } else if (declineBtn && state.quoteId) {
       window.UOS.ProgramApp.updateWorkspace(function (workspace) {
         return window.UOS.ProgramQuotes.setStatus(workspace, state.quoteId, "Declined");
       }).then(function () { populateClientFromEntity(state.selectedEntityId, true); });
     } else if (revisionBtn && state.selectedEntityId && !revisionBtn.disabled) {
-      window.UOS.ProgramApp.updateWorkspace(function (workspace) {
+      if (revisionDialogPending) return;
+      revisionDialogPending = true;
+      var hasIssuedQuote = (workspaceSnapshot().entities.quotes || []).some(function (quote) { return quote.projectId === state.selectedEntityId && quote.status === "Issued"; });
+      var revisionConfirmation = hasIssuedQuote ? UOS.dialogs.open({ title: "Create Quote Revision", message: "This Project has an issued quote. Creating a revision leaves that quote issued. If you issue the new revision, the existing issued quote can become Superseded.", actions: [{ label: "Cancel", value: false }, { label: "Create revision", value: true, variant: "primary" }] }) : Promise.resolve(true);
+      revisionConfirmation.then(function (confirmed) {
+        if (!confirmed) return;
+        return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
         var entityQuotes = (workspace.entities.quotes || []).filter(function (q) { return q.projectId === state.selectedEntityId; });
         var latestQuote = entityQuotes.sort(function (a, b) { return Number(b.revision || 1) - Number(a.revision || 1); })[0];
 
@@ -1037,23 +1264,20 @@ function hasLifecycleAction(actions, names) {
         populateClientFromEntity(state.selectedEntityId, true);
         if (window.UOS && window.UOS.toast) window.UOS.toast("New Quote revision created.", "success");
       });
+      }).finally(function () { revisionDialogPending = false; });
     } else if (printBtn) {
-      var cleanup = function () {
-        document.body.classList.remove("is-printing-quote");
-        window.removeEventListener("afterprint", cleanup);
-      };
-      window.addEventListener("afterprint", cleanup);
-      document.body.classList.add("is-printing-quote");
+      if (!prepareQuotePrint()) return;
       window.requestAnimationFrame(function () {
         window.requestAnimationFrame(function () {
           window.print();
         });
       });
     } else if (saveBtn) {
-      saveToWorkspace();
-      if (window.UOS && window.UOS.dialogs && typeof window.UOS.dialogs.alert === "function") {
-        window.UOS.dialogs.alert({ title: "Quote Saved", message: "Quotation " + state.quoteNumber + " has been saved into the workspace." });
-      }
+      saveToWorkspace().then(function () {
+        window.UOS.dialogs.alert({ title: "Quote Saved", message: "Quotation " + state.quoteNumber + " has been saved into workspace." });
+      }).catch(function (error) {
+        window.UOS.dialogs.alert({ title: "Quote Not Saved", message: error.message || "The quote could not be saved." });
+      });
     } else {
       var viewModeBtn = event.target.closest("[data-quote-view-mode]");
       if (viewModeBtn) {
@@ -1268,11 +1492,8 @@ function hasLifecycleAction(actions, names) {
           '<span class="program-quote-project-card__loc-text">' + esc(locText) + '</span>' +
         '</div>' +
       '</div>' +
-      '<div class="program-quote-project-card__meta">' +
-        '<span class="program-card-pill program-card-pill--loc">' +
-          '<svg viewBox="0 0 24 24" aria-hidden="true" class="program-card-pill-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>' +
-          '<span>' + esc(quoteStatus) + '</span>' +
-        '</span>' +
+      '<div class="program-quote-project-card__meta">' + quoteStatusPill(quoteStatus) +
+        '<span>' + esc(latestQuote ? quoteCardDates(latestQuote) : "No saved quote") + '</span>' +
       '</div>';
 
       card.innerHTML = cardHtml;
@@ -1322,7 +1543,7 @@ function hasLifecycleAction(actions, names) {
   }
 
   function renderUI() {
-    rootNode = document.querySelector("[data-program-view='quotes']");
+    rootNode = document.querySelector("[data-program-view='quotes']") || rootNode;
     if (!rootNode) return;
 
     renderProjectsList();
@@ -1330,17 +1551,96 @@ function hasLifecycleAction(actions, names) {
     renderBuilder();
   }
 
-  function clearSelectedClient() {
+  function resetQuoteEditor() {
     state.selectedEntityId = "";
     state.quoteId = "";
     state.auditNumber = "";
     state.previousAuditNumber = "";
+    state.quoteNumber = "";
+    state.status = "Draft";
+    state.revision = 1;
     state.clientName = "";
     state.address = "";
     state.email = "";
+    state.preparedBy = "";
+    state.scopeNotes = "";
+    state.terms = "";
+    state.quoteDate = new Date().toISOString().slice(0, 10);
+    state.expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    state.discountRate = 0;
+    state.contingencyRate = 0;
+    state.operationalAmount = 0;
+    state.fundingMode = "customer";
+    state.proposedCustomerContribution = null;
     state.lines = [];
+    state.payments = [];
+  }
+
+  function clearSelectedClient() {
+    resetQuoteEditor();
     renderBuilder();
-    saveToWorkspace();
+  }
+
+  var quoteSectionNavigation = null;
+  function initQuoteSectionNavigation() {
+    var body = rootNode.querySelector(".program-quote-pane-body");
+    var rail = rootNode.querySelector(".program-quote-section-rail");
+    if (!body || !rail) return;
+    var headings = [1, 2, 3, 4, 5, 6].map(function (number) { return rootNode.querySelector("#quote-section-" + number); });
+    var buttons = Array.prototype.slice.call(rail.querySelectorAll("[data-quote-section-link]"));
+    var spacer = document.createElement("div");
+    spacer.className = "program-quote-section-scroll-space";
+    spacer.setAttribute("aria-hidden", "true");
+    body.appendChild(spacer);
+    var frame = null;
+    function reveal(button) {
+      var viewport = rail.getBoundingClientRect(), bounds = button.getBoundingClientRect();
+      if (bounds.left < viewport.left + 6) rail.scrollLeft -= viewport.left + 6 - bounds.left;
+      else if (bounds.right > viewport.right - 6) rail.scrollLeft += bounds.right - viewport.right + 6;
+    }
+    function update() {
+      frame = null;
+      if (!body.getClientRects().length || !body.clientHeight) return;
+      var last = headings[5], lastCard = last.closest(".program-quote-card");
+      var style = getComputedStyle(body);
+      var tail = Math.max(0, body.clientHeight - 12 - (lastCard.getBoundingClientRect().bottom - last.getBoundingClientRect().top) - (parseFloat(style.paddingBottom) || 0) - (parseFloat(style.rowGap) || 0));
+      var height = Math.ceil(tail) + "px";
+      if (spacer.style.height !== height) spacer.style.height = height;
+      var marker = body.getBoundingClientRect().top + body.clientTop + 12;
+      var current = 0;
+      headings.forEach(function (heading, index) {
+        if (heading.getBoundingClientRect().top <= marker + 1) current = index;
+      });
+      buttons.forEach(function (button, index) {
+        if (index === current) button.setAttribute("aria-current", "location");
+        else button.removeAttribute("aria-current");
+      });
+      reveal(buttons[current]);
+    }
+    function schedule() {
+      if (frame === null) frame = window.requestAnimationFrame(update);
+    }
+    rail.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-quote-section-link]");
+      if (!button || !rail.contains(button)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      update();
+      var heading = headings[Number(button.getAttribute("data-quote-section-link")) - 1];
+      var top = body.scrollTop + heading.getBoundingClientRect().top - body.getBoundingClientRect().top - body.clientTop - 12;
+      body.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+      schedule();
+    });
+    body.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    if (typeof ResizeObserver === "function") {
+      var observer = new ResizeObserver(schedule);
+      observer.observe(body);
+      observer.observe(rail);
+      headings.forEach(function (heading) { observer.observe(heading.closest(".program-quote-card")); });
+    }
+    quoteSectionNavigation = { schedule: schedule };
+    schedule();
   }
 
   function init() {
@@ -1348,22 +1648,34 @@ function hasLifecycleAction(actions, names) {
     rootNode = document.querySelector("[data-program-view='quotes']");
     if (!rootNode) return;
     initialized = true;
+    initQuoteSectionNavigation();
+    window.addEventListener("beforeprint", function () {
+      var workspace = workspaceSnapshot();
+      if (workspace && workspace.workspace.destination === "quotes") prepareQuotePrint();
+    });
+    window.addEventListener("afterprint", cleanupQuotePrint);
 
-    rootNode.addEventListener("input", onInput);
-    rootNode.addEventListener("change", function (event) {
+    document.addEventListener("input", function (event) {
+      if (event.target.closest("[data-program-view='quotes']")) onInput(event);
+    }, true);
+    document.addEventListener("change", function (event) {
+      if (!event.target.closest("[data-program-view='quotes']")) return;
       if (event.target.matches("[data-client-picker]")) {
         if (event.target.value) {
           populateClientFromEntity(event.target.value, false);
         } else {
           clearSelectedClient();
         }
-      } else {
+      } else if (event.target.matches("select")) {
         onInput(event);
       }
-    });
-    rootNode.addEventListener("click", onClick);
+    }, true);
+    document.addEventListener("click", function (event) {
+      if (event.target.closest("[data-program-view='quotes']")) onClick(event);
+    }, true);
     document.addEventListener("uos:privacy-changed", renderBuilder);
-    rootNode.addEventListener("submit", function (event) {
+    document.addEventListener("submit", function (event) {
+      if (!event.target.closest("[data-program-view='quotes']")) return;
       var form = event.target.closest("[data-payment-form]");
       if (!form) return;
       event.preventDefault();
@@ -1388,8 +1700,15 @@ function hasLifecycleAction(actions, names) {
 
     document.addEventListener("uos:program-ready", function (event) {
       var ws = event.detail && event.detail.workspace;
-      if (!ws || !ws.workspace || ws.workspace.destination !== "quotes") return;
-      state.workspace = ws;
+      if (!ws || !ws.workspace) return;
+    state.workspace = ws;
+    // Clear stale editor memory even when the Quote Builder is not open.
+    if (state.selectedEntityId && !(ws.entities && ws.entities.projects || []).some(function (project) { return project.id === state.selectedEntityId; })) {
+      resetQuoteEditor();
+      renderUI();
+    }
+    if (ws.workspace.destination !== "quotes") return;
+      if (pendingDraftSaves && ws.workspace.selectedProjectId === state.selectedEntityId) { renderBuilder(); return; }
       if (ws.entities) {
         var contextProjectId = ws.workspace && ws.workspace.selectedProjectId || "";
         var contextProject = (ws.entities.projects || []).find(function (project) { return project.id === contextProjectId; });

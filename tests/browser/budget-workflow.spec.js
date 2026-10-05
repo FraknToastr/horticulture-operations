@@ -5,6 +5,68 @@ test.beforeEach(async ({ page }) => {
   await suppressBackupModalForFunctionalTest(page);
 });
 
+test("Budget form and all eight actions persist through approval, closure and reload", async ({ page }) => {
+  await page.goto("/src/program-planner/nsa.html");
+  let child = page.frames().find((frame) => frame !== page.mainFrame());
+  await child.waitForFunction(() => window.UOS?.ProgramApp?.snapshot().phase === "ready");
+  await child.evaluate(async () => {
+    await window.UOS.ProgramApp.updateWorkspace((ws) => ws);
+    await window.UOS.ProgramApp.navigate("budget");
+  });
+  let frame = page.frameLocator("iframe");
+  await frame.locator('[data-budget-year]').selectOption("2026-27");
+  let form = frame.locator('[data-budget-inline-approve]');
+  const names = ["amount", "date", "actor", "approver", "reason", "evidence"];
+  const values = ["1250.5", "2026-09-23", "Recording officer", "Named authority", "Annual authority", "Council minutes 42"];
+  for (let index = 0; index < names.length; index++) await form.locator(`[name="${names[index]}"]`).fill(values[index]);
+  const actions = form.locator('[data-budget-persistent-actions] button');
+  await expect(actions).toHaveText(["Approve budget", "Allocate", "Reconcile year", "Adjust budget", "Transfer allocation", "Close year", "Record reopen decision", "Apply reopen"]);
+  for (let index = 1; index < 8; index++) await expect(actions.nth(index)).toBeDisabled();
+  await actions.first().click();
+  await expect(form.locator('input[readonly]')).toHaveCount(6);
+  await expect(actions.first()).toBeDisabled();
+  for (const action of ["allocate", "adjust", "transfer", "close"]) await expect(form.locator(`[data-budget-action="${action}"]`)).toBeEnabled();
+  await expect(form.locator('[data-budget-action="reconcile"]')).toBeDisabled();
+  await page.reload();
+  child = page.frames().find((item) => item !== page.mainFrame());
+  await child.waitForFunction(() => window.UOS?.ProgramApp?.snapshot().phase === "ready");
+  await child.evaluate(() => window.UOS.ProgramApp.navigate("budget"));
+  frame = page.frameLocator("iframe");
+  await frame.locator('[data-budget-year]').selectOption("2026-27");
+  form = frame.locator('[data-budget-inline-approve]');
+  for (let index = 0; index < names.length; index++) {
+    await expect(form.locator(`[name="${names[index]}"]`)).toHaveValue(values[index]);
+    await expect(form.locator(`[name="${names[index]}"]`)).toHaveAttribute("readonly", "");
+  }
+  await child.evaluate(async () => {
+    await window.UOS.ProgramApp.updateWorkspace((ws) => {
+      const budget = ws.entities.annualBudgets.find((item) => item.owner === "NSA" && item.financialYear === "2026-27");
+      return window.UOS.ProgramBudget.closeYear(ws, budget.id, { actor: "Recording officer", reason: "Close approved year", evidence: "Year report", date: "2026-09-30" });
+    });
+  });
+  await expect(form.locator('input[readonly]')).toHaveCount(6);
+  await expect(form.locator('[data-budget-action="reopen"]')).toBeEnabled();
+  for (const action of ["allocate", "adjust", "transfer", "close", "apply-reopen"]) await expect(form.locator(`[data-budget-action="${action}"]`)).toBeDisabled();
+  await form.locator('[data-budget-action="reopen"]').click();
+  const decision = frame.locator('[data-budget-form="reopen"]');
+  for (const [name, value] of Object.entries({ actor: "Recording officer", approver: "Named authority", reason: "Approve reopening", evidence: "Council minutes 43" })) await decision.locator(`[name="${name}"]`).fill(value);
+  await decision.locator('button[type="submit"]').click();
+  await expect(decision).toBeHidden();
+  await expect(form.locator('[data-budget-action="reopen"]')).toBeDisabled();
+  await expect(form.locator('[data-budget-action="apply-reopen"]')).toBeEnabled();
+  await form.locator('[data-budget-action="apply-reopen"]').click();
+  const application = frame.locator('[data-budget-form="apply-reopen"]');
+  await application.locator('button[type="submit"]').click();
+  await expect(application).toBeHidden();
+  await expect(form.locator('[data-budget-action="allocate"]')).toBeEnabled();
+  await expect(form.locator('[data-budget-action="apply-reopen"]')).toBeDisabled();
+  await expect(form.locator('[name="evidence"]')).toHaveValue("Council minutes 42");
+  await page.setViewportSize({ width: 480, height: 720 });
+  const row = form.locator('[data-budget-persistent-actions]');
+  await expect(row.locator('button')).toHaveCount(8);
+  expect(await row.evaluate((node) => ({ overflow: getComputedStyle(node).overflowX, wide: node.scrollWidth > node.clientWidth }))).toEqual({ overflow: "auto", wide: true });
+});
+
 test("Budget UI allocates to a Register record before any Project exists", async ({ page }) => {
   await page.goto("/src/program-planner/nsa.html");
   const child = page.frames().find((frame) => frame !== page.mainFrame());
@@ -104,11 +166,13 @@ test("Budget UI allocates to a Register record before any Project exists", async
   await approval.locator('[name="reason"]').fill("Annual approval");
   await approval.locator('[name="evidence"]').fill("Council approval record");
   await approval.locator('button[type="submit"]').click();
-  await expect(frame.locator('[data-budget-inline-approve]')).toHaveCount(0);
+  await expect(frame.locator('[data-budget-inline-approve]')).toBeVisible();
+  await expect(approval.locator('input[readonly]')).toHaveCount(6);
+  await expect(approval.locator('button[type="submit"]')).toBeDisabled();
   await expect(frame.locator('.program-budget__status')).toHaveAttribute("data-state", "open");
   await expect(frame.locator('[data-budget-header-amount]')).toHaveText("$1,000.00");
   await expect(frame.locator('.program-budget__approval-details')).toHaveCount(0);
-  await expect(approval).toBeHidden();
+  await expect(approval).toBeVisible();
   await child.evaluate(() => window.UOS.ProgramApp.navigate("register"));
   await expect(frame.locator('[data-program-view="register"]')).toBeVisible();
   await expect(frame.locator('[data-budget-header-unallocated]')).toBeVisible();
@@ -125,6 +189,7 @@ test("Budget UI allocates to a Register record before any Project exists", async
   await expect(projectBudget.locator('[data-register-budget-row="action"]')).toContainText("Budget");
   await expect(projectBudget.locator('[data-register-allocation-fy]')).toHaveText("FY 2026/27");
   await expect(projectBudget.locator('[data-register-budget-row="allocation"]')).toContainText("$0.00");
+  await expect(projectBudget.locator('[data-register-action="allocate-budget"]')).toHaveText("Allocate");
   await projectBudget.locator('[data-register-action="allocate-budget"]').click();
   const allocation = frame.locator('[data-budget-form="allocate"]');
   await expect(allocation.locator('[name="registerId"]')).toHaveValue("NSA-APP-BUDGET-UI");
@@ -140,6 +205,19 @@ test("Budget UI allocates to a Register record before any Project exists", async
   await allocation.locator('[name="evidence"]').fill("Allocation approval record");
   await allocation.locator('button[value="approved"]').click();
   await expect(projectBudget.locator('[data-register-allocation-amount]')).toHaveText("$600.00");
+  await expect(projectBudget.locator('[data-register-action="allocate-budget"]')).toHaveText("Adjust");
+  for (const amount of [-600, 600]) {
+    await child.evaluate(async amount => {
+      await window.UOS.ProgramApp.updateWorkspace(ws => {
+        const allocation = ws.entities.registerAllocations.find(item => item.registerId === 'NSA-APP-BUDGET-UI');
+        return window.UOS.ProgramBudget.adjustAllocation(ws, allocation.budgetId, allocation.registerId, {
+          amount, actor: 'Budget officer', approver: 'Budget authority', date: '2026-10-01', reason: 'Verify allocation label', evidence: 'Approved adjustment', financialYear: '2026-27'
+        });
+      });
+    }, amount);
+    await expect(projectBudget.locator('[data-register-action="allocate-budget"]')).toHaveText(amount < 0 ? 'Allocate' : 'Adjust');
+  }
+
   await expect(frame.locator('[data-budget-header-amount]')).toHaveText("$400.00");
   await projectBudget.locator('[data-register-action="allocate-budget"]').click();
   const draft = frame.locator('[data-budget-form="allocate"]');

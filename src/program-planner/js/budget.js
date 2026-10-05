@@ -118,34 +118,27 @@
       field("Reason", "reason", "text", values.reason) + field("Evidence", "evidence", "text", values.evidence);
   }
   function detail(label, value) { return '<div><dt>' + escapeHtml(label) + '</dt><dd>' + escapeHtml(value || "Not recorded") + '</dd></div>'; }
-  function newBudgetPanel() {
-    var draft = approvalDraft();
-    return '<form class="program-budget__approval-form" data-budget-form="create-and-approve" data-budget-inline-approve>' +
-      '<p class="program-budget__approval-intro">Record annual authority for ' + escapeHtml(yearLabel(state.year)) + '.</p>' +
-      '<div class="program-budget__approval-fields">' + moneyField(draft.amount) + field("Effective date", "date", "date", draft.date) + inlineAuthorityFields(draft) + '</div>' +
-      '<p class="program-budget__dialog-error" data-budget-dialog-error role="alert" hidden></p>' +
-      '<div class="program-budget__approval-actions"><button type="submit" class="uos-button uos-button--primary">Approve budget</button></div></form>';
-  }
-  function inlineBudgetPanel(budget) {
-    if (budget.status === "draft") {
-      var draft = approvalDraft();
-      return '<form class="program-budget__approval-form" data-budget-form="approve" data-budget-inline-approve data-budget-context="' + escapeHtml(JSON.stringify({ budgetId: budget.id })) + '">' +
-        '<p class="program-budget__approval-intro">Record the annual authority for ' + escapeHtml(yearLabel(budget.financialYear)) + '.</p>' +
-        '<div class="program-budget__approval-fields">' + moneyField(draft.amount) + field("Effective date", "date", "date", draft.date) + inlineAuthorityFields(draft) + '</div>' +
-        '<p class="program-budget__dialog-error" data-budget-dialog-error role="alert" hidden></p>' +
-        '<div class="program-budget__approval-actions"><button type="submit" class="uos-button uos-button--primary">Approve budget</button></div></form>';
-    }
-    var entry = approvalEntry(budget.id);
-    var details = entry ? '<dl class="program-budget__approval-details">' +
-      detail("Approved authority", amount(budget.approvedAmount)) + detail("Recording officer", entry.actor) + detail("Named approver", budget.approvedBy) +
-      detail("Reason", entry.reason) + detail("Evidence", entry.evidence) + detail("Effective date", UOS.imports && UOS.imports.formatDate ? UOS.imports.formatDate(entry.effectiveDate || text(entry.createdAt).slice(0, 10)) : (entry.effectiveDate || text(entry.createdAt).slice(0, 10))) + '</dl>' :
-      '<p class="program-budget__muted">Recorded approval details are unavailable for this imported year.</p>';
-    details = "";
-    return details +
-      (budget.reviewRequired ? button("reconcile", "Reconcile year", false) : "") +
-      (budget.status === "open" ? button("adjust", "Adjust budget", !!budget.reviewRequired) + button("transfer", "Transfer allocation", !!budget.reviewRequired) + button("close", "Close year", !!budget.reviewRequired) : "") +
-      (budget.status === "closed" ? (reopenAuthorisation(budget.id) ? button("apply-reopen", "Apply reopen", false) : button("reopen", "Record reopen decision", !!budget.reviewRequired)) : "");
-  }
+  function budgetActionRow(budget) {
+   var open = budget && budget.status === "open", closed = budget && budget.status === "closed";
+   var review = budget && budget.reviewRequired, authorised = closed && reopenAuthorisation(budget.id);
+   return '<div class="program-budget__persistent-actions" data-budget-persistent-actions>' +
+     '<button type="submit" class="uos-button uos-button--primary"' + (budget && budget.status !== "draft" ? ' disabled' : '') + '>Approve budget</button>' +
+     button("allocate", "Allocate", !open || !!review) + button("reconcile", "Reconcile year", !review) +
+     button("adjust", "Adjust budget", !open || !!review) + button("transfer", "Transfer allocation", !open || !!review) +
+     button("close", "Close year", !open || !!review) + button("reopen", "Record reopen decision", !closed || !!review || !!authorised) +
+     button("apply-reopen", "Apply reopen", !authorised || !!review) + '</div>';
+ }
+ function persistentBudgetPanel(budget) {
+   var approved = budget && budget.status !== "draft", entry = approved ? approvalEntry(budget.id) || {} : {};
+   var values = approved ? { amount: budget.approvedAmount, date: entry.effectiveDate || text(entry.createdAt).slice(0, 10), actor: entry.actor || "", approver: entry.approver || budget.approvedBy || "", reason: entry.reason || "", evidence: entry.evidence || "" } : approvalDraft();
+   var fields = moneyField(values.amount) + field("Effective date", "date", "date", values.date) + inlineAuthorityFields(values);
+   if (approved) fields = fields.replace(/<input /g, '<input readonly aria-readonly="true" ');
+   return '<form class="program-budget__approval-form" data-budget-form="' + (budget ? "approve" : "create-and-approve") + '" data-budget-inline-approve' + (budget ? ' data-budget-context="' + escapeHtml(JSON.stringify({ budgetId: budget.id })) + '"' : '') + '>' +
+     '<div class="program-budget__approval-fields">' + fields + '</div>' +
+     '<p class="program-budget__dialog-error" data-budget-dialog-error role="alert" hidden></p>' + budgetActionRow(budget) + '</form>';
+ }
+ function newBudgetPanel() { return persistentBudgetPanel(null); }
+ function inlineBudgetPanel(budget) { return persistentBudgetPanel(budget); }
   function closeDialog() { if (state.dialog && state.dialog.open) state.dialog.close(); }
   function showDialog(title, description, content, operation, context) {
     if (!state.dialog) {

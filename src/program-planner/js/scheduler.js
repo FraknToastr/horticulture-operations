@@ -3,7 +3,7 @@
 
   var UOS = window.UOS = window.UOS || {};
   var root;
-  var state = { workspace: null, jobs: [], visible: [], mode: "week", cursor: "", selectedId: "", selectedProjectId: "", panelMode: "projects", detail: false, scrollTop: 0, focusList: false, sourceFilter: "all" };
+  var state = { workspace: null, jobs: [], visible: [], calendarVisible: [], calendarScope: "application", mode: "week", cursor: "", selectedId: "", selectedProjectId: "", panelMode: "projects", detail: false, scrollTop: 0, focusList: false, sourceFilter: "all" };
   var schedulerAppConfig = UOS.ProgramAppConfig && typeof UOS.ProgramAppConfig.current === "function" ? UOS.ProgramAppConfig.current() : null;
   var SESSION_SCROLL_KEY = "uos.scheduler." + (schedulerAppConfig && schedulerAppConfig.appId || "legacy") + ".scrollTop";
   function readSessionScroll() { try { return Number(window.sessionStorage.getItem(SESSION_SCROLL_KEY)) || 0; } catch (error) { return 0; } }
@@ -176,13 +176,16 @@
   }
 
   function jobsForDay(date) {
-    return state.visible.filter(function (job) { return !job._unscheduled && job.startDate <= date && job.endDate >= date; });
+    return state.calendarVisible.filter(function (job) { return !job._unscheduled && job.startDate <= date && job.endDate >= date; });
+  }
+  function isCalendarJobInProject(job, project) {
+    return Boolean(job && project && job.projectId === project.id && job.owner === project.owner);
   }
 
-  function timeLabel(job) {
+ function timeLabel(job) {
     if (job._unscheduled || !job.startDate) return "Unscheduled";
-    if (job.startTime && job.endTime && !job.allDay) return job.startTime + " – " + job.endTime;
-    if (job.startTime && !job.endTime && !job.allDay) return "From " + job.startTime;
+ if (job.startTime && job.endTime) return job.startTime + " – " + job.endTime;
+ if (job.startTime && !job.endTime) return "From " + job.startTime;
     if (job.allDay) return "All day";
     return job.startTime && job.endTime ? job.startTime + " – " + job.endTime : "All day";
   }
@@ -195,12 +198,13 @@
     var button = document.createElement("button"); button.type = "button";
     var selected = job.id === state.selectedId;
     var activeProject = getProjectsForActiveOwner().find(function (project) { return project.id === state.selectedProjectId; }) || null;
-    var linked = Boolean(activeProject && isJobInProject(job, activeProject));
+    var linked = isCalendarJobInProject(job, activeProject);
+    selected = selected && linked;
     var jobProject = getProjectsForActiveOwner().find(function (project) { return isJobInProject(job, project); }) || null;
     var register = jobProject && getRecordById(jobProject.applicationId || jobProject.eventId);
     var contextLabel = [title(job), register && (register.title || register.name), jobProject && (jobProject.title || jobProject.name), timeLabel(job)].filter(Boolean).join(", ");
     button.className = "program-calendar-job " + (linked ? "is-linked-project" : "is-other-project") + (conflicts[job.id] ? " is-conflict" : "") + (selected ? " is-selected" : "");
-    button.setAttribute("data-scheduler-job", job.id); button.setAttribute("aria-label", contextLabel + (conflicts[job.id] ? ", Conflict: " + conflicts[job.id].join(", ") : ""));
+    button.setAttribute("data-scheduler-job", job.id); button.setAttribute("aria-label", contextLabel + (linked ? ", Edit job for the active application" : ", View read-only job summary") + (conflicts[job.id] ? ", Conflict: " + conflicts[job.id].join(", ") : ""));
     button.title = contextLabel;
     if (selected) button.setAttribute("aria-current", "true");
     var name = document.createElement("span"); name.className = "program-calendar-job__title"; name.textContent = title(job);
@@ -234,7 +238,7 @@
       calendar.parentNode.insertBefore(strip, calendar);
     }
     strip.replaceChildren();
-    var jobs = state.visible.filter(function (job) { return job._unscheduled; });
+    var jobs = state.calendarVisible.filter(function (job) { return job._unscheduled; });
     strip.hidden = jobs.length === 0;
     if (!jobs.length) return;
     var label = document.createElement("strong"); label.className = "program-scheduler-unscheduled__label"; label.textContent = "Unscheduled"; strip.appendChild(label);
@@ -595,35 +599,70 @@
     list.scrollTop = state.scrollTop;
     if (state.focusList && state.selectedId) { var selected = Array.prototype.find.call(list.querySelectorAll("[data-scheduler-job]"), function (node) { return node.getAttribute("data-scheduler-job") === state.selectedId; }); if (selected) selected.focus(); state.focusList = false; }
   }
-  function field(list, label, value) { var row = document.createElement("div"); var dt = document.createElement("dt"); var dd = document.createElement("dd"); dt.textContent = label; dd.textContent = text(value) || "Not set"; row.appendChild(dt); row.appendChild(dd); list.appendChild(row); }
-  function renderDetail(conflicts) {
+ function syncScheduleDateControls(form) {
+ if (!form) return;
+ var sameDay = form.elements.sameDay, startDate = form.elements.startDate, endDate = form.elements.endDate;
+ var same = Boolean(sameDay && sameDay.checked);
+ var endDateField = one("[data-scheduler-end-date]", form);
+ if (endDateField) endDateField.hidden = same;
+ if (same && startDate && endDate) endDate.value = startDate.value;
+ var allDay = form.elements.allDay;
+ all("[data-scheduler-timed]", form).forEach(function (node) { node.hidden = Boolean(allDay && allDay.checked); });
+ }
+ function renderDetail(conflicts) {
     var job = state.jobs.find(function (item) { return item.id === state.selectedId; });
     var listMode = one("[data-scheduler-list-mode]"); var detail = one("[data-scheduler-detail]");
-    state.detail = Boolean(state.detail && job); if (listMode) listMode.hidden = state.detail; if (detail) detail.hidden = !state.detail; if (!state.detail) return;
+    state.detail = Boolean(state.detail && job); if (listMode) listMode.hidden = state.detail; if (detail) detail.hidden = !state.detail; if (!state.detail) { state.editorJobId = ""; state.editorValues = []; return; }
     var badge = one("[data-scheduler-detail-badge]"); if (badge) { while (badge.firstChild) badge.removeChild(badge.firstChild); }
-    one("[data-scheduler-detail-owner]").textContent = workLabel(job) + " · " + job.id;
-    one("[data-scheduler-detail-title]").textContent = title(job);
+    var heading = one("[data-scheduler-detail-title]"), source = sourceLabel(job);
+    var destination = source === "Planner" ? "planner" : source === "Space Map" ? "map" : source === "Calculator" ? "costing" : "scheduler";
+    var sourceIcon = document.querySelector('[data-program-destination="' + destination + '"] svg');
+    heading.textContent = "";
+    if (sourceIcon) {
+      sourceIcon = sourceIcon.cloneNode(true);
+      sourceIcon.setAttribute("class", "program-scheduler-detail__source-icon");
+      sourceIcon.removeAttribute("aria-hidden");
+      sourceIcon.setAttribute("role", "img");
+      sourceIcon.setAttribute("aria-label", source + " source");
+      heading.appendChild(sourceIcon);
+    }
+    var headingName = document.createElement("span");
+    headingName.textContent = title(job);
+    heading.appendChild(headingName);
     var notices = one("[data-scheduler-conflicts]"); while (notices.firstChild) notices.removeChild(notices.firstChild);
     (conflicts[job.id] || []).forEach(function (label) { var notice = document.createElement("p"); notice.className = "program-conflict-notice"; notice.textContent = label; notices.appendChild(notice); });
     var form = one("[data-scheduler-form]");
     if (form) {
+      var signature = JSON.stringify([job.startDate, job.endDate, job.startTime, job.endTime, job.allDay, job.updatesApplicationStatus, job.crewId, job.location, job.status, job.priority]);
+      if (state.editorJobId === job.id && state.editorSignature === signature) {
+        (state.editorValues || []).forEach(function (saved) {
+          var field = form.elements[saved.name];
+          if (!field) return;
+          if (field.type === "checkbox") field.checked = saved.checked;
+          else field.value = saved.value;
+        });
+        syncScheduleDateControls(form);
+        return;
+      }
       ["startDate", "endDate", "startTime", "endTime", "crewId", "location", "status", "priority"].forEach(function (name) {
         if (form.elements[name]) form.elements[name].value = text(job[name]);
       });
-      var hasExplicitTimes = Boolean(job.startTime && job.endTime);
-      var isAllDay = job.allDay && !hasExplicitTimes;
-      if (form.elements.allDay) form.elements.allDay.checked = isAllDay;
-      all("[data-scheduler-timed]").forEach(function (node) { node.hidden = isAllDay; });
+ if (form.elements.allDay) form.elements.allDay.checked = Boolean(job.allDay);
+      if (form.elements.updatesApplicationStatus) form.elements.updatesApplicationStatus.checked = job.updatesApplicationStatus === true;
+ if (form.elements.sameDay) form.elements.sameDay.checked = !job.endDate || job.endDate === job.startDate;
+ syncScheduleDateControls(form);
+      state.editorJobId = job.id; state.editorSignature = signature;
+      captureEditorDraft();
       var formError = one("[data-scheduler-form-error]"); if (formError) { formError.hidden = true; formError.textContent = ""; }
     }
-    var fmt = window.UOS && window.UOS.imports && window.UOS.imports.formatDate;
-    var startDateStr = fmt ? fmt(job.startDate) : job.startDate;
-    var endDateStr = fmt ? fmt(job.endDate) : job.endDate;
-    var dateRangeStr = job.startDate === job.endDate ? startDateStr : startDateStr + " – " + endDateStr;
-    var fields = one("[data-scheduler-detail-fields]"); while (fields.firstChild) fields.removeChild(fields.firstChild);
-    field(fields, "Ownership", job.ownerLabel); field(fields, "Source", sourceLabel(job)); field(fields, "Category", category(job)); field(fields, "Status", status(job)); field(fields, "Date", dateRangeStr); field(fields, "Time", timeLabel(job)); field(fields, "Duration", job.allDay ? "All day" : Math.floor(job.durationMinutes / 60) + "h " + job.durationMinutes % 60 + "m"); field(fields, "Crew", crew(job)); field(fields, "Location", location(job));
+
   }
-  function updatePillPicker() {
+    function captureEditorDraft() {
+    var form = state.detail && one("[data-scheduler-form]");
+    if (!form) return;
+    state.editorValues = Array.prototype.filter.call(form.elements, function (field) { return Boolean(field.name); }).map(function (field) { return { name: field.name, value: field.value, checked: field.checked }; });
+  }
+function updatePillPicker() {
     var activeMode = activeOwner() === "EVT" ? "events" : "applications";
     Array.prototype.slice.call(document.querySelectorAll("[data-scheduler-pane-mode]")).forEach(function (btn) {
       var active = btn.getAttribute("data-scheduler-pane-mode") === activeMode;
@@ -636,6 +675,7 @@
   function render() {
     if (!root || !state.workspace || !model()) return;
     var scheduler = state.workspace.workspace && state.workspace.workspace.scheduler || {};
+    state.selectedProjectId = text(state.workspace.workspace.selectedProjectId || scheduler.selectedProjectId);
     state.mode = scheduler.mode === "month" ? "month" : "week";
     state.cursor = text(state.workspace.workspace.calendarCursor || scheduler.cursor) || today();
     state.selectedId = text(scheduler.selectedId || state.workspace.workspace.selectedEntityId);
@@ -656,7 +696,25 @@
     all("[data-scheduler-mode]").forEach(function (button) { button.setAttribute("aria-pressed", String(button.getAttribute("data-scheduler-mode") === state.mode)); });
     var sortSelect = one("[data-scheduler-sort]"); if (sortSelect) sortSelect.value = sort;
     updatePillPicker();
-    var conflicts = conflictMap(); renderCalendar(conflicts); renderUnscheduled(conflicts); renderList(conflicts); renderDetail(conflicts);
+    updateCalendarScope(scheduler); var conflicts = conflictMap(); renderCalendar(conflicts); renderUnscheduled(conflicts); renderList(conflicts); renderDetail(conflicts);
+  }
+  function updateCalendarScope(scheduler) {
+    var activeProject = getProjectsForActiveOwner().find(function (project) { return project.id === state.selectedProjectId; });
+    state.calendarScope = activeProject && scheduler.calendarScope !== "all" ? "application" : "all";
+    state.calendarVisible = state.visible.filter(function (job) { return state.calendarScope === "all" || isCalendarJobInProject(job, activeProject); });
+    var eventWorkspace = activeOwner() === "EVT";
+    all("[data-scheduler-calendar-scope]").forEach(function (button) {
+      var scope = button.getAttribute("data-scheduler-calendar-scope");
+      button.textContent = (scope === "all" ? "All " : "This ") + (eventWorkspace ? (scope === "all" ? "events" : "event") : (scope === "all" ? "applications" : "application"));
+      button.disabled = scope === "application" && !activeProject;
+      button.setAttribute("aria-pressed", String(scope === state.calendarScope));
+    });
+    var legend = one("[data-scheduler-calendar-legend]");
+    if (legend) {
+      legend.hidden = state.calendarScope !== "all" || !activeProject;
+      legend.querySelector("[data-scheduler-calendar-legend-active]").textContent = eventWorkspace ? "This event" : "This application";
+      legend.querySelector("[data-scheduler-calendar-legend-other]").textContent = eventWorkspace ? "Other events" : "Other applications";
+    }
   }
   function persist(changes) {
     if (!UOS.ProgramApp || typeof UOS.ProgramApp.updateWorkspace !== "function") return Promise.resolve(null);
@@ -679,11 +737,13 @@
     var job = state.jobs.find(function (item) { return item.id === id; });
     if (!job) return Promise.resolve(null);
     state.selectedId = id;
+    if (job.startDate) state.cursor = job.startDate;
     state.panelMode = "jobs";
     state.detail = true;
     render();
     return persist(function (scheduler) {
       scheduler.selectedId = id;
+      if (job.startDate) scheduler.cursor = job.startDate;
       scheduler.panelMode = "jobs";
       scheduler.detail = true;
       scheduler.inspectorMode = "detail";
@@ -697,12 +757,13 @@
       dialog = document.createElement("dialog");
       dialog.className = "program-data-dialog program-scheduler-summary-dialog";
       dialog.setAttribute("data-scheduler-other-project-summary", "");
-      dialog.innerHTML = '<div class="program-data-dialog__frame"><header><h2>Job summary</h2><button type="button" class="uos-button uos-button--subtle uos-button--sm" data-scheduler-summary-close aria-label="Close Job summary">Close</button></header><div class="program-data-dialog__body" data-scheduler-summary-body></div><footer><button type="button" class="uos-button uos-button--secondary" data-scheduler-summary-close>Return to calendar</button></footer></div>';
+      dialog.setAttribute("aria-labelledby", "scheduler-job-summary-title");
+      dialog.innerHTML = '<div class="program-data-dialog__frame"><header><h2 id="scheduler-job-summary-title">Job summary</h2><button type="button" class="uos-button uos-button--subtle uos-button--sm" data-scheduler-summary-close aria-label="Close Job summary">Close</button></header><div class="program-data-dialog__body" data-scheduler-summary-body></div><footer><button type="button" class="uos-button uos-button--secondary" data-scheduler-summary-close>Return to calendar</button></footer></div>';
       document.body.appendChild(dialog);
     }
     var body = dialog.querySelector("[data-scheduler-summary-body]");
     body.innerHTML = "";
-    [["Job", title(job)], ["Project", project && title(project)], ["Register", register && title(register)], ["Status", text(job.status) || "Draft"], ["Schedule", timeLabel(job) || "Not scheduled"]].forEach(function (entry) {
+    [["Job", title(job)], ["Source", sourceLabel(job)], ["Project", project && (title(project) + " · " + project.id)], [activeOwner() === "EVT" ? "Event" : "Application", register && (title(register) + " · " + register.id)], ["Job status", status(job)], ["Schedule", job._unscheduled ? "Unscheduled" : job.startDate + (job.endDate !== job.startDate ? " to " + job.endDate : "") + " · " + timeLabel(job)], ["Crew", crew(job)]].forEach(function (entry) {
       var row = document.createElement("section"), heading = document.createElement("strong"), value = document.createElement("p");
       heading.textContent = entry[0]; value.textContent = entry[1] || "Not recorded"; row.appendChild(heading); row.appendChild(value); body.appendChild(row);
     });
@@ -714,7 +775,8 @@
   function routeCalendarJob(id, trigger) {
     var job = state.jobs.find(function (item) { return item.id === id; });
     var activeProject = getProjectsForActiveOwner().find(function (item) { return item.id === state.selectedProjectId; });
-    if (job && activeProject && !isJobInProject(job, activeProject)) { showOtherProjectJobSummary(job, trigger); return Promise.resolve(null); }
+    if (!job || job.owner !== activeOwner()) return Promise.resolve(null);
+    if (!isCalendarJobInProject(job, activeProject)) { showOtherProjectJobSummary(job, trigger); return Promise.resolve(null); }
     return focusCalendarJob(id);
   }
   function selectProject(id, showJobs) {
@@ -747,15 +809,15 @@
     var values = new FormData(form);
     var startTimeVal = text(values.get("startTime"));
     var endTimeVal = text(values.get("endTime"));
-    var hasTimes = Boolean(startTimeVal && endTimeVal);
-    var allDayChecked = Boolean(form.elements.allDay && form.elements.allDay.checked);
-    var allDay = allDayChecked && !hasTimes;
+    var allDay = Boolean(form.elements.allDay && form.elements.allDay.checked);
+    var sameDay = Boolean(form.elements.sameDay && form.elements.sameDay.checked);
     var changes = {
       startDate: text(values.get("startDate")),
-      endDate: text(values.get("endDate") || values.get("startDate")),
+      endDate: sameDay ? text(values.get("startDate")) : text(values.get("endDate") || values.get("startDate")),
       allDay: allDay,
-      startTime: allDay ? "" : startTimeVal,
-      endTime: allDay ? "" : endTimeVal,
+      updatesApplicationStatus: Boolean(form.elements.updatesApplicationStatus && form.elements.updatesApplicationStatus.checked),
+ startTime: startTimeVal,
+ endTime: endTimeVal,
       crewId: text(values.get("crewId")),
       location: text(values.get("location")),
       priority: text(values.get("priority"))
@@ -778,7 +840,7 @@
       next.workspace.scheduler.detail = true;
       next.workspace.scheduler.inspectorMode = "detail";
       return next;
-    }).then(function () {
+    }, { source: "automatic", command: "Planner Job scheduled" }).then(function () {
       if (UOS.toast) UOS.toast("Schedule updated successfully.", "success");
     }).catch(function (error) {
       if (errorNode) {
@@ -789,40 +851,52 @@
     });
   }
   function deleteSelectedJob() {
-    var job = state.jobs.find(function (item) { return item.id === state.selectedId; });
+    var job = UOS.ProgramApp && (UOS.ProgramApp.workspace().entities.jobs || []).find(function (item) { return item.id === state.selectedId; });
     if (!job || !UOS.ProgramApp || !UOS.ProgramModel || typeof UOS.ProgramModel.deleteJob !== "function") return Promise.resolve(null);
-    function apply(deletePlannerTask) {
+    function apply(deletePlannerTask, deleteCostingLine) {
+      try {
+      UOS.ProgramModel.deleteJob(UOS.ProgramApp.workspace(), job.id, { deleteCostingLine: !!deleteCostingLine, deletePlannerTask: !!deletePlannerTask });
+      } catch (error) {
+        if (UOS.toast) UOS.toast(error.message, "error");
+        return Promise.resolve(null);
+      }
       return UOS.ProgramApp.updateWorkspace(function (workspace) {
-        var next = UOS.ProgramModel.deleteJob(workspace, job.id);
-        if (deletePlannerTask && job.sourceKind === "planner") {
-          var task = next.entities.tasks.find(function (item) { return item.id === job.sourceEntityId; });
-          if (task) task.suppressed = true;
-        }
-        return typeof UOS.ProgramModel.normalize === "function" ? UOS.ProgramModel.normalize(next) : next;
+        return UOS.ProgramModel.deleteJob(workspace, job.id, { deleteCostingLine: !!deleteCostingLine, deletePlannerTask: !!deletePlannerTask });
       }).then(function (saved) {
         state.selectedId = ""; state.detail = false; state.focusList = true; render();
-        if (UOS.toast) UOS.toast("Job deleted. Its polygon remains available to create another job.", "success");
+        if (UOS.toast) UOS.toast("Job deleted.", "success");
         return saved;
       });
     }
-    if (!UOS.dialogs || typeof UOS.dialogs.open !== "function") return apply(false);
+    if (!UOS.dialogs || typeof UOS.dialogs.open !== "function") return Promise.resolve(null);
     var linkedTask = job.sourceKind === "planner" && (UOS.ProgramApp.workspace().entities.tasks || []).find(function (item) { return item.id === job.sourceEntityId; });
-    var option = null;
+    var option = document.createElement("div");
+    var costingCount = (UOS.ProgramApp.workspace().entities.costingLines || []).filter(function (line) { return line.jobId === job.id; }).length;
+    if (costingCount) option.innerHTML = '<label class="scheduler-delete-task-option"><input type="checkbox" data-scheduler-delete-costing-line> Also delete its Resource Calculator ' + (costingCount === 1 ? 'item' : 'items') + '</label>';
     if (linkedTask) {
-      option = document.createElement("label");
-      option.className = "uos-field";
-      option.innerHTML = '<input type="checkbox" data-scheduler-delete-planner-task> Also delete its Planner task';
+      option.innerHTML += '<input type="checkbox" data-scheduler-delete-planner-task> Also delete its Planner task';
     }
     return UOS.dialogs.open({
       title: "Delete job?",
-      message: "This deletes the Job and its related costing and draft quote records. Its source polygon will remain mapped.",
+      message: "Delete this Job? Retained Resource Calculator items will have their automatic job creation suspended. Source polygons remain mapped.",
       node: option,
+      modalClass: "uos-modal--scheduler-delete",
       actions: [{ label: "Keep job", value: false }, { label: "Delete job", value: true, danger: true }]
     }).then(function (confirmed) {
-      return confirmed ? apply(Boolean(option && option.querySelector("input").checked)) : null;
+      return confirmed ? apply(Boolean(option.querySelector("[data-scheduler-delete-planner-task]") && option.querySelector("[data-scheduler-delete-planner-task]").checked), Boolean(option.querySelector("[data-scheduler-delete-costing-line]") && option.querySelector("[data-scheduler-delete-costing-line]").checked)) : null;
     });
   }
   function onClick(event) {
+    var calendarScope = event.target.closest("[data-scheduler-calendar-scope]");
+    if (calendarScope) {
+      var nextScope = calendarScope.getAttribute("data-scheduler-calendar-scope");
+      if (!calendarScope.disabled && ["application", "all"].indexOf(nextScope) >= 0) {
+        persist(function (scheduler) { scheduler.calendarScope = nextScope; }).catch(function (error) {
+          if (UOS.toast) UOS.toast(error.message || "Calendar view could not be saved.", "error");
+        });
+      }
+      return;
+    }
     /* Shared mini-drawer contract: selection may rebuild the list, so run it
        after the single opening motion and inherit the settled open state. */
     var schedulerDisclosureToggle = event.target.closest("[data-disclosure-toggle]");
@@ -930,7 +1004,14 @@
         renderList(conflictMap());
       }
     });
-    document.addEventListener("click", onClick); document.addEventListener("change", function (event) { var source = event.target.closest("[data-scheduler-source-filter]"); if (source) { state.sourceFilter = source.value || "all"; render(); return; } var input = event.target.closest("[data-scheduler-filter]"); if (input) setFilter(input.getAttribute("data-scheduler-filter"), input.value); var sort = event.target.closest("[data-scheduler-sort]"); if (sort) setSort(sort.value); var allDay = event.target.closest('[name="allDay"]'); if (allDay) all("[data-scheduler-timed]").forEach(function (node) { node.hidden = allDay.checked; }); }); root.addEventListener("keydown", onKeydown);
+    var calendarHeader = one(".program-scheduler-head");
+    if (calendarHeader && window.ResizeObserver) {
+      new ResizeObserver(function () {
+        root.style.setProperty("--scheduler-header-height", calendarHeader.getBoundingClientRect().height + "px");
+      }).observe(calendarHeader);
+    }
+    root.addEventListener("input", captureEditorDraft); root.addEventListener("change", captureEditorDraft);
+    document.addEventListener("click", onClick); document.addEventListener("change", function (event) { var source = event.target.closest("[data-scheduler-source-filter]"); if (source) { state.sourceFilter = source.value || "all"; render(); return; } var input = event.target.closest("[data-scheduler-filter]"); if (input) setFilter(input.getAttribute("data-scheduler-filter"), input.value); var sort = event.target.closest("[data-scheduler-sort]"); if (sort) setSort(sort.value); var allDay = event.target.closest('[name="allDay"]'); var sameDay = event.target.closest('[name="sameDay"]'); var startDate = event.target.closest('[name="startDate"]'); if (allDay || sameDay || startDate) syncScheduleDateControls(event.target.closest("[data-scheduler-form]")); }); root.addEventListener("keydown", onKeydown);
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && state.detail && !event.defaultPrevented) { event.preventDefault(); backToList(); }
     });

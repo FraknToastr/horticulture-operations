@@ -146,11 +146,20 @@
       return "horticulture-" + owner + "-" + kind + "-" + dateStamp + "-" + timeStamp + "-v5." + extension;
     }
     function downloadJson() {
-      var workspace = getWorkspace();
-      UOS.imports.download(exportName("workspace-backup", "json"), UOS.ProgramData.exportJson(workspace, appIdentity()), "application/json;charset=utf-8");
-      acknowledgeBackupReminder();
-      set("[data-program-data-status]", "Portable schema-v5 JSON workspace backup downloaded."); closeExport();
-      return Math.max(0, Number(workspace && workspace.workspaceRevision) || 0);
+      var app = UOS.ProgramApp;
+      var source = app && typeof app.workspaceBackup === "function" ? app.workspaceBackup() : Promise.resolve(getWorkspace());
+      return source.then(function (workspace) {
+        var recovery = app && app.snapshot().startupRecovery;
+        var contents = recovery ? JSON.stringify(workspace, null, 2) : UOS.ProgramData.exportJson(workspace, appIdentity());
+        UOS.imports.download(exportName("workspace-backup", "json"), contents, "application/json;charset=utf-8");
+        acknowledgeBackupReminder();
+        set("[data-program-data-status]", recovery ? "Original stored workspace downloaded for recovery." : "Portable schema-v5 JSON workspace backup downloaded.");
+        closeExport();
+        return Math.max(0, Number(workspace && workspace.workspaceRevision) || 0);
+      }).catch(function (error) {
+        set("[data-program-data-status]", "Backup failed: " + (error.message || error));
+        return null;
+      });
     }
     function downloadBundle() {
       UOS.imports.download(exportName("handoff", "zip"), UOS.ProgramData.exportBundle(getWorkspace(), appIdentity()), "application/zip");
@@ -241,10 +250,15 @@
     }
 
     function backupBeforeDelete() {
-      deletionBackupRevision = downloadJson();
-      var confirm = one("[data-program-delete-confirm]");
-      if (confirm) { confirm.disabled = false; confirm.removeAttribute("aria-describedby"); }
-      set("[data-program-data-status]", "Backup downloaded. You may now confirm deletion of this exact workspace revision.");
+      var backup = one("[data-program-delete-backup]");
+      if (backup) backup.disabled = true;
+      return downloadJson().then(function (revision) {
+        if (revision == null) return;
+        deletionBackupRevision = revision;
+        var confirm = one("[data-program-delete-confirm]");
+        if (confirm) { confirm.disabled = false; confirm.removeAttribute("aria-describedby"); }
+        set("[data-program-data-status]", "Backup downloaded. You may now confirm deletion of this exact workspace revision.");
+      }).finally(function () { if (backup) backup.disabled = false; });
     }
 
     function confirmDelete() {

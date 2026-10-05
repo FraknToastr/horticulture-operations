@@ -584,6 +584,8 @@ function runAfterOpen(key, callback) {
     document.addEventListener("keydown", function (event) {
       var toggleNode = event.target.closest && event.target.closest("[data-disclosure-toggle]");
       if (event.key === "Escape") {
+        // Each Tools drawer owns Escape before the outer Register drawer.
+        if (event.target.closest && event.target.closest("[data-calculator-tools]:not([hidden]),[data-costing-tools]:not([hidden])")) return;
         var context = event.target.closest && event.target.closest("[data-disclosure-drawer],[data-disclosure-toggle]");
         var contextKey = context && context.getAttribute ? context.getAttribute("data-disclosure-key") : "";
         var contextScope = contextKey ? disclosureScope(context, contextKey) : "";

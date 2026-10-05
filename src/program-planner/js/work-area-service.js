@@ -148,8 +148,8 @@
       return text(item.sourceGeometryId) === geometry.id || job && text(item.jobId) === job.id;
     });
     if (lines.length > 1) throw commandError("WORK_LINEAGE_COSTING_CARDINALITY", "Work Geometry must have exactly one canonical CostingLine.", { geometryId: geometry.id, jobIds: sortedIds(relatedJobs), costingLineIds: sortedIds(lines) });
-    if (relatedLines.length !== lines.length || lines.length && (!job || text(lines[0].jobId) !== job.id)) throw commandError("WORK_LINEAGE_INCONSISTENT", "Work Geometry CostingLine lineage is inconsistent.", { geometryId: geometry.id, jobIds: sortedIds(relatedJobs), costingLineIds: sortedIds(relatedLines), relatedIds: sortedIds(relatedLines) });
-    if (Boolean(job) !== Boolean(lines.length)) throw commandError("WORK_LINEAGE_INCOMPLETE", "Work Geometry lineage is incomplete.", { geometryId: geometry.id, jobIds: sortedIds(jobs), costingLineIds: sortedIds(lines) });
+    if (relatedLines.length !== lines.length || lines.length && (text(lines[0].jobId) !== text(job && job.id))) throw commandError("WORK_LINEAGE_INCONSISTENT", "Work Geometry CostingLine lineage is inconsistent.", { geometryId: geometry.id, jobIds: sortedIds(relatedJobs), costingLineIds: sortedIds(relatedLines), relatedIds: sortedIds(relatedLines) });
+    if (job && !lines.length || lines.length && !job && lines[0].workCommandVersion !== 1 && !lines[0].jobCreationSuspended) throw commandError("WORK_LINEAGE_INCOMPLETE", "Work Geometry lineage is incomplete.", { geometryId: geometry.id, jobIds: sortedIds(jobs), costingLineIds: sortedIds(lines) });
     if (job && (job.owner !== geometry.owner || job.projectId !== geometry.projectId)) throw commandError("WORK_LINEAGE_OWNER_MISMATCH", "Geometry and Job ownership must agree.", { geometryId: geometry.id, jobIds: sortedIds(jobs), costingLineIds: sortedIds(lines) });
     if (job && (lines[0].owner !== geometry.owner || lines[0].projectId !== geometry.projectId)) throw commandError("WORK_LINEAGE_INCONSISTENT", "Geometry and CostingLine ownership must agree.", { geometryId: geometry.id, jobIds: sortedIds(jobs), costingLineIds: sortedIds(lines), relatedIds: sortedIds(lines) });
     return { job: job, line: lines[0] || null };
@@ -236,11 +236,17 @@
   }
   function removeGeometry(inputWorkspace, geometryId) {
     var model = modelDependency(), workspace = clone(inputWorkspace), geometry = geometryForCommand(workspace, geometryId), lineage = canonicalLineage(workspace, geometry);
+    if (lineage.line && lineage.line.workCommandVersion === 1) {
+      workspace = dependencies().costing.removeLine(workspace, lineage.line.id);
+      workspace.entities.geometries = workspace.entities.geometries.filter(function (item) { return item.id !== geometry.id; });
+      return model.normalize(workspace);
+    }
     if (lineage.job && lineage.line) return removeGeometryWork(inputWorkspace, geometryId);
     workspace.entities.geometries = workspace.entities.geometries.filter(function (item) { return item.id !== geometry.id; });
     return workspace;
   }
-  function syncGeometry(inputWorkspace, geometryId) {
+  function syncGeometry(inputWorkspace, geometryId, options) {
+    options = options || {};
     var deps = dependencies();
     var workspace = clone(inputWorkspace);
     var geometry = find(workspace.entities.geometries, text(geometryId), "Geometry");
@@ -286,6 +292,30 @@
     }
 
     var oldJob = lineage.job;
+    if (lineage.line && lineage.line.workCommandVersion !== 1 && lineage.line.jobCreationSuspended) {
+      if (options.explicit) return syncGeometry(deps.costing.recreateWorkJob(workspace, lineage.line.id), geometry.id, options);
+      var suspendedQuantity = deps.model.spatialQuantityForRate({ unit: lineage.line.unit, quantityMode: "m2", quantityKind: "area", active: true }, authoritative.areaSqM);
+      workspace = deps.costing.updateLine(workspace, lineage.line.id, { quantity: suspendedQuantity });
+      var suspendedLine = find(workspace.entities.costingLines, lineage.line.id, "Costing line");
+      suspendedLine.sourceAreaSqM = authoritative.areaSqM;
+      state(find(workspace.entities.geometries, geometry.id, "Geometry"), "job-required", "Job creation is suspended. Use Create a Job to recreate draft work.");
+      return workspace;
+    }
+    // Existing aggregate/assigned mapped work retains its historical model.
+    // Every new lineage and subsequent synchronization uses the command owner.
+    if (!lineage.line || lineage.line.workCommandVersion === 1) {
+      var canonical = deps.costing.createWork(workspace, project.id, rate.id, measured, {
+        geometryId: geometry.id, explicit: options.explicit === true,
+        quantityOverride: lineage.line && text(lineage.line.rateItemId) === rate.id
+          ? deps.model.spatialQuantityForRate({ unit: lineage.line.unit, quantityMode: "m2", quantityKind: "area", active: true }, authoritative.areaSqM) : quantity,
+        sourceAreaSqM: authoritative.areaSqM, sourceWorkTypeKey: key
+      });
+      var canonicalGeometry = find(canonical.entities.geometries, geometry.id, "Geometry");
+      canonicalGeometry.rateItemId = rate.id;
+      canonicalGeometry.payload.rateItemId = rate.id;
+      state(canonicalGeometry, canonicalGeometry.workRemoved ? "work-removed" : "synced", canonicalGeometry.workRemoved ? "Work deliberately removed. Use Create a Job to create fresh work." : "Mapped costing synchronized.");
+      return canonical;
+    }
     var jobId = oldJob ? oldJob.id : deps.model.stableId(project.owner, "job", geometry.id);
     if (!oldJob && Object.keys(workspace.entities).some(function (collection) { return Array.isArray(workspace.entities[collection]) && workspace.entities[collection].some(function (item) { return item && item.id === jobId; }); })) throw commandError("WORK_LINEAGE_ID_CONFLICT", "Deterministic mapped Job ID is already occupied.", { geometryId: geometry.id, jobIds: [jobId] });
     var job = oldJob ? clone(oldJob) : {

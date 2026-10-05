@@ -17,6 +17,77 @@
   var positionedKey = "";
   var lockedFloorHeight = null;
 
+  var quotePosition = null;
+  var costingPosition = null;
+
+  function costingContext(root) {
+    return contextRecord(UOS.ProgramApp && UOS.ProgramApp.workspace()) + ":" + root.getAttribute("data-costing-position-context");
+  }
+  function captureCostingPosition() {
+    var root = roots.costing || document.querySelector('[data-program-view="costing"]');
+    if (!root || !root.isConnected || root.hidden || root.closest("[hidden]")) return null;
+    var context = costingContext(root);
+    if (costingPosition && costingPosition.root === root && costingPosition.context === context) return costingPosition;
+    costingPosition = { root: root, context: context, scrolls: Array.prototype.map.call(root.querySelectorAll(".program-cost-table-wrap,.program-calculator-table-wrap"), function (node) { return { node: node, top: node.scrollTop, left: node.scrollLeft }; }) };
+    return costingPosition;
+  }
+  function restoreCostingPosition(saved) {
+    saved = saved || costingPosition;
+    if (!saved) return;
+    var root = saved.root, workspace = UOS.ProgramApp && UOS.ProgramApp.workspace();
+    if (!workspace || workspace.workspace.destination !== "costing" || costingContext(root) !== saved.context) { costingPosition = null; return; }
+    // Register rebuilding temporarily detaches the module. Restore once mounted.
+    if (!root.isConnected || root.hidden || root.closest("[hidden]")) return;
+    saved.scrolls.forEach(function (item) { if (root.contains(item.node)) { item.node.scrollTop = item.top; item.node.scrollLeft = item.left; } });
+    if (costingPosition === saved) costingPosition = null;
+  }
+  function quoteContext(root) {
+    var workspace = UOS.ProgramApp && UOS.ProgramApp.workspace();
+    return contextRecord(workspace) + ":" + root.getAttribute("data-quote-position-context");
+  }
+  function nodePath(node, root) {
+    var parts = [];
+    while (node && node !== root) {
+      var parent = node.parentElement;
+      if (!parent) return null;
+      parts.unshift(":nth-child(" + (Array.prototype.indexOf.call(parent.children, node) + 1) + ")");
+      node = parent;
+    }
+    return parts.length ? ":scope > " + parts.join(" > ") : null;
+  }
+  function captureQuotePosition() {
+    var root = roots.quotes || document.querySelector('[data-program-view="quotes"]');
+    if (!root || !root.isConnected || root.hidden || root.closest("[hidden]")) return null;
+    var nodes = [root].concat(Array.prototype.slice.call(root.querySelectorAll("*")));
+    var scrolls = nodes.filter(function (node) { var css = global.getComputedStyle(node); return /auto|scroll/.test(css.overflowX + css.overflowY) && (node.scrollHeight > node.clientHeight || node.scrollWidth > node.clientWidth); }).map(function (node) { return { node: node, path: nodePath(node, root), top: node.scrollTop, left: node.scrollLeft }; });
+    var active = document.activeElement, focus = null;
+    if (active && root.contains(active)) {
+      var line = active.closest("[data-line-id]");
+      var selector = line && active.hasAttribute("data-line-field") ? '[data-line-id="' + CSS.escape(line.getAttribute("data-line-id")) + '"] [data-line-field="' + CSS.escape(active.getAttribute("data-line-field")) + '"]' : nodePath(active, root);
+      focus = { node: active, selector: selector, start: active.selectionStart, end: active.selectionEnd, direction: active.selectionDirection };
+    }
+    var saved = { root: root, context: quoteContext(root), scrolls: scrolls, focus: focus };
+    quotePosition = saved;
+    return saved;
+  }
+  function restoreQuotePosition(saved) {
+    saved = saved || quotePosition;
+    if (!saved) return;
+    var root = roots.quotes || document.querySelector('[data-program-view="quotes"]');
+    var workspace = UOS.ProgramApp && UOS.ProgramApp.workspace();
+    if (!root || root.hidden || !root.isConnected || root.closest("[hidden]") || moduleKey(workspace && workspace.workspace.destination) !== "quotes" || quoteContext(root) !== saved.context) { if (quotePosition === saved) quotePosition = null; return; }
+    var focused = document.activeElement;
+    if (saved.focus && !document.querySelector("dialog[open]") && (focused === document.body || focused === saved.focus.node || root.contains(focused))) {
+      var target = root.contains(saved.focus.node) ? saved.focus.node : saved.focus.selector && root.querySelector(saved.focus.selector);
+      if (target && !target.disabled && target.getClientRects().length && (focused === document.body || focused === saved.focus.node)) {
+        target.focus({ preventScroll: true });
+        if (saved.focus.start != null && target.setSelectionRange) target.setSelectionRange(saved.focus.start, saved.focus.end, saved.focus.direction || "none");
+      }
+    }
+    saved.scrolls.forEach(function (item) { var target = root.contains(item.node) ? item.node : item.path && root.querySelector(item.path); if (target) { target.scrollTop = item.top; target.scrollLeft = item.left; } });
+    if (quotePosition === saved) quotePosition = null;
+  }
+
   function moduleKey(value) { return value === "location" ? "map" : String(value || ""); }
   function isModule(value) { return KEYS.indexOf(moduleKey(value)) >= 0; }
   function tableFrame() { return document.querySelector(".program-register-main-pane > .program-table-wrap"); }
@@ -118,6 +189,7 @@
     document.body.removeAttribute("data-register-module-navigation-pending");
 
     if (moduleChanged && key === "scheduler" && UOS.ProgramSchedulerUI && typeof UOS.ProgramSchedulerUI.render === "function") UOS.ProgramSchedulerUI.render();
+    if (moduleChanged && key === "costing" && UOS.ProgramCostingController && typeof UOS.ProgramCostingController.update === "function") UOS.ProgramCostingController.update(workspace);
     if (moduleChanged && key === "map" && UOS.ProgramMapController && typeof UOS.ProgramMapController.render === "function") UOS.ProgramMapController.render();
     var disclosure = UOS.ProgramDisclosureRows;
     if ((contextChanged || navigationRequested === true) && disclosure && !disclosure.isOpen("register:" + recordId)) disclosure.open("register:" + recordId);
@@ -139,6 +211,8 @@
       sync(latest, navigation);
       syncOpenDrawer();
       fitBudgetFloor();
+      restoreQuotePosition();
+      restoreCostingPosition();
     });
   }
 
@@ -287,7 +361,7 @@
 
   UOS.ProgramDrawerWorkspace = {
     modules: KEYS.slice(), isModule: isModule, moduleKey: moduleKey,
-    sync: sync, requestSync: requestSync, applyViewportFloor: applyViewportFloor
+    sync: sync, requestSync: requestSync, applyViewportFloor: applyViewportFloor, captureQuotePosition: captureQuotePosition, restoreQuotePosition: restoreQuotePosition, captureCostingPosition: captureCostingPosition, restoreCostingPosition: restoreCostingPosition
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
   else init();

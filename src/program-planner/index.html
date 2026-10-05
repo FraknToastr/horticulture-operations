@@ -14,16 +14,16 @@
   </script>
   <title>Horticulture Program Planner · U-OS</title>
   <link rel="icon" href="../shared/assets/uos-grid-arrow-favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../shared/css/tokens.css">
+  <link rel="stylesheet" href="../shared/css/tokens.css?v=20261001-modal-focus-v1">
   <link rel="stylesheet" href="../shared/css/reset.css">
   <link rel="stylesheet" href="../shared/css/themes.css">
-  <link rel="stylesheet" href="../shared/css/components.css">
+  <link rel="stylesheet" href="../shared/css/components.css?v=20261002-error-remediation-v12">
   <link rel="stylesheet" href="../shared/css/shell.css">
-  <link rel="stylesheet" href="../shared/css/accessibility.css">
+  <link rel="stylesheet" href="../shared/css/accessibility.css?v=20261001-modal-focus-v1">
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
-<link rel="stylesheet" href="styles.css?v=20260930-planner-action-rail-v4">
-<link rel="stylesheet" href="planner-row-header.css?v=20260930-row-header-v4">
+<link rel="stylesheet" href="styles.css?v=20261005-quote-navigation-v6">
+<link rel="stylesheet" href="planner-row-header.css?v=20261001-planner-shortcuts-v4">
   <link rel="stylesheet" href="status-v5.css?v=20260913-status-history-review-v1">
   <link rel="stylesheet" href="reports.css">
 </head>
@@ -50,10 +50,10 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg><span>Register</span><span class="program-header-nav__count" data-program-header-count="register" aria-hidden="true">0</span>
           </button>
           <button class="program-header-nav__item" type="button" data-destination="planner" data-program-destination="planner" data-uos-tooltip="Project Planner" data-uos-tooltip-pos="bottom" aria-label="Project Planner">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Planner</span><span class="program-header-nav__count" data-program-header-count="planner" aria-hidden="true">0</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="1"/><circle cx="6" cy="12" r="1"/><circle cx="6" cy="17" r="1"/><path d="M10 7h8M10 12h8M10 17h8"/></svg><span>Planner</span><span class="program-header-nav__count" data-program-header-count="planner" aria-hidden="true">0</span>
           </button>
           <button class="program-header-nav__item" type="button" data-destination="map" data-program-destination="map" data-uos-tooltip="Space Map" data-uos-tooltip-pos="bottom" aria-label="Space Map">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-13a7 7 0 1 0-14 0c0 6.9 7 13 7 13Z"/><circle cx="12" cy="9" r="2.5"/></svg><span>Space Map</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Space Map</span>
           </button>
           <button class="program-header-nav__item" type="button" data-destination="costing" data-program-destination="costing" data-uos-tooltip="Cost Calculator" data-uos-tooltip-pos="bottom" aria-label="Cost Calculator">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg><span>Calculator</span>
@@ -114,26 +114,21 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg>
             <div><h3>Workspace could not be opened</h3><p id="workspace-error-message" data-program-error-message>Your stored data has not been changed.</p></div>
             <button class="uos-button" id="workspace-retry" type="button" data-program-retry><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg><span>Try again</span></button>
+            <button class="uos-button" type="button" data-program-recovery-settings>Open Data &amp; Settings</button>
           </section>
 
           <section class="program-migration program-island" id="migration-preview" aria-labelledby="migration-title" data-program-migration hidden>
             <header class="program-panel__head">
               <div>
                 <p class="uos-eyebrow">Migration preview</p>
-                <h3 id="migration-title">Review existing horticulture workspaces</h3>
+                <h3 id="migration-title">Review stored workspace records</h3>
                 <p>Nothing will be replaced until you confirm this staged migration.</p>
               </div>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
             </header>
-            <div class="program-migration__summary" id="migration-summary" data-program-migration-counts aria-live="polite">
-              <div><span>Total records</span><strong data-program-migration-total>0</strong></div>
-              <div><span>Nature Strip</span><strong data-program-migration-nature>0</strong></div>
-              <div><span>Remediation</span><strong data-program-migration-remediation>0</strong></div>
-              <div><span>Applications</span><strong data-program-migration-count="applications">0</strong></div>
-              <div><span>Events</span><strong data-program-migration-count="events">0</strong></div>
-              <div><span>Projects</span><strong data-program-migration-count="projects">0</strong></div>
-              <div><span>Jobs</span><strong data-program-migration-count="jobs">0</strong></div>
-            </div>
+            <p class="program-muted" data-program-migration-sources></p>
+            <p class="program-muted" data-program-migration-owners></p>
+            <div class="program-migration__summary" id="migration-summary" data-program-migration-counts aria-live="polite"></div>
             <ul class="program-migration__warnings" id="migration-warnings" data-program-migration-warnings hidden></ul>
             <footer class="program-panel__actions">
               <button class="uos-button" id="migration-cancel" type="button" data-program-start-empty>Start with an empty workspace</button>
@@ -273,7 +268,7 @@
                     <th scope="col" class="program-register-table__reference-col" data-register-sort-header="receipt"><button type="button" class="program-register-table__sort" data-register-table-sort="receipt"><span data-register-sort-label="receipt">Ref / Receipt</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
                     <th scope="col" class="program-register-table__project-col">Project</th>
                     <th scope="col" class="program-register-table__budget-col">Budget</th>
-                      <th scope="col" class="program-register-table__actions-col">Actions</th>
+                      <th scope="col" class="program-register-table__actions-col"><span class="program-register-actions-label">Actions</span></th>
                     </tr>
                   </thead>
                   <tbody data-register-table-body></tbody>
@@ -467,15 +462,8 @@
 
             <!-- Middle Panel: Global Rate Item Library (Splits remaining space with Job Calculator) -->
             <section class="program-cost-catalog program-island" aria-labelledby="cost-catalog-title">
-              <header class="program-costing-head">
-                <div class="program-costing-title"><div><p class="uos-eyebrow">Global cost library</p><h3 id="cost-catalog-title">Rate Items</h3></div></div>
-                <button class="program-cost-tools-toggle uos-button uos-button--secondary uos-button--sm" type="button" data-costing-tools-toggle aria-expanded="false" aria-controls="costingLibraryTools" aria-label="Show Rate Library search and actions" title="Rate Library tools"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M4 3h5m-2.5-2v4"/></svg><span>Tools</span><svg class="program-cost-tools-toggle__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-              </header>
-              <div class="program-cost-controls" id="costingLibraryTools" data-costing-tools hidden>
-                <label class="program-cost-search"><span class="uos-sr-only">Search rates</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="search" placeholder="Search rates" data-costing-search></label>
-                <label><span class="uos-sr-only">Filter category</span><select data-costing-category><option value="all">All categories</option></select></label>
-                <div class="program-costing-head__actions program-cost-controls__actions"><button class="uos-button uos-button--secondary" type="button" data-costing-add-item data-uos-tooltip="Add Rate Item to Resource Calculator" aria-label="Add Rate Item to Resource Calculator"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add rate</span></button><button class="uos-button uos-button--secondary" type="button" data-costing-export data-uos-tooltip="Export Rate Library" aria-label="Export Rate Library"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg><span>Export Rate Library</span></button></div>
-              </div>
+              <header class="program-costing-head"><div class="program-costing-head-content">
+                <div class="program-costing-title"><div><p class="uos-eyebrow">Cost Library</p><h3 id="cost-catalog-title">Rate Items</h3></div></div>
               <div class="program-cost-tabs" role="tablist" aria-label="Rate Library categories">
                 <button class="program-header-nav__item" type="button" role="tab" data-costing-section="Labour" aria-selected="true" tabindex="0"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="6" r="2.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2M8 12l-2 4m10-4 2 4"/></svg><span>Labour</span></button>
                 <button class="program-header-nav__item" type="button" role="tab" data-costing-section="Equipment" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M10 2h4l.6 2.3 2 1.1 2.3-.6 2 3.4-1.7 1.7v2.2l1.7 1.7-2 3.4-2.3-.6-2 1.1L14 22h-4l-.6-2.3-2-1.1-2.3.6-2-3.4 1.7-1.7v-2.2L3.1 10.2l2-3.4 2.3.6 2-1.1z"/></svg><span>Equipment</span></button>
@@ -483,8 +471,15 @@
                 <button class="program-header-nav__item" type="button" role="tab" data-costing-section="Contractors" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M2 21v-2a7 7 0 0 1 14 0v2M17 6a3 3 0 0 1 0 6m1 3a5 5 0 0 1 4 5v1"/></svg><span>Contractors</span></button>
                 <button class="program-header-nav__item" type="button" role="tab" data-costing-section="Sundry" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 5V3h8v2M8 11h8m-8 5h5"/></svg><span>Sundry</span></button>
               </div>
+                <button class="program-cost-tools-toggle uos-button uos-button--secondary uos-button--sm" type="button" data-costing-tools-toggle aria-expanded="false" aria-controls="costingLibraryTools" aria-label="Show Rate Library search and actions" title="Rate Library tools"><span>Tools</span><svg class="program-cost-tools-toggle__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+              </div></header>
+              <div class="program-cost-controls" id="costingLibraryTools" data-costing-tools hidden>
+                <label class="program-cost-search"><span class="uos-sr-only">Search rates</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="search" placeholder="Search rates" data-costing-search></label>
+                <label><span class="uos-sr-only">Filter category</span><select data-costing-category><option value="all">All categories</option></select></label>
+                <div class="program-costing-head__actions program-cost-controls__actions"><button class="uos-button uos-button--secondary" type="button" data-costing-add-item data-uos-tooltip="Add Rate Item to Resource Calculator" aria-label="Add Rate Item to Resource Calculator"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add rate</span></button><button class="uos-button uos-button--secondary" type="button" data-costing-export data-uos-tooltip="Export Rate Library" aria-label="Export Rate Library"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg><span>Export Rate Library</span></button></div>
+              </div>
               <div class="program-cost-table-wrap program-scroll-region">
-                <table class="program-cost-table"><colgroup><col class="program-cost-col-category"><col class="program-cost-col-description"><col class="program-cost-col-unit"><col class="program-cost-col-rate"><col class="program-cost-col-state"><col class="program-cost-col-actions"></colgroup><thead><tr><th scope="col" aria-sort="none"><button class="program-rate-sort" type="button" data-rate-sort="category"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h14"/></svg><span>Category</span><span class="program-rate-sort__indicator" data-rate-sort-indicator aria-hidden="true">↕</span></button></th><th scope="col" aria-sort="ascending"><button class="program-rate-sort" type="button" data-rate-sort="description"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Description</span><span class="program-rate-sort__indicator" data-rate-sort-indicator aria-hidden="true">↑</span></button></th><th scope="col"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-7"/></svg>Unit</th><th scope="col"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Rate</th><th scope="col"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>State</th><th scope="col"><span class="uos-sr-only">Actions</span></th></tr></thead><tbody data-costing-catalog-body></tbody></table>
+                <table class="program-cost-table"><colgroup><col class="program-cost-col-category"><col class="program-cost-col-description"><col class="program-cost-col-unit"><col class="program-cost-col-rate"><col class="program-cost-col-state"><col class="program-cost-col-actions"></colgroup><thead><tr><th scope="col" aria-sort="none"><button class="program-rate-sort" type="button" data-rate-sort="category"><span>Category</span><span class="program-rate-sort__indicator" data-rate-sort-indicator aria-hidden="true">↕</span></button></th><th scope="col" aria-sort="ascending"><button class="program-rate-sort" type="button" data-rate-sort="description"><span>Description</span><span class="program-rate-sort__indicator" data-rate-sort-indicator aria-hidden="true">↑</span></button></th><th scope="col">Unit</th><th scope="col">Rate</th><th scope="col">State</th><th scope="col"><span class="uos-sr-only">Actions</span></th></tr></thead><tbody data-costing-catalog-body></tbody></table>
                 <div class="program-cost-empty" data-costing-catalog-empty hidden><strong>No Rate Items found</strong><p>Add or import a Rate Item, or adjust this filter.</p></div>
               </div>
             </section>
@@ -493,9 +488,21 @@
             <section class="program-job-calculator program-island" aria-labelledby="costing-title">
               <header class="program-costing-head program-calculator-head">
                 <div class="program-costing-title"><div><p class="uos-eyebrow">Resource Calculator</p><h3 id="costing-title">Assigned Rate Items</h3></div></div>
+                <button class="program-cost-tools-toggle uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-tools-toggle aria-expanded="false" aria-controls="calculatorTools" aria-label="Show Resource Calculator tools"><span>Tools</span><svg class="program-cost-tools-toggle__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
               </header>
+              <div class="program-calculator-tools" id="calculatorTools" data-calculator-tools hidden>
+                <div class="program-calculator-tools__actions">
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-delete-kind="All">Delete All</button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-delete-kind="Labour">Delete Labour Items</button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-delete-kind="Equipment">Delete Equipment Items</button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-delete-kind="Material">Delete Materials Items</button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-delete-kind="Contractors">Delete Contractor Items</button>
+                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-delete-kind="Sundry">Delete Sundry Items</button>
+                </div>
+                <p class="program-calculator-tools__result" data-calculator-delete-result role="status" hidden></p>
+              </div>
               <div class="program-calculator-table-wrap program-scroll-region">
-                <table class="program-calculator-table"><colgroup><col class="program-calculator-col-line-item"><col class="program-calculator-col-source"><col class="program-calculator-col-qty"><col class="program-calculator-col-unit"><col class="program-calculator-col-rate"><col class="program-calculator-col-total"><col class="program-calculator-col-actions"></colgroup><thead><tr><th scope="col">Line item</th><th scope="col">Source</th><th scope="col">Qty</th><th scope="col">Unit</th><th scope="col">Rate</th><th scope="col">Total</th><th scope="col"><span class="uos-sr-only">Remove</span></th></tr></thead><tbody data-costing-lines></tbody></table>
+                <table class="program-calculator-table"><colgroup><col class="program-calculator-col-line-item"><col class="program-calculator-col-source"><col class="program-calculator-col-qty"><col class="program-calculator-col-unit"><col class="program-calculator-col-rate"><col class="program-calculator-col-total"><col class="program-calculator-col-actions"></colgroup><thead><tr><th scope="col">Rate item</th><th scope="col">Source</th><th scope="col">Qty</th><th scope="col">Unit</th><th scope="col">Rate</th><th scope="col">Total</th><th scope="col"><span class="uos-sr-only">Remove</span></th></tr></thead><tbody data-costing-lines></tbody></table>
                 <div class="program-cost-empty" data-costing-lines-empty><strong>No costing lines assigned</strong><p>Add an active catalog item or send a mapped polygon quantity to this job.</p></div>
               </div>
               <footer class="program-cost-totals" data-costing-totals-footer>
@@ -551,25 +558,30 @@
                   <span data-scheduler-detail-badge></span>
                 </header>
                 <div class="program-scheduler-detail__body program-scroll-region">
-                  <p class="uos-eyebrow" data-scheduler-detail-owner></p>
                   <h3 id="scheduler-detail-title" data-scheduler-detail-title>Selected job</h3>
                   <div data-scheduler-conflicts></div>
                   <form class="program-scheduler-form" data-scheduler-form aria-describedby="scheduler-form-error">
                     <div class="program-scheduler-form__grid">
+                      <div class="program-scheduler-form__checks">
+                        <label class="program-scheduler-form__check"><input type="checkbox" name="allDay"><span>All-day job</span></label>
+                        <label class="program-scheduler-form__check"><input type="checkbox" name="sameDay" checked><span>Same Start/End Day</span></label>
+                      </div>
                       <label><span>Start date</span><input type="date" name="startDate" required></label>
-                      <label><span>End date</span><input type="date" name="endDate" required></label>
-                      <label class="program-scheduler-form__check"><input type="checkbox" name="allDay"><span>All-day job</span></label>
-                      <label data-scheduler-timed><span>Start time</span><input type="time" name="startTime"></label>
-                      <label data-scheduler-timed><span>End time</span><input type="time" name="endTime"></label>
+                      <label data-scheduler-end-date><span>End date</span><input type="date" name="endDate" required></label>
+                      <label class="program-scheduler-form__timed program-scheduler-form__timed--start" data-scheduler-timed><span>Start time</span><input type="time" name="startTime"></label>
+                      <label class="program-scheduler-form__timed program-scheduler-form__timed--end" data-scheduler-timed><span>End time</span><input type="time" name="endTime"></label>
                       <label><span>Crew</span><input type="text" name="crewId" autocomplete="off"></label>
                       <label class="program-scheduler-form__wide"><span>Location</span><input type="text" name="location" autocomplete="off"></label>
                       <label><span>Status</span><input type="text" name="status" autocomplete="off"></label>
                       <label><span>Priority</span><input type="text" name="priority" autocomplete="off"></label>
                     </div>
+                    <div class="program-scheduler-form__nomination" role="group" aria-label="Application status nomination">
+                      <label class="program-scheduler-form__check"><input type="checkbox" name="updatesApplicationStatus" aria-describedby="scheduler-application-status-help"><span>Updates application status for the main works</span></label>
+                      <p id="scheduler-application-status-help">When scheduled, this job can mark the application Scheduled. For Nature Strip works, starting this job can also mark the application In Progress.</p>
+                    </div>
                     <p class="program-scheduler-form__error" id="scheduler-form-error" data-scheduler-form-error role="alert" hidden></p>
-                    <div class="program-scheduler-form__actions"><button class="uos-button uos-button--primary" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span>Save schedule</span></button><button class="uos-button uos-button--danger" type="button" data-scheduler-delete-job><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Delete job</span></button></div>
+                    <div class="program-scheduler-form__actions"><button class="uos-button uos-button--primary" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span>Save schedule</span></button><button class="uos-button uos-button--secondary" type="button" data-scheduler-status aria-haspopup="dialog" aria-controls="statusLifecycleDialog"><span>Job status</span></button><button class="uos-button uos-button--danger" type="button" data-scheduler-delete-job><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Delete job</span></button></div>
                   </form>
-                  <dl data-scheduler-detail-fields></dl>
                 </div>
               </article>
             </aside>
@@ -577,23 +589,7 @@
             <!-- Right Side: Larger Calendar Pane -->
             <section class="program-scheduler-calendar program-island">
               <header class="program-scheduler-head">
-                <div class="program-scheduler-header__left" style="display:flex;align-items:center;gap:10px;">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;color:var(--uos-primary);flex-shrink:0;"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
-                  <span id="scheduler-title" class="uos-sr-only">Job Scheduler</span>
-                  <div class="program-filter-drawer" data-filter-drawer="scheduler" style="border:none;background:transparent;">
-                    <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="schedulerFilterDrawerBody" aria-label="Toggle schedule filters" style="height:28px;min-height:28px;padding:0 10px;gap:10px;border:1px solid var(--panel-border);border-radius:var(--panel-radius, 6px);background:var(--uos-surface-muted);">
-                      <span class="program-filter-drawer-toggle__lead">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-icon"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-                        <span>Filters</span>
-                      </span>
-                      <span class="program-filter-drawer-toggle__trail">
-                        <span class="program-filter-drawer-active-badge" data-filter-drawer-badge="scheduler" hidden>0</span>
-                        <span class="program-filter-drawer-reset" data-filter-drawer-reset="scheduler" role="button" tabindex="0" aria-label="Reset active filters" title="Reset active filters" hidden>&times;</span>
-                        <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-chevron"><path d="m6 9 6 6 6-6"/></svg>
-                      </span>
-                    </button>
-                  </div>
-                </div>
+                <span id="scheduler-title" class="uos-sr-only">Job Scheduler</span>
 
                 <!-- Center: Calendar Navigation (Previous, Today, Next, Period Title) -->
                 <div class="program-scheduler-navigation" role="group" aria-label="Calendar navigation">
@@ -603,10 +599,19 @@
                   <strong data-scheduler-period aria-live="polite"></strong>
                 </div>
 
-                <!-- Right: Week / Month View Mode Toggle -->
-                <div class="program-scheduler-modes" role="group" aria-label="Calendar view">
-                  <button type="button" data-scheduler-mode="week" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span>Week</span></button>
-                  <button type="button" data-scheduler-mode="month" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Month</span></button>
+                <div class="program-scheduler-header__controls">
+                  <div class="program-scheduler-calendar-legend" data-scheduler-calendar-legend hidden>
+                    <span class="program-scheduler-calendar-legend__active" data-scheduler-calendar-legend-active>This application</span>
+                    <span class="program-scheduler-calendar-legend__other" data-scheduler-calendar-legend-other>Other applications</span>
+                  </div>
+                  <div class="program-scheduler-modes program-scheduler-calendar-scope" role="group" aria-label="Calendar application scope">
+                    <button type="button" data-scheduler-calendar-scope="application" aria-pressed="true">This application</button>
+                    <button type="button" data-scheduler-calendar-scope="all" aria-pressed="false">All applications</button>
+                  </div>
+                  <div class="program-scheduler-modes" role="group" aria-label="Calendar view">
+                    <button type="button" data-scheduler-mode="week" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span>Week</span></button>
+                    <button type="button" data-scheduler-mode="month" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Month</span></button>
+                  </div>
                 </div>
               </header>
 
@@ -646,6 +651,7 @@
             </header>
             <div class="program-reports__empty program-island" data-reports-empty><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><div><h3>No financial activity yet</h3><p>Create and cost Jobs to populate live budget reporting. No example records are embedded.</p></div></div>
             <div class="program-reports__content program-scroll-region" data-reports-content hidden>
+              <section class="program-report-panel program-island"><header><div><h3>Quote funding and customer accounts</h3><p>Proposed coverage and accepted customer funding are separate. Customer totals include GST; delivery cost and contributions exclude GST.</p></div></header><div class="program-report-table-wrap"><table><thead><tr><th>Project</th><th>Owner</th><th>Delivery cost</th><th>Applicable City funding</th><th>Proposed customer contribution</th><th>Agreement</th><th>Accepted customer funding</th><th>Customer GST</th><th>Customer payable</th><th>Received</th><th>Outstanding</th></tr></thead><tbody data-reports-funding-body></tbody></table></div></section>
               <section class="program-report-kpis" aria-label="Program financial position">
                 <article class="program-report-kpi program-island"><span>Operational Amount</span><strong data-reports-kpi="approvedBudget">$0</strong></article>
                 <article class="program-report-kpi program-island"><span>Committed budget</span><strong data-reports-kpi="committedBudget">$0</strong></article>
@@ -773,7 +779,17 @@
                   </div>
                 </div>
 
-              <div class="program-quote-pane-body">
+              <section class="program-quote-section-navigation" aria-label="Quote section navigation">
+                  <nav class="program-quote-section-rail" aria-label="Quote sections">
+                  <button type="button" class="program-quote-section-link" data-quote-section-link="1" aria-controls="quote-section-1" aria-label="Section 1: Customer &amp; Quote Metadata">1 Customer</button>
+                  <button type="button" class="program-quote-section-link" data-quote-section-link="2" aria-controls="quote-section-2" aria-label="Section 2: Itemized Quotation Lines">2 Lines</button>
+                  <button type="button" class="program-quote-section-link" data-quote-section-link="3" aria-controls="quote-section-3" aria-label="Section 3: Scope and Terms">3 Terms</button>
+                  <button type="button" class="program-quote-section-link" data-quote-section-link="4" aria-controls="quote-section-4" aria-label="Section 4: Project Funding Position (ex GST)">4 Funding</button>
+                  <button type="button" class="program-quote-section-link" data-quote-section-link="5" aria-controls="quote-section-5" aria-label="Section 5: Payment Ledger">5 Payments</button>
+                  <button type="button" class="program-quote-section-link" data-quote-section-link="6" aria-controls="quote-section-6" aria-label="Section 6: Position">6 Position</button>
+                  </nav>
+                  </section>
+                  <div class="program-quote-pane-body">
                 <section class="program-quote-card program-quote-history" aria-labelledby="quote-history-title">
                   <div class="program-quote-card__head">
                     <div><p class="uos-eyebrow">Saved records</p><h4 id="quote-history-title">Quote and revision history</h4></div>
@@ -788,7 +804,7 @@
                 <!-- Section 1: Customer & Metadata -->
                   <div class="program-quote-card program-quote-section--metadata">
                     <div class="program-quote-card__head">
-                      <h4>1. Customer &amp; Quote Metadata</h4>
+                      <h4 id="quote-section-1">1. Customer &amp; Quote Metadata</h4>
                     </div>
                     <div class="program-quote-form-grid">
                       <div class="uos-field">
@@ -831,18 +847,27 @@
                   <!-- Section 2: Line Items -->
                   <div class="program-quote-card program-quote-section--lines">
                     <div class="program-quote-card__head" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                      <h4>2. Itemized Quotation Lines</h4>
+                      <h4 id="quote-section-2">2. Itemized Quotation Lines</h4>
                       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-add-line>+ Quote adjustment</button>
                       </div>
                     </div>
 
-                    <div style="overflow-x: auto;">
-                      <table class="uos-table program-quote-builder-table">
+                    <div class="program-quote-lines-wrap">
+            <table class="uos-table program-quote-builder-table">
+              <colgroup>
+                <col class="program-quote-builder-table__description-col">
+                <col class="program-quote-builder-table__category-col">
+                <col class="program-quote-builder-table__quantity-col">
+                <col class="program-quote-builder-table__unit-col">
+                <col class="program-quote-builder-table__rate-col">
+                <col class="program-quote-builder-table__total-col">
+                <col class="program-quote-builder-table__actions-col">
+              </colgroup>
                         <thead>
                           <tr>
                             <th>Description</th>
-                            <th>Category</th>
+                            <th>Kind</th>
                             <th>Qty</th>
                             <th>Unit</th>
                             <th>Rate ($)</th>
@@ -858,7 +883,7 @@
                   <!-- Section 3: Scope and Terms -->
                   <div class="program-quote-card program-quote-section--terms">
                     <div class="program-quote-card__head">
-                    <h4>3. Scope and Terms</h4>
+                    <h4 id="quote-section-3">3. Scope and Terms</h4>
                     </div>
                     <div class="program-quote-form-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
                       <div class="uos-field" style="grid-column: span 2;">
@@ -878,9 +903,17 @@
 
                   <!-- Section 4: Project Funding Position -->
                   <div class="program-quote-card program-quote-section--funding">
-                    <div class="program-quote-card__head"><h4>4. Project Funding Position (ex GST)</h4></div>
+                    <div class="program-quote-card__head"><h4 id="quote-section-4">4. Project Funding Position (ex GST)</h4></div>
+                    <fieldset class="program-quote-funding-choice">
+                      <legend>Who is funding this work?</legend>
+                      <label><input type="radio" name="quote-funding-mode" value="city" data-quote-funding-mode> City of Adelaide</label>
+                      <label><input type="radio" name="quote-funding-mode" value="customer" data-quote-funding-mode> Customer</label>
+                      <label><input type="radio" name="quote-funding-mode" value="mixed" data-quote-funding-mode> City of Adelaide and customer</label>
+                      <p data-funding-choice-note role="status"></p>
+                    </fieldset>
                     <div class="program-quote-form-grid">
-              <div class="uos-field"><label>Council Operational Amount</label><input type="number" min="0" step="0.01" class="uos-input uos-input--sm" data-operational-amount value="0"><button class="uos-button uos-button--secondary uos-button--sm" type="button" data-open-destination="budget">Manage allocation in Budget</button></div>
+              <div class="uos-field"><label for="quote-city-allocation">City of Adelaide allocation (ex GST)</label><input id="quote-city-allocation" type="number" min="0" step="0.01" class="uos-input uos-input--sm" data-operational-amount value="0"><small data-city-allocation-note></small><button class="uos-button uos-button--secondary uos-button--sm" type="button" data-open-destination="budget">Manage allocation in Budget</button></div>
+                      <div class="uos-field" data-mixed-contribution-field hidden><label for="quote-customer-contribution">Proposed customer contribution (ex GST)</label><input id="quote-customer-contribution" type="number" min="0" step="0.01" class="uos-input uos-input--sm" data-quote-customer-contribution><small data-customer-suggestion></small><button type="button" class="uos-button uos-button--secondary uos-button--sm" data-use-suggested-contribution hidden>Use suggested amount</button></div>
                       <div class="uos-field"><label for="quote-contingency">Contingency Allowance (%)</label><input id="quote-contingency" type="number" step="0.5" min="0" max="50" class="uos-input uos-input--sm" data-quote-contingency value="0"></div>
                       <div class="uos-field"><label for="quote-discount">Discount Rate (%)</label><input id="quote-discount" type="number" step="0.5" min="0" max="50" class="uos-input uos-input--sm" data-quote-discount value="0"></div>
                       <div class="program-funding-summary">
@@ -889,7 +922,9 @@
                           <dt>Council operational funding</dt><dd data-funding-value="council">$0.00</dd>
                           <dt>Discount allowance ($)</dt><dd data-funding-value="discount">$0.00</dd>
                           <dt>Contingency allowance ($)</dt><dd data-funding-value="contingency">$0.00</dd>
-                          <dt>Customer quote contribution</dt><dd data-funding-value="customer">$0.00</dd>
+                          <dt>Proposed customer contribution <small data-customer-agreement></small></dt><dd data-funding-value="customer">$0.00</dd>
+                          <dt>Customer GST</dt><dd data-funding-value="customerGst">$0.00</dd>
+                          <dt>Customer amount payable (inc GST)</dt><dd data-funding-value="customerTotal">$0.00</dd>
                                 <dt>Total Funding</dt><dd data-funding-value="total">$0.00</dd>
                         </dl>
                       </div>
@@ -897,9 +932,9 @@
                   </div>
 
                   <!-- Section 5: Payment Ledger -->
-                  <section class="program-quote-card program-payment-ledger" aria-labelledby="payment-ledger-title">
+                  <section class="program-quote-card program-payment-ledger" aria-labelledby="quote-section-5">
                     <div class="program-quote-card__head">
-                      <div><p class="uos-eyebrow">After issue</p><h4 id="payment-ledger-title">5. Payment Ledger</h4></div>
+                      <div><p class="uos-eyebrow">After issue</p><h4 id="quote-section-5">5. Payment Ledger</h4></div>
                       <span class="program-payment-ledger__status" data-payment-status>Unpaid</span>
                     </div>
                     <div class="program-payment-ledger__summary" aria-live="polite">
@@ -927,10 +962,11 @@
                   <!-- Section 6: Position -->
                   <div class="program-quote-card program-quote-section--position">
                     <div class="program-quote-card__head">
-                      <h4>6. Position</h4>
+                      <h4 id="quote-section-6">6. Position</h4>
                     </div>
                     <div class="program-quote-form-grid" style="grid-template-columns: 1fr; gap: 16px;">
                       <div class="program-funding-gap" data-funding-card>
+                        <p data-proposed-coverage-note></p>
                         <div class="program-funding-gap__head" data-funding-label>Project Funding Position</div>
                         <div class="program-funding-gap__metric"><span>Delivery Cost (ex-GST)</span><strong data-funding-value="delivery">$0.00</strong></div>
                         <div class="program-funding-gap__metric"><span>Council Contribution</span><strong data-funding-value="council">$0.00</strong></div>
@@ -953,9 +989,9 @@
               <div class="program-quote-preview-pane">
                 <div class="program-quote-preview-toolbar">
                   <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="uos-badge uos-badge--status uos-badge--info">LIVE PREVIEW</span>
+                    <span class="uos-badge uos-badge--status uos-badge--info program-quote-live-pill">LIVE PREVIEW</span>
                             <div class="program-quote-preview-status" aria-label="Quote lifecycle">
-                                Quote Status <strong data-quote-status>Draft</strong>
+                                <span class="program-quote-status-pill" data-quote-status data-quote-state="Draft" aria-live="polite">Draft</span>
                                 <span data-quote-lifecycle-actions hidden>
                                     <button class="uos-button uos-button--primary uos-button--sm" type="button" data-quote-issue>Issue</button>
                                     <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-quote-accept>Accept</button>
@@ -1047,22 +1083,32 @@
     <div class="program-data-dialog__frame"><header><div><p class="uos-eyebrow">Workspace backup</p><h2 id="program-export-title">Choose a portable format</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" data-program-export-cancel aria-label="Close export options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header><div class="program-export-options"><button type="button" data-program-export-json><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM15 3v5h5M9 13h6M9 17h6"/></svg><span><strong>Workspace backup (.json)</strong><small>Complete canonical schema-v5 workspace for recovery.</small></span></button><button type="button" data-program-export-bundle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v13H3zM7 3h10v4M9 11h6M9 15h6"/></svg><span><strong>CSV + GeoJSON bundle</strong><small>Optional interchange ZIP with entity tables and spatial geometry.</small></span></button></div><footer><button class="uos-button uos-button--secondary" type="button" data-program-export-cancel>Cancel</button></footer></div>
   </dialog>
 
-  <dialog class="program-rate-dialog" data-costing-rate-dialog aria-labelledby="costing-rate-dialog-title">
-    <form method="dialog" data-costing-rate-form aria-describedby="costing-rate-error">
-      <header><div><p class="uos-eyebrow">Cost catalog</p><h2 id="costing-rate-dialog-title" data-costing-rate-dialog-title>Add rate</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" data-costing-rate-cancel aria-label="Close rate editor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
-      <div class="program-rate-form-grid">
-        <label class="program-rate-form-wide"><span>Description</span><textarea name="description" rows="4" required></textarea></label>
-        <label><span>Kind</span><select name="kind" required><option value="Labour">Labour</option><option value="Equipment">Equipment</option><option value="Material">Material</option><option value="Contractors">Contractors</option><option value="Sundry">Sundry</option></select></label>
-        <label><span>Category</span><select name="category" required><option>Preparation</option><option>Installation</option><option>Maintenance</option><option>Materials</option><option>Equipment</option><option>Administration</option></select></label>
-        <label><span>Unit</span><select name="unit" class="uos-select"><option value="each">each</option><option value="hour">hour</option><option value="day">day</option><option value="week">week</option><option value="m²">m²</option><option value="ha">ha</option><option value="km²">km²</option><option value="m³">m³</option><option value="L">L</option><option value="kg">kg</option><option value="tonne">tonne</option><option value="m">m</option><option value="lm">lm</option><option value="item">item</option><option value="count">count</option><option value="set">set</option></select></label>
-        <label><span>Unit rate</span><input name="unitRate" type="number" min="0" step="0.01" required></label>
-        <label><span>Quantity mode</span><select name="quantityMode"><option value="direct">Direct</option><option value="m2">Area (m²)</option><option value="m3">Volume (m³)</option><option value="kg">Mass (kg)</option><option value="hours">Hours</option></select></label>
+  <dialog class="program-rate-dialog planner-task-dialog rate-library-editor" data-costing-rate-dialog aria-labelledby="costing-rate-dialog-title">
+    <form class="planner-task-editor" method="dialog" data-costing-rate-form aria-describedby="costing-rate-error">
+      <header class="planner-task-editor__head"><div><p class="uos-eyebrow">Cost catalog</p><h2 id="costing-rate-dialog-title" data-costing-rate-dialog-title>Add rate</h2></div><button class="program-dialog__close" type="button" data-costing-rate-cancel aria-label="Close rate editor">×</button></header>
+      <div class="program-rate-form-grid planner-task-editor__body">
+        <label class="program-rate-form-wide uos-field"><span>Description</span><textarea class="uos-input" name="description" rows="1" required></textarea></label>
+        <label class="uos-field"><span>Kind</span><select class="uos-select" name="kind" required><option value="Labour">Labour</option><option value="Equipment">Equipment</option><option value="Material">Material</option><option value="Contractors">Contractors</option><option value="Sundry">Sundry</option></select></label>
+        <label class="uos-field"><span>Category</span><select class="uos-select" name="category" required><option>Preparation</option><option>Installation</option><option>Maintenance</option><option>Materials</option><option>Equipment</option><option>Administration</option></select></label>
+        <label class="uos-field"><span>Unit</span><select name="unit" class="uos-select"><option value="each">each</option><option value="hour">hour</option><option value="day">day</option><option value="week">week</option><option value="m²">m²</option><option value="ha">ha</option><option value="km²">km²</option><option value="m³">m³</option><option value="L">L</option><option value="kg">kg</option><option value="tonne">tonne</option><option value="m">m</option><option value="lm">lm</option><option value="item">item</option><option value="count">count</option><option value="set">set</option></select></label>
+        <label class="uos-field"><span>Unit rate</span><input class="uos-input" name="unitRate" type="number" min="0" step="0.01" required></label>
+        <label class="uos-field"><span>Quantity mode</span><select class="uos-select" name="quantityMode"><option value="direct">Direct</option><option value="m2">Area (m²)</option><option value="m3">Volume (m³)</option><option value="kg">Mass (kg)</option><option value="hours">Hours</option></select></label>
+        <label class="program-rate-active"><input name="schedulerEnabled" type="checkbox"><span>Scheduler for future additions</span></label>
         <label class="program-rate-active"><input name="active" type="checkbox" checked><span>Active and available for costing</span></label>
         <label class="program-rate-active"><input name="spatialEnabled" type="checkbox" data-costing-rate-spatial><span>Also available as a polygon job</span></label>
-        <label class="program-rate-form-wide" data-costing-rate-work-type-field><span>Polygon work type</span><select name="workTypeKey" data-costing-rate-work-type disabled><option value="">Select a work type</option><option value="turfing">Turfing area</option><option value="aerate">Aeration area</option><option value="fertilise">Fertilising area</option><option value="topdressing">Topdressing area</option><option value="rolling">Rolling area</option></select><small class="uos-field-hint">Uses this same Rate Item for future Space Map polygons. Existing jobs and cost snapshots are unchanged.</small></label>
+        <label class="program-rate-form-wide uos-field" data-costing-rate-work-type-field><span>Polygon work type</span><select class="uos-select" name="workTypeKey" data-costing-rate-work-type disabled><option value="">Select a work type</option><option value="turfing">Turfing area</option><option value="aerate">Aeration area</option><option value="fertilise">Fertilising area</option><option value="topdressing">Topdressing area</option><option value="rolling">Rolling area</option></select><small class="uos-field-hint">Uses this same Rate Item for future Space Map polygons. Existing jobs and cost snapshots are unchanged.</small></label>
+        <section class="planner-task-editor__job planner-task-editor__wide rate-library-guide" data-rate-editor-guide aria-label="Resource Calculator icon guide">
+          <div class="rate-library-guide__column"><h3 class="rate-library-guide__heading">Cost Library</h3>
+            <div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" data-rate-guide-icon="plus" aria-hidden="true"></span><span>Click to add this to the Resource Calculator</span></div>
+            <div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" data-rate-guide-icon="map" aria-hidden="true"></span><span>Click this to add this to the Resource Calculator with estimated measurements OR Add to Resource Calculator Via Space Map to confirm measurements.</span></div>
+          </div>
+          <div class="rate-library-guide__column"><h3 class="rate-library-guide__heading">Resource Calculator</h3>
+            <div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" data-rate-guide-icon="calendar" aria-hidden="true"></span><span>Click this icon in Resource Calculator to Schedule a Job</span></div>
+          </div>
+        </section>
       </div>
       <p class="program-cost-error" id="costing-rate-error" data-costing-rate-error role="alert" hidden></p>
-      <footer><button class="uos-button uos-button--secondary" type="button" data-costing-rate-cancel>Cancel</button><button class="uos-button uos-button--primary" type="submit" value="default" data-costing-rate-submit>Save rate</button></footer>
+      <footer class="planner-task-editor__actions"><button class="uos-button uos-button--secondary" type="button" data-costing-rate-cancel>Cancel</button><button class="uos-button uos-button--primary" type="submit" value="default" data-costing-rate-submit>Save rate</button></footer>
     </form>
   </dialog>
 
@@ -1127,7 +1173,7 @@
   <script defer src="app-config.js"></script>
   <script defer src="../remediation-planner/config/map-providers.js?v=20260922-metromaps-default"></script>
   <script defer src="../remediation-planner/config/metromaps-provider.js?v=20260922-wmts-fix"></script>
-  <script defer src="../shared/js/suite.js"></script>
+  <script defer src="../shared/js/suite.js?v=20261002-error-remediation-v12"></script>
   <script defer src="../shared/js/storage.js?v=20260912-empty-baseline-v1"></script>
   <script defer src="../shared/vendor/pdfjs/pdf.min.js"></script>
   <script defer src="../shared/js/imports.js"></script>
@@ -1137,57 +1183,57 @@
   <script defer src="../shared/js/xlsx-reader.js"></script>
   <script defer src="../shared/js/rate-library.js?v=20260928-rate-library-schema-v2"></script>
   <script defer src="../shared/js/map-costing.js"></script>
-  <script defer src="js/privacy.js?v=20260824-privacy-mode"></script>
-  <script defer src="js/status.js?v=20260913-quote-signal-guard"></script>
+  <script defer src="js/privacy.js?v=20261005-quote-address"></script>
+ <script defer src="js/status.js?v=20261002-job-nomination-v1"></script>
   <script defer src="js/default-rate-catalog.js?v=20260912-empty-baseline-v1"></script>
-  <script defer src="js/model.js?v=20260928-rate-kind-five-v1"></script>
+  <script defer src="js/model.js?v=20261002-calendar-scope-v1"></script>
   <script defer src="js/budget-model.js?v=20260928-budget-v1"></script>
   <script defer src="js/budget-governance.js?v=20260929-budget-governance-v1"></script>
-  <script defer src="js/status-model.js?v=20260912-empty-baseline-v1"></script>
-  <script defer src="js/product-contracts.js?v=20260911-product-contracts-v1"></script>
-  <script defer src="js/costing-model.js?v=20260928-rate-library-five-kinds-v1"></script>
-  <script defer src="js/work-area-service.js?v=20260830-catalog-work-type-v1"></script>
-  <script defer src="js/quote-model.js?v=20260829-audit-remediation-v1"></script>
-  <script defer src="js/funding-model.js?v=20260821-performance-hotfix"></script>
+  <script defer src="js/status-model.js?v=20261001-job-delete-v1"></script>
+  <script defer src="js/product-contracts.js?v=20261001-planner-editor-v3"></script>
+  <script defer src="js/costing-model.js?v=20261002-calculator-bulk-tools-v11"></script>
+  <script defer src="js/work-area-service.js?v=20261001-calculator-scheduler-controls-v2"></script>
+  <script defer src="js/quote-model.js?v=20261001-quote-funding-v1"></script>
+  <script defer src="js/funding-model.js?v=20261001-quote-funding-v1"></script>
   <script defer src="js/data-health.js?v=20260912-schema-v5"></script>
   <script defer src="js/status-health.js?v=20260912-schema-v5"></script>
     <script defer src="js/observability.js?v=20260909-slice10"></script>
   <script defer src="js/migration.js"></script>
   <script defer src="js/storage.js?v=20260829-audit-remediation-v1"></script>
   <script defer src="js/data-workspace.js?v=20260913-pdf-preview-delta-v1"></script>
-  <script defer src="js/data-settings.js?v=20260913-clean-import-preview-v1"></script>
+  <script defer src="js/data-settings.js?v=20261001-startup-recovery-v1"></script>
   <script defer src="js/dashboard.js?v=20260821-performance-hotfix"></script>
-  <script defer src="js/reports-model.js"></script>
-  <script defer src="js/reports.js?v=20260821-performance-hotfix"></script>
-  <script defer src="js/card-visibility.js?v=20260830-disclosure-visibility-v12"></script>
- <script defer src="js/disclosure-rows.js?v=20260930-fixed-register-frame-v5"></script>
- <link rel="stylesheet" href="planner-editor.css?v=20260930-planner-editor-v2">
+  <script defer src="js/reports-model.js?v=20261001-quote-funding-v1"></script>
+  <script defer src="js/reports.js?v=20261001-quote-funding-v1"></script>
+  <script defer src="js/card-visibility.js?v=20261005-quote-field-visibility-v13"></script>
+ <script defer src="js/disclosure-rows.js?v=20261002-error-remediation-v12"></script>
+ <link rel="stylesheet" href="planner-editor.css?v=20261002-task-history-v4">
  <style>
  .planner-item-row[aria-selected="true"] td+td{border-left-color:transparent!important}.planner-col-action{display:flex;align-items:center;justify-content:flex-end}.planner-task-type-group{display:inline-flex;align-items:center;margin-right:16px;padding-right:14px;border-right:1px solid var(--uos-border,#dbe3ea)}.planner-task-type-group .planner-task-path{width:30px;height:30px;padding:0;justify-content:center}.planner-task-path svg,.planner-maintenance-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.planner-task-maintenance-actions{display:inline-flex;align-items:center;gap:8px}.planner-maintenance-icon{display:inline-grid!important;place-items:center;width:30px;min-width:30px;height:30px;min-height:30px;margin:0!important;padding:0!important;border:1px solid var(--uos-border,#cbd5e1)!important;border-radius:var(--uos-radius-control,6px)!important;background:#fff!important;color:var(--uos-text,#0f172a)!important}.program-register-allocation-table{border:2px solid var(--register-owner-primary-dark,#047857)!important;border-radius:var(--uos-radius-control,6px)!important;overflow:hidden}.program-budget:not([hidden]){height:calc(100dvh - var(--program-header-height,82px));min-height:620px;padding:0;overflow:hidden}.program-budget__workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:100%;min-height:0;border:2px solid var(--program-owner-strong,var(--uos-text,#0f172a));border-radius:0;background:var(--uos-surface,#fff);overflow:hidden}.program-budget__approvals{display:flex;min-height:0;flex-direction:column;padding:22px 24px;border-right:1px solid var(--uos-border,#dbe3ea)}.program-budget__fixed-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex:0 0 auto}.program-budget__fixed-head h2{margin:2px 0 14px}.program-budget__year-field{width:min(220px,100%);margin:0 0 14px}.program-budget__approvals>[data-budget-year-state]{flex:0 0 auto}.program-budget__allocations,.program-budget__pending{display:flex;min-height:0;flex:1 1 0;flex-direction:column;margin-top:16px}.program-budget__table-wrap,.program-budget__history{min-height:0;max-height:25dvh;overflow:auto}.program-budget__table-wrap thead{position:sticky;top:0;z-index:1;background:var(--uos-surface,#fff)}.program-budget__dashboard{min-height:0;padding:22px 24px}.program-budget__metrics{display:grid;grid-template-columns:1fr;gap:12px}.program-budget__metric{display:flex;align-items:center;justify-content:space-between;min-height:76px;padding:16px;border:1px solid var(--uos-border,#dbe3ea);border-radius:var(--uos-radius-control,6px);background:var(--uos-surface,#fff)}.program-budget__metric strong{font-size:22px}@media(max-width:900px){.program-budget:not([hidden]){height:auto;overflow:visible}.program-budget__workspace{grid-template-columns:1fr;height:auto;overflow:visible}.program-budget__approvals{border-right:0;border-bottom:1px solid var(--uos-border,#dbe3ea)}.program-budget__table-wrap,.program-budget__history{max-height:360px}}
  </style>
  <link rel="stylesheet" href="budget-layout.css?v=20260930-budget-workspace-v2">
  <link rel="stylesheet" href="drawer-floor.css?v=20260930-unified-floor-v1">
-  <script defer src="js/register.js?v=20260930-register-drawer-stability-v6"></script>
+  <script defer src="js/register.js?v=20261002-error-remediation-v12"></script>
   <script defer src="js/budget.js?v=20260930-budget-workspace-v3"></script>
   <script defer src="js/register-open-project-fix.js?v=20260922-open-project"></script>
- <script defer src="js/drawer-workspace.js?v=20260930-unified-floor-v1"></script>
-  <script defer src="js/scheduler-model.js?v=20260828-first-review-phase3-v1"></script>
-  <script defer src="js/planner-model.js"></script>
- <script defer src="js/scheduler.js?v=20260930-planner-job-delete-v4"></script>
-  <script defer src="js/costing.js?v=20260928-rate-library-ui-v1"></script>
+ <script defer src="js/drawer-workspace.js?v=20261002-error-remediation-v12"></script>
+  <script defer src="js/scheduler-model.js?v=20261002-job-nomination-v1"></script>
+ <script defer src="js/planner-model.js?v=20261002-task-history-v1"></script>
+ <script defer src="js/scheduler.js?v=20261002-calendar-header-v3"></script>
+  <script defer src="js/costing.js?v=20261002-error-remediation-v12"></script>
   <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
   <script defer src="../shared/vendor/maplibre/maplibre-gl.js"></script>
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
     <script defer src="../remediation-planner/js/map.js?v=20260930-seamless-raster-v2"></script>
   <script defer src="js/program-map.js?v=20260913-active-location-v2"></script>
   <script defer src="js/map-floating-draw-toolbar.js?v=20260930-inset-v3"></script>
- <script defer src="js/planner.js?v=20260930-task-lifecycle-v7"></script>
+ <script defer src="js/planner.js?v=20261002-task-history-v4"></script>
  <script defer src="js/planner-section-headers.js?v=20260930-persistent-default-collapsed"></script>
-  <script defer src="js/planner-presentation.js?v=20260930-task-icons-v5"></script>
-  <script defer src="js/quote-builder.js?v=20260911-sidebar-state-v1"></script>
-<script defer src="js/app.js?v=20260913-drawer-context-v3"></script>
+  <script defer src="js/planner-presentation.js?v=20261001-planner-editor-v3"></script>
+ <script defer src="js/quote-builder.js?v=20261005-quote-navigation-v6"></script>
+<script defer src="js/app.js?v=20261001-planner-editor-v3"></script>
   <script defer src="js/status-app.js?v=20260912-schema-v5"></script>
-  <script defer src="js/status-ui.js?v=20260913-status-history-review-v1"></script>
+  <script defer src="js/status-ui.js?v=20261002-scheduler-costing-v2"></script>
   <script defer src="js/register-history-ui.js?v=20260912-register-history-v2"></script>
 </body>
 </html>

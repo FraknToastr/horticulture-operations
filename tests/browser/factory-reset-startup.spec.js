@@ -124,7 +124,9 @@ test("restored or cancelled NSA reset intent cannot delete Register records", as
 
   // A browser may restore the iframe's former URL independently of its outer
   // launcher. The query string alone is never reset authority.
+  const restoredNavigation = page.waitForEvent("framenavigated", (frame) => frame === child);
   await page.locator("#workspace-frame").evaluate((iframe) => { iframe.src = "index.html?workspace=NSA&factory-reset=1"; });
+  await restoredNavigation;
   child = page.frames().find((candidate) => candidate !== page.mainFrame());
   await child.waitForFunction(() => window.UOS?.ProgramApp?.snapshot().phase === "ready");
   await expect(page.frameLocator("iframe").getByRole("dialog", { name: "Factory reset this workspace?" })).toHaveCount(0);

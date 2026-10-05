@@ -1,3 +1,57 @@
 .planner-status-summary,.planner-task-path{display:inline-flex;align-items:center;gap:7px;color:var(--uos-text-muted,#64748b);font-size:11px;font-weight:700}.planner-task-path{padding:4px 7px;border:1px solid var(--uos-border,#dbe3ea);border-radius:4px;background:var(--uos-surface-subtle,#f8fafc)}.planner-task-path.is-scheduled{border-color:color-mix(in srgb,var(--program-owner-strong,#166534) 35%,#dbe3ea);color:var(--program-owner-strong,#166534);background:var(--program-owner-soft,#f0fdf4)}.planner-notes-summary{display:block;max-width:230px;overflow:hidden;color:var(--uos-text-muted,#64748b);text-overflow:ellipsis;white-space:nowrap}
 .planner-task-dialog{width:min(840px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:0;overflow:hidden;border:2px solid var(--uos-text,#0f172a);border-radius:var(--uos-radius-panel,10px);color:var(--uos-text,#0f172a);background:var(--uos-surface,#fff);box-shadow:0 24px 64px rgba(15,23,42,.28)}.planner-task-dialog::backdrop{background:rgba(15,23,42,.54)}.planner-task-editor{display:flex;max-height:calc(100dvh - 32px);flex-direction:column}.planner-task-editor__head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:24px 28px 20px;border-bottom:1px solid var(--uos-border,#dbe3ea)}.planner-task-editor__head .uos-eyebrow{margin:0 0 8px}.planner-task-editor__head h2{margin:0;font-size:30px;line-height:1.15}.planner-task-editor__head .program-dialog__close{display:inline-grid;place-items:center;flex:0 0 40px;width:40px;height:40px;margin:0;padding:0;border:1px solid var(--uos-border,#cbd5e1);border-radius:var(--uos-radius-control,6px);color:var(--uos-text,#0f172a);background:var(--uos-surface,#fff);font-size:24px;line-height:1;cursor:pointer}.planner-task-editor__head .program-dialog__close:hover{border-color:var(--program-owner-strong,#166534);background:var(--program-owner-soft,#f0fdf4)}.planner-task-editor__body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:22px 28px;overflow-y:auto}.planner-task-editor__wide{grid-column:1/-1}.planner-task-editor .uos-field{gap:6px}.planner-task-editor .uos-field>span{font-weight:750}.planner-task-editor .planner-task-editor__job{display:grid;gap:4px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--program-owner-strong,#166534) 35%,var(--uos-border,#dbe3ea));border-left:4px solid var(--program-owner-strong,#166534);border-radius:var(--uos-radius-control,6px);background:var(--program-owner-soft,#f0fdf4)}.planner-task-editor__job span,.planner-task-editor__job small{color:var(--uos-text-muted,#64748b);font-size:12px}.planner-task-editor>.program-form-error{margin:0 28px 12px}.planner-task-editor__actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:18px 28px;border-top:1px solid var(--uos-border,#dbe3ea);background:var(--uos-surface,#fff)}
+.planner-task-editor .planner-task-editor__job{gap:14px;padding:18px 20px}
+.planner-calendar-guide__row{display:flex;align-items:center;gap:12px;min-width:0}
+.planner-task-editor__job .planner-calendar-guide__row>span:last-child{color:var(--uos-text,#0f172a);font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.planner-calendar-guide__icon{display:inline-grid;place-items:center;box-sizing:border-box;flex:0 0 30px;width:30px;height:30px;border:1px solid var(--uos-border,#dbe3ea);border-radius:4px;background:var(--uos-surface-subtle,#f8fafc);color:var(--uos-text-muted,#64748b)}
+.planner-calendar-guide__icon.is-linked-job{border:2px solid var(--program-owner-strong,#047857);background:var(--program-owner-soft,#ecfdf5);color:var(--program-owner-strong,#047857);box-shadow:0 0 0 1px color-mix(in srgb,var(--program-owner-strong,#047857) 24%,transparent)}
+.planner-calendar-guide__icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* Rate Library shares Planner controls; these overrides affect only its editor. */
+.rate-library-editor .planner-task-editor{display:flex}
+.rate-library-editor .planner-task-editor__head{align-items:flex-start;gap:24px;padding:24px 28px 20px}
+.rate-library-editor .planner-task-editor__head .uos-eyebrow{margin:0 0 8px}
+.rate-library-editor .planner-task-editor__actions{gap:12px;padding:18px 28px}
+.rate-library-editor .program-rate-form-grid label{color:var(--uos-text,#0f172a);font-size:inherit;font-weight:400}
+.rate-library-editor .program-rate-form-grid textarea{min-height:var(--uos-control-height);max-height:none}
+.rate-library-editor .program-rate-form-grid .program-rate-active{gap:8px}
+.rate-library-editor .program-rate-active>span{font-weight:750}
+.rate-library-editor .planner-task-editor>.program-cost-error{margin:0 28px 12px}
+.rate-library-editor .rate-library-guide{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.rate-library-guide__column{display:flex;flex-direction:column;gap:18px;min-width:0}
+.rate-library-editor .planner-calendar-guide__row{align-items:flex-start}
+@media(max-width:640px){
+  .rate-library-editor .planner-task-editor__head{padding:18px}
+  .rate-library-editor .planner-task-editor__actions{padding:14px 18px}
+  .rate-library-editor .rate-library-guide{grid-template-columns:minmax(0,1fr);gap:18px}
+  .rate-library-editor .planner-task-editor>.program-cost-error{margin-inline:18px}
+}
 @media(max-width:640px){.planner-task-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px)}.planner-task-editor__head{padding:18px}.planner-task-editor__head h2{font-size:26px}.planner-task-editor__body{grid-template-columns:1fr;padding:18px}.planner-task-editor__wide{grid-column:auto}.planner-task-editor__actions{flex-wrap:wrap;padding:14px 18px}.planner-task-editor__actions .uos-button{flex:1 1 auto}.planner-task-editor>.program-form-error{margin-inline:18px}}
+
+.rate-library-editor textarea[name="description"] {height:var(--uos-control-height);min-height:var(--uos-control-height);resize:vertical;}
+.rate-library-guide__heading {margin:0;color:var(--uos-text,#0f172a);font-size:14px;font-weight:750;line-height:1.4;}
+.planner-task-editor__head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.planner-task-editor__head .planner-task-editor__head-actions>button{box-sizing:border-box;display:inline-grid;place-items:center;flex:0 0 auto;width:auto;min-width:0;height:32px;min-height:32px;max-height:32px;padding:0 8px}
+.planner-task-editor__head .planner-task-editor__head-actions>.program-dialog__close{width:32px;min-width:32px;padding:0;font-size:20px}
+.planner-task-dialog[data-planner-task-dialog]{background:var(--program-owner-soft,#f0fdf4);border-color:var(--program-owner-strong,#166534)}
+[data-planner-task-dialog] .planner-task-editor__actions{background:var(--program-owner-soft,#f0fdf4)}
+[data-planner-task-dialog] .planner-task-editor__head:has([data-planner-task-reset-notice]:not([hidden])){position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr);align-items:center}
+[data-planner-task-dialog] .planner-task-editor__head>div:first-child{grid-column:1;grid-row:1}
+[data-planner-task-dialog] .planner-task-editor__head-actions{grid-column:3;grid-row:1;justify-self:end}
+.planner-task-reset-pill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);grid-column:auto;grid-row:auto;justify-self:center;align-self:center;display:flex;align-items:center;justify-content:center;box-sizing:border-box;margin:0;padding:6px 10px;width:max-content;max-width:calc(100% - 400px);border:1px solid var(--program-owner-strong,#166534);border-radius:999px;background:var(--program-owner-soft,#f0fdf4);color:var(--program-owner-strong,#166534);font-size:12px;font-weight:700;line-height:1.35;text-align:center}
+@media(max-width:640px){
+ [data-planner-task-dialog] .planner-task-editor__head:has([data-planner-task-reset-notice]:not([hidden])){grid-template-columns:minmax(0,1fr) auto;gap:14px 12px}
+ [data-planner-task-dialog] .planner-task-editor__head-actions{grid-column:2}
+ .planner-task-reset-pill{position:static;transform:none;grid-column:1/-1;grid-row:2;width:fit-content;max-width:100%}
+}
+.planner-task-editor [data-planner-task-reason][hidden],.planner-task-editor [data-planner-task-history][hidden],.planner-task-editor [data-planner-task-reset-notice][hidden]{display:none!important}
+.planner-task-history{padding-top:16px;border-top:1px solid var(--uos-border,#dbe3ea);min-width:0}
+.planner-task-history h3{margin:0 0 12px;font-size:16px}
+.planner-task-history ol{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.planner-task-history li{padding:12px 14px;border:1px solid var(--uos-border,#dbe3ea);border-radius:var(--uos-radius-control,6px);background:var(--uos-surface-subtle,#f8fafc);overflow-wrap:anywhere}
+.planner-task-history p{margin:6px 0 0;white-space:pre-wrap}
+.planner-task-history time{font-size:12px;color:var(--uos-text-muted,#64748b)}
+.planner-task-editor [data-planner-task-delete-confirm][hidden]{display:none!important}
+.planner-task-delete-confirm{padding:16px;border:1px solid var(--uos-border,#dbe3ea);border-left:4px solid var(--program-owner-strong,#166534);border-radius:var(--uos-radius-control,6px);background:var(--uos-surface-subtle,#f8fafc)}
+.planner-task-delete-confirm h3{margin:0;font-size:16px}
+.planner-task-delete-confirm p{margin:10px 0;line-height:1.5}
+.planner-task-delete-confirm>div{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px}

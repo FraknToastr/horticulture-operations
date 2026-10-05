@@ -184,3 +184,12 @@ Proof must cover all three exact origins: Planner Task, Calculator work, and Spa
 Release evidence must be risk-based. A bounded implementation change may use targeted tests for the affected module(s) plus the smallest relevant cross-module/browser check. The evidence record must name the tests, show their result, and state the untested boundary, if any.
 
 The complete Node/browser release regime remains mandatory for release candidates and for changes involving shared contracts, schema or storage format, migrations, persistence/recovery, security, build/runtime configuration, or multiple release gates. A targeted test result cannot close a gate whose boundary was not exercised, and test conservation is not a waiver of Critical-gate proof.
+
+## Register shortcut acceptance
+
+Focused proof must cover NSA and EVT inactive/unused/in-use states, Project-only Scheduler access, untouched generated tasks versus saved Planner changes, current-module re-entry, correct record context, and absence of navigation-created records. DOM geometry checks must prove Budget heading/value alignment and Actions heading/panel alignment with all buttons contained. Include affected drawer-context, scroll-ownership and floor regressions. These checks require no screenshot snapshots; bounded shortcut changes use targeted module and cross-module evidence under the conservative test rule.
+
+
+## Quote funding and customer agreement proof
+
+Run `node --test tests/quote-funding.test.cjs` and `playwright test tests/browser/quote-funding.spec.js`. Both owners must demonstrate all funding modes, costing-only Labour, shortfalls/surpluses, exclusion of City allocation in Customer mode, retained/manual/suggested contributions, reload/refresh/revisions, Issue before acceptance, agreement states, payment locks/reversal, City payment prohibition, legacy preservation, and preview/PDF wording and amounts.

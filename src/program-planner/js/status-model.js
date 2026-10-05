@@ -6,7 +6,8 @@
     blank: base.blank, normalize: base.normalize, assertValid: base.assertValid,
     exportJson: base.exportJson, importJson: base.importJson,
     registerDeletionImpact: base.registerDeletionImpact,
-    deleteRegisterRecord: base.deleteRegisterRecord
+    deleteRegisterRecord: base.deleteRegisterRecord,
+    deleteJob: base.deleteJob
   };
   function clone(value) { return value === undefined ? undefined : JSON.parse(JSON.stringify(value)); }
   function text(value) { return String(value == null ? "" : value).trim(); }
@@ -91,7 +92,16 @@ var result = original.deleteRegisterRecord(input, registerId);
     result.workspace = normalize(workspace);
     return result;
   }
-var REGISTER_BASELINE_ID = "register-baseline-2026-07-01";
+  function deleteJob(input, jobId, options) {
+    var result = original.deleteJob(input, jobId, options);
+    ["statusEvents", "statusRecommendations"].forEach(function (collection) {
+      result.entities[collection] = (result.entities[collection] || []).filter(function (item) {
+        return item.entityId !== jobId;
+      });
+    });
+    return normalize(result);
+  }
+  var REGISTER_BASELINE_ID = "register-baseline-2026-07-01";
 var REGISTER_BASELINE_CUTOFF = "2026-07-01";
 var EMPTY_OPERATIONAL_BASELINE_ID = "empty-operational-baseline-2026-09-12";
   var PURGED_OPERATIONAL_COLLECTIONS = ["projects", "jobs", "tasks", "costingLines", "geometries", "quotes", "quoteLines", "payments", "paymentAllocations", "quoteEvents", "statusEvents", "statusRecommendations"];
@@ -224,6 +234,7 @@ function resetOperationalBaseline(input, options) {
   base.importJson = function (value) { var parsed = typeof value === "string" ? JSON.parse(value) : clone(value); return normalize(parsed); };
   base.registerDeletionImpact = registerDeletionImpact;
   base.deleteRegisterRecord = deleteRegisterRecord;
+  base.deleteJob = deleteJob;
 base.registerBaselineSanitationId = REGISTER_BASELINE_ID;
 base.registerBaselineCutoff = REGISTER_BASELINE_CUTOFF;
 base.sanitizeRegisterBaseline = sanitizeRegisterBaseline;

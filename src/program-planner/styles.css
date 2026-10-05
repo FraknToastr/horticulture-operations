@@ -390,7 +390,7 @@ html[data-suite-theme="dark"] body.is-evt-mode .uos-brand__headline {
 .program-scheduler-layout [data-filter-drawer-toggle] .program-filter-drawer-chevron {
   display: none;
 }
-.program-scheduler-layout [data-scheduler-unscheduled] { display: none !important; }
+.program-scheduler-layout [data-scheduler-unscheduled]:not([hidden]) { display: flex !important; }
 
 .program-scheduler-inspector > [data-scheduler-list-mode] > .program-scheduler-inspector__head,
 .program-scheduler-inspector > [data-scheduler-list-mode] > [data-filter-drawer="scheduler-sidebar"] {
@@ -1391,6 +1391,7 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-map-toggles .uos-bu
 .program-cost-controls select { width: 100%; }
 .program-cost-table-wrap,
 .program-calculator-table-wrap { position: relative; min-height: 0; overflow: auto; }
+.program-calculator-table-wrap { max-width: calc(100vw - 48px); }
 
 .program-cost-table,
 .program-calculator-table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -1484,17 +1485,17 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-map-toggles .uos-bu
 }
 .program-rate-actions { display: flex; justify-content: flex-start; gap: 6px; min-width: 126px; }
 .program-calculator-table input { width: 78px; min-width: 62px; }
-.program-calculator-table { table-layout: fixed; }
-.program-calculator-col-line-item { width: 34%; }
+.program-calculator-table { table-layout: fixed; min-width: 760px; }
+.program-calculator-col-line-item { width: auto; }
 .program-calculator-col-source { width: 52px; }
 .program-calculator-col-qty { width: 86px; }
-.program-calculator-col-unit { width: 92px; }
+.program-calculator-col-unit { width: 104px; }
 .program-calculator-col-rate { width: 92px; }
 .program-calculator-col-total { width: 92px; }
-.program-calculator-col-actions { width: 48px; }
+.program-calculator-col-actions { width: 88px; }
 .program-calculator-table th:first-child,
 .program-calculator-table td:first-child {
-  width: 34%;
+  width: auto !important;
   min-width: 220px;
 }
 .program-calculator-line-item strong {
@@ -1508,13 +1509,14 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-map-toggles .uos-bu
 .program-calculator-table th:nth-child(3),
 .program-calculator-table td:nth-child(3) { width: 86px; }
 .program-calculator-table th:nth-child(4),
-.program-calculator-table td:nth-child(4) { width: 92px; }
+.program-calculator-table td:nth-child(4) { width: 104px; }
+.program-calculator-table [data-costing-line-unit] { width: 88px; min-width: 88px; max-width: 88px; }
 .program-calculator-table th:nth-child(5),
 .program-calculator-table td:nth-child(5) { width: 92px; }
 .program-calculator-table th:nth-child(6),
 .program-calculator-table td:nth-child(6) { width: 92px; }
 .program-calculator-table th:last-child,
-.program-calculator-table td:last-child { width: 48px; }
+.program-calculator-table td:last-child { width: 88px; }
 .program-cost-source { color: var(--uos-text-muted); }
 .program-cost-source svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; }
 
@@ -1938,10 +1940,16 @@ body.uos-rail-collapsed .program-nav-group {
 
 .program-migration__summary {
   display: grid;
-  grid-template-columns: repeat(7, minmax(96px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: var(--panel-gap-compact);
   padding: var(--panel-gap);
   overflow-x: auto;
+}
+
+[data-program-migration-sources],
+[data-program-migration-owners] {
+  margin: var(--panel-gap-compact) var(--panel-gap);
+  text-wrap: pretty;
 }
 
 .program-migration__summary > div,
@@ -2698,44 +2706,6 @@ body.uos-rail-collapsed .program-nav-group {
   background: transparent;
   color: var(--uos-text-muted, #64748b);
 }
-.program-register-mini-toolbar button[data-register-action].is-available-module,
-.program-register-mini-toolbar button[data-register-action].is-current-module {
-  background: var(--register-shortcut-owner-soft);
-  border-color: var(--register-shortcut-owner);
-  color: var(--register-shortcut-owner);
-  box-shadow: none;
-}
-.program-register-mini-toolbar button[data-register-action].is-available-module:hover,
-.program-register-mini-toolbar button[data-register-action].is-current-module:hover {
-  background: var(--register-shortcut-owner-hover);
-  border-color: var(--register-shortcut-owner);
-  color: var(--register-shortcut-owner);
-}
-.program-register-mini-toolbar button[data-register-action].is-current-module,
-.program-register-mini-toolbar button[data-register-action].is-current-module:disabled {
-  border-width: 2px;
-  opacity: 1;
-  cursor: default;
-}
-.program-register-mini-toolbar button[data-register-action]:disabled:not(.is-current-module) {
-  background: transparent;
-  color: var(--uos-text-muted, #64748b);
-  border-color: var(--panel-border, #cbd5e1);
-}
-
-.program-register-mini-toolbar button.program-register-action--linked,
-.program-register-table td .program-register-mini-toolbar button.program-register-action--linked {
-  border: 1px solid var(--uos-brand, #059669);
-  background: var(--uos-brand-soft, #ecfdf5);
-  color: var(--uos-brand-text, #047857);
-  box-shadow: 0 0 0 1px rgba(5, 150, 105, .08);
-}
-
-.program-register-mini-toolbar button.program-register-action--linked:hover,
-.program-register-table td .program-register-mini-toolbar button.program-register-action--linked:hover {
-  border-color: var(--uos-brand-text, #047857);
-  background: #d1fae5;
-}
 
 .program-register-mini-toolbar button:disabled,
 .program-register-mini-toolbar button[aria-disabled="true"],
@@ -2785,37 +2755,6 @@ body.uos-rail-collapsed .program-nav-group {
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
 }
 
-/*
- * The row-table toolbar predates the availability model and supplies its own
- * white button surface.  Keep linked destinations as behaviour only: the
- * availability/current state is the one visual source of truth.  This layer
- * deliberately follows those legacy table rules so it applies equally in the
- * register table and the compact drawer toolbar, without affecting headers.
- */
-.program-register-mini-toolbar[data-owner] button[data-register-action].is-available-module:not(:disabled),
-.program-register-table td .program-register-mini-toolbar[data-owner] button[data-register-action].is-available-module:not(:disabled) {
-  background: var(--register-shortcut-owner-soft) !important;
-  border: 1px solid var(--register-shortcut-owner) !important;
-  color: var(--register-shortcut-owner) !important;
-  box-shadow: none !important;
-}
-
-.program-register-mini-toolbar[data-owner] button[data-register-action].is-current-module,
-.program-register-table td .program-register-mini-toolbar[data-owner] button[data-register-action].is-current-module {
-  background: var(--register-shortcut-owner-soft) !important;
-  border: 2px solid var(--register-shortcut-owner) !important;
-  color: var(--register-shortcut-owner) !important;
-  opacity: 1 !important;
-  box-shadow: none !important;
-}
-
-.program-register-mini-toolbar[data-owner] button[data-register-action]:disabled:not(.is-current-module),
-.program-register-table td .program-register-mini-toolbar[data-owner] button[data-register-action]:disabled:not(.is-current-module) {
-  background: transparent !important;
-  border: 1px solid var(--panel-border, #cbd5e1) !important;
-  color: var(--uos-text-muted, #64748b) !important;
-  box-shadow: none !important;
-}
 
 .program-register-table td .program-register-mini-toolbar button.program-register-delete-btn,
 .program-register-row button.program-register-delete-btn {
@@ -4632,6 +4571,30 @@ body.program-planner,
   cursor: pointer;
 }
 
+.program-register-protected-edit__button--icon {
+  display: inline-grid;
+  place-items: center;
+  align-self: center;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-color: var(--uos-border, #cbd5e1);
+  background: var(--uos-surface, #fff);
+  color: var(--uos-text, #0f172a);
+}
+
+.program-register-protected-edit__button--icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .program-register-protected-edit__button:hover,
 .program-register-protected-edit__button:focus-visible {
   border-color: var(--register-owner-primary, var(--program-owner-accent, #15803d));
@@ -4950,6 +4913,8 @@ html[data-suite-theme="tritanopia"] body.program-planner {
   }
 }
 
+.program-quote-print-host { display: none; }
+
 @media print {
   @page {
     size: auto;
@@ -4970,6 +4935,24 @@ html[data-suite-theme="tritanopia"] body.program-planner {
     padding: 0 !important;
     margin: 0 !important;
     background: #ffffff !important;
+  }
+
+  html:has(body.is-printing-quote),
+  body.is-printing-quote {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  body.is-printing-quote > :not(.program-quote-print-host) {
+    display: none !important;
+  }
+  body.is-printing-quote > .program-quote-print-host {
+    display: block !important;
+    position: static !important;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    background: #fff;
+    color: #0f172a;
   }
 
   /* HIDE ALL APP CHROME, SIDEBARS & PANELS DURING PRINTING */
@@ -7174,6 +7157,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
 }
 .program-quote-section--funding .program-quote-form-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
 }
 .program-funding-summary {
   display: grid;
@@ -7260,6 +7244,16 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   color: var(--uos-text, #0f172a);
 }
 
+.program-quote-funding-choice {
+  margin: 0 0 16px; padding: 12px; border: 1px solid var(--panel-border); border-radius: 6px;
+  display: flex; flex-wrap: wrap; gap: 12px 20px;
+}
+.program-quote-funding-choice legend { font-weight: 700; padding: 0 4px; }
+.program-quote-funding-choice label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.program-quote-funding-choice input { accent-color: var(--uos-brand); }
+.program-quote-funding-choice p { flex-basis: 100%; margin: 0; color: var(--uos-text-muted); }
+.program-quote-section--funding small { color: var(--uos-text-muted); text-wrap: pretty; }
+.program-quote-section--funding [hidden] { display: none !important; }
 .program-quote-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -7302,6 +7296,72 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   border-bottom: 1px solid var(--panel-border, #e2e8f0);
   vertical-align: middle;
 }
+
+.program-quote-builder-table { table-layout: fixed; }
+.program-quote-builder-table__category-col { width: 110px; }
+.program-quote-builder-table__quantity-col { width: 58px; }
+.program-quote-builder-table__unit-col { width: 64px; }
+.program-quote-builder-table__rate-col { width: 94px; }
+.program-quote-builder-table__total-col { width: 94px; }
+.program-quote-builder-table__actions-col { width: 30px; }
+.program-quote-builder-table th:not(:first-child),
+.program-quote-builder-table__category,
+.program-quote-builder-table__quantity,
+.program-quote-builder-table__unit,
+.program-quote-builder-table__rate,
+.program-quote-builder-table__total,
+.program-quote-builder-table__actions { padding-right: 0; padding-left: 0; text-align: right; }
+.program-quote-builder-table__description { padding-right: 8px; padding-left: 8px; }
+.program-quote-builder-table__description .uos-input,
+.program-quote-builder-table__category .uos-select,
+.program-quote-builder-table__quantity .uos-input,
+.program-quote-builder-table__unit .uos-input,
+.program-quote-builder-table__rate .uos-input { width: 100%; min-width: 0; }
+.program-quote-builder-table__category .uos-select,
+.program-quote-builder-table__quantity .uos-input,
+.program-quote-builder-table__unit .uos-input,
+.program-quote-builder-table__rate .uos-input { text-align: right; }
+.program-quote-builder-table__category .uos-select { text-align-last: right; }
+.program-quote-builder-table__total { font-weight: 700; vertical-align: middle; white-space: nowrap; }
+.program-quote-builder-table__actions .uos-button { min-width: 28px; padding-right: 0; padding-left: 0; }
+
+/* Quote tables also render inside Register drawers. Keep the outer table's
+   positional column widths and important padding out of this inner table. */
+.program-quote-builder-table > thead > tr > th,
+.program-quote-builder-table > tbody > tr > td {
+  width: auto !important;
+  min-width: 0;
+  padding-inline: 0 !important;
+}
+.program-quote-builder-table > thead > tr > th:first-child,
+.program-quote-builder-table > tbody > tr > td:first-child {
+  padding-inline: 8px !important;
+}
+.program-quote-builder-table > thead > tr > th {
+  text-align: left !important;
+}
+.program-quote-builder-table > tbody > tr > .program-quote-builder-table__category,
+.program-quote-builder-table > tbody > tr > .program-quote-builder-table__quantity,
+.program-quote-builder-table > tbody > tr > .program-quote-builder-table__unit,
+.program-quote-builder-table > tbody > tr > .program-quote-builder-table__rate {
+  padding-right: 6px !important;
+}
+.program-quote-builder-table > tbody > tr > .program-quote-builder-table__total {
+  padding-right: 6px !important;
+}
+.program-quote-builder-table > tbody > tr > td .uos-input,
+.program-quote-builder-table > tbody > tr > td .uos-select {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  text-align-last: left;
+}
+
+.program-scheduler-form__checks { display: flex; grid-column: 1 / -1; align-items: center; gap: 18px; min-height: 28px; }
+.program-scheduler-form__checks .program-scheduler-form__check { grid-column: auto; }
+.program-scheduler-form__timed { grid-column: span 1; }
+.program-scheduler-form__timed--start { grid-column: 1; }
+.program-scheduler-form__timed--end { grid-column: 2; }
 
 /* Right Half: Previewer Pane */
 .program-quote-preview-pane {
@@ -7389,6 +7449,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   padding: 0;
   font-family: var(--uos-font-family, system-ui, -apple-system, sans-serif);
   color: #0f172a;
+  container: quote-sheet / inline-size;
 }
 
 .uos-quote-sheet-inner {
@@ -7501,10 +7562,23 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
 }
 
 .uos-quote-sheet__summary-wrap {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 24px;
   margin-bottom: 24px;
+}
+
+.uos-quote-sheet__notes-col {
+  flex: 1 1 240px;
+  min-width: min(100%, 240px);
+}
+.uos-quote-sheet__totals-col {
+  flex: 0 1 auto;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline-start: auto;
 }
 
 .uos-quote-sheet__notes-col h4,
@@ -7522,6 +7596,8 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   font-size: 12px;
   line-height: 1.5;
   color: #334155;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .uos-quote-sheet__totals-list {
@@ -7538,6 +7614,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
 
 .uos-quote-sheet__totals-list dt {
   color: #475569;
+  white-space: nowrap;
 }
 
 .uos-quote-sheet__totals-list dd {
@@ -7545,6 +7622,12 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   text-align: right;
   font-weight: 600;
   color: #0f172a;
+  white-space: nowrap;
+}
+
+@container quote-sheet (max-width: 520px) {
+  .uos-quote-sheet__totals-col { width: 100%; }
+  .uos-quote-sheet__totals-list dt { white-space: normal; }
 }
 
 .uos-quote-sheet__grand-total-label,
@@ -8179,13 +8262,14 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-register-detail :is
 .program-geometry-drop:hover,
 .program-geometry-drop:focus-visible,
 .program-geometry-drop.is-dragover { border-color: var(--program-owner-accent, var(--uos-brand)); background: var(--program-owner-soft, var(--uos-brand-soft)); outline: none; }
-.program-map-data-dialog__paste { min-width: 0; min-height: 0; }
-.program-map-data-dialog__paste textarea { width: 100%; min-height: 0; height: 100%; resize: none; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+.program-map-data-dialog__paste { min-width: 0; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
+.program-map-data-dialog__paste textarea { width: 100%; min-height: 0; height: auto; align-self: stretch; resize: none; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
 .program-map-data-dialog footer { justify-content: space-between; }
 .program-map-data-dialog__footer-actions { display: flex; align-items: center; gap: 8px; }
 
 @media (max-width: 720px) {
-  .program-map-data-dialog__body { grid-template-columns: minmax(0, 1fr); overflow: auto; }
+  .program-map-data-dialog__body { grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; align-items: start; overflow: auto; }
+  .program-map-data-dialog__paste { grid-template-rows: auto auto; }
   .program-map-data-dialog__paste textarea { min-height: 260px; resize: vertical; }
   .program-map-data-dialog footer { align-items: stretch; flex-direction: column-reverse; }
   .program-map-data-dialog__footer-actions { align-items: stretch; flex-direction: column; }
@@ -8443,36 +8527,6 @@ body[data-owner-mode="NSA"] .program-register-mini-toolbar button:hover,
   color: #14532d !important;
 }
 
-/* Established Authoritative Linked Buttons in NSA Mode */
-body.is-nsa-mode .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-body.is-nature-mode .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-body[data-owner-mode="NSA"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-[data-owner="NSA"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-[data-owner="nsa"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-.program-register-detail[data-owner="NSA"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-.program-register-table tr[data-owner="NSA"] td .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-.program-register-table td .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]) {
-  border: 2px solid #059669 !important;
-  background: #ecfdf5 !important;
-  color: #047857 !important;
-  opacity: 1 !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-  box-shadow: 0 0 0 1px rgba(5, 150, 105, 0.2) !important;
-}
-
-body.is-nsa-mode .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-body.is-nature-mode .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-body[data-owner-mode="NSA"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-[data-owner="NSA"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-[data-owner="nsa"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-.program-register-detail[data-owner="NSA"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-.program-register-table tr[data-owner="NSA"] td .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-.program-register-table td .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover {
-  background: #d1fae5 !important;
-  border-color: #047857 !important;
-  color: #065f46 !important;
-}
 
 /* Explicit Remediation (EVT) Family Colors */
 body.is-evt-mode .program-register-mini-toolbar button,
@@ -8501,34 +8555,6 @@ body[data-owner-mode="EVT"] .program-register-mini-toolbar button:hover,
   color: #1e3a8a !important;
 }
 
-/* Established Authoritative Linked Buttons in EVT Mode */
-body.is-evt-mode .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-body.is-events-mode .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-body[data-owner-mode="EVT"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-[data-owner="EVT"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-[data-owner="evt"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-.program-register-detail[data-owner="EVT"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]),
-.program-register-table tr[data-owner="EVT"] td .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]) {
-  border: 2px solid #2563eb !important;
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
-  opacity: 1 !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2) !important;
-}
-
-body.is-evt-mode .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-body.is-events-mode .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-body[data-owner-mode="EVT"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-[data-owner="EVT"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-[data-owner="evt"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-.program-register-detail[data-owner="EVT"] .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover,
-.program-register-table tr[data-owner="EVT"] td .program-register-mini-toolbar button:is(.program-register-action--linked, [data-linked-entity="true"]):hover {
-  background: #dbeafe !important;
-  border-color: #1d4ed8 !important;
-  color: #1e40af !important;
-}
 
 /* Ensure disabled styles ONLY apply to buttons that are NOT linked */
 .program-register-mini-toolbar button:disabled:not(.is-current-module):not(.program-register-action--linked):not([data-linked-entity="true"]),
@@ -8573,51 +8599,6 @@ body[data-owner-mode="EVT"] .program-register-mini-toolbar button:is(.program-re
   overflow-y: auto !important;
 }
 
-/* Active/Current Module Indicator in Shortcut Button Bars & Table Action Columns */
-.program-register-mini-toolbar button.is-current-module,
-.program-register-mini-toolbar button[aria-current="page"],
-.program-register-mini-toolbar button[aria-current="page"]:disabled {
-  background: var(--program-owner-soft, #f0fdf4) !important;
-  color: var(--program-owner-strong, #065f46) !important;
-  border: 2px solid var(--program-owner-accent, #059669) !important;
-  cursor: default !important;
-  pointer-events: none !important;
-  box-shadow: 0 0 0 1px var(--program-owner-ring, rgba(5, 150, 105, 0.25)) !important;
-  opacity: 1 !important;
-}
-
-body.is-nsa-mode .program-register-mini-toolbar button.is-current-module,
-body.is-nsa-mode .program-register-mini-toolbar button[aria-current="page"],
-body.is-nsa-mode .program-register-mini-toolbar button[aria-current="page"]:disabled,
-body.is-nature-mode .program-register-mini-toolbar button.is-current-module,
-body.is-nature-mode .program-register-mini-toolbar button[aria-current="page"],
-body[data-owner-mode="NSA"] .program-register-mini-toolbar button.is-current-module,
-body[data-owner-mode="NSA"] .program-register-mini-toolbar button[aria-current="page"],
-.is-nsa-mode .program-register-mini-toolbar button.is-current-module,
-.is-nature-mode .program-register-mini-toolbar button.is-current-module {
-  background: #f0fdf4 !important;
-  color: #166534 !important;
-  border: 2px solid #059669 !important;
-  box-shadow: 0 0 0 1px rgba(5, 150, 105, 0.3) !important;
-}
-
-body.is-evt-mode .program-register-mini-toolbar button.is-current-module,
-body.is-evt-mode .program-register-mini-toolbar button[aria-current="page"],
-body.is-evt-mode .program-register-mini-toolbar button[aria-current="page"]:disabled,
-body.is-events-mode .program-register-mini-toolbar button.is-current-module,
-body.is-events-mode .program-register-mini-toolbar button[aria-current="page"],
-body.is-remediation-mode .program-register-mini-toolbar button.is-current-module,
-body.is-remediation-mode .program-register-mini-toolbar button[aria-current="page"],
-body[data-owner-mode="EVT"] .program-register-mini-toolbar button.is-current-module,
-body[data-owner-mode="EVT"] .program-register-mini-toolbar button[aria-current="page"],
-.is-evt-mode .program-register-mini-toolbar button.is-current-module,
-.is-events-mode .program-register-mini-toolbar button.is-current-module,
-.is-remediation-mode .program-register-mini-toolbar button.is-current-module {
-  background: #f0f9ff !important;
-  color: #0369a1 !important;
-  border: 2px solid #0284c7 !important;
-  box-shadow: 0 0 0 1px rgba(2, 132, 199, 0.3) !important;
-}
 
 /* Small Panel Header Left Alignment */
 .program-register-pane__head,
@@ -11069,7 +11050,7 @@ html[data-suite-theme="dark"] .program-cost-table .program-category-pill[data-ca
 .program-budget__dialog-head h2 { margin: 0; font-size: 20px; }
 .program-budget__dialog-close { border: 0; background: transparent; color: inherit; font: inherit; font-size: 26px; line-height: 1; cursor: pointer; }
 .program-budget__dialog-form > p { margin: 8px 0 18px; color: var(--uos-text-muted, #66737c); font-size: 13px; text-wrap: pretty; }
-.program-budget__dialog-fields { display: grid; gap: 12px; max-height: 55vh; overflow: auto; }
+.program-budget__dialog-fields { display: grid; gap: 12px; max-height: 55vh; overflow: auto; padding: var(--uos-focus-clearance, 8px); scrollbar-gutter: stable; }
 .program-budget__field { display: grid; gap: 5px; font-size: 12px; font-weight: 600; }
 .program-budget__field .uos-input, .program-budget__field .uos-select { width: 100%; min-width: 0; }
 .program-budget__dialog-error { margin: 12px 0 0 !important; font-size: 12px; }
@@ -11303,3 +11284,235 @@ html[data-suite-theme="dark"] .program-cost-table .program-category-pill[data-ca
   font-size: 12px;
   white-space: nowrap;
 }
+/* Both Calculator rails share Register Action control dimensions. */
+.program-rate-actions { display: flex; align-items: center; gap: 4px; }
+.program-rate-actions .uos-button--icon,
+.program-calculator-actions .uos-button--icon { width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0; }
+.program-rate-actions .uos-button--icon svg,
+.program-calculator-actions .uos-button--icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.program-rate-scheduler-info { position: relative; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 28px; cursor: help; color: var(--uos-accent, #337b57); }
+.program-rate-scheduler-info:focus-visible { outline: 2px solid var(--uos-accent, #337b57); outline-offset: 2px; }
+.program-calculator-table td.program-calculator-actions { white-space: nowrap; overflow: visible !important; text-overflow: clip; }
+.program-calculator-action-rail { display: inline-flex; align-items: center; flex-wrap: nowrap; gap: 12px; vertical-align: middle; }
+.program-calculator-action-rail > button { flex: 0 0 28px; }
+.program-calculator-calendar { position: relative; }
+.program-calculator-calendar::after { content: ""; position: absolute; top: 4px; right: -7px; height: 18px; border-right: 1px solid var(--uos-border, #d8dfe1); }
+.program-budget__persistent-actions { display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; padding-block: 8px; }
+.program-budget__persistent-actions > button { flex: 0 0 auto; }
+
+/* Costing rows use the same controls and field treatment as Quote Section 2. */
+.program-cost-table, .program-calculator-table {font-size:12px;}
+.program-cost-table thead th, .program-calculator-table thead th {padding:6px 8px;background:var(--uos-surface-subtle,#f8fafc);font-size:11px;font-weight:700;color:var(--uos-text-muted,#64748b);text-transform:uppercase;}
+.program-cost-table tbody td, .program-calculator-table tbody td {padding:6px 8px;vertical-align:middle;}
+.program-cost-table .program-rate-sort {font:inherit;color:inherit;text-transform:inherit;}
+.program-cost-value {display:block;box-sizing:border-box;width:100%;min-width:0;min-height:var(--uos-control-height,36px);padding:var(--uos-control-padding-y,8px) var(--uos-control-padding-x,10px);border:1px solid var(--uos-border-strong,#cbd5e1);border-radius:var(--uos-radius-control,6px);background:var(--uos-surface,#fff);color:var(--uos-text,#0f172a);font:inherit;line-height:1.4;overflow-wrap:anywhere;}
+.program-cost-value--total {font-weight:700;white-space:nowrap;}
+.program-calculator-table .uos-input, .program-calculator-table .uos-select {width:100%;min-width:0;max-width:none;}
+.program-calculator-table [data-costing-line-unit] {width:100%;min-width:0;max-width:none;}
+.program-calculator-line-item strong.program-cost-value {font-weight:400;}
+.program-cost-table .program-cost-value {white-space:normal;overflow:visible;font-weight:400;}
+.program-scheduler-form__actions {display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:8px;}
+.program-scheduler-form__actions > .uos-button {flex:0 0 auto;width:auto;min-width:0;height:32px;min-height:32px;padding:0 8px;font-size:12px;white-space:nowrap;}
+.program-scheduler-form__actions > .uos-button svg {display:none;}
+#scheduler-application-status-help {margin:0;color:var(--uos-text-muted);font-size:12px;line-height:1.5;}
+.program-scheduler-form__nomination {display:grid;gap:8px;min-width:0;padding:12px;border:1px solid var(--panel-border);border-radius:8px;background:var(--panel-bg);}
+.program-scheduler-form__nomination .program-scheduler-form__check {align-items:flex-start;min-height:0;}
+.program-scheduler-form__nomination .program-scheduler-form__check input {flex-shrink:0;margin:0;}
+html .program-scheduler-detail > .program-scheduler-inspector__head {border-bottom:1px solid var(--panel-border)!important;box-shadow:none!important;background:var(--uos-surface,#fff)!important;}
+.program-scheduler-detail__body > [data-scheduler-detail-title] {display:flex;align-items:center;gap:10px;margin:4px 0 16px;font-size:22px;font-weight:800;line-height:1.3;}
+.program-scheduler-detail__body > [data-scheduler-detail-title] > span {min-width:0;overflow-wrap:anywhere;}
+.program-scheduler-detail__body .program-scheduler-detail__source-icon {flex:0 0 36px!important;width:36px!important;height:36px!important;margin:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--uos-brand-text);}
+.program-scheduler-calendar {display:flex!important;flex-direction:column!important;}
+.program-scheduler-calendar > .program-calendar-scroll {flex:1 1 auto;min-height:0;overflow:auto;}
+.program-scheduler-calendar > .program-scheduler-filter-drawer-body {flex:0 0 auto;}
+.program-scheduler-calendar-scope button:disabled {opacity:.55;cursor:default;}
+.program-scheduler-calendar-scope button:focus-visible {outline:2px solid var(--uos-text);outline-offset:2px;}
+.program-scheduler-head {flex-wrap:wrap!important;gap:8px!important;height:auto!important;min-height:52px!important;max-height:none!important;padding:8px 16px!important;}
+.program-scheduler-head > .program-scheduler-navigation {position:static!important;left:auto!important;top:auto!important;transform:none!important;}
+.program-scheduler-header__controls {display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;min-width:0;max-width:100%;margin-left:auto;}
+.program-scheduler-header__controls > .program-scheduler-modes {margin-left:0!important;}
+@media (max-width:640px) {.program-scheduler-head {max-width:100vw;box-sizing:border-box!important;}.program-scheduler-header__controls {justify-content:flex-start;margin-left:0;}}
+.program-scheduler-calendar-legend {display:flex;flex:1;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px;font-size:12px;color:var(--uos-text-muted);}
+.program-scheduler-calendar-legend[hidden] {display:none;}
+.program-scheduler-calendar-legend > span {display:inline-flex;align-items:center;gap:5px;}
+.program-scheduler-calendar-legend > span::before {content:"";width:12px;height:12px;border-radius:2px;border:1px solid var(--panel-border);background:var(--uos-surface-muted,#f1f5f9);}
+.program-scheduler-calendar-legend > .program-scheduler-calendar-legend__active::before {background:var(--program-owner-strong,#065f46);border-color:var(--program-owner-strong,#065f46);}
+.program-calendar-job.is-other-project {opacity:1;filter:none;background:var(--uos-surface-muted,#f1f5f9);color:var(--uos-text-muted,#64748b);border-color:var(--panel-border,#cbd5e1);font-weight:500;}
+.program-calendar-job.is-other-project:hover, .program-calendar-job.is-other-project:focus-visible {background:var(--uos-surface-subtle,#e2e8f0);color:var(--uos-text,#0f172a);border-color:var(--uos-border-strong,#94a3b8);}
+.program-calendar-job.is-linked-project {background:var(--program-owner-strong,#065f46);color:var(--uos-on-action,#fff);border-color:var(--program-owner-strong,#065f46);}
+.program-calendar-job.is-linked-project:hover, .program-calendar-job.is-linked-project:focus-visible {background:var(--program-owner-accent,#047857);color:var(--uos-on-action,#fff);}
+.program-calendar-job.is-linked-project.is-selected {position:relative;outline:none!important;}
+.program-calendar-job.is-linked-project.is-selected::after {
+  content:""!important;display:block!important;position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
+  background-image:repeating-linear-gradient(90deg,#fff 0 4px,#0f172a 4px 8px),repeating-linear-gradient(0deg,#fff 0 4px,#0f172a 4px 8px),repeating-linear-gradient(90deg,#fff 0 4px,#0f172a 4px 8px),repeating-linear-gradient(0deg,#fff 0 4px,#0f172a 4px 8px);
+  background-size:8px 2px,2px 8px,8px 2px,2px 8px;
+  background-position:0 0,100% 0,0 100%,0 0;background-repeat:repeat-x,repeat-y,repeat-x,repeat-y;
+  animation:scheduler-selection-ants 800ms linear infinite;
+}
+@keyframes scheduler-selection-ants {
+  to {background-position:8px 0,100% 8px,-8px 100%,0 -8px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .program-calendar-job.is-linked-project.is-selected::after {animation:none;}
+}
+.program-calendar-job.is-linked-project .program-calendar-job__title {color:inherit;}
+.program-calendar-job.is-other-project .program-calendar-job__title {font-weight:500;color:inherit;}
+.program-scheduler-form__timed[hidden] {display:none!important;}
+
+.program-cost-col-unit {width:80px;}
+.program-cost-table th:nth-child(3), .program-cost-table td:nth-child(3) {width:80px;min-width:80px;padding:6px 8px;}
+.program-cost-col-rate {width:100px;}
+.program-cost-col-state {width:84px;}
+
+/* One frame height and one gap for Quote, Cost Library and Calculator rows. */
+:is(.program-quote-builder-table,.program-cost-table,.program-calculator-table) {--commercial-frame-height:var(--uos-control-height,34px);--commercial-frame-gap:8px;}
+:is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>tbody>tr>td:not([colspan]) {padding:6px var(--commercial-frame-gap) 6px 0!important;vertical-align:middle;}
+:is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>tbody>tr>td:first-child {padding-left:8px!important;}
+:is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>thead>tr>th {padding-inline:0 var(--commercial-frame-gap)!important;text-align:left;}
+:is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>thead>tr>th:first-child {padding-left:8px!important;}
+:is(.program-quote-builder-table,.program-cost-table,.program-calculator-table) :is(.uos-input,.uos-select,.program-cost-value,.program-rate-state) {box-sizing:border-box;height:var(--commercial-frame-height);min-height:var(--commercial-frame-height);max-height:var(--commercial-frame-height);padding:0 9px;border-radius:var(--uos-radius-control);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;}
+:is(.program-cost-table,.program-calculator-table) .program-cost-value {line-height:calc(var(--commercial-frame-height) - 2px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.program-cost-table .program-rate-state {width:100%;}
+.program-calculator-table .program-cost-source {text-align:left;}
+.program-cost-source-frame {display:inline-flex;box-sizing:border-box;align-items:center;justify-content:center;width:var(--commercial-frame-height);height:var(--commercial-frame-height);border:1px solid var(--uos-border-strong);border-radius:var(--uos-radius-control);background:var(--uos-surface);}
+.program-cost-source-frame svg {width:20px;height:20px;}
+:is(.program-rate-actions,.program-calculator-action-rail) {gap:var(--commercial-frame-gap);flex-wrap:nowrap;}
+:is(.program-rate-actions,.program-calculator-action-rail)>:is(button,.program-rate-scheduler-info),.program-quote-builder-table__actions .uos-button {box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;flex:0 0 var(--commercial-frame-height);width:var(--commercial-frame-height);min-width:var(--commercial-frame-height);max-width:var(--commercial-frame-height);height:var(--commercial-frame-height);min-height:var(--commercial-frame-height);max-height:var(--commercial-frame-height);padding:0;border:1px solid var(--uos-border-strong);border-radius:var(--uos-radius-control);background:var(--uos-surface);}
+:is(.program-rate-actions,.program-calculator-action-rail) .uos-button--icon svg {width:20px;height:20px;}
+.program-quote-builder-table__actions .uos-button {font-size:20px;}
+.program-calculator-calendar::after {display:none;}
+.program-cost-col-actions {width:calc(4 * var(--commercial-frame-height) + 5 * var(--commercial-frame-gap))!important;}
+.program-cost-table :is(th,td):last-child {width:calc(4 * var(--commercial-frame-height) + 5 * var(--commercial-frame-gap));min-width:calc(4 * var(--commercial-frame-height) + 5 * var(--commercial-frame-gap));overflow:visible;}
+.program-cost-col-description {width:auto;}
+.program-calculator-col-source {width:calc(var(--commercial-frame-height) + var(--commercial-frame-gap));}
+.program-calculator-table :is(th,td):nth-child(2) {width:calc(var(--commercial-frame-height) + var(--commercial-frame-gap));}
+.program-calculator-col-actions {width:calc(2 * var(--commercial-frame-height) + 3 * var(--commercial-frame-gap));}
+.program-calculator-table :is(th,td):last-child {width:calc(2 * var(--commercial-frame-height) + 3 * var(--commercial-frame-gap));min-width:calc(2 * var(--commercial-frame-height) + 3 * var(--commercial-frame-gap));overflow:visible;}
+.program-quote-builder-table {min-width:740px;}
+.program-quote-builder-table__category-col {width:120px;}
+.program-quote-builder-table__quantity-col {width:72px;}
+.program-quote-builder-table__unit-col {width:80px;}
+.program-quote-builder-table__rate-col,.program-quote-builder-table__total-col {width:104px;}
+.program-quote-builder-table__actions-col {width:calc(var(--commercial-frame-height) + var(--commercial-frame-gap));}
+.program-quote-builder-table [data-line-field="description"]:focus {text-overflow:clip;}
+
+.program-cost-table .program-rate-actions {justify-content:flex-start;min-width:0;}
+.program-calculator-table .program-calculator-actions {text-align:left;}
+
+/* Category shares the widest label's column width; trailing columns keep fixed positions. */
+.program-cost-table {display:block;--commercial-state-width:80px;}
+.program-cost-table>colgroup {display:none;}
+.program-cost-table>thead,.program-cost-table>tbody {display:block;width:100%;}
+.program-cost-table>thead>tr,.program-cost-table>tbody>tr {display:grid;grid-template-columns:var(--commercial-category-width,160px) minmax(168px,1fr) 80px 100px var(--commercial-state-width) calc(4 * var(--commercial-frame-height) + 4 * var(--commercial-frame-gap));width:100%;}
+.program-cost-table>tbody>tr {min-height:calc(var(--commercial-frame-height) + 13px);}
+.program-cost-table>tbody>tr>td {display:block;height:auto;min-height:calc(var(--commercial-frame-height) + 13px);}
+.program-cost-table>thead>tr>th,.program-cost-table>tbody>tr>td {box-sizing:border-box;min-width:0;width:auto!important;}
+.program-cost-table .program-category-pill {height:var(--commercial-frame-height);min-height:var(--commercial-frame-height);max-height:var(--commercial-frame-height);padding:0 8px;line-height:1.2;}
+.program-cost-table>thead>tr>th:first-child {padding-right:8px!important;}
+.program-cost-table>tbody>tr>td:first-child {padding-right:8px!important;}
+.program-cost-table>thead>tr>th:last-child,.program-cost-table>tbody>tr>td:last-child {width:auto;min-width:0;}
+.program-cost-table .program-rate-actions {display:grid;grid-template-columns:repeat(4,var(--commercial-frame-height));justify-content:end;gap:8px;width:100%;}
+.program-rate-empty-slot {width:var(--commercial-frame-height);height:var(--commercial-frame-height);}
+.program-calculator-col-actions {width:calc(2 * var(--commercial-frame-height) + 2 * var(--commercial-frame-gap));}
+.program-calculator-table :is(th,td):last-child {width:calc(2 * var(--commercial-frame-height) + 2 * var(--commercial-frame-gap));min-width:calc(2 * var(--commercial-frame-height) + 2 * var(--commercial-frame-gap));text-align:right;}
+.program-calculator-action-rail {justify-content:flex-end;}
+.program-quote-builder-table__actions {text-align:right!important;}
+.program-cost-table .program-category-pill {display:block;width:100%;max-width:100%;overflow:hidden;text-overflow:clip;line-height:calc(var(--commercial-frame-height) - 2px);}
+
+/* Calculator titles and Kind navigation share a measured header height. */
+.program-costing-workspace .program-cost-catalog {grid-template-rows:auto auto minmax(0,1fr);}
+.program-cost-catalog>.program-cost-controls {grid-row:2;}
+.program-cost-catalog>.program-cost-table-wrap {grid-row:3;}
+.program-costing-workspace :is(.program-cost-catalog,.program-job-calculator)>.program-costing-head {height:var(--calculator-panel-header-height,52px)!important;min-height:var(--calculator-panel-header-height,52px)!important;max-height:none!important;flex-direction:row!important;}
+.program-costing-head-content {display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;align-items:center;gap:8px 12px;width:100%;min-width:0;padding:8px 0;}
+.program-costing-head-content .program-costing-title {width:max-content;}
+.program-costing-head-content .program-cost-tabs {min-height:0;padding:0;border:0;justify-content:safe center;align-items:center;gap:5px;}
+.program-costing-head-content.is-compact {grid-template-columns:minmax(0,1fr) max-content;}
+.program-costing-head-content.is-compact .program-cost-tabs {grid-column:1/-1;grid-row:2;}
+.program-costing-head-content.is-compact .program-cost-tools-toggle {grid-column:2;grid-row:1;}
+.program-costing-head-content .program-cost-tools-toggle {min-width:0;padding-inline:8px;gap:4px;margin:0;}
+:is(.program-cost-table,.program-calculator-table)>thead>tr {height:calc(var(--commercial-frame-height) + 13px)!important;background:var(--uos-surface-muted);}
+:is(.program-cost-table,.program-calculator-table)>thead>tr>th {height:calc(var(--commercial-frame-height) + 13px)!important;min-height:calc(var(--commercial-frame-height) + 13px);box-sizing:border-box;background:var(--uos-surface-muted)!important;vertical-align:middle;}
+.program-cost-table>thead>tr>th {display:flex;align-items:center;}
+.program-calculator-table>thead>tr>th:nth-child(3) {text-align:center!important;}
+.program-calculator-table .program-costing-line-group>th {text-align:left!important;}
+
+/* Pin each complete column-heading band inside its own table scroller. */
+:is(.program-cost-table,.program-calculator-table)>thead {position:sticky;top:0;z-index:3;background:var(--uos-surface-muted);}
+:is(.program-cost-table,.program-calculator-table)>thead>tr>th {position:static;}
+.program-calculator-table>thead>tr>th {box-shadow:inset 0 -1px 0 var(--panel-border);}
+.program-calculator-table .program-costing-line-group {height:calc(var(--commercial-frame-height) + 13px);}
+.program-calculator-table .program-costing-line-group>th {position:static;box-sizing:border-box;height:calc(var(--commercial-frame-height) + 13px);min-height:calc(var(--commercial-frame-height) + 13px);padding:0 8px;vertical-align:middle;}
+
+.program-costing-workspace .program-job-calculator {grid-template-rows:auto auto minmax(0,1fr) auto;}
+.program-job-calculator>.program-calculator-head {justify-content:space-between;gap:12px;}
+.program-calculator-head>[data-calculator-tools-toggle] {flex:0 0 auto;min-width:0;margin:0;padding-inline:8px;gap:4px;}
+.program-job-calculator>.program-calculator-tools {grid-row:2;min-width:0;padding:10px 8px;border-bottom:1px solid var(--panel-border);background:var(--uos-surface);}
+.program-calculator-tools[hidden] {display:none!important;}
+.program-calculator-tools__actions {display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.program-calculator-tools__actions>.uos-button {flex:0 0 auto;white-space:nowrap;}
+.program-calculator-tools__result {margin:8px 0 0;font-size:12px;white-space:pre-line;overflow-wrap:anywhere;max-height:120px;overflow:auto;}
+.program-job-calculator>.program-calculator-table-wrap {grid-row:3;}
+.program-job-calculator>.program-cost-totals {grid-row:4;}
+
+.program-scheduler-header__controls {flex:1;}
+.program-scheduler-job-register__header, html .program-scheduler-detail > .program-scheduler-inspector__head {height:var(--scheduler-header-height,52px)!important;min-height:var(--scheduler-header-height,52px)!important;box-sizing:border-box!important;align-items:center!important;}
+
+/* Table truncation must not cut off the focused editor's outside ring. */
+.program-quote-builder-table td:focus-within,
+.program-calculator-table td:focus-within,
+.program-cost-table td:focus-within {overflow:visible!important;position:relative;z-index:1;}
+
+.program-quote-preview-toolbar {flex-wrap:wrap;gap:8px;}
+.program-quote-preview-toolbar > div:first-child {flex-wrap:wrap;}
+.program-quote-preview-status {display:inline-flex;align-items:center;gap:8px;}
+.program-quote-preview-status [data-quote-lifecycle-actions] {display:inline-flex;align-items:center;gap:6px;}
+.program-quote-preview-status [data-quote-lifecycle-actions][hidden] {display:none;}
+.program-quote-status-pill,
+.program-quote-live-pill {display:inline-flex;align-items:center;justify-content:center;height:28px;min-height:28px;box-sizing:border-box;padding:0 10px;border:1px solid var(--panel-border);border-radius:999px;font-size:11px;font-weight:800;line-height:1;white-space:nowrap;background:var(--uos-surface-muted,#f1f5f9);color:var(--uos-text-muted,#475569);}
+.program-quote-preview-status .uos-button {height:28px;min-height:28px;box-sizing:border-box;padding:2px 8px;}
+:root {--quote-status-height:28px;--quote-draft-bg:#e2e8f0;--quote-draft-text:#1e293b;--quote-draft-border:#94a3b8;}
+html[data-suite-theme="dark"] {--quote-draft-bg:#334155;--quote-draft-text:#f1f5f9;--quote-draft-border:#64748b;}
+.program-quote-status-pill[data-quote-state] {--quote-pill-bg:var(--quote-draft-bg);--quote-pill-text:var(--quote-draft-text);--quote-pill-border:var(--quote-draft-border);height:var(--quote-status-height);min-height:var(--quote-status-height);background:var(--quote-pill-bg);color:var(--quote-pill-text);border-color:var(--quote-pill-border);}
+.program-quote-status-pill[data-quote-state="Unquoted"] {--quote-pill-bg:#475569;--quote-pill-text:#fff;--quote-pill-border:#334155;}
+.program-quote-status-pill[data-quote-state="Issued"] {--quote-pill-bg:#1d4ed8;--quote-pill-text:#fff;--quote-pill-border:#1e40af;}
+.program-quote-status-pill[data-quote-state="Accepted"] {--quote-pill-bg:#047857;--quote-pill-text:#fff;--quote-pill-border:#065f46;}
+.program-quote-status-pill[data-quote-state="Declined"] {--quote-pill-bg:#b91c1c;--quote-pill-text:#fff;--quote-pill-border:#991b1b;}
+.program-quote-status-pill[data-quote-state="Superseded"] {--quote-pill-bg:#6d28d9;--quote-pill-text:#fff;--quote-pill-border:#5b21b6;}
+.program-quote-status-pill--slim,
+.program-quote-history__row > .program-quote-status-pill--slim {display:inline-flex;flex:0 0 104px;width:104px;height:var(--quote-status-height);min-height:var(--quote-status-height);padding:0 8px;font-size:11px;}
+.program-quote-history__item {gap:8px;}
+.program-quote-history__item > .program-quote-history__row {display:flex;flex:1;flex-direction:row;align-items:center;gap:10px;white-space:nowrap;overflow-x:auto;padding:3px 0;}
+.program-quote-history__row > strong,
+.program-quote-history__row > span {flex-shrink:0;margin:0;white-space:nowrap;}
+.program-quote-history__dates {font-size:11px;color:var(--uos-text-muted);}
+.program-quote-project-card__meta {display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;}
+.program-quote-issue-funding {display:flex;flex-direction:column;gap:6px;padding:16px;border:2px solid var(--uos-brand);border-radius:8px;background:var(--uos-surface-muted);}
+.program-quote-issue-funding > span {font-size:12px;font-weight:700;color:var(--uos-text-muted);}
+.program-quote-issue-funding > strong {font-size:22px;line-height:1.25;color:var(--uos-text);}
+.program-quote-issue-warnings {margin-top:16px;padding:12px;border:1px solid #d97706;border-radius:8px;background:#fffbeb;color:#92400e;}
+.program-quote-issue-warnings p {margin:0 0 8px;}
+.program-quote-issue-warnings p:last-child {margin-bottom:0;}
+html[data-suite-theme="dark"] .program-quote-issue-warnings {background:#382a14;color:#fde68a;border-color:#a16207;}
+
+.program-quote-history__row > strong::before,
+.program-quote-history__row > span:not(.program-quote-status-pill)::before,
+.program-quote-project-card__meta > span:not(.program-quote-status-pill)::before {content:"•";display:inline-block;margin-right:10px;color:var(--uos-text-muted);font-weight:400;}
+
+/* Leave space at every edge of the horizontally scrolling quote table for focus. */
+.program-quote-lines-wrap {overflow-x:auto;padding:6px;margin:-6px;scroll-padding:6px;}
+
+[data-program-view="quotes"] :is(input,select,textarea,button) {scroll-margin:6px;}
+
+/* The action header and section rail stay outside the quote form's scroll viewport. */
+.program-quote-builder-pane > .program-quote-pane-head {flex:0 0 auto;position:sticky;top:0;z-index:3;}
+.program-quote-section-navigation {flex:0 0 auto;min-width:0;border-bottom:1px solid var(--panel-border);background:var(--uos-surface-subtle,#f8fafc);position:sticky;top:52px;z-index:3;}
+.program-quote-section-rail {display:flex;align-items:center;gap:0;min-width:0;overflow-x:auto;padding:6px 10px;scrollbar-width:thin;scroll-padding:6px;}
+.program-quote-section-link {display:inline-flex;align-items:center;justify-content:center;position:relative;flex:0 0 auto;min-height:28px;padding:3px 7px;border:1px solid transparent;border-radius:var(--uos-radius-control);font:inherit;font-size:11px;font-weight:600;white-space:nowrap;background:transparent;color:var(--uos-text-muted);cursor:pointer;}
+.program-quote-section-link + .program-quote-section-link {margin-left:13px;}
+.program-quote-section-link + .program-quote-section-link::before {content:"";position:absolute;right:calc(100% + 3px);width:7px;height:1px;background:var(--uos-border-strong,#94a3b8);pointer-events:none;}
+.program-quote-section-link[aria-current="location"] {background:var(--program-owner-primary,var(--uos-brand));border-color:var(--program-owner-primary,var(--uos-brand));color:#fff;font-weight:800;}
+.program-quote-section-link:hover:not([aria-current]) {background:var(--uos-surface-muted,#e2e8f0);color:var(--uos-text);}
+.program-quote-pane-body {align-content:start;overscroll-behavior:contain;}
+.program-quote-section-scroll-space {grid-row:8;pointer-events:none;}
+@media print {.program-quote-section-navigation,.program-quote-section-scroll-space {display:none!important;}}

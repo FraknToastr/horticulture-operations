@@ -46,6 +46,7 @@ test("NSA Planner shortcut retains every Register row header and dates use DD/MM
 
   const plannerButton = manualRow.locator('[data-register-action="planner"]');
   await expect(plannerButton).toBeEnabled();
+  await expect(pdfRow.locator('[data-register-action="planner"]')).toBeDisabled();
   const actionLayout = await manualRow.locator(".program-register-table__actions-cell").evaluate((cell) => {
     const toolbar = cell.querySelector(".program-register-mini-toolbar");
     const buttons = Array.from(toolbar.querySelectorAll("button"));
@@ -65,8 +66,8 @@ test("NSA Planner shortcut retains every Register row header and dates use DD/MM
   expect(actionLayout.toolbarWidth).toBeLessThanOrEqual(280);
   expect(actionLayout.firstInset).toBeGreaterThanOrEqual(8);
   expect(actionLayout.lastInset).toBeGreaterThanOrEqual(8);
-  expect(actionLayout.plannerBorderWidth).toBe("0px");
-  expect(actionLayout.plannerRadius).toBe("0px");
+  expect(actionLayout.plannerBorderWidth).toBe("1px");
+  expect(actionLayout.plannerRadius).toBe("4px");
   const before = await child.evaluate(() => {
     const outer = document.querySelector("[data-register-table-body]").closest(".program-table-wrap");
     const second = document.querySelector('tr[data-register-record="NSA-APP-SECOND-ROW"]');

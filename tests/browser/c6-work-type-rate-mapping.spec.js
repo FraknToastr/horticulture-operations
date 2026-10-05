@@ -167,7 +167,7 @@ test("C6-BR-02: Supported unmapped polygon keeps Create Job disabled with no lin
   const create = shapeCard.locator('[data-create-shape-job]');
   await expect(shapeCard.locator('[data-shape-type]')).toHaveValue("fertilise");
   await expect(create).toBeDisabled();
-  await expect(create).toHaveAttribute("title", /active compatible pricing rates/i);
+  await expect(create).toHaveAttribute("data-uos-tooltip", /active compatible pricing rates/i);
   const counts = await child.evaluate((geometryId) => {
     const ws = window.UOS.ProgramApp.workspace();
     return [ws.entities.jobs.filter((item) => item.sourceGeometryId === geometryId).length, ws.entities.costingLines.filter((item) => item.sourceGeometryId === geometryId).length];
@@ -225,7 +225,7 @@ test("C6-BR-DUAL-01: Adding a dual-path Rate creates one row whose Map button ad
   await expect.poll(() => child.evaluate((rateId) => {
     const line = window.UOS.ProgramApp.workspace().entities.costingLines.find((item) => item.rateItemId === rateId);
     return line ? { sourceKind: line.sourceKind, sourceGeometryId: line.sourceGeometryId } : null;
-  }, rateId)).toEqual({ sourceKind: "manual", sourceGeometryId: null });
+  }, rateId)).toEqual({ sourceKind: "calculator", sourceGeometryId: null });
 });
 
 test("C6-BR-DUAL-02: Editing a manual Rate into a dual-path Rate preserves one row and changes + to Map", async ({ page }) => {

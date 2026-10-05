@@ -1,0 +1,189 @@
+const { test, expect } = require('@playwright/test');
+const { suppressBackupModalForFunctionalTest } = require('./test-helper.cjs');
+
+test.beforeEach(async ({ page }) => suppressBackupModalForFunctionalTest(page));
+
+for (const owner of ['NSA', 'EVT']) {
+  test(`${owner}: reason, visible history, staged reset and reload`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/src/program-planner/${owner === 'NSA' ? 'nsa' : 'events'}.html`);
+    let child = page.frames().find(frame => frame !== page.mainFrame());
+    await child.waitForFunction(() => window.UOS?.ProgramApp?.snapshot().phase === 'ready');
+    const ids = await child.evaluate(async owner => {
+      let ids;
+      await window.UOS.ProgramApp.updateWorkspace(workspace => {
+        const id = `${owner === 'NSA' ? 'NSA-APP' : 'EVT'}-RESET-HISTORY`;
+        workspace.entities[owner === 'NSA' ? 'applications' : 'events'].push({ id, owner, type: owner === 'NSA' ? 'application' : 'event', title: 'Task reset and history', status: 'received', dateReceived: '2026-10-02' });
+        const promoted = window.UOS.ProgramModel.promoteRegisterRecord(workspace, id);
+        const task = promoted.workspace.entities.tasks.find(item => item.projectId === promoted.project.id);
+        ids = { taskId: task.id, projectId: promoted.project.id, title: task.title, sortOrder: task.sortOrder };
+        promoted.workspace.workspace.selectedProjectId = promoted.project.id;
+        promoted.workspace.workspace.selectedEntityId = id;
+        return promoted.workspace;
+      });
+      await window.UOS.ProgramApp.navigate('planner');
+      return ids;
+    }, owner);
+    const row = () => child.locator(`.planner-item-row[data-task-entity-id="${ids.taskId}"]`);
+    const dialog = () => child.locator('[data-planner-task-dialog]');
+    async function open() {
+      await expect(child.locator('[data-program-view="planner"]')).toBeVisible();
+      if (await row().getAttribute('hidden') !== null) {
+        const section = await row().getAttribute('data-planner-section-item');
+        await child.locator(`[data-planner-section-toggle="${section}"]`).click();
+      }
+      await row().locator('[data-planner-edit-task]').click();
+      await expect(dialog()).toBeVisible();
+    }
+    await open();
+    await expect(dialog().locator('[name="sortOrder"]')).toHaveCount(0);
+    await expect(dialog().locator('[name="reason"]')).toBeHidden();
+    await expect(dialog().locator('[data-planner-task-history]')).toBeHidden();
+    await dialog().locator('[name="status"]').selectOption('In Progress');
+    await dialog().locator('[name="operator"]').fill('Test officer');
+    await dialog().locator('[name="notes"]').fill('Keep this until reset');
+    await dialog().locator('button[value="save"]').click();
+    await expect(dialog()).not.toBeVisible();
+    await open();
+    await dialog().locator('[name="status"]').selectOption('Not Started');
+    await expect(dialog().locator('[name="reason"]')).toBeVisible();
+    await dialog().locator('[name="reason"]').fill('   ');
+    await dialog().locator('button[value="save"]').click();
+    await expect(dialog().locator('[data-planner-task-error]')).toContainText('reason');
+    await expect(dialog().locator('[name="reason"]')).toBeFocused();
+    await expect(dialog().locator('[name="notes"]')).toHaveValue('Keep this until reset');
+    await dialog().locator('[name="reason"]').fill('Work has not started');
+    await dialog().locator('button[value="save"]').click();
+    await expect(dialog()).not.toBeVisible();
+    await open();
+    await expect(dialog().locator('[data-planner-task-history]')).toBeVisible();
+    await expect(dialog().locator('[data-planner-task-history]')).toContainText('Work has not started');
+    await dialog().locator('[data-planner-task-reset]').click();
+    await expect(dialog().locator('[name="notes"]')).toHaveValue('');
+    await expect(dialog().locator('[data-planner-task-reset-notice]')).toBeVisible();
+    const pillGeometry = await dialog().evaluate(el => {
+      const pill = el.querySelector('[data-planner-task-reset-notice]');
+      const header = el.querySelector('header');
+      const p = pill.getBoundingClientRect(), h = header.getBoundingClientRect();
+      const style = getComputedStyle(el), pillStyle = getComputedStyle(pill);
+      const probe = document.createElement('span');
+      el.appendChild(probe);
+      probe.style.color = 'var(--program-owner-strong)';
+      const strong = getComputedStyle(probe).color;
+      probe.style.color = 'var(--program-owner-soft)';
+      const soft = getComputedStyle(probe).color;
+      probe.remove();
+      return { inHeader: header.contains(pill), centeredX: Math.abs(p.x + p.width / 2 - h.x - h.width / 2) < 1, centeredY: Math.abs(p.y + p.height / 2 - h.y - h.height / 2) < 1, border: style.borderTopColor, background: style.backgroundColor, pillBorder: pillStyle.borderTopColor, pillBackground: pillStyle.backgroundColor, strong, soft };
+    });
+    expect(pillGeometry.inHeader).toBe(true);
+    expect(pillGeometry.centeredX).toBe(true);
+    expect(pillGeometry.centeredY).toBe(true);
+    expect(pillGeometry.border).toBe(pillGeometry.strong);
+    expect(pillGeometry.background).toBe(pillGeometry.soft);
+    expect(pillGeometry.pillBorder).toBe(pillGeometry.strong);
+    expect(pillGeometry.pillBackground).toBe(pillGeometry.soft);
+    await dialog().screenshot({ path: testInfo.outputPath(`${owner}-reset-header-pill.png`) });
+    await page.setViewportSize({ width: 390, height: 900 });
+    expect(await dialog().evaluate(el => {
+      const pill = el.querySelector('[data-planner-task-reset-notice]').getBoundingClientRect();
+      const header = el.querySelector('header').getBoundingClientRect();
+      const controls = el.querySelector('.planner-task-editor__head-actions').getBoundingClientRect();
+      return Math.abs(pill.x + pill.width / 2 - header.x - header.width / 2) < 1 && pill.top >= controls.bottom && pill.bottom <= header.bottom && el.scrollWidth <= el.clientWidth;
+    })).toBe(true);
+    await dialog().screenshot({ path: testInfo.outputPath(`${owner}-reset-header-pill-mobile.png`) });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await dialog().locator('button[data-planner-task-cancel]').last().click();
+    await open();
+    await expect(dialog().locator('[name="notes"]')).toHaveValue('Keep this until reset');
+    await dialog().locator('[data-planner-task-reset]').click();
+    await dialog().locator('button[value="save"]').click();
+    await expect(dialog()).not.toBeVisible();
+    await open();
+    await expect(dialog().locator('[data-planner-task-history]')).toContainText('Task reset');
+    await expect(dialog().locator('[data-planner-task-history]')).toContainText('Work has not started');
+    await expect(dialog().locator('[name="title"]')).toHaveValue(ids.title);
+    const positioning = await dialog().evaluate(el => {
+      const guide = el.querySelector('[data-planner-task-job]').getBoundingClientRect();
+      const history = el.querySelector('[data-planner-task-history]').getBoundingClientRect();
+      const reset = el.querySelector('[data-planner-task-reset]').getBoundingClientRect();
+      const close = el.querySelector('.program-dialog__close').getBoundingClientRect();
+      return { historyBelow: history.top >= guide.bottom, buttonsAligned: Math.abs(reset.top - close.top) < 1, buttonsCompact: reset.width <= 56 && close.width === 32 && reset.height === 32 && close.height === 32, width: el.querySelector('.planner-task-editor__body').scrollWidth, available: el.querySelector('.planner-task-editor__body').clientWidth };
+    });
+    expect(positioning.historyBelow).toBe(true);
+    expect(positioning.buttonsAligned).toBe(true);
+    expect(positioning.buttonsCompact).toBe(true);
+    expect(positioning.width).toBeLessThanOrEqual(positioning.available + 1);
+    await dialog().locator('[data-planner-task-history]').scrollIntoViewIfNeeded();
+    await dialog().screenshot({ path: testInfo.outputPath(`${owner}-task-history.png`) });
+    await page.setViewportSize({ width: 390, height: 900 });
+    expect(await dialog().evaluate(el => {
+      const reset = el.querySelector('[data-planner-task-reset]').getBoundingClientRect();
+      const close = el.querySelector('.program-dialog__close').getBoundingClientRect();
+      return reset.width <= 56 && close.width === 32 && reset.height === 32 && close.height === 32 && Math.abs(reset.top - close.top) < 1;
+    })).toBe(true);
+    await dialog().locator('[data-planner-task-history]').scrollIntoViewIfNeeded();
+    expect(await dialog().evaluate(el => el.getBoundingClientRect().width <= innerWidth && el.querySelector('.planner-task-editor__body').scrollWidth <= el.querySelector('.planner-task-editor__body').clientWidth)).toBe(true);
+    await dialog().screenshot({ path: testInfo.outputPath(`${owner}-task-history-mobile.png`) });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await dialog().locator('button[data-planner-task-cancel]').last().click();
+    await page.reload();
+    child = page.frames().find(frame => frame !== page.mainFrame());
+    await child.waitForFunction(() => window.UOS?.ProgramApp?.snapshot().phase === 'ready');
+    await child.evaluate(async () => window.UOS.ProgramApp.navigate('planner'));
+    await open();
+    await expect(dialog().locator('[data-planner-task-history]')).toContainText('Task reset');
+    await expect(dialog().locator('[name="notes"]')).toHaveValue('');
+    expect(await child.evaluate(id => window.UOS.ProgramApp.workspace().entities.tasks.find(item => item.id === id).sortOrder, ids.taskId)).toBe(ids.sortOrder);
+    await dialog().locator('[name="status"]').selectOption('In Progress');
+    await dialog().locator('button[value="save"]').click();
+    await expect(dialog()).not.toBeVisible();
+    await open();
+    await dialog().locator('[data-planner-task-reset]').click();
+    await expect(dialog().locator('[name="reason"]')).toBeVisible();
+    await dialog().locator('[name="reason"]').fill('Reset work after review');
+    await dialog().locator('button[value="save"]').click();
+    await expect(dialog()).not.toBeVisible();
+    await open();
+    await expect(dialog().locator('[data-planner-task-history]')).toContainText('Reset work after review');
+    await dialog().locator('[name="status"]').selectOption('On Hold');
+    await expect(dialog().locator('[name="reason"]')).toBeVisible();
+    await dialog().locator('[name="status"]').selectOption('Not Started');
+    await expect(dialog().locator('[name="reason"]')).toBeHidden();
+    await dialog().locator('button[data-planner-task-cancel]').last().click();
+    await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.snapshot().busy)).toBe(false);
+    await child.evaluate(async ids => {
+      await window.UOS.ProgramApp.updateWorkspace(workspace => {
+        const marked = window.UOS.ProgramPlannerModel.updateTask(workspace, ids.projectId, ids.taskId, { operational: true });
+        const draft = window.UOS.ProgramPlannerModel.createDraftJob(marked.workspace, ids.projectId, ids.taskId);
+        return draft.workspace;
+      });
+    }, ids);
+    await open();
+    await dialog().locator('[data-planner-task-reset]').click();
+    await dialog().locator('button[value="save"]').click();
+    await dialog().getByRole('button', { name: 'Keep Job', exact: true }).click();
+    expect(await child.evaluate(id => window.UOS.ProgramApp.workspace().entities.tasks.find(task => task.id === id).jobId, ids.taskId)).toBeTruthy();
+    await dialog().locator('button[value="save"]').click();
+    await child.getByRole('button', { name: 'Delete Job and continue', exact: true }).click();
+    await expect(dialog()).not.toBeVisible();
+    expect(await child.evaluate(id => window.UOS.ProgramApp.workspace().entities.tasks.find(task => task.id === id).jobId, ids.taskId)).toBeNull();
+    await child.evaluate(async ids => {
+      await window.UOS.ProgramApp.updateWorkspace(workspace => {
+        const marked = window.UOS.ProgramPlannerModel.updateTask(workspace, ids.projectId, ids.taskId, { operational: true });
+        const draft = window.UOS.ProgramPlannerModel.createDraftJob(marked.workspace, ids.projectId, ids.taskId);
+        draft.workspace.entities.jobs.find(job => job.id === draft.job.id).actualCost = 100;
+        return draft.workspace;
+      });
+    }, ids);
+    await open();
+    await dialog().locator('[data-planner-task-reset]').click();
+    await dialog().locator('button[value="save"]').click();
+    await child.getByRole('button', { name: 'Delete Job and continue', exact: true }).click();
+    await expect(dialog().locator('[data-planner-task-error]')).toContainText('actual financial history');
+    expect(await child.evaluate(id => {
+      const workspace = window.UOS.ProgramApp.workspace();
+      const task = workspace.entities.tasks.find(item => item.id === id);
+      return task.operational && workspace.entities.jobs.some(job => job.id === task.jobId && job.actualCost === 100);
+    }, ids.taskId)).toBe(true);
+  });
+}

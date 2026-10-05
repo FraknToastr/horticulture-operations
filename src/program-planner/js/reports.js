@@ -7,7 +7,8 @@
   "use strict";
 
   var UOS = root.UOS = root.UOS || {};
-function money(value) { return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(Number(value) || 0); }
+  function money(value) { return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(Number(value) || 0); }
+  function customerMoney(value) { return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value) || 0); }
   function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
   function cell(row, value, className) { var node = document.createElement("td"); node.textContent = String(value); if (className) node.className = className; row.appendChild(node); }
   function ownerBadge(owner, label) { var node = document.createElement("span"); node.className = "program-report-owner"; node.dataset.owner = owner; node.textContent = "[" + label + "]"; return node; }
@@ -80,6 +81,19 @@ function money(value) { return new Intl.NumberFormat("en-AU", { style: "currency
     var model = UOS.ProgramReportsModel;
     if (!model) return null;
     var summary = model.summarize(workspace);
+    var fundingBody = root.querySelector("[data-reports-funding-body]");
+    if (fundingBody) {
+      clear(fundingBody);
+      (summary.fundingPositions || []).forEach(function (position) {
+        var row = document.createElement("tr");
+        cell(row, position.title); cell(row, position.owner); cell(row, customerMoney(position.calculatedDeliveryCost));
+        cell(row, customerMoney(position.operationalAmount)); cell(row, customerMoney(position.customerQuote));
+        cell(row, position.customerAgreementStatus); cell(row, customerMoney(position.confirmedCustomerFunding));
+        cell(row, customerMoney(position.customerGst)); cell(row, customerMoney(position.customerGrandTotal));
+        cell(row, customerMoney(position.paymentsPaid)); cell(row, customerMoney(position.customerOutstanding));
+        fundingBody.appendChild(row);
+      });
+    }
     ["approvedBudget", "committedBudget", "actualSpend", "spareFunds"].forEach(function (field) {
       var node = root.querySelector('[data-reports-kpi="' + field + '"]'); if (node) node.textContent = money(summary.finances[field]);
     });

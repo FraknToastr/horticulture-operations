@@ -49,7 +49,7 @@
       rateItemId: text(line.rateItemId) || null, sourceGeometryId: text(line.sourceGeometryId) || null,
       sourceAreaSqM: Number.isFinite(sourceAreaSqM) ? Math.max(0, sourceAreaSqM) : null,
       sourceWorkTypeKey: text(line.sourceWorkTypeKey) || null,
-      category: text(line.category) || "General", description: text(line.description || line.title), unit: text(line.unit) || "item",
+      kind: text(line.kind), category: text(line.category) || "General", description: text(line.description || line.title), unit: text(line.unit) || "item",
       quantity: Math.max(0, Number(line.quantity) || 0), rate: Math.max(0, Number(line.unitRate) || 0),
       total: Math.max(0, money(line.estimatedTotal)), paid: line.paid === true, sourceKind: "costingLine", readOnly: true
     };
@@ -64,7 +64,7 @@
     });
     var seen = {};
     return result.entities.costingLines.filter(function (line) {
-      if (line.projectId !== project.id || !jobIds[line.jobId] || seen[line.id]) return false;
+ if (line.projectId !== project.id || line.jobId && !jobIds[line.jobId] || seen[line.id]) return false;
       seen[line.id] = true;
       return true;
     }).map(inheritedLine);
@@ -80,11 +80,30 @@
     var gst = money(beforeGst * 0.1);
     return { subtotal: subtotal, discountRate: effectiveDiscountRate, discount: discount, discountAmount: discount, contingency: contingency, subtotalExGst: beforeGst, gst: gst, grandTotal: money(beforeGst + gst) };
   }
-function customLines(input) {
+  // Work estimates remain independent of the amount offered to the customer.
+  function customerAmounts(quote) {
+    quote = quote || {};
+    var mode = text(quote.fundingMode);
+    var contribution = mode === "city" ? 0 : mode === "mixed"
+      ? Math.max(0, money(quote.proposedCustomerContribution))
+      : Math.max(0, money(Number(quote.grandTotal) - Number(quote.gst)));
+    var gst = mode === "city" ? 0 : mode === "mixed" ? money(contribution * 0.1) : money(quote.gst);
+    return { contribution: contribution, gst: gst, payable: mode === "city" ? 0 : mode === "mixed" ? money(contribution + gst) : money(quote.grandTotal) };
+  }
+  function suggestedContribution(quote, cityAllocation) {
+    return Math.max(0, money(Number(quote.grandTotal) - Number(quote.gst) - Number(cityAllocation || 0)));
+  }
+  function agreementStatus(quote) {
+    if (!quote) return "No customer agreement";
+    if (quote.fundingMode === "city") return "No customer payment required";
+    if (text(quote.supersededByQuoteId) || quote.status === "Superseded") return "Superseded";
+    return { Draft: "Proposed", Issued: "Awaiting acceptance", Accepted: "Accepted", Declined: "Declined" }[quote.status] || "Proposed";
+  }
+  function customLines(input) {
     return (Array.isArray(input) ? input : []).map(function (line, index) {
       var quantity = Math.max(0, Number(line.quantity) || 0), rate = Math.max(0, Number(line.rate == null ? line.unitRate : line.rate) || 0);
       return {
-        id: text(line.id) || "custom-" + index, category: text(line.category) || "Adjustment", description: text(line.description) || "Quote adjustment",
+        id: text(line.id) || "custom-" + index, kind: text(line.kind) || "Sundry", category: text(line.category) || "Adjustment", description: text(line.description) || "Quote adjustment",
         unit: text(line.unit) || "item", quantity: quantity, rate: rate, total: money(quantity * rate), paid: line.paid === true, sourceKind: "custom", readOnly: false
       };
     });
@@ -101,7 +120,7 @@ function currentQuoteLines(result, quoteId) {
       sourceGeometryId: line.sourceGeometryId || null,
       sourceAreaSqM: Number.isFinite(Number(line.sourceAreaSqM)) ? Math.max(0, Number(line.sourceAreaSqM)) : null,
       sourceWorkTypeKey: text(line.sourceWorkTypeKey) || null,
-      category: line.category,
+      kind: text(line.kind), category: line.category,
       description: line.description,
       unit: line.unit,
       quantity: line.quantity,
@@ -135,6 +154,12 @@ function valueOrExisting(input, name, existing) {
     var previousQuoteId = text(input.previousQuoteId || (existing && existing.previousQuoteId)) || null;
     var auditNumber = text(input.auditNumber || (existing && existing.auditNumber)) || revisionAuditNumber(auditRootNumber, revision);
   var financialLock = Boolean(existing && commerciallyLocked(result, existing.id));
+  var fundingMode = input.fundingMode === undefined ? (existing ? existing.fundingMode : "customer") : input.fundingMode;
+  if (fundingMode != null && fundingMode !== "" && ["city", "customer", "mixed"].indexOf(fundingMode) < 0) throw new Error("Unsupported funding arrangement.");
+  fundingMode = fundingMode || null;
+  var proposed = valueOrExisting(input, "proposedCustomerContribution", existing);
+  if (proposed != null && proposed !== "" && (!Number.isFinite(Number(proposed)) || Number(proposed) < 0)) throw new Error("Proposed customer contribution must be a non-negative number.");
+  if (financialLock && (fundingMode !== (existing.fundingMode || null) || (input.proposedCustomerContribution !== undefined && money(proposed) !== money(existing.proposedCustomerContribution)))) throw new Error("Reverse active payments and payment allocations before changing the funding arrangement or proposed customer contribution.");
   var lines;
   if (financialLock) lines = [];
   else if (!existing || input.refreshCosts === true) {
@@ -150,6 +175,10 @@ function valueOrExisting(input, name, existing) {
     var requestedDiscountRate = input.discountRate === undefined && existing ? existing.discountRate : input.discountRate;
     var requestedDiscountAmount = input.discountAmount === undefined && existing ? existing.discountAmount : input.discountAmount;
     var calculated = totals(lines, requestedDiscountRate, input.contingencyRate === undefined && existing ? existing.contingencyRate : input.contingencyRate, requestedDiscountAmount);
+    if (fundingMode === "mixed" && (proposed == null || proposed === "")) {
+      var allocation = UOS.ProjectFunding ? UOS.ProjectFunding.operationalAmount(project, result) : 0;
+      proposed = suggestedContribution(calculated, allocation);
+    }
     var quote = {
       id: quoteId, owner: project.owner, type: "quote", projectId: project.id, quoteNumber: quoteNumber, revision: revision,
       auditNumber: auditNumber, auditRootNumber: auditRootNumber, rootQuoteId: rootQuoteId, previousQuoteId: previousQuoteId,
@@ -157,6 +186,7 @@ function valueOrExisting(input, name, existing) {
     quoteDate: text(valueOrExisting(input, "quoteDate", existing)), expiryDate: text(valueOrExisting(input, "expiryDate", existing)), discountRate: calculated.discountRate, discountAmount: calculated.discount,
     contingencyRate: Math.max(0, Number(valueOrExisting(input, "contingencyRate", existing)) || 0), scopeNotes: text(valueOrExisting(input, "scopeNotes", existing)), terms: text(valueOrExisting(input, "terms", existing)),
       status: "Draft", subtotal: calculated.subtotal, gst: calculated.gst, grandTotal: calculated.grandTotal,
+      fundingMode: fundingMode, proposedCustomerContribution: proposed == null || proposed === "" ? null : money(proposed),
       updatedAt: new Date().toISOString(), provenance: { owner: project.owner, sourceApp: "uos.quote-builder", sourceVersion: 1, sourceId: quoteId }
     };
     if (financialLock) {
@@ -178,7 +208,7 @@ function valueOrExisting(input, name, existing) {
         rateItemId: line.rateItemId || null, catalogId: line.catalogId || null, sourceGeometryId: line.sourceGeometryId || null,
         sourceAreaSqM: Number.isFinite(Number(line.sourceAreaSqM)) ? Math.max(0, Number(line.sourceAreaSqM)) : null,
         sourceWorkTypeKey: text(line.sourceWorkTypeKey) || null,
-        category: line.category, description: line.description, unit: line.unit, quantity: line.quantity,
+        kind: text(line.kind), category: line.category, description: line.description, unit: line.unit, quantity: line.quantity,
         unitRate: line.rate, total: line.total, sourceKind: line.sourceKind, customLineKey: line.sourceKind === "custom" ? sourceKey : null,
         paid: line.paid === true,
         provenance: { owner: project.owner, sourceApp: "uos.quote-builder", sourceVersion: 1, sourceId: sourceKey }
@@ -197,10 +227,10 @@ function valueOrExisting(input, name, existing) {
   return saveDraft(result, { id: quote.id, projectId: quote.projectId, refreshCosts: true });
  }
 
- function commercialProjection(inputWorkspace, quoteId) {
+  function commercialProjection(inputWorkspace, quoteId) {
   var snapshot = quoteSnapshot(inputWorkspace, quoteId);
   var quote = snapshot.quote;
-  return {
+    var projection = {
    quote: {
     id: quote.id, projectId: quote.projectId, quoteNumber: quote.quoteNumber,
     revision: quote.revision, auditNumber: quote.auditNumber,
@@ -209,8 +239,15 @@ function valueOrExisting(input, name, existing) {
     discountRate: quote.discountRate, discountAmount: quote.discountAmount,
     contingencyRate: quote.contingencyRate, scopeNotes: quote.scopeNotes, terms: quote.terms,
     subtotal: quote.subtotal, gst: quote.gst, grandTotal: quote.grandTotal
-   }, lines: snapshot.lines
-  };
+    }, lines: snapshot.lines
+    };
+    if (quote.fundingMode) {
+      projection.quote.fundingMode = quote.fundingMode;
+      projection.quote.proposedCustomerContribution = quote.proposedCustomerContribution;
+      if (quote.cityFundingAmount !== undefined) projection.quote.cityFundingAmount = quote.cityFundingAmount;
+      if (quote.estimatedDeliveryCost !== undefined) projection.quote.estimatedDeliveryCost = quote.estimatedDeliveryCost;
+    }
+    return projection;
  }
 
  function projectionFingerprint(projection) {
@@ -241,6 +278,7 @@ function valueOrExisting(input, name, existing) {
     if (text(quote.scopeNotes)) scopeSources.push({ type: "quote.scopeNotes", id: quote.id });
     material.forEach(function (line) { if (text(line.description)) scopeSources.push({ type: "quoteLine.description", id: line.id }); });
     var costSources = [], failures = [];
+    if (["city", "customer", "mixed"].indexOf(quote.fundingMode) < 0) failures.push({ code: "FUNDING_MODE_REQUIRED", message: "Choose a funding arrangement before issuing this Quote." });
     material.forEach(function (line) {
       if (text(line.sourceKind) === "costingLine" && costingIds[text(line.costingLineId)]) costSources.push({ type: "costingLine", id: text(line.costingLineId) });
       else if (text(line.rateItemId) || text(line.catalogId)) costSources.push({ type: "approvedRate", id: text(line.rateItemId || line.catalogId) });
@@ -271,6 +309,10 @@ function valueOrExisting(input, name, existing) {
       var readiness = evaluateReadiness(result, quote.id);
       if (!readiness.ready) throw new Error("Quote readiness failed: " + readiness.failures.map(function (failure) { return failure.message; }).join(" "));
       quote.readinessSnapshot = readiness.snapshot;
+      if (quote.fundingMode) {
+        quote.cityFundingAmount = readiness.evidence.funding.operationalAmount;
+        quote.estimatedDeliveryCost = readiness.evidence.funding.calculatedDeliveryCost;
+      }
     }
  if (target === "Issued") {
  quote.commercialFingerprint = projectionFingerprint(commercialProjection(result, quote.id));
@@ -298,14 +340,15 @@ function valueOrExisting(input, name, existing) {
     if (text(source.status) === "Superseded") throw new Error("Create a revision from the latest non-superseded Quote.");
     if (result.entities.quotes.some(function (quote) { return quote.previousQuoteId === source.id || quote.auditRootNumber === source.auditRootNumber && Number(quote.revision || 1) > Number(source.revision || 1); })) throw new Error("A later revision already exists for this Quote root.");
     var adjustments = result.entities.quoteLines.filter(function (line) { return line.quoteId === source.id && line.sourceKind === "custom"; }).map(function (line) {
-      return { id: text(line.customLineKey || line.provenance && line.provenance.sourceId || line.id), category: line.category, description: line.description, unit: line.unit, quantity: line.quantity, rate: line.unitRate };
+      return { id: text(line.customLineKey || line.provenance && line.provenance.sourceId || line.id), kind: text(line.kind), category: line.category, description: line.description, unit: line.unit, quantity: line.quantity, rate: line.unitRate };
     });
     return saveDraft(result, {
       projectId: source.projectId, quoteNumber: source.quoteNumber, revision: Math.max(1, Number(source.revision) || 1) + 1,
       auditRootNumber: source.auditRootNumber, rootQuoteId: source.rootQuoteId || source.id, previousQuoteId: source.id,
       clientName: source.clientName, address: source.address, phone: source.phone, email: source.email, preparedBy: source.preparedBy,
       quoteDate: new Date().toISOString().slice(0, 10), expiryDate: source.expiryDate,
-      discountRate: source.discountRate, discountAmount: source.discountAmount, contingencyRate: source.contingencyRate, scopeNotes: source.scopeNotes, terms: source.terms, customLines: adjustments
+      discountRate: source.discountRate, discountAmount: source.discountAmount, contingencyRate: source.contingencyRate, scopeNotes: source.scopeNotes, terms: source.terms, customLines: adjustments,
+      fundingMode: source.fundingMode || null, proposedCustomerContribution: source.proposedCustomerContribution
     });
   }
 
@@ -327,6 +370,7 @@ function recordPayment(inputWorkspace, input) {
     var result = workspace(inputWorkspace);
     input = object(input) ? input : {};
     var quote = find(result.entities.quotes, text(input.quoteId), "Quote");
+    if (quote.fundingMode === "city") throw new Error("No customer payment required. Customer payments and deposits are disabled for City-funded Quotes.");
     if (PAYABLE_STATUSES.indexOf(text(quote.status)) < 0) throw new Error("Payments cannot be recorded against a Superseded Quote.");
     var value = money(input.amount);
     if (!(value > 0)) throw new Error("Payment amount must be greater than zero.");
@@ -379,8 +423,9 @@ function recordPayment(inputWorkspace, input) {
     var paid = money(Object.keys(activePayments).reduce(function (sum, id) { return sum + activePayments[id].amount; }, 0));
     var depositPaid = money(Object.keys(activePayments).reduce(function (sum, id) { return sum + (activePayments[id].method === "Paid with Deposit" ? activePayments[id].amount : 0); }, 0));
     var linePaid = {}; allocations.forEach(function (allocation) { linePaid[allocation.quoteLineId] = money((linePaid[allocation.quoteLineId] || 0) + allocation.amount); });
-    var balance = money(Number(quote.grandTotal || 0) - paid);
-    return { total: money(quote.grandTotal), paid: paid, depositPaid: depositPaid, balance: balance, balanceDue: Math.max(0, balance), credit: Math.max(0, money(-balance)), status: paid <= 0 ? "Unpaid" : balance > 0 ? "Partially Paid" : balance < 0 ? "Overpaid" : "Paid", payments: payments, allocations: allocations, linePaid: linePaid };
+    var customer = customerAmounts(quote);
+    var balance = quote.fundingMode === "city" ? 0 : money(customer.payable - paid);
+    return { total: customer.payable, paid: paid, depositPaid: depositPaid, balance: balance, balanceDue: Math.max(0, balance), credit: Math.max(0, money(-balance)), status: quote.fundingMode === "city" ? "No customer payment required" : paid <= 0 ? "Unpaid" : balance > 0 ? "Partially Paid" : balance < 0 ? "Overpaid" : "Paid", payments: payments, allocations: allocations, linePaid: linePaid };
   }
 
   function projectQuotes(inputWorkspace, projectId) {
@@ -439,4 +484,7 @@ function recordPayment(inputWorkspace, input) {
   }
 
   UOS.ProgramQuotes = { statuses: STATUSES.slice(), paymentMethods: PAYMENT_METHODS.slice(), inheritProject: inheritProject, evaluateReadiness: evaluateReadiness, commerciallyLocked: function (inputWorkspace, quoteId) { return commerciallyLocked(workspace(inputWorkspace), text(quoteId)); }, saveDraft: saveDraft, updateDraft: saveDraft, refreshDraftFromCurrentCosts: refreshDraftFromCurrentCosts, commercialProjection: commercialProjection, setStatus: setStatus, issue: issue, accept: accept, decline: decline, createRevision: createRevision, lifecycleActions: lifecycleActions, projectQuotes: projectQuotes, quoteRoots: quoteRoots, quoteSnapshot: quoteSnapshot, quoteViewModel: quoteViewModel, recordPayment: recordPayment, reversePayment: reversePayment, paymentSummary: paymentSummary, deletionImpact: deletionImpact, removeQuote: removeQuote, totals: totals };
+  UOS.ProgramQuotes.customerAmounts = customerAmounts;
+  UOS.ProgramQuotes.suggestedContribution = suggestedContribution;
+  UOS.ProgramQuotes.agreementStatus = agreementStatus;
 }());

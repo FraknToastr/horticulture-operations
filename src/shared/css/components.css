@@ -180,3 +180,5 @@ html[data-suite-theme="dark"] .uos-about__logo--dark { display: block; }
   background: var(--uos-border-strong);
   border-radius: 999px;
 }
+
+.uos-tooltip {box-sizing:border-box;max-width:min(320px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow:auto;overflow-wrap:anywhere;pointer-events:none;}

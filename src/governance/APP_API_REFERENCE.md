@@ -17,11 +17,11 @@ Use `UOS.ProgramApp.updateWorkspace(mutator, options)` for normal writes. It clo
 
 | Namespace | Public calls |
 |---|---|
-| `UOS.ProgramPlannerModel` | `eventTemplates`, `isOperationalTask`, `updateTask`, `createTask`, `saveTask`, `duplicateTasks`, `createDraftJob`, `scheduleTask` |
+| `UOS.ProgramPlannerModel` | `eventTemplates`, `isOperationalTask`, `taskState`, `updateTask`, `createTask`, `saveTask`, `duplicateTasks`, `createDraftJob`, `scheduleTask` |
 | `UOS.ProgramPlanner` | `init`, `render`, Project/row selection, task editor, save, duplicate, and delete actions |
 | `UOS.ProgramSchedulerModel` | Job normalization, validation, scheduling, and source-lineage helpers |
 | `UOS.ProgramSchedulerUI` | `init`, `render`, `selectJob`, `focusCalendarJob`, `routeCalendarJob`, `backToList`, `snapshot` |
-| `UOS.ProgramCosting` | Rate-item CRUD, job/line CRUD, `refreshLineFromRate`, `assignLine`, `totals`, `jobCalculator`, adjustments, catalogue queries/grouping, `exportRateCsv` |
+| `UOS.ProgramCosting` | Rate-item CRUD, job/line CRUD, `refreshLineFromRate`, `assignLine`, `totals`, `jobCalculator`, adjustments, catalogue queries/grouping, `exportRateCsv`, shared `rateKind`/`lineKind`, `removeCalculatorLine`, project-scoped `removeLines` |
 | `UOS.rateLibrary` | Rate-library CSV import/export and catalogue helpers |
 | `UOS.WorkAreaService` | `eligibleSpatialRatesForWorkType`, `mappedRateIds`, `isMappedRate`, `canonicalWorkTypeRateItems` |
 | `UOS.ProgramRegister` | Register UI controller methods |
@@ -46,6 +46,8 @@ Use `UOS.ProgramApp.updateWorkspace(mutator, options)` for normal writes. It clo
 | `UOS.toast` | Notification function: `(message, severity)` |
 
 ## Events and reset
+
+`ProgramCosting.removeLines(workspace, projectId, kind)` accepts `All`, `Labour`, `Equipment`, `Material`, `Contractors` or `Sundry`. It does not mutate or persist its input. It returns `{ workspace, matchedIds, deletedIds, retained, affectedJobIds, affectedGeometryIds }`; retained entries contain `{ id, description, reason }`. The controller uses this command for isolated confirmation previews and again against live data for the single persisted batch. `removeCalculatorLine(workspace, lineId)` shares individual-delete protections and mapped-work handling. `rateKind(rate)` and `lineKind(workspace, line)` provide the classification used by displayed groups and bulk filters.
 
 The app emits `uos:program-ready`, `uos:workspace-changed`, and `uos:program-save-error`. Event data is a snapshot; use `updateWorkspace` for persisted changes.
 

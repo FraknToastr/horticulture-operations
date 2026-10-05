@@ -106,11 +106,16 @@ var OWNER_LABELS = { NSA: "Nature Strip", EVT: "Remediation" };
     else if (UOS.ProgramModel && typeof UOS.ProgramModel.finances === "function") finances = UOS.ProgramModel.finances(workspace);
     return {
       finances: finances,
+      fundingPositions: UOS.ProjectFunding && UOS.ProgramQuotes ? entities(workspace, "projects").map(function (project) {
+        var quote = UOS.ProjectFunding.applicableQuote(workspace, project.id);
+        if (!quote) quote = entities(workspace, "quotes").filter(function (item) { return item.projectId === project.id && item.status === "Draft"; }).sort(function (a, b) { return Number(b.revision || 1) - Number(a.revision || 1); })[0];
+        return Object.assign({ title: project.title || project.id, owner: project.owner }, UOS.ProjectFunding.position(workspace, project.id, quote ? { quote: quote } : {}));
+      }) : [],
       owners: [owners.NSA, owners.EVT],
       statuses: Object.keys(statuses).map(function (key) { return statuses[key]; }).sort(function (left, right) { return right.jobs - left.jobs || left.label.localeCompare(right.label); }),
       jobs: jobs,
       jobCount: jobs.length,
-      hasData: jobs.length > 0 || finances.approvedBudget !== 0 || entities(workspace, "costingLines").length > 0
+      hasData: jobs.length > 0 || finances.approvedBudget !== 0 || entities(workspace, "costingLines").length > 0 || entities(workspace, "quotes").length > 0
     };
   }
 

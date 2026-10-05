@@ -22,21 +22,35 @@ test("Planner modal governs task fields and hands one Draft Planner Job to Sched
   });
 
   const frame = page.frameLocator("iframe");
+  async function revealPlanningSection() {
+    const toggle = frame.locator('[data-planner-section-toggle="PLANNING AND APPROVAL"]');
+    await expect(toggle).toBeVisible();
+    if (await toggle.getAttribute('aria-expanded') === 'false') await toggle.click();
+  }
   await expect(frame.locator('[data-program-view="planner"]')).toBeVisible();
   await frame.locator(".planner-btn-add-item").click();
   const dialog = frame.locator("[data-planner-task-dialog]");
   await expect(dialog).toBeVisible();
   await dialog.locator('[name="title"]').fill("Inspect irrigation assets");
   await dialog.locator('[name="description"]').fill("Confirm valves, heads, and isolation points before work.");
-  await dialog.locator('[name="section"]').fill("Pre-delivery");
+  await dialog.locator('[name="section"]').selectOption("Planning and Approval");
   await dialog.locator('[name="classification"]').selectOption("operational");
   await dialog.locator('[name="status"]').selectOption("In Progress");
   await dialog.locator('[name="operator"]').fill("Planner test operator");
   await dialog.locator('[name="assigneeId"]').selectOption("Technical Officer");
   await dialog.locator('[name="dueDate"]').fill("2026-10-12");
   await dialog.locator('[name="notes"]').fill("Coordinate with irrigation team.");
-  await expect(dialog.locator("[data-planner-save-scheduler]")).toBeVisible();
-  await dialog.locator("[data-planner-save-scheduler]").click();
+  await expect(dialog.locator("[data-planner-save-scheduler]")).toHaveCount(0);
+  await dialog.locator('button[value="save"]').click();
+  await expect(dialog).not.toBeVisible();
+  const taskId = await child.evaluate(() => {
+    const workspace = window.UOS.ProgramApp.workspace();
+    const task = workspace.entities.tasks.find(item => item.title === "Inspect irrigation assets");
+    if (workspace.entities.jobs.some(job => job.sourceEntityId === task.id)) throw new Error("Save created a Job");
+    return task.id;
+  });
+  await frame.locator('[data-planner-section-toggle="PLANNING AND APPROVAL"][aria-expanded="false"]').click();
+  await frame.locator(`[data-planner-draft-job="${taskId}"]`).click();
 
   await expect(frame.locator('[data-program-view="scheduler"]')).toBeVisible();
   await expect.poll(() => child.evaluate(() => {
@@ -56,10 +70,9 @@ test("Planner modal governs task fields and hands one Draft Planner Job to Sched
   expect(lineage.jobs[0].status).toBe("draft");
   expect(lineage.selectedId).toBe(lineage.jobs[0].id);
   expect(lineage.selectedProjectId).toBe(lineage.task.projectId);
-  await child.evaluate(() => { window.UOS.ProgramApp.navigate("planner"); return true; });
-  await child.evaluate(() => {
-    document.querySelectorAll('.planner-section-toggle[aria-expanded="false"]').forEach((button) => button.click());
-  });
+  await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.snapshot().busy)).toBe(false);
+  await child.evaluate(async () => { await window.UOS.ProgramApp.navigate("planner"); });
+  await revealPlanningSection();
   const draftJobIcon = frame.locator(`.planner-item-row[data-task-entity-id="${lineage.task.id}"] [data-planner-open-scheduled-job="${lineage.jobs[0].id}"]`);
   await expect(draftJobIcon).toBeVisible();
   await draftJobIcon.click();
@@ -74,12 +87,14 @@ test("Planner modal governs task fields and hands one Draft Planner Job to Sched
       const job = workspace.entities.jobs.find((item) => item.id === jobId);
       task.schedulerJobId = jobId;
       task.jobId = jobId;
-      job.status = "scheduled";
+    job.status = "scheduled";
+    job.startDate = "2026-10-05";
+    job.endDate = "2026-10-05";
       return workspace;
     });
     await window.UOS.ProgramApp.navigate("planner");
-    document.querySelectorAll('.planner-section-toggle[aria-expanded="false"]').forEach((button) => button.click());
   }, { taskId: lineage.task.id, jobId: lineage.jobs[0].id });
+  await revealPlanningSection();
   const scheduledJobIcon = frame.locator(`.planner-item-row[data-task-entity-id="${lineage.task.id}"] .planner-task-path.is-scheduled[data-planner-open-scheduled-job="${lineage.jobs[0].id}"]`);
   await expect(scheduledJobIcon).toBeVisible();
   await scheduledJobIcon.click();

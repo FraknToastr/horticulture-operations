@@ -187,13 +187,13 @@
     });
     var scheduler = ws.workspace && ws.workspace.scheduler, detail = document.querySelector("[data-scheduler-detail]");
     if (detail && !detail.hidden && scheduler && scheduler.selectedId) {
-      var job = entity(ws, scheduler.selectedId), prior = detail.querySelector("[data-status-scheduler-mount]");
-      if (!prior) {
-        prior = document.createElement("div");
-        prior.setAttribute("data-status-scheduler-mount", "");
-        detail.appendChild(prior);
+      var job = entity(ws, scheduler.selectedId), trigger = detail.querySelector("[data-scheduler-status]");
+      detail.querySelectorAll("[data-status-scheduler-mount], [data-status-controls-for]").forEach(function (node) { node.remove(); });
+      if (trigger) {
+        trigger.disabled = !job;
+        if (job) trigger.setAttribute("data-status-lifecycle-open", job.record.id);
+        else trigger.removeAttribute("data-status-lifecycle-open");
       }
-      prior.innerHTML = job ? controlHtml(job, ws) : "";
     }
   }
   function render() { if (renderPending) return; renderPending = true; requestAnimationFrame(function () { renderPending = false; renderQueue(); attachGovernedControls(); renderLifecycleDialog(); }); }

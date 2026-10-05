@@ -173,7 +173,7 @@
        canonical Project boundary. It preserves records instead of guessing a
        Project, Job, Quote, or commercial lineage. */
     remove("jobs", function (job) { return !text(job && job.projectId); }, function () { return "Legacy Job requires projectId before restoration."; });
-    remove("costingLines", function (line) { return !text(line && line.jobId) || !text(line && line.projectId); }, function () { return "Legacy Costing Line requires projectId and jobId before restoration."; });
+      remove("costingLines", function (line) { return !text(line && line.projectId); }, function () { return "Legacy Costing Line requires projectId before restoration."; });
     remove("quotes", function (quote) { return !text(quote && quote.projectId); }, function () { return "Legacy Quote requires projectId before restoration."; });
 
     var quotes = index("quotes");

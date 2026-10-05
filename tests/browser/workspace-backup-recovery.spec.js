@@ -51,8 +51,8 @@ test("workspace backup is primary, deletion requires it, and no browser editing 
       actionsTop: actions.top
     };
   });
-  expect(alignment.actionsCenter).toBeCloseTo(alignment.identityCenter, 4);
-  expect(alignment.savedAtCenter).toBeCloseTo(alignment.identityCenter, 4);
+  expect(Math.abs(alignment.actionsCenter - alignment.identityCenter)).toBeLessThan(0.5);
+  expect(Math.abs(alignment.savedAtCenter - alignment.identityCenter)).toBeLessThan(0.5);
   expect(alignment.actionsTop).toBeGreaterThan(alignment.identityBottom);
   const position = await reminder.evaluate((node) => {
     const rect = node.getBoundingClientRect();

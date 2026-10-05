@@ -42,7 +42,7 @@ test("RC-DEL-03: immediate Add → Remove reaches canonical zero without a settl
   await expect(frame.locator("[data-costing-error]")).toBeHidden();
 });
 
-test("C4 mapped geometry line removal uses the governed geometry path", async ({ page }) => {
+test("C4 mapped work deletion retains geometry and prevents automatic recreation", async ({ page }) => {
   const { child, frame } = await openCosting(page, "NSA-APP-C4-GEOMETRY");
   const geometryId = await child.evaluate(async () => {
     let createdId = "";
@@ -54,7 +54,7 @@ test("C4 mapped geometry line removal uses the governed geometry path", async ({
         payload: { workTypeKey: "turfing", visible: true, valid: true }
       });
       createdId = created.entities.geometries[created.entities.geometries.length - 1].id;
-      const synced = window.UOS.WorkAreaService.syncGeometry(created, createdId);
+      const synced = window.UOS.WorkAreaService.syncGeometry(created, createdId, { explicit: true });
       const job = synced.entities.jobs.find((item) => item.sourceGeometryId === createdId);
       synced.workspace.selectedProjectId = projectId;
       synced.workspace.costing = { selectedProjectId: projectId, jobId: job.id, section: "Labour", mode: "applications" };
@@ -79,7 +79,10 @@ test("C4 mapped geometry line removal uses the governed geometry path", async ({
       (ws.entities.statusEvents || []).some((item) => item.entityId === jobId),
       (ws.entities.statusRecommendations || []).some((item) => item.entityId === jobId)
     ];
-  }, { geometryId, jobId })).toEqual([false, false, false, false, false]);
+  }, { geometryId, jobId })).toEqual([true, false, false, false, false]);
+  await expect.poll(() => child.evaluate((id) => window.UOS.ProgramApp.workspace().entities.geometries.find((item) => item.id === id).workRemoved, geometryId)).toBe(true);
+  await child.evaluate(async (id) => { await window.UOS.ProgramApp.updateWorkspace((workspace) => window.UOS.WorkAreaService.syncGeometry(workspace, id)); }, geometryId);
+  await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(0);
   await expect(frame.locator("[data-costing-error]")).toBeHidden();
 });
 
