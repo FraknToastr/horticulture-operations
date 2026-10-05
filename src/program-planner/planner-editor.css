@@ -32,8 +32,8 @@
 .planner-task-editor__head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .planner-task-editor__head .planner-task-editor__head-actions>button{box-sizing:border-box;display:inline-grid;place-items:center;flex:0 0 auto;width:auto;min-width:0;height:32px;min-height:32px;max-height:32px;padding:0 8px}
 .planner-task-editor__head .planner-task-editor__head-actions>.program-dialog__close{width:32px;min-width:32px;padding:0;font-size:20px}
-.planner-task-dialog[data-planner-task-dialog]{background:var(--program-owner-soft,#f0fdf4);border-color:var(--program-owner-strong,#166534)}
-[data-planner-task-dialog] .planner-task-editor__actions{background:var(--program-owner-soft,#f0fdf4)}
+.planner-task-dialog:is([data-planner-task-dialog],[data-costing-rate-dialog]){background:var(--program-owner-soft,#f0fdf4);border-color:var(--program-owner-strong,#166534)}
+.planner-task-dialog .planner-task-editor__actions{background:var(--program-owner-soft,#f0fdf4)}
 [data-planner-task-dialog] .planner-task-editor__head:has([data-planner-task-reset-notice]:not([hidden])){position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr);align-items:center}
 [data-planner-task-dialog] .planner-task-editor__head>div:first-child{grid-column:1;grid-row:1}
 [data-planner-task-dialog] .planner-task-editor__head-actions{grid-column:3;grid-row:1;justify-self:end}
@@ -55,3 +55,6 @@
 .planner-task-delete-confirm h3{margin:0;font-size:16px}
 .planner-task-delete-confirm p{margin:10px 0;line-height:1.5}
 .planner-task-delete-confirm>div{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px}
+
+/* White documentation cards remain readable inside coloured editor dialogs in either theme. */
+.planner-task-editor .planner-task-editor__job{--uos-text:#0f172a;--uos-text-muted:#475569;--uos-border:#dbe3ea;--uos-surface-subtle:#f8fafc;background:#fff;color:var(--uos-text)}

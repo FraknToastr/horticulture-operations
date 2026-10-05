@@ -37,14 +37,24 @@
 #program-app .program-register-mini-toolbar button[data-shortcut-state]:not(:disabled):hover { background: var(--register-shortcut-owner-hover) !important; color: var(--register-shortcut-owner) !important; border-color: var(--register-shortcut-owner) !important; }
 
 /* Match the Planner task rail to the 30px Register shortcuts and 46px panel. */
+.planner-table-wrap {
+  box-sizing: border-box;
+  padding-inline-end: 4px;
+}
+.planner-checklist-wrap { --planner-action-background: #047857; }
+.planner-checklist-wrap[data-owner="EVT"] { --planner-action-background: #0369a1; }
+#program-app .planner-btn-add-item {
+  background: var(--planner-action-background, #047857) !important;
+  border-color: var(--planner-action-background, #047857) !important;
+}
 #program-app .planner-table thead th,
 #program-app .planner-table .planner-cat-header-row > th,
 #program-app .planner-table .planner-cat-header-row > td,
 #program-app .planner-table .planner-item-row > td { height: 46px; box-sizing: border-box; }
 #program-app .planner-table .planner-cat-header-row > th,
 #program-app .planner-table .planner-cat-header-row > td {
-  background: color-mix(in srgb, var(--program-owner-strong, #047857) 18%, #fff) !important;
-  color: var(--program-owner-strong, #047857) !important;
+  background: var(--planner-action-background, #047857) !important;
+  color: #fff !important;
   font-weight: 900;
   border-top-color: transparent !important;
   border-bottom-color: transparent !important;
@@ -52,6 +62,7 @@
 #program-app .planner-table td.planner-col-action {
   justify-content: flex-end !important;
   padding-block: 8px !important;
+  padding-inline-end: 8px !important;
 }
 #program-app .planner-table .planner-task-type-group {
   margin: 0 8px 0 0 !important;

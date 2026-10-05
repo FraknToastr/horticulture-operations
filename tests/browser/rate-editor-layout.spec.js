@@ -48,12 +48,15 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1440, 390]) {
       expect(await guide.locator('.planner-calendar-guide__row>span:last-child').allTextContents()).toEqual([
         'Click to add this to the Resource Calculator',
         'Click this to add this to the Resource Calculator with estimated measurements OR Add to Resource Calculator Via Space Map to confirm measurements.',
-        'Click this icon in Resource Calculator to Schedule a Job'
+        'Click this icon in Resource Calculator to Schedule a Job',
+        'This symbol indicates a successfully scheduled job.'
       ]);
       expect(await guide.locator('h3').allTextContents()).toEqual(['Cost Library', 'Resource Calculator']);
       expect(await guide.locator('button,a,input,[tabindex]').count()).toBe(0);
-      expect(await guide.locator('svg[aria-hidden="true"]').count()).toBe(3);
+      expect(await guide.locator('svg[aria-hidden="true"]').count()).toBe(4);
       expect(await guide.locator('[data-rate-guide-icon="calendar"] svg').innerHTML()).not.toContain('M8 16l');
+      expect(await guide.locator('[data-rate-guide-icon="calendar-tick"] svg').innerHTML()).toContain('M8 16l');
+      expect(await guide.evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(255, 255, 255)');
       await dialog.locator('.planner-task-editor__body').evaluate(body => { body.scrollTop = body.scrollHeight; });
       await expect(guide).toBeVisible();
       await expect(dialog.locator('[data-costing-rate-submit]')).toBeVisible();

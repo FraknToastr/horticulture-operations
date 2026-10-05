@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
 <link rel="stylesheet" href="styles.css?v=20261005-quote-navigation-v6">
-<link rel="stylesheet" href="planner-row-header.css?v=20261001-planner-shortcuts-v4">
+<link rel="stylesheet" href="planner-row-header.css?v=20261005-planner-section-colour-v6">
   <link rel="stylesheet" href="status-v5.css?v=20260913-status-history-review-v1">
   <link rel="stylesheet" href="reports.css">
 </head>
@@ -409,7 +409,7 @@
 
               <!-- Pane 2: Large Right Side Main Pane with Browser Tabs & Checklist -->
               <div class="program-planner-main-pane">
-                <h3 class="uos-sr-only" id="planner-title">Project Checklists</h3>
+                <h3 class="uos-sr-only" id="planner-title">Project Checklist</h3>
                 <nav class="planner-browser-tabs" id="plannerBrowserTabs" aria-label="Project Planner Tabs"></nav>
                 <div class="planner-checklist-wrap program-scroll-region" id="plannerChecklistContent"></div>
               </div>
@@ -1104,6 +1104,7 @@
           </div>
           <div class="rate-library-guide__column"><h3 class="rate-library-guide__heading">Resource Calculator</h3>
             <div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" data-rate-guide-icon="calendar" aria-hidden="true"></span><span>Click this icon in Resource Calculator to Schedule a Job</span></div>
+            <div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" data-rate-guide-icon="calendar-tick" aria-hidden="true"></span><span>This symbol indicates a successfully scheduled job.</span></div>
           </div>
         </section>
       </div>
@@ -1207,7 +1208,7 @@
   <script defer src="js/reports.js?v=20261001-quote-funding-v1"></script>
   <script defer src="js/card-visibility.js?v=20261005-quote-field-visibility-v13"></script>
  <script defer src="js/disclosure-rows.js?v=20261002-error-remediation-v12"></script>
- <link rel="stylesheet" href="planner-editor.css?v=20261002-task-history-v4">
+ <link rel="stylesheet" href="planner-editor.css?v=20261005-editor-guide-cards-v6">
  <style>
  .planner-item-row[aria-selected="true"] td+td{border-left-color:transparent!important}.planner-col-action{display:flex;align-items:center;justify-content:flex-end}.planner-task-type-group{display:inline-flex;align-items:center;margin-right:16px;padding-right:14px;border-right:1px solid var(--uos-border,#dbe3ea)}.planner-task-type-group .planner-task-path{width:30px;height:30px;padding:0;justify-content:center}.planner-task-path svg,.planner-maintenance-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.planner-task-maintenance-actions{display:inline-flex;align-items:center;gap:8px}.planner-maintenance-icon{display:inline-grid!important;place-items:center;width:30px;min-width:30px;height:30px;min-height:30px;margin:0!important;padding:0!important;border:1px solid var(--uos-border,#cbd5e1)!important;border-radius:var(--uos-radius-control,6px)!important;background:#fff!important;color:var(--uos-text,#0f172a)!important}.program-register-allocation-table{border:2px solid var(--register-owner-primary-dark,#047857)!important;border-radius:var(--uos-radius-control,6px)!important;overflow:hidden}.program-budget:not([hidden]){height:calc(100dvh - var(--program-header-height,82px));min-height:620px;padding:0;overflow:hidden}.program-budget__workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:100%;min-height:0;border:2px solid var(--program-owner-strong,var(--uos-text,#0f172a));border-radius:0;background:var(--uos-surface,#fff);overflow:hidden}.program-budget__approvals{display:flex;min-height:0;flex-direction:column;padding:22px 24px;border-right:1px solid var(--uos-border,#dbe3ea)}.program-budget__fixed-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex:0 0 auto}.program-budget__fixed-head h2{margin:2px 0 14px}.program-budget__year-field{width:min(220px,100%);margin:0 0 14px}.program-budget__approvals>[data-budget-year-state]{flex:0 0 auto}.program-budget__allocations,.program-budget__pending{display:flex;min-height:0;flex:1 1 0;flex-direction:column;margin-top:16px}.program-budget__table-wrap,.program-budget__history{min-height:0;max-height:25dvh;overflow:auto}.program-budget__table-wrap thead{position:sticky;top:0;z-index:1;background:var(--uos-surface,#fff)}.program-budget__dashboard{min-height:0;padding:22px 24px}.program-budget__metrics{display:grid;grid-template-columns:1fr;gap:12px}.program-budget__metric{display:flex;align-items:center;justify-content:space-between;min-height:76px;padding:16px;border:1px solid var(--uos-border,#dbe3ea);border-radius:var(--uos-radius-control,6px);background:var(--uos-surface,#fff)}.program-budget__metric strong{font-size:22px}@media(max-width:900px){.program-budget:not([hidden]){height:auto;overflow:visible}.program-budget__workspace{grid-template-columns:1fr;height:auto;overflow:visible}.program-budget__approvals{border-right:0;border-bottom:1px solid var(--uos-border,#dbe3ea)}.program-budget__table-wrap,.program-budget__history{max-height:360px}}
  </style>
@@ -1227,7 +1228,7 @@
     <script defer src="../remediation-planner/js/map.js?v=20260930-seamless-raster-v2"></script>
   <script defer src="js/program-map.js?v=20260913-active-location-v2"></script>
   <script defer src="js/map-floating-draw-toolbar.js?v=20260930-inset-v3"></script>
- <script defer src="js/planner.js?v=20261002-task-history-v4"></script>
+ <script defer src="js/planner.js?v=20261005-checklist-title-v5"></script>
  <script defer src="js/planner-section-headers.js?v=20260930-persistent-default-collapsed"></script>
   <script defer src="js/planner-presentation.js?v=20261001-planner-editor-v3"></script>
  <script defer src="js/quote-builder.js?v=20261005-quote-navigation-v6"></script>

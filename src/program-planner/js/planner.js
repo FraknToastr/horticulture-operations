@@ -464,7 +464,7 @@ function displayDate(value) {
     var topNavHtml = '<div class="planner-nav-header">' +
       '<div class="planner-nav-title" style="display:flex;align-items:center;gap:10px;">' +
         '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;color:var(--program-owner-strong);stroke-width:2;flex:0 0 auto;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
-        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--uos-text);">Project Checklists</h3>' +
+        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--uos-text);">Project Checklist</h3>' +
       '</div>' +
       '<div class="planner-nav-actions">' +
         '<span class="planner-duplicate-action" data-uos-tooltip="' + (state.selectedChecklistItemId ? 'Duplicate selected checklist row' : 'Select a checklist row to enable Duplicate') + '" title="' + (state.selectedChecklistItemId ? 'Duplicate selected checklist row' : 'Select a checklist row to enable Duplicate') + '"' + (state.selectedChecklistItemId ? '' : ' tabindex="0"') + '>' +
