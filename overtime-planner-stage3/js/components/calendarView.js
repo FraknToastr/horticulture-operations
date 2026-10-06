@@ -10,6 +10,7 @@ window.HortOpsCalendarView = {
     var dateUtils = window.HortOpsDateUtils;
     var slots = state.slots;
     var self = this;
+    var programme = state.uiState && state.uiState.planningRange;
 
     var esc = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml) ? window.HortOpsSecurityUtils.escapeHtml : function(s) { return String(s || ''); };
     var escAttr = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtmlAttr) ? window.HortOpsSecurityUtils.escapeHtmlAttr : function(s) { return String(s || ''); };
@@ -24,7 +25,7 @@ window.HortOpsCalendarView = {
 
     // A weekday pattern occurrence can belong to a different month than its Saturday bucket.
     var monthSlots = slots.filter(function(s) {
-      return s.month === self.selectedMonth || s.shifts.some(function(sh) {
+      return !!programme || s.month === self.selectedMonth || s.shifts.some(function(sh) {
         return sh.frequencyType === 'work_pattern' &&
           Number(String(sh.date).slice(5, 7)) === self.selectedMonth &&
           Number(String(sh.date).slice(0, 4)) === Number(state.currentYear);
@@ -41,6 +42,7 @@ window.HortOpsCalendarView = {
         '</button>';
       }).join('') +
     '</div>';
+    if (programme) monthNav = '<span class="badge badge-emerald">' + esc(programme.start) + ' – ' + esc(programme.end) + '</span>';
 
     var weekendCardsHtml = monthSlots.map(function(slot) {
       var isCurrentWeek = slot.weekNumber === currentWeekNum;
@@ -89,7 +91,8 @@ window.HortOpsCalendarView = {
           dayCols.push({ date: sh.date, dayName: sh.dayOfWeek || 'Overtime Day' });
         }
       });
-      dayCols.sort(function(a, b) { return a.date.localeCompare(b.date); });
+            if (programme) dayCols = dayCols.filter(function(d) { return d.date >= programme.start && d.date <= programme.end; });
+            dayCols.sort(function(a, b) { return a.date.localeCompare(b.date); });
       var patternRange = slot.shifts.some(function(sh) { return sh.frequencyType === 'work_pattern'; });
       var displayRange = patternRange ?
         dateUtils.formatDisplayDate(dayCols[0].date) + ' – ' + dateUtils.formatDisplayDate(dayCols[dayCols.length - 1].date) :
@@ -164,7 +167,7 @@ window.HortOpsCalendarView = {
 
     return '<div class="panel-card">' +
       '<div class="panel-header">' +
-        '<span class="panel-title">' + icons.render('calendar', 'w-4 h-4') + esc(monthNames[self.selectedMonth - 1]) + ' ' + state.currentYear + ' Operational Roster</span>' +
+        '<span class="panel-title">' + icons.render('calendar', 'w-4 h-4') + (programme ? 'Programme Operational Roster' : esc(monthNames[self.selectedMonth - 1]) + ' ' + state.currentYear + ' Operational Roster') + '</span>' +
         monthNav +
       '</div>' +
       '<div class="panel-body">' + weekendCardsHtml + '</div>' +

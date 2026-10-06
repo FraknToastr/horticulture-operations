@@ -157,20 +157,24 @@ window.HortOpsStaffRegistry = {
         }
       }
 
+      var workforceState = (window.HortOpsApp && window.HortOpsApp.state) || {};
+      var hasHoursEvidence = Array.isArray(staff.overtimeHoursEvidence) && staff.overtimeHoursEvidence.length > 0;
+      var hasLeaveHistory = (Array.isArray(workforceState.absences) && workforceState.absences.some(function(entry) { return entry && entry.staffId === staff.id; })) ||
+        (Array.isArray(workforceState.refusalHistory) && workforceState.refusalHistory.some(function(entry) { return entry && entry.staffId === staff.id; }));
       var actionHtml = '<div style="display: flex; gap: 0.35rem; justify-content: center;">' +
-        '<button type="button" class="btn btn-secondary" data-hours-evidence-staff="' + escAttr(staff.id) + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" title="Record verified year-to-date overtime hours">' +
+        '<button type="button" class="btn btn-secondary workforce-action-button' + (hasHoursEvidence ? ' has-action-data' : '') + '" data-hours-evidence-staff="' + escAttr(staff.id) + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" title="Record verified year-to-date overtime hours">' +
           icons.render('clock', 'w-3 h-3 text-emerald-600') +
           '<span>Hours</span>' +
         '</button>' +
-        '<button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffQualificationModal.open(\'' + escAttr(staff.id) + '\')" title="Manage Qualifications & Accreditations">' +
+        '<button type="button" class="btn btn-secondary workforce-action-button' + (quals.length ? ' has-action-data' : '') + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffQualificationModal.open(\'' + escAttr(staff.id) + '\')" title="Manage Qualifications & Accreditations">' +
           icons.render('shield', 'w-3 h-3 text-emerald-600') +
           '<span>Tickets</span>' +
         '</button>' +
-        '<button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffAbsenceModal.open(\'' + escAttr(staff.id) + '\')" title="Manage Absence Intervals & Refusal History">' +
+        '<button type="button" class="btn btn-secondary workforce-action-button' + (hasLeaveHistory ? ' has-action-data' : '') + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffAbsenceModal.open(\'' + escAttr(staff.id) + '\')" title="Manage Absence Intervals & Refusal History">' +
           icons.render('calendar', 'w-3 h-3 text-amber-600') +
           '<span>Leave</span>' +
         '</button>' +
-        '<button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffExemptionModal.open(\'' + escAttr(staff.id) + '\')" title="Edit Overtime Exemption">' +
+        '<button type="button" class="btn btn-secondary workforce-action-button' + (isExempt ? ' has-action-data' : '') + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffExemptionModal.open(\'' + escAttr(staff.id) + '\')" title="Edit Overtime Exemption">' +
           icons.render('edit', 'w-3 h-3 text-slate-500') +
           '<span>Exempt</span>' +
         '</button>' +
@@ -182,7 +186,6 @@ window.HortOpsStaffRegistry = {
             '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + safeColor(staff.avatarColor, '#10b981') + '; shrink: 0;"></span>' +
             '<div>' +
               '<div style="font-weight: 700; color: var(--slate-900);">' + esc(staff.name) + '</div>' +
-              '<div style="font-size: 12px; color: var(--slate-400);">' + esc(staff.email || '') + '</div>' +
             '</div>' +
           '</div>' +
         '</td>' +
@@ -196,7 +199,7 @@ window.HortOpsStaffRegistry = {
         '<td><span class="badge badge-slate" style="font-size: 11px;">' + esc(staff.userType || 'App') + '</span></td>' +
         '<td>' + statusBadge + '</td>' +
         '<td>' + otStatusHtml + '</td>' +
-        '<td style="text-align: center;">' + actionHtml + '</td>' +
+                '<td class="registry-action-cell" style="text-align: center;">' + actionHtml + '</td>' +
       '</tr>';
     }).join('');
 
@@ -211,21 +214,21 @@ window.HortOpsStaffRegistry = {
         '<span style="font-size: 13px; color: var(--slate-500);">' + filtered.length + ' of ' + staffList.length + ' personnel</span>' +
       '</div>' +
 
-      '<div style="overflow-x: auto;">' +
-        '<table class="planner-table">' +
+            '<div class="registry-table-scrollport workforce-table-scrollport">' +
+                '<table class="registry-table workforce-registry-table">' +
           '<thead><tr>' +
-            '<th style="width: 210px;">Employee</th>' +
-            '<th style="width: 130px;">Department</th>' +
-            '<th style="width: 120px;">Team / Unit</th>' +
-            '<th style="width: 120px;">Crew / Depot</th>' +
-            '<th style="width: 110px;">Role</th>' +
-            '<th style="width: 150px;">Accreditations</th>' +
-            '<th style="width: 110px;">Fatigue</th>' +
-            '<th style="width: 120px;">Plant Operator</th>' +
-            '<th style="width: 80px;">User Type</th>' +
-            '<th style="width: 90px;">Status</th>' +
-            '<th style="width: 90px;">Overtime</th>' +
-            '<th style="width: 130px; text-align: center;">Action</th>' +
+                    '<th>Employee</th>' +
+                    '<th>Department</th>' +
+                    '<th>Team / Unit</th>' +
+                    '<th>Crew / Depot</th>' +
+                    '<th>Role</th>' +
+                    '<th>Accreditations</th>' +
+                    '<th>Fatigue</th>' +
+                    '<th>Plant Operator</th>' +
+                    '<th>User Type</th>' +
+                    '<th>Status</th>' +
+                    '<th>Overtime</th>' +
+                    '<th class="registry-action-cell" style="text-align: center;">Action</th>' +
           '</tr></thead>' +
           '<tbody>' + rowsHtml + '</tbody>' +
         '</table>' +

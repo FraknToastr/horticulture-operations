@@ -99,8 +99,12 @@ window.HortOpsJobRegistry = {
           cadenceHtml = '<span class="badge badge-emerald">Every ' + job.intervalWeeks + ' wks</span>';
         } else if (job.frequencyType === 'annual') {
           cadenceHtml = '<span class="badge badge-sky">Annual</span>';
+        } else if (job.frequencyType === 'seasonal') {
+            cadenceHtml = '<span class="badge badge-sky">Annual seasonal series</span>';
+        } else if (job.frequencyType === 'work_pattern') {
+            cadenceHtml = '<span class="badge badge-emerald">Multiple days</span>';
         } else {
-          cadenceHtml = '<span class="badge badge-purple">One-Off</span>';
+            cadenceHtml = '<span class="badge badge-purple">One-Off</span>';
         }
 
         var reqQuals = Array.isArray(job.requiredQualifications) ? job.requiredQualifications : [];
@@ -255,8 +259,8 @@ window.HortOpsJobRegistry = {
       '</div>' +
 
       // Table
-      '<div style="overflow-x: auto;">' +
-        '<table class="planner-table" style="min-width: 1000px;">' +
+            '<div class="registry-table-scrollport job-table-scrollport">' +
+                '<table class="registry-table job-registry-table">' +
           '<thead><tr>' +
             '<th style="width: 260px;">Job Name & Location</th>' +
             '<th style="width: 130px;">Category</th>' +

@@ -42,6 +42,20 @@ window.HortOpsRosteringEngine = {
       }
     });
 
+    // A range view can end in the middle of a year. Fill the represented years
+    // before looking ahead so continuation never jumps from February to the
+    // following January, and partial views yield the same occurrence sequence.
+    if (window.HortOpsScheduler && sourceShiftId && sourceShiftId.indexOf('@') !== -1 && window.HortOpsApp && window.HortOpsApp.state && window.HortOpsApp.state.uiState && window.HortOpsApp.state.uiState.planningRange) {
+      var sourceYear = Number(sourceShiftId.split('@')[1].slice(0, 4));
+      var lastYear = unique.reduce(function(last, shift) { return Math.max(last, Number(shift.date.slice(0, 4))); }, sourceYear);
+      for (var fillYear = sourceYear; fillYear <= lastYear; fillYear++) {
+        var complete = window.HortOpsScheduler.generateOperationalDigest(jobs || [job], fillYear);
+        complete.allShifts.forEach(function(shift) {
+          if (shift.jobId === targetJobId && !seen.has(shift.shiftId)) { seen.add(shift.shiftId); unique.push(shift); }
+        });
+      }
+    }
+
     unique.sort(function(a, b) {
       if (a.date !== b.date) {
         return a.date.localeCompare(b.date);
@@ -54,7 +68,7 @@ window.HortOpsRosteringEngine = {
     // Cross-year recurrence resolution if needed for recurring/annual jobs
     var isRecurring = job.frequencyType === 'recurring_weeks' ||
                       job.frequencyType === 'recurring_cadence' ||
-                      job.frequencyType === 'annual' || job.frequencyType === 'work_pattern';
+                      job.frequencyType === 'annual' || job.frequencyType === 'seasonal' || job.frequencyType === 'work_pattern';
 
     // Source-relative remaining count (Defect A):
     var sourceIndex = sourceShiftId ? unique.findIndex(function(s) { return s.shiftId === sourceShiftId; }) : -1;
@@ -154,7 +168,7 @@ window.HortOpsRosteringEngine = {
     if (job.frequencyType === 'one_off') return 1;
 
     var remaining = this.resolveRemainingOccurrences(currentShiftId, allShifts, job, this.UI_REPEAT_CAP, jobs);
-    if (job.frequencyType === 'annual' || job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence' || job.frequencyType === 'work_pattern') {
+    if (job.frequencyType === 'annual' || job.frequencyType === 'seasonal' || job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence' || job.frequencyType === 'work_pattern') {
       return Math.max(1, Math.min(remaining.length, this.UI_REPEAT_CAP));
     }
     return Math.max(1, remaining.length);

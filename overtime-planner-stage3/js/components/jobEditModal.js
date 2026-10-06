@@ -179,13 +179,17 @@ window.HortOpsJobEditModal = {
                 '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Color Tag</label>' +
                 '<input type="color" class="form-input" style="height: 32px; padding: 2px;" value="' + escapeAttr(safeColor(data.color, '#047857')) + '" onchange="window.HortOpsJobEditModal.updateField(\'color\', this.value)" />' +
               '</div>' +
-            '</div>' +
+      '</div>' +
+      '<div>' +
+        '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Location</label>' +
+        '<input type="text" class="form-input" value="' + escapeAttr(data.locationDetails || '') + '" oninput="window.HortOpsJobEditModal.updateField(\'locationDetails\', this.value)" />' +
+      '</div>' +
 
-            // Row 2: Team Preferences & Exclusive Rules
+      // Row 2: Team Preferences & Exclusive Rules
             teamPreferencesHtml +
 
             // Row 3: Operational Requirements
-            '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.75rem;">' +
+        '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">' +
               '<div>' +
                 '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Crew Size Required</label>' +
                 '<input type="number" min="1" max="20" class="form-input" value="' + (data.crewSize || 3) + '" oninput="window.HortOpsJobEditModal.updateField(\'crewSize\', parseInt(this.value, 10))" />' +
@@ -198,16 +202,10 @@ window.HortOpsJobEditModal = {
                 '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Start Time</label>' +
                 '<input type="text" class="form-input" value="' + escapeAttr(data.startTime || '06:00 AM') + '" oninput="window.HortOpsJobEditModal.updateField(\'startTime\', this.value)" />' +
               '</div>' +
-              '<div>' +
-                '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Preferred Day</label>' +
-                '<select class="form-select" onchange="window.HortOpsJobEditModal.updateField(\'preferredDay\', this.value)">' +
-                  '<option value="saturday"' + (data.preferredDay === 'saturday' ? ' selected' : '') + '>Saturday</option>' +
-                  '<option value="sunday"' + (data.preferredDay === 'sunday' ? ' selected' : '') + '>Sunday</option>' +
-                  '<option value="friday"' + (data.preferredDay === 'friday' ? ' selected' : '') + '>Friday</option>' +
-                  '<option value="monday"' + (data.preferredDay === 'monday' ? ' selected' : '') + '>Monday</option>' +
-                '</select>' +
-              '</div>' +
             '</div>' +
+
+            // Row 4: Cadence & Frequency-Specific Configuration
+            recurrenceFormHtml +
 
             // Plant Operator Requirement (Mandate Section 10)
             '<div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 0.5rem 0.75rem;">' +
@@ -235,16 +233,7 @@ window.HortOpsJobEditModal = {
               '</div>' +
             '</div>' +
 
-            // Row 4: Cadence & Frequency-Specific Configuration (P0-07)
-            recurrenceFormHtml +
-
-            // Row 5: Location Details
-            '<div>' +
-              '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Location Details</label>' +
-              '<input type="text" class="form-input" value="' + escapeAttr(data.locationDetails || '') + '" oninput="window.HortOpsJobEditModal.updateField(\'locationDetails\', this.value)" />' +
-            '</div>' +
-
-            // Row 6: Regulatory Permits & Approvals
+      // Row 5: Regulatory Permits & Approvals
             '<div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.75rem;">' +
               '<label style="display: block; font-weight: 700; font-size: 12px; color: #92400e; margin-bottom: 0.5rem;">Regulatory Permits & Corridor Approvals</label>' +
               '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">' +

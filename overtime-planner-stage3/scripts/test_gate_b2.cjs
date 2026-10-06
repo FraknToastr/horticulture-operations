@@ -105,7 +105,8 @@ const testJobs = [
     id: 'JOB-FIXED-CROSS',
     name: 'Fixed Cross-Year Job',
     frequencyType: 'annual',
-    targetMonth: 6,
+        targetMonth: 6,
+        annualRule: {kind:'weekday',startYear:2026,month:6,ordinal:2,weekday:6},
     status: 'active',
     primaryTeam: 'Parks',
     crewSize: 1,
@@ -457,7 +458,7 @@ resetWorkspaceState();
 
 // 4.1 Past assignment with missing timing snapshot
 window.HortOpsDateUtils.getLocalDateKey = function() { return '2026-07-01'; };
-const pastShiftId = 'JOB-PAST@2026-05-15';
+const pastShiftId = 'JOB-PAST@2026-05-16';
 window.HortOpsApp.state.customAssignments[pastShiftId] = ['EMP-001'];
 delete window.HortOpsApp.state.historicalSnapshots[pastShiftId];
 

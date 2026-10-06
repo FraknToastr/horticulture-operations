@@ -68,7 +68,7 @@ window.HortOpsImportModal = {
           '</div>' +
 
           // Upload Dropzone
-          '<div style="border: 2px dashed ' + (diff || jsonBackup ? 'var(--emerald-400)' : 'var(--slate-300)') + '; border-radius: 8px; padding: 1.25rem; text-align: center; background: ' + (diff || jsonBackup ? 'var(--emerald-50)' : 'var(--slate-50)') + '; cursor: pointer;" onclick="document.getElementById(\'staff-csv-file-input\').click()">' +
+      '<div id="import-file-dropzone" role="button" tabindex="0" aria-label="Choose or drop a users CSV or workspace JSON file" style="border: 2px dashed ' + (diff || jsonBackup ? 'var(--emerald-400)' : 'var(--slate-300)') + '; border-radius: 8px; padding: 1.25rem; text-align: center; background: ' + (diff || jsonBackup ? 'var(--emerald-50)' : 'var(--slate-50)') + '; cursor: pointer; transition: border-color 120ms ease, background-color 120ms ease;" onclick="document.getElementById(\'staff-csv-file-input\').click()" onkeydown="return window.HortOpsImportModal.handleDropzoneKey(event)" ondragenter="return window.HortOpsImportModal.handleDragEnter(event)" ondragover="return window.HortOpsImportModal.handleDragOver(event)" ondragleave="return window.HortOpsImportModal.handleDragLeave(event)" ondrop="return window.HortOpsImportModal.handleDrop(event)">' +
             '<input type="file" id="staff-csv-file-input" accept=".csv,.json" style="display: none;" onchange="window.HortOpsImportModal.handleFileSelect(event)" />' +
             '<div style="margin-bottom: 0.4rem; color: var(--emerald-700);">' + icons.render('upload', 'w-6 h-6') + '</div>' +
             '<div style="font-size: 13px; font-weight: 700; color: var(--slate-800);">' +
@@ -212,15 +212,14 @@ window.HortOpsImportModal = {
     var rows = staffList.map(function(s) {
       return '<tr style="border-bottom: 1px solid var(--slate-100); font-size: 12px;">' +
         '<td style="padding: 0.4rem; font-weight: 600;">' + esc(s.name) + '</td>' +
-        '<td style="padding: 0.4rem;">' + esc(s.email || '—') + '</td>' +
         '<td style="padding: 0.4rem;">' + esc(s.department) + '</td>' +
         '<td style="padding: 0.4rem;">' + esc(s.team) + '</td>' +
         '<td style="padding: 0.4rem;">' + esc(s.role) + '</td>' +
       '</tr>';
     }).join('');
 
-    return '<table style="width: 100%; border-collapse: collapse;">' +
-      '<thead><tr style="background: var(--slate-50); font-size: 11px; text-transform: uppercase; color: var(--slate-600); text-align: left;"><th style="padding: 0.4rem;">Name</th><th style="padding: 0.4rem;">Email</th><th style="padding: 0.4rem;">Department</th><th style="padding: 0.4rem;">Team</th><th style="padding: 0.4rem;">Role</th></tr></thead>' +
+        return '<table style="width: 100%; border-collapse: collapse;">' +
+            '<thead><tr style="background: var(--slate-50); font-size: 11px; text-transform: uppercase; color: var(--slate-600); text-align: left;"><th style="padding: 0.4rem;">Name</th><th style="padding: 0.4rem;">Department</th><th style="padding: 0.4rem;">Team</th><th style="padding: 0.4rem;">Role</th></tr></thead>' +
       '<tbody>' + rows + '</tbody>' +
     '</table>';
   },
@@ -254,16 +253,71 @@ window.HortOpsImportModal = {
     this.renderModal();
   },
 
+  setDropzoneActive: function(active) {
+    var zone = document.getElementById('import-file-dropzone');
+    if (!zone) return;
+    zone.style.borderColor = active ? 'var(--emerald-600)' : (this.currentDiff || this.pendingJsonBackup ? 'var(--emerald-400)' : 'var(--slate-300)');
+    zone.style.background = active ? 'var(--emerald-100)' : (this.currentDiff || this.pendingJsonBackup ? 'var(--emerald-50)' : 'var(--slate-50)');
+  },
+
+  handleDragEnter: function(event) {
+    event.preventDefault();
+    this.setDropzoneActive(true);
+    return false;
+  },
+
+  handleDragOver: function(event) {
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    this.setDropzoneActive(true);
+    return false;
+  },
+
+  handleDragLeave: function(event) {
+    // Dragging over an inner element emits dragleave on the container too.
+    if (!event.currentTarget || !event.currentTarget.contains(event.relatedTarget)) this.setDropzoneActive(false);
+    return false;
+  },
+
+  handleDrop: function(event) {
+    event.preventDefault();
+    this.setDropzoneActive(false);
+    var files = event.dataTransfer && event.dataTransfer.files;
+    this.handleFile(files && files.length ? files[0] : null);
+    return false;
+  },
+
+  handleDropzoneKey: function(event) {
+    if (event.key !== 'Enter' && event.key !== ' ') return true;
+    event.preventDefault();
+    var input = document.getElementById('staff-csv-file-input');
+    if (input) input.click();
+    return false;
+  },
+
   handleFileSelect: function(e) {
-    var file = e.target.files[0];
+    this.handleFile(e && e.target && e.target.files ? e.target.files[0] : null);
+  },
+
+  handleFile: function(file) {
     if (!file) return;
+
+    var lowerName = String(file.name || '').toLowerCase();
+    if (!lowerName.endsWith('.csv') && !lowerName.endsWith('.json')) {
+      this.fileName = '';
+      this.currentDiff = null;
+      this.pendingJsonBackup = null;
+      this.errorMessage = 'Choose a .csv user table or .json workspace backup.';
+      this.renderModal();
+      return;
+    }
 
     this.fileName = file.name + ' (' + Math.round(file.size / 1024) + ' KB)';
     var self = this;
 
     var reader = new FileReader();
     var writerGeneration = window.HortOpsWriterSession && window.HortOpsWriterSession.status().generation;
-    if (file.name.toLowerCase().endsWith('.json')) {
+    if (lowerName.endsWith('.json')) {
       this.isJsonMode = true;
       reader.onload = function(evt) {
         if (window.HortOpsWriterSession && (!window.HortOpsWriterSession.canWrite() || window.HortOpsWriterSession.status().generation !== writerGeneration)) return;

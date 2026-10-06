@@ -470,12 +470,22 @@ html, body {
 
 /* Forward Planner Grid Specifics */
 .planner-table-wrapper {
-  overflow: auto;
+    overflow: auto;
   max-height: calc(100vh - 146px);
   border-radius: 8px;
   border: 1px solid var(--slate-200);
   background: #ffffff;
   position: relative;
+}
+.planner-table-wrapper.compact-week-view { overflow-x: hidden; }
+.planner-table-wrapper.compact-week-view .planner-table { width: 100%; min-width: 100%; }
+.planner-table-wrapper.compact-week-view .planner-table th:not(.sticky-hierarchy-col),
+.planner-table-wrapper.compact-week-view .planner-table td:not(.sticky-hierarchy-col) { min-width: 0 !important; }
+/* The whole-season view alone scrolls horizontally; preserve its staff context. */
+.planner-table-wrapper.season-view .sticky-hierarchy-col {
+    position: sticky;
+    left: 0;
+    z-index: 30;
 }
 
 @media (max-width: 1536px) {
@@ -652,13 +662,19 @@ tr.row-selected > td:last-child {
 
 /* Vacancy Row in Planner Grid */
 tr.vacancy-row {
-  background-color: rgba(254, 243, 199, 0.15);
-  border-bottom: 1px solid rgba(252, 211, 77, 0.7);
+ background-color: rgba(254, 243, 199, 0.15);
+ border-bottom: 1px solid rgba(252, 211, 77, 0.7);
+}
+
+/* Keep the vacancy identity card level with the action cards when a day cell
+   is taller (for example, when it includes candidate preview controls). */
+tr.vacancy-row > td {
+  vertical-align: top !important;
 }
 
 tr.vacancy-row td.sticky-hierarchy-col {
-  background-color: #ffffff !important;
-  border-right: 1px solid var(--slate-200);
+ background-color: #ffffff !important;
+ border-right: 1px solid var(--slate-200);
 }
 
 .unallocated-slot-card {
@@ -895,6 +911,67 @@ body.modal-scroll-locked {
   padding: 1px 4px;
 }
 
+/* Navigation and period selection have separate, bounded layout regions. */
+.app-header { padding:0; }
+.header-container { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:20px; padding:10px 24px; }
+.brand-area { min-width:0; }
+.nav-tabs { justify-self:center; max-width:100%; flex-wrap:wrap; justify-content:center; }
+.header-actions { justify-self:end; flex-wrap:wrap; }
+.programme-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:8px 24px; background:var(--slate-50); color:var(--slate-700); border-top:1px solid var(--emerald-900); }
+.programme-year { display:flex; align-items:center; gap:8px; }
+.programme-toolbar label { color:var(--slate-600); font-size:12px; font-weight:600; white-space:nowrap; }
+.programme-toolbar .year-select { width:96px; height:32px; padding:4px 8px; background:white; color:var(--slate-800); border:1px solid var(--slate-300); }
+.planning-range-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.programme-toolbar-title { font-size:12px; font-weight:700; margin-right:4px; }
+.planning-range-controls input { width:142px; height:32px; font:inherit; font-size:12px; color:var(--slate-800); border:1px solid var(--slate-300); border-radius:5px; padding:4px 8px; background:white; }
+.planning-range-controls .btn { min-height:32px; font-size:12px; padding:5px 12px; white-space:nowrap; }
+.programme-toolbar input:focus-visible, .programme-toolbar select:focus-visible { outline:2px solid var(--emerald-600); outline-offset:2px; }
+@media (max-width:1500px) {
+  .header-container { grid-template-columns:minmax(0,1fr) auto; gap:10px 16px; }
+  .header-container .nav-tabs { grid-column:1 / -1; grid-row:2; justify-self:stretch; }
+}
+@media (max-width:760px) {
+  .header-container { padding:12px; gap:10px; }
+  .brand-title { font-size:14px; }
+  .brand-subtitle { font-size:9px; }
+  .brand-logo { display:none; }
+  .header-actions { display:grid; grid-template-columns:repeat(4,32px); gap:4px; }
+  .header-health-pill { grid-column:1 / -1; justify-self:end; }
+  .programme-toolbar { padding:8px 12px; }
+  .planning-range-controls { gap:6px; }
+  .programme-toolbar-title { width:100%; }
+}
+.recurrence-fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+.recurrence-fields label { display:flex; flex-direction:column; gap:5px; font-size:12px; font-weight:700; }
+.recurrence-days { display:flex; gap:12px; flex-wrap:wrap; padding:10px 0; }
+.recurrence-days label { font-size:12px; }
+.recurrence-editor { border:1px solid var(--slate-200); border-radius:6px; padding:12px; background:var(--slate-50); }
+.recurrence-editor p { font-size:12px; color:var(--slate-600); line-height:1.5; }
+.recurrence-preview { display:block; font-size:12px; background:white; border:1px solid var(--slate-200); padding:10px; margin-top:12px; line-height:1.7; overflow-wrap:anywhere; }
+.recurrence-date-preview-heading { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:10px; color:var(--slate-800); font-size:12px; font-weight:800; }
+.recurrence-date-preview-heading span { color:var(--slate-500); font-size:11px; font-weight:600; }
+.recurrence-date-calendar-grid { display:grid; grid-template-columns:repeat(4,minmax(132px,1fr)); gap:10px; }
+.recurrence-calendar-month { min-width:0; padding:8px; border:1px solid var(--slate-200); border-radius:5px; background:var(--slate-50); }
+.recurrence-calendar-month h4 { margin:0 0 6px; color:var(--slate-700); font-size:11px; font-weight:800; text-align:center; }
+.recurrence-calendar-weekdays,.recurrence-calendar-days { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); text-align:center; }
+.recurrence-calendar-weekdays { margin-bottom:3px; color:var(--slate-400); font-size:8px; font-weight:800; text-transform:uppercase; }
+.recurrence-calendar-days { row-gap:2px; }
+.recurrence-calendar-day { display:grid; place-items:center; width:20px; height:20px; justify-self:center; border-radius:50%; color:var(--slate-700); font-size:10px; font-weight:600; }
+.recurrence-calendar-day { border:0; background:transparent; font-family:inherit; padding:0; }
+.recurrence-calendar-day.is-scheduled { background:var(--emerald-700); color:#fff; box-shadow:0 0 0 2px var(--emerald-100); font-weight:800; }
+.recurrence-calendar-day.is-public-holiday { background:var(--amber-600); box-shadow:0 0 0 2px var(--amber-100); }
+.recurrence-calendar-day.is-exempt { background:var(--rose-700); box-shadow:0 0 0 2px var(--rose-100); }
+.recurrence-calendar-day.is-exemption-selectable { cursor:pointer; outline:1px dashed var(--rose-700); outline-offset:1px; }
+.recurrence-preview-slider { display:inline-flex; padding:2px; border:1px solid var(--slate-300); border-radius:999px; background:var(--slate-100); }
+.recurrence-preview-slider button { border:0; border-radius:999px; background:transparent; color:var(--slate-600); padding:3px 9px; font:inherit; font-size:11px; font-weight:700; cursor:pointer; }
+.recurrence-preview-slider button.is-active { background:#fff; color:var(--emerald-800); box-shadow:0 1px 2px rgba(15,23,42,.12); }
+.recurrence-exemption-list { margin-top:10px; padding-top:9px; border-top:1px solid var(--slate-200); }
+.recurrence-exemption-list h4 { margin:0 0 6px; color:var(--slate-700); font-size:11px; font-weight:800; }
+.recurrence-exemption-list > div { display:flex; flex-wrap:wrap; gap:5px; }
+.recurrence-exemption-chip { border:1px solid var(--rose-100); border-radius:999px; background:var(--rose-50); color:var(--rose-700); padding:3px 7px; font:inherit; font-size:10px; font-weight:700; cursor:pointer; }
+.recurrence-date-preview-empty { color:var(--slate-500); font-size:12px; }
+@media (max-width:900px) { .recurrence-date-calendar-grid { grid-template-columns:repeat(3,minmax(132px,1fr)); } }
+@media (max-width:620px) { .recurrence-date-calendar-grid { grid-template-columns:repeat(2,minmax(132px,1fr)); } }
 .repeat-count-select:disabled {
   background: var(--slate-100);
   color: var(--slate-400);
@@ -1319,3 +1396,201 @@ body.modal-scroll-locked {
   .allocator-columns .allocated-assignment-col { width: 100% !important; max-width: 100%; margin-right: 0 !important; padding-right: 0 !important; border-right: 0 !important; }
   .allocator-columns .allocated-assignment-col select { min-width: 0; max-width: 100%; }
 }
+
+/* Work-pattern controls keep recurrence choices visible with the core job inputs. */
+.work-pattern-editor { border: 1px solid var(--slate-200); border-radius: 8px; padding: 1rem; background: var(--slate-50); display: grid; gap: .85rem; }
+.work-pattern-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.work-pattern-heading h3 { margin: 0; color: var(--slate-900); font-size: 1rem; }
+.work-pattern-heading p { margin: .2rem 0 0; color: var(--slate-600); font-size: .8rem; }
+.work-pattern-kicker { color: var(--emerald-700); font-size: .7rem !important; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.work-pattern-summary { max-width: 42%; padding: .45rem .6rem; border-radius: 999px; background: var(--emerald-100); color: var(--emerald-800); font-size: .75rem; font-weight: 700; text-align: right; }
+.work-pattern-mode-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.work-pattern-select { display: grid; gap: .3rem; max-width: 360px; color: var(--slate-700); font-size: .75rem; font-weight: 700; }
+.work-pattern-select small { color: var(--slate-500); font-size: .72rem; font-weight: 500; }
+.work-pattern-mode { display: flex; gap: .55rem; min-height: 72px; padding: .7rem; border: 1px solid var(--slate-300); border-radius: 7px; background: #fff; cursor: pointer; }
+.work-pattern-mode.is-selected { border-color: var(--emerald-600); box-shadow: 0 0 0 2px var(--emerald-100); }
+.work-pattern-mode input { margin-top: .18rem; }
+.work-pattern-mode strong, .work-pattern-mode small { display: block; }
+.work-pattern-mode small { margin-top: .2rem; color: var(--slate-600); font-size: .74rem; line-height: 1.35; }
+.work-pattern-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; align-items: end; }
+.work-pattern-fields > label, .work-pattern-exclusions { display: grid; gap: .3rem; color: var(--slate-700); font-size: .75rem; font-weight: 700; }
+.work-pattern-checkbox { grid-column: span 2; display: flex !important; align-items: center; gap: .45rem; min-height: 38px; font-weight: 600 !important; }
+.work-pattern-days { display: flex; flex-wrap: wrap; gap: .35rem; min-height: 30px; }
+.work-pattern-days > span { padding: .3rem .5rem; border-radius: 5px; background: var(--slate-200); color: var(--slate-700); font-size: .72rem; font-weight: 700; }
+.work-pattern-preview { display: grid; grid-template-columns: minmax(150px, .8fr) minmax(0, 2fr); gap: .75rem; align-items: center; padding: .7rem; border-radius: 6px; background: #fff; border: 1px solid var(--slate-200); }
+.work-pattern-preview strong, .work-pattern-preview span { display: block; }
+.work-pattern-preview span, .work-pattern-helper, .work-pattern-optional { color: var(--slate-500); font-size: .72rem; font-weight: 500; }
+.work-pattern-date-list { display: flex; flex-wrap: wrap; gap: .35rem; }
+.work-pattern-date { padding: .28rem .42rem; border-radius: 4px; background: var(--slate-100); color: var(--slate-700); font-size: .72rem; }
+.work-pattern-empty { color: var(--slate-500); font-size: .75rem; }
+.work-pattern-helper { margin: 0; line-height: 1.45; }
+.assignment-continuity-guide { display: block; margin: 0 0 .2rem; color: var(--slate-500); font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+
+/* Viewport-owned workspace and registry table shells. */
+body {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+#header-mount { flex: 0 0 auto; }
+.main-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* The planner owns the remaining space in the shared scroll shell.  Its
+   matrix scrolls inside this area, rather than extending past the viewport. */
+.main-wrapper:has(.forward-planner-workspace) {
+  display: flex;
+  overflow: hidden;
+}
+
+.main-wrapper:has(.forward-planner-workspace) #content-mount,
+.forward-planner-workspace {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.forward-planner-workspace > .recurrence-preview {
+  flex: 0 0 auto;
+}
+
+/* Keep the planner's controls at their designed height; only the matrix may
+   consume or release the remaining vertical space. */
+.forward-planner-workspace > .forward-planner-controls {
+  flex: 0 0 auto;
+  min-height: max-content;
+}
+
+.forward-planner-workspace > .planner-table-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+}
+
+:root { --registry-control-height: 34px; --registry-frame-gap: 8px; }
+.registry-table-scrollport {
+    max-width: 100%;
+    overflow: auto;
+    overscroll-behavior: contain;
+    max-height: calc(100vh - 265px);
+    min-height: 180px;
+}
+.registry-table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: var(--registry-frame-gap);
+    font-size: 13px;
+}
+.registry-table th,
+.registry-table td {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    vertical-align: middle;
+}
+.registry-table th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    color: var(--slate-700);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+}
+.registry-table th:not(.registry-action-cell) {
+    background: var(--slate-50);
+    box-shadow: 0 0 0 1px var(--slate-200);
+    border-radius: 5px;
+    padding: 9px 10px;
+}
+.registry-table td:not(.registry-action-cell) {
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--slate-200);
+    border-radius: 5px;
+    padding: 8px 10px;
+    min-height: var(--registry-control-height);
+}
+.registry-table tr:hover td:not(.registry-action-cell) {
+    box-shadow: 0 0 0 1px var(--emerald-300);
+}
+.registry-table .badge {
+    min-height: var(--registry-control-height);
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+}
+.registry-table-scrollport .form-input,
+.registry-table-scrollport .form-select,
+.registry-table-scrollport .btn,
+.registry-table-scrollport button,
+.panel-header .form-input,
+.panel-header .form-select {
+    min-height: var(--registry-control-height);
+    box-sizing: border-box;
+}
+.workforce-registry-table th:first-child,
+.workforce-registry-table td:first-child { min-width: 210px; }
+.workforce-registry-table th:nth-child(2),
+.workforce-registry-table td:nth-child(2) { min-width: 135px; }
+.workforce-registry-table th:nth-child(3),
+.workforce-registry-table td:nth-child(3),
+.workforce-registry-table th:nth-child(4),
+.workforce-registry-table td:nth-child(4) { min-width: 130px; }
+.workforce-registry-table th:nth-child(5),
+.workforce-registry-table td:nth-child(5) { min-width: 130px; }
+.workforce-registry-table th:nth-child(6),
+.workforce-registry-table td:nth-child(6) { min-width: 170px; }
+.workforce-registry-table .registry-action-cell {
+    position: sticky;
+    right: 0;
+    z-index: 4;
+    background: #fff;
+    padding-inline: var(--registry-frame-gap);
+    min-width: 246px;
+}
+.workforce-registry-table thead .registry-action-cell {
+    z-index: 7;
+    padding-block: 9px;
+    color: var(--slate-700);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+}
+.workforce-registry-table tbody .registry-action-cell { padding-block: 8px; }
+.workforce-registry-table .registry-action-cell > div { min-height: var(--registry-control-height); }
+.workforce-registry-table .workforce-action-button.has-action-data {
+  border-color: var(--emerald-700) !important;
+  box-shadow: 0 0 0 1px var(--emerald-700), 0 1px 2px rgba(4, 120, 87, 0.16);
+}
+.workforce-registry-table .workforce-action-button.has-action-data:hover {
+  border-color: var(--emerald-800) !important;
+  box-shadow: 0 0 0 1px var(--emerald-800), 0 2px 4px rgba(4, 120, 87, 0.2);
+}
+/* The accordion summary already names its staff set; the nested renderer's
+   one-group heading is therefore redundant. */
+.staff-allocator-priority-section [data-allocator-group] > div:first-child {
+  display: none;
+}
+.staff-allocator-priority-section [data-allocator-group] {
+  margin-top: 0 !important;
+  border-top: 0 !important;
+  padding-top: 0 !important;
+}
+.job-registry-table { min-width: 1080px; }
+.job-registry-table th { background: var(--slate-50); box-shadow: 0 0 0 1px var(--slate-200); border-radius: 5px; padding: 9px 10px; }
+.job-registry-table td { background: #fff; box-shadow: 0 0 0 1px var(--slate-200); border-radius: 5px; padding: 8px 10px; }
+@media (max-width: 760px) {
+    .main-wrapper { padding-inline: 8px; }
+    .registry-table-scrollport { max-height: calc(100vh - 290px); }
+    .workforce-registry-table .registry-action-cell { min-width: 230px; }
+}
+@media (max-width: 760px) { .work-pattern-heading, .work-pattern-preview { grid-template-columns: 1fr; display: grid; } .work-pattern-summary { max-width: none; text-align: left; justify-self: start; } .work-pattern-mode-grid, .work-pattern-fields { grid-template-columns: 1fr; } .work-pattern-checkbox { grid-column: auto; } }

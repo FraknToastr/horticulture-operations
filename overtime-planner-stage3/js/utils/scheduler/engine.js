@@ -176,16 +176,18 @@ window.HortOpsSchedulerEngine = {
   },
 
   generateWeekendSlots: function(year) {
-    var holidays = window.HortOpsData.getPublicHolidaysForYear(year);
+    var holidays = [].concat(window.HortOpsData.getPublicHolidaysForYear(year - 1), window.HortOpsData.getPublicHolidaysForYear(year), window.HortOpsData.getPublicHolidaysForYear(year + 1));
     var slots = [];
 
     var jan1 = new Date(year, 0, 1);
     var dayOfWeek = jan1.getDay();
     var daysUntilFirstSat = (6 - dayOfWeek + 7) % 7;
     var currentSat = new Date(year, 0, 1 + daysUntilFirstSat);
+    // January Sunday/Monday belongs to the weekend starting in December.
+    if (daysUntilFirstSat >= 5) currentSat.setDate(currentSat.getDate() - 7);
 
     var weekNum = 1;
-    while (currentSat.getFullYear() === year) {
+    while (currentSat.getFullYear() <= year) {
       var sat = new Date(currentSat);
       var sun = new Date(currentSat);
       sun.setDate(sun.getDate() + 1);
@@ -337,6 +339,9 @@ window.HortOpsSchedulerEngine = {
       return false;
     }
 
+    if (window.HortOpsRecurrence) {
+      return window.HortOpsRecurrence.dates(job, parseInt(dateStr.slice(0, 4), 10)).indexOf(dateStr) !== -1;
+    }
     if (job.frequencyType === 'work_pattern') {
       var rules = window.HortOpsPlanningRules;
       return !!rules && rules.dates(job, parseInt(dateStr.slice(0,4),10)).indexOf(dateStr) !== -1;
@@ -644,6 +649,42 @@ window.HortOpsSchedulerEngine = {
     }
   },
 
+  generateRangeDigest: function(jobs, from, to, includeResolved, customAssignments, staffList, customPermits, customSnapshots, detachedContext) {
+    var rules = window.HortOpsRecurrence;
+    if (!rules || !rules.isRealDate(from) || !rules.isRealDate(to) || from > to) throw new Error('Invalid programming horizon.');
+    var byDate = {}, byId = {}, issues = [], self = this;
+    for (var year = Number(from.slice(0, 4)); year <= Number(to.slice(0, 4)); year++) {
+      var digest = this.generateOperationalDigest(jobs, year, includeResolved, customAssignments, staffList, customPermits, customSnapshots, true);
+      digest.slots.forEach(function(slot) {
+        if ([slot.fridayDate, slot.saturdayDate, slot.sundayDate, slot.mondayDate].every(function(date) { return date < from || date > to; })) return;
+        var bucket = byDate[slot.saturdayDate];
+        if (!bucket) {
+          bucket = byDate[slot.saturdayDate] = Object.assign({}, slot, { shifts: [], publicHolidays: slot.publicHolidays.slice(), calendarWeekNumber: slot.weekNumber, slotId: slot.saturdayDate });
+        }
+        slot.publicHolidays.forEach(function(h) { if (!bucket.publicHolidays.some(function(other) { return other.date === h.date; })) bucket.publicHolidays.push(h); });
+        slot.shifts.forEach(function(shift) {
+          if (shift.date < from || shift.date > to || byId[shift.shiftId]) return;
+          byId[shift.shiftId] = shift; bucket.shifts.push(shift);
+        });
+      });
+      issues = issues.concat(digest.integrityIssues.filter(function(issue) { return !issue.date || (issue.date >= from && issue.date <= to); }));
+    }
+    var slots = Object.values(byDate).sort(function(a, b) { return a.saturdayDate.localeCompare(b.saturdayDate); });
+    var shifts = Object.values(byId).sort(function(a, b) { return a.date.localeCompare(b.date) || a.shiftId.localeCompare(b.shiftId); });
+    slots.forEach(function(slot, index) {
+      // The display index is continuous throughout the horizon. Dates are the
+      // stable identity; calendar week numbers are retained only as metadata.
+      slot.weekNumber = index + 1;
+      slot.shifts.forEach(function(shift) { shift.calendarWeekNumber = shift.weekNumber; shift.weekNumber = slot.weekNumber; shift.slotId = slot.slotId; });
+      slot.totalShifts = slot.shifts.length;
+      slot.totalCrewHours = slot.shifts.reduce(function(sum, s) { return sum + (Number(s.durationHours) || 0) * (Number(s.crewSize) || 0); }, 0);
+      slot.isOverloaded = slot.shifts.length >= 3;
+      slot.hasArterialConflict = slot.shifts.filter(function(s) { return s.category === 'Arterial Road'; }).length >= 2;
+    });
+    if (!detachedContext) shifts.forEach(function(shift) { self.revalidateShiftAssignments(shift, staffList || [], jobs.find(function(job) { return job.id === shift.jobId; }), shifts); });
+    return { slots: slots, allShifts: shifts, integrityIssues: issues, range: { start: from, end: to } };
+  },
+
   generateOperationalDigest: function(jobs, year, includeResolved, customAssignments, staffList, customPermits, customSnapshots, detachedContext) {
     var self = this;
     if (includeResolved === undefined) includeResolved = true;
@@ -694,7 +735,7 @@ window.HortOpsSchedulerEngine = {
           return;
         }
 
-        var slot = (job && job.frequencyType === 'work_pattern' && window.HortOpsPlanningRules) ? window.HortOpsPlanningRules.slotFor(slots,hist.date) : slots.find(function(s) {
+        var slot = window.HortOpsPlanningRules ? window.HortOpsPlanningRules.slotFor(slots,hist.date) : slots.find(function(s) {
           if (hist.weekNumber !== undefined && hist.weekNumber !== null) return s.weekNumber === hist.weekNumber;
           return s.saturdayDate === hist.date || s.sundayDate === hist.date || s.fridayDate === hist.date || s.mondayDate === hist.date;
         });
@@ -746,10 +787,11 @@ window.HortOpsSchedulerEngine = {
     });
 
     eligibleJobs.forEach(function(job, jobIdx) {
-      if (job.frequencyType === 'work_pattern') {
+      if (window.HortOpsRecurrence || job.frequencyType === 'work_pattern') {
         var rules = window.HortOpsPlanningRules;
         if (!rules) throw new Error('Work pattern engine unavailable');
-        rules.dates(job, year).forEach(function(date) {
+        var generatedDates = window.HortOpsRecurrence ? window.HortOpsRecurrence.dates(job, year) : rules.dates(job, year);
+        generatedDates.forEach(function(date) {
           var shiftId = job.id + '@' + date, dateKey = job.id + '_' + date;
           if (seededShiftKeys.has(shiftId) || seededShiftKeys.has(dateKey)) return;
           var slot = rules.slotFor(slots, date);
@@ -1201,6 +1243,14 @@ window.HortOpsSchedulerEngine = {
       }
     }
 
+    // Never project off-calendar records into an operational schedule. Saved
+    // audit snapshots remain untouched, including any older invalid records.
+    if (window.HortOpsRecurrence) {
+      allShifts = allShifts.filter(function(shift) {
+        return window.HortOpsRecurrence.isOperatingDate(shift.date);
+      });
+      slots.forEach(function(slot) { slot.shifts = slot.shifts.filter(function(shift) { return allShifts.indexOf(shift) !== -1; }); });
+    }
     // Calculate totals and clash flags
     slots.forEach(function(slot) {
       slot.totalShifts = slot.shifts.length;
@@ -1257,7 +1307,7 @@ window.HortOpsSchedulerEngine = {
         (j.status || '') + ':' +
         (j.startTime || '') + ':' +
         (j.durationHours || '') + ':' +
-        JSON.stringify(j.staffingSections || null) + ':' + JSON.stringify(j.workPattern || null) + ':' + JSON.stringify(j.preferredPoolTagIds || []) + ':' + JSON.stringify(j.exclusivePoolTagIds || []) + ':' + (j.exclusivePoolSource || '') + ':' + (j.frequencyType || '') + ':' +
+        JSON.stringify(j.staffingSections || null) + ':' + JSON.stringify(j.workPattern || null) + ':' + JSON.stringify(j.annualRule || null) + ':' + JSON.stringify(j.seasonalRule || null) + ':' + JSON.stringify(j.scheduleEnd || null) + ':' + JSON.stringify(j.preferredPoolTagIds || []) + ':' + JSON.stringify(j.exclusivePoolTagIds || []) + ':' + (j.exclusivePoolSource || '') + ':' + (j.frequencyType || '') + ':' +
         (j.preferredDay || '') + ':' +
         (j.intervalWeeks || '') + ':' +
         (j.anchorWeek !== undefined ? j.anchorWeek : '') + ':' +

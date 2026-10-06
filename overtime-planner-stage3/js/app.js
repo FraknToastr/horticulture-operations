@@ -832,13 +832,16 @@ window.HortOpsApp = {
 
   recomputeDigest: function() {
     var scheduler = window.HortOpsScheduler;
-    var digest = scheduler.generateOperationalDigest(
+    var range = this.state.uiState && this.state.uiState.planningRange;
+    var digest = range ? scheduler.generateRangeDigest(this.state.jobs, range.start, range.end, true,
+      this.state.customAssignments, this.state.staffList, this.state.customPermits, this.state.historicalSnapshots) : scheduler.generateOperationalDigest(
       this.state.jobs,
       this.state.currentYear || 2026,
       true,
       this.state.customAssignments,
       this.state.staffList,
-      this.state.customPermits
+      this.state.customPermits,
+      this.state.historicalSnapshots
     );
 
     this.state.slots = digest.slots;
@@ -924,6 +927,11 @@ window.HortOpsApp = {
 
   setActiveView: function(viewId) {
     this.state.activeView = viewId;
+    if (viewId === 'forward_planner' && window.HortOpsForwardPlanner) {
+      // Opening the planner always begins at the current operational week.
+      // Within an open planner session, its own navigation remains unchanged.
+      window.HortOpsForwardPlanner.startWeekInitialized = false;
+    }
     if (this.state.uiState && typeof this.state.uiState === 'object') {
       this.state.uiState.activeView = viewId;
     }
@@ -936,10 +944,28 @@ window.HortOpsApp = {
     this.state.currentYear = parsedYear;
     if (this.state.uiState && typeof this.state.uiState === 'object') {
       this.state.uiState.currentYear = parsedYear;
+      delete this.state.uiState.planningRange;
     }
     this.recomputeDigest();
     this.renderCurrentView();
     this.saveCurrentWorkspace();
+  },
+
+  setPlanningRange: function(start, end) {
+    var rules = window.HortOpsRecurrence;
+    if (!rules || !rules.isRealDate(start) || !rules.isRealDate(end) || end < start || Number(end.slice(0, 4)) - Number(start.slice(0, 4)) > 5) return { success: false, error: 'Choose an inclusive horizon of up to five years.' };
+    var ui = Object.assign({}, this.state.uiState, { planningRange: { start: start, end: end } });
+    var result = this._commitCanonicalProposal({ uiState: ui });
+    if (!result.success) return result;
+    if (window.HortOpsForwardPlanner) { window.HortOpsForwardPlanner.startWeek = 1; window.HortOpsForwardPlanner.startWeekInitialized = true; }
+    this.recomputeDigest(); this.renderCurrentView();
+    return { success: true };
+  },
+
+  applyPlanningRange: function() {
+    var start = document.getElementById('planning-range-start'), end = document.getElementById('planning-range-end');
+    var result = this.setPlanningRange(start && start.value, end && end.value);
+    if (!result.success) alert(result.error);
   },
 
   updateShiftStaff: function(shiftId, assignedStaffIds) {
@@ -1001,6 +1027,81 @@ window.HortOpsApp = {
     return { success: true, instructionsSealed: instructionsToSeal };
   },
 
+  getJobAllocationResetPreview: function(jobId, scope, state) {
+    state = state || this.state;
+    var today = window.HortOpsDateUtils && window.HortOpsDateUtils.getLocalDateKey ? window.HortOpsDateUtils.getLocalDateKey() : new Date().toISOString().slice(0, 10);
+    var all = scope === 'all';
+    var jobKey = function(key) { key = String(key || ''); return key.indexOf(jobId + '@') === 0 || key.indexOf(jobId + '_') === 0 || key.indexOf(jobId + '-w') === 0 || key.indexOf(jobId + '-oneoff-') === 0; };
+    var recordDate = function(key, item) { var value = item && (item.date || item.startDate); if (/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return value; var values = [key, item && item.sourceShiftId, item && item.startShiftId, item && item.targetShiftId]; for (var i = 0; i < values.length; i++) { var match = String(values[i] || '').match(/\d{4}-\d{2}-\d{2}/); if (match) return match[0]; } return ''; };
+    var scoped = function(key, item) { var date = recordDate(key, item); return all || (date && date >= today); };
+    var counts = { assignments: 0, permitOverrides: 0, rosteringInstructions: 0, rosteringProvenance: 0, historicalSnapshots: 0, today: today };
+    var affectedAssignments = {};
+    Object.keys(state.customAssignments || {}).forEach(function(key) { if (jobKey(key) && scoped(key) && Array.isArray(state.customAssignments[key]) && state.customAssignments[key].length) affectedAssignments[key] = true; });
+    // Retained snapshots are also an assignment fallback. Count occurrences, not
+    // both copies of the same commitment, and honour explicit vacancy overrides.
+    Object.keys(state.historicalSnapshots || {}).forEach(function(key) {
+      var item = state.historicalSnapshots[key];
+      if (!item || !(item.jobId === jobId || jobKey(key) || jobKey(item.shiftId)) || !scoped(key, item)) return;
+      var shiftId = item.shiftId || (jobId + '@' + item.date);
+      var live = state.customAssignments || {};
+      var assigned = live[shiftId] || live[jobId + '@' + item.date] || live[jobId + '_' + item.date] || item.assignedStaffIds || [];
+      if (assigned.length) affectedAssignments[shiftId] = true;
+    });
+    counts.assignments = Object.keys(affectedAssignments).length;
+    Object.keys(state.customPermits || state.permits || {}).forEach(function(key) { var item = (state.customPermits || state.permits || {})[key]; if (jobKey(key) && scoped(key, item)) counts.permitOverrides++; });
+    var instructions = (state.rostering && state.rostering.instructions) || {};
+    Object.keys(instructions).forEach(function(key) { if (instructions[key] && instructions[key].jobId === jobId && (scoped(key, instructions[key]) || instructions[key].status !== 'historical')) counts.rosteringInstructions++; });
+    Object.keys((state.rostering && state.rostering.provenance) || {}).forEach(function(key) { var item = state.rostering.provenance[key] || {}; var linked = jobKey(key) || jobKey(item.sourceShiftId) || jobKey(item.targetShiftId) || (item.instructionId && instructions[item.instructionId] && instructions[item.instructionId].jobId === jobId); if (linked && scoped(key, item)) counts.rosteringProvenance++; });
+    Object.keys(state.historicalSnapshots || {}).forEach(function(key) { var item = state.historicalSnapshots[key]; if (item && (item.jobId === jobId || jobKey(key) || jobKey(item.shiftId))) counts.historicalSnapshots++; });
+    counts.cleared = counts.assignments + counts.permitOverrides + counts.rosteringInstructions + counts.rosteringProvenance;
+    return counts;
+  },
+  resetJobAllocations: function(jobId, scope) {
+    if (scope !== 'current_and_future' && scope !== 'all') return { success: false, error: 'Invalid reset scope' };
+    if (!(this.state.jobs || []).some(function(job) { return job.id === jobId; })) return { success: false, error: 'Job not found' };
+    var counts = this.getJobAllocationResetPreview(jobId, scope, this.state), all = scope === 'all', self = this;
+    var jobKey = function(key) { key = String(key || ''); return key.indexOf(jobId + '@') === 0 || key.indexOf(jobId + '_') === 0 || key.indexOf(jobId + '-w') === 0 || key.indexOf(jobId + '-oneoff-') === 0; };
+    var recordDate = function(key, item) { var value = item && (item.date || item.startDate); if (/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return value; var values = [key, item && item.sourceShiftId, item && item.startShiftId, item && item.targetShiftId]; for (var i = 0; i < values.length; i++) { var match = String(values[i] || '').match(/\d{4}-\d{2}-\d{2}/); if (match) return match[0]; } return ''; };
+    var scoped = function(key, item) { var date = recordDate(key, item); return all || (date && date >= counts.today); };
+    var assignments = JSON.parse(JSON.stringify(this.state.customAssignments || {}));
+    var permits = JSON.parse(JSON.stringify(this.state.customPermits || this.state.permits || {}));
+    var rostering = JSON.parse(JSON.stringify(this.state.rostering || { instructions: {}, provenance: {} }));
+    rostering.instructions = rostering.instructions || {}; rostering.provenance = rostering.provenance || {};
+    Object.keys(assignments).forEach(function(key) { if (jobKey(key) && scoped(key)) delete assignments[key]; });
+    // Absence of an override means "use the saved snapshot", not "vacant".
+    // Preserve the audit record byte-for-byte and explicitly clear its live
+    // projection, including snapshot-only occurrences and legacy ID aliases.
+    Object.keys(this.state.historicalSnapshots || {}).forEach(function(key) {
+      var item = self.state.historicalSnapshots[key];
+      if (!item || !(item.jobId === jobId || jobKey(key) || jobKey(item.shiftId)) || !scoped(key, item)) return;
+      assignments[item.shiftId || (jobId + '@' + item.date)] = [];
+      assignments[jobId + '@' + item.date] = [];
+    });
+    Object.keys(permits).forEach(function(key) { if (jobKey(key) && scoped(key, permits[key])) delete permits[key]; });
+    Object.keys(rostering.instructions).forEach(function(key) {
+      var item = rostering.instructions[key];
+      if (!item || item.jobId !== jobId) return;
+      if (scoped(key, item)) { delete rostering.instructions[key]; return; }
+      // A rule starting in the past can still own future commitments. Stop it
+      // without deleting the explanation for pre-today allocations.
+      if (item.status !== 'historical') {
+        item.status = 'historical';
+        var job = self.state.jobs.find(function(j) { return j.id === jobId; });
+        var source = item.sourceShiftId || item.startShiftId;
+        var series = window.HortOpsRosteringEngine.resolveSeries(job, self.state.allShifts, item.repeatCount + 2, self.state.jobs, source);
+        var start = series.findIndex(function(s) { return s.shiftId === source; });
+        if (start >= 0) item.repeatCount = Math.max(1, series.slice(start, start + item.repeatCount).filter(function(s) { return s.date < counts.today; }).length);
+      }
+    });
+    Object.keys(rostering.provenance).forEach(function(key) { var item = rostering.provenance[key] || {}; var linked = jobKey(key) || jobKey(item.sourceShiftId) || jobKey(item.targetShiftId) || (item.instructionId && self.state.rostering && self.state.rostering.instructions && self.state.rostering.instructions[item.instructionId] && self.state.rostering.instructions[item.instructionId].jobId === jobId); if (linked && scoped(key, item)) delete rostering.provenance[key]; });
+    var commit = this._commitCanonicalProposal({ assignments: assignments, permits: permits, rostering: rostering, historicalSnapshots: this.state.historicalSnapshots });
+    if (!commit.success) return { success: false, error: commit.error || 'Workspace save failed. Reset was not applied.' };
+    this.state.customAssignments = assignments; this.state.assignments = assignments;
+    this.state.customPermits = permits; this.state.permits = permits;
+    this.state.rostering = rostering; this.state.storageStatus = commit.storageMode === 'session-only' ? 'session_only' : 'saved';
+    this.recomputeDigest(); this.renderCurrentView();
+    return { success: true, scope: scope, counts: counts, retainedSnapshots: counts.historicalSnapshots };
+  },
   getJobDependencies: function(jobId, state) {
     state = state || this.state;
     var assignmentsCount = 0;

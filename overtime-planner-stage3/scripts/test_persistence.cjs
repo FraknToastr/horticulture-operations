@@ -447,8 +447,8 @@ const annualTuesdaySchemaJson = JSON.stringify({
 });
 const annualTuesdaySchemaRes = storage.importWorkspaceJson(annualTuesdaySchemaJson);
 assert.strictEqual(annualTuesdaySchemaRes.success, false, 'Annual job with preferredDay Tuesday must be rejected');
-assert(annualTuesdaySchemaRes.error.toLowerCase().includes('unsupported preferredday'), 'Error must cite unsupported preferredDay');
-console.log('[PASS] JSON schema validation rejects annual job with unsupported preferredDay Tuesday.');
+assert(annualTuesdaySchemaRes.error.includes('Annual date requires'), 'Annual jobs without an explicit date rule must be rejected');
+console.log('[PASS] JSON schema validation rejects legacy annual month-only scheduling.');
 
 // 14. Schema Hardening: Reject Unsafe Job ID (Mandate Section 6, 15)
 const unsafeJobIdJson = JSON.stringify({

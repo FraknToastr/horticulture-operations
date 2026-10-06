@@ -15,7 +15,10 @@ window.HortOpsForwardPlannerControls = {
     var totalWeeks = ctx.totalWeeks;
     var totalActiveColumns = ctx.totalActiveColumns;
     var totalAssignedInWindowCount = ctx.totalAssignedInWindowCount;
-    var currentWeekNum = ctx.currentWeekNum;
+        var currentWeekNum = ctx.currentWeekNum;
+        var isSeasonView = self.viewMode === 'season' && !!ctx.programme;
+        var canPrevious = self.startWeek > (ctx.scopeStartWeek || 1);
+        var canNext = endWeek < (ctx.scopeEndWeek || totalWeeks);
     var icons = ctx.icons || window.HortOpsIcons;
     var esc = ctx.esc;
     var escAttr = ctx.escAttr;
@@ -88,21 +91,21 @@ window.HortOpsForwardPlannerControls = {
             'Weeks <strong style="color: var(--slate-900);">' + self.startWeek + ' - ' + endWeek + '</strong> of ' + totalWeeks + ' (' + totalActiveColumns + ' active days) • ' +
             '<strong style="color: var(--emerald-700);">' + totalAssignedInWindowCount + ' Rostered</strong>' +
           '</span>' +
-          '<div style="display: flex; align-items: center; gap: 0.25rem;">' +
-            '<button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 11px; font-weight: 700; color: var(--emerald-700);" onclick="window.HortOpsForwardPlanner.jumpToCurrentWeek()">' +
-              'Current Wk (W' + currentWeekNum + ')' +
+                    '<div style="display: ' + (isSeasonView ? 'none' : 'flex') + '; align-items: center; gap: 0.25rem;">' +
+            '<button class="btn btn-secondary" id="fp-current-week" style="padding: 0.25rem 0.5rem; font-size: 11px; font-weight: 700; color: var(--emerald-700);" onclick="window.HortOpsForwardPlanner.returnToCurrentWeek()">' +
+                'Current week (Week ' + currentWeekNum + ')' +
             '</button>' +
-            '<button class="btn btn-secondary" style="padding: 0.3rem 0.5rem;" onclick="window.HortOpsForwardPlanner.prevWeeks()"' + (self.startWeek <= 1 ? ' disabled' : '') + '>' +
+            '<button class="btn btn-secondary" style="padding: 0.3rem 0.5rem;" onclick="window.HortOpsForwardPlanner.prevWeeks()"' + (!canPrevious ? ' disabled' : '') + '>' +
               icons.render('chevronLeft', 'w-3.5 h-3.5') +
             '</button>' +
-            '<button class="btn btn-secondary" style="padding: 0.3rem 0.5rem;" onclick="window.HortOpsForwardPlanner.nextWeeks()"' + (endWeek >= totalWeeks ? ' disabled' : '') + '>' +
+            '<button class="btn btn-secondary" style="padding: 0.3rem 0.5rem;" onclick="window.HortOpsForwardPlanner.nextWeeks()"' + (!canNext ? ' disabled' : '') + '>' +
               icons.render('chevronRight', 'w-3.5 h-3.5') +
             '</button>' +
           '</div>' +
-          '<div style="display: flex; align-items: center; gap: 0.2rem;">' +
+            '<div style="display: flex; align-items: center; gap: 0.2rem;">' +
             [4, 6, 8].map(function(sz) {
               return '<button class="btn ' + (self.windowSize === sz ? 'btn-primary' : 'btn-secondary') + '" style="padding: 0.25rem 0.5rem; font-size: 11px;" onclick="window.HortOpsForwardPlanner.setWindowSize(' + sz + ')">' + sz + ' Wks</button>';
-            }).join('') +
+            }).join('') + (ctx.programme ? '<button class="btn ' + (isSeasonView ? 'btn-primary' : 'btn-secondary') + '" style="padding: 0.25rem 0.5rem; font-size: 11px; margin-left: 0.35rem;" onclick="window.HortOpsForwardPlanner.setSeasonView(' + (!isSeasonView ? 'true' : 'false') + ')" title="Recommended for Super-wide monitors">' + (isSeasonView ? 'Use week view' : 'Entire season') + ' <span style="font-weight: 500;">(Recommended for Super-wide monitors)</span></button>' : '') +
           '</div>' +
         '</div>' +
       '</div>' +

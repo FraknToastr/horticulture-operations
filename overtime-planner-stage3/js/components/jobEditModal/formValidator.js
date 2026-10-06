@@ -1,74 +1,18 @@
-// Job Edit Modal Form Validator Sub-module
-// Performs pre-save validation across recurrence rules, frequency requirements, and dates.
+// Job editor validation uses the same dates as preview, planner and rostering.
 window.HortOpsJobEditFormValidator = {
-  validate: function(formData) {
-    if (!formData || !formData.name || !formData.name.trim()) {
-      return { valid: false, message: 'Please specify a valid Job Name.' };
-    }
-
-    // P0-07, P0-09, N-P1-02: Validation by frequency type
-    if (formData.frequencyType === 'work_pattern') {
-      var patternRules = window.HortOpsPlanningRules;
-      if (!patternRules) return {valid:false,message:'Work pattern validation unavailable.'};
-      var patternCheck = patternRules.validatePattern(formData);
-      if (!patternCheck.valid) return {valid:false,message:patternCheck.error};
-    }
-    if (formData.frequencyType === 'one_off') {
-      if (!formData.targetDate) {
-        return { valid: false, message: 'Please specify an overtime date for this one-off shift.' };
-      }
-      var d = new Date(formData.targetDate + 'T12:00:00');
-      var dayOfWeek = d.getDay(); // 0 Sun, 1 Mon, 2 Tue, 3 Wed, 4 Thu, 5 Fri, 6 Sat
-      if (dayOfWeek >= 2 && dayOfWeek <= 4) {
-        return {
-          valid: false,
-          message: 'Unsupported one-off overtime date: Scheduled overtime operations occur exclusively on Friday, Saturday, Sunday, or Monday.'
-        };
-      }
-    } else if (formData.frequencyType === 'annual') {
-      if (!formData.targetMonth) {
-        formData.targetMonth = 2; // Default February
-      }
-    } else if (formData.frequencyType === 'recurring_weeks') {
-      if (!formData.anchorDate) {
-        return { valid: false, message: 'Please specify an Anchor Date (YYYY-MM-DD) for this recurring job.' };
-      }
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.anchorDate)) {
-        return { valid: false, message: 'Invalid Anchor Date format. Please use YYYY-MM-DD.' };
-      }
-
-      var anchorDt = new Date(formData.anchorDate + 'T12:00:00');
-      var anchorDayOfWeek = anchorDt.getDay(); // 0 Sun, 1 Mon, 5 Fri, 6 Sat
-      var pref = (formData.preferredDay || 'saturday').toLowerCase();
-      var expectedDayOfWeek = (pref === 'sunday') ? 0
-                            : (pref === 'monday' || pref === 'monday_post_holiday') ? 1
-                            : (pref === 'friday' || pref === 'friday_pre_holiday') ? 5
-                            : 6;
-      if (anchorDayOfWeek !== expectedDayOfWeek) {
-        var dayNames = { 0: 'Sunday', 1: 'Monday', 5: 'Friday', 6: 'Saturday' };
-        return {
-          valid: false,
-          message: 'Anchor Start Date must fall on the selected preferred overtime day (' + (formData.preferredDay || 'Saturday') + '). The selected date falls on ' + (dayNames[anchorDayOfWeek] || 'an unsupported weekday') + '.'
-        };
-      }
-
-      if (window.HortOpsDateUtils && window.HortOpsDateUtils.calculateWeekFromDate) {
-        formData.anchorWeek = window.HortOpsDateUtils.calculateWeekFromDate(formData.anchorDate);
-      }
-      if (!formData.intervalWeeks || formData.intervalWeeks < 1) {
-        formData.intervalWeeks = 4;
-      }
-    }
-
-    if (!formData.staffingSections || formData.staffingSections.teams !== false) {
-      var primary = formData.primaryTeam || formData.defaultTeam || 'Parks';
-      formData.primaryTeam = primary;
-      formData.defaultTeam = primary;
-      formData.preferredTeam = primary;
-    }
-
-    return { valid: true };
-  },
+    validate: function(formData) {
+        if (!formData || !formData.name || !formData.name.trim()) return {valid:false,message:'Please specify a valid Job Name.'};
+        if (!window.HortOpsRecurrence) return {valid:false,message:'Canonical recurrence validation unavailable.'};
+        var check = window.HortOpsRecurrence.validate(formData);
+        if (!check.valid) return {valid:false,message:check.error};
+        if (!formData.staffingSections || formData.staffingSections.teams !== false) {
+            var primary = formData.primaryTeam || formData.defaultTeam || 'Parks';
+            formData.primaryTeam = primary;
+            formData.defaultTeam = primary;
+            formData.preferredTeam = primary;
+        }
+        return {valid:true};
+    },
   // Offline17.5f: Resolves chronologically ordered occurrence dates for an instruction
   resolveInstructionOccurrences: function(job, startShiftIdOrDate, repeatCount) {
     if (!job || !startShiftIdOrDate) return [];
@@ -108,10 +52,10 @@ window.HortOpsJobEditFormValidator = {
   // Offline17.5i: Detects if proposed Job mutations alter operational occurrence generation
   doesProposedJobChangeOperationalSchedule: function(existingJob, proposedJob) {
     if (!existingJob || !proposedJob) return false;
-    var recurrenceFields = ['frequencyType', 'intervalWeeks', 'anchorDate', 'anchorWeek', 'targetDate', 'targetMonth', 'preferredDay', 'status', 'workPattern'];
+        var recurrenceFields = ['frequencyType', 'intervalWeeks', 'anchorDate', 'anchorWeek', 'targetDate', 'targetMonth', 'preferredDay', 'status', 'workPattern', 'annualRule', 'seasonalRule', 'scheduleEnd'];
     return recurrenceFields.some(function(field) {
       if (proposedJob[field] === undefined && existingJob[field] === undefined) return false;
-      if (field === 'workPattern') return JSON.stringify(proposedJob[field] || null) !== JSON.stringify(existingJob[field] || null);
+            if (['workPattern','annualRule','seasonalRule','scheduleEnd'].indexOf(field) !== -1) return JSON.stringify(proposedJob[field] || null) !== JSON.stringify(existingJob[field] || null);
       return String(proposedJob[field] || '') !== String(existingJob[field] || '');
     });
   },

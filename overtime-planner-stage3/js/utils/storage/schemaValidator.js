@@ -280,7 +280,7 @@ window.HortOpsSchemaValidator = {
       // Declaring any extension, even empty/null, always requires the real rules.
       var ownPlanning = Object.prototype.hasOwnProperty;
       var extended = ownPlanning.call(parsed, 'poolTags') || parsed.roster.some(function(person) { return ownPlanning.call(person, 'poolTagIds') || ownPlanning.call(person, 'poolTagHistory'); }) || parsed.jobs.some(function(job) {
-        return job.frequencyType === 'work_pattern' || ['workPattern','preferredPoolTagIds','exclusivePoolTagIds','exclusivePoolSource','staffingSections'].some(function(field) { return ownPlanning.call(job,field); });
+                return job && (['work_pattern','annual','seasonal'].indexOf(job.frequencyType) !== -1 || ['workPattern','annualRule','seasonalRule','scheduleEnd','preferredPoolTagIds','exclusivePoolTagIds','exclusivePoolSource','staffingSections'].some(function(field) { return ownPlanning.call(job,field); }));
       });
       if (extended) return { valid: false, error: 'Pool/pattern validation unavailable' };
     } else {
@@ -288,8 +288,12 @@ window.HortOpsSchemaValidator = {
       if (!planningCheck.valid) return planningCheck;
     }
 
-    var validDays = ['friday', 'saturday', 'sunday', 'monday', 'friday_pre_holiday', 'monday_post_holiday'];
-    var validFreqs = ['recurring_weeks', 'recurring_cadence', 'annual', 'one_off', 'work_pattern'];
+        if (parsed.uiState && parsed.uiState.planningRange) {
+            var range = parsed.uiState.planningRange;
+            if (!window.HortOpsRecurrence || !window.HortOpsRecurrence.isRealDate(range.start) || !window.HortOpsRecurrence.isRealDate(range.end) || range.start > range.end || Number(range.end.slice(0,4)) - Number(range.start.slice(0,4)) > 5) return {valid:false,error:'Invalid programming horizon.'};
+        }
+        var validDays = ['friday', 'saturday', 'sunday', 'monday', 'friday_pre_holiday', 'monday_post_holiday'];
+    var validFreqs = ['recurring_weeks', 'recurring_cadence', 'annual', 'seasonal', 'one_off', 'work_pattern'];
     var seenJobIds = new Set();
 
     for (var i = 0; i < parsed.jobs.length; i++) {
@@ -348,13 +352,7 @@ window.HortOpsSchemaValidator = {
           return { valid: false, error: 'Recurring job "' + j.name + '" anchorDate ' + j.anchorDate + ' falls on ' + (dayNames[anchorDayOfWeek] || 'unknown weekday') + ', which does not match preferredDay (' + j.preferredDay + ').' };
         }
       } else if (j.frequencyType === 'annual') {
-        if (!j.targetMonth || typeof j.targetMonth !== 'number' || j.targetMonth < 1 || j.targetMonth > 12) {
-          return { valid: false, error: 'Annual job "' + j.name + '" requires a valid targetMonth (1-12).' };
-        }
-        var validAnnualDays = ['friday', 'saturday', 'sunday', 'monday'];
-        if (j.preferredDay && validAnnualDays.indexOf(String(j.preferredDay).toLowerCase()) === -1) {
-          return { valid: false, error: 'Annual job "' + j.name + '" has unsupported preferredDay "' + j.preferredDay + '". Only Friday, Saturday, Sunday, and Monday are supported.' };
-        }
+        if (!j.annualRule) return { valid: false, error: 'Annual date requires an explicit annualRule.' };
       } else if (j.frequencyType === 'one_off') {
         if (!j.targetDate || !this.isRealYmd(j.targetDate)) {
           return { valid: false, error: 'One-off job "' + j.name + '" requires a valid Gregorian calendar targetDate (YYYY-MM-DD).' };

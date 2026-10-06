@@ -479,12 +479,22 @@ html, body {
 
 /* Forward Planner Grid Specifics */
 .planner-table-wrapper {
-  overflow: auto;
+    overflow: auto;
   max-height: calc(100vh - 146px);
   border-radius: 8px;
   border: 1px solid var(--slate-200);
   background: #ffffff;
   position: relative;
+}
+.planner-table-wrapper.compact-week-view { overflow-x: hidden; }
+.planner-table-wrapper.compact-week-view .planner-table { width: 100%; min-width: 100%; }
+.planner-table-wrapper.compact-week-view .planner-table th:not(.sticky-hierarchy-col),
+.planner-table-wrapper.compact-week-view .planner-table td:not(.sticky-hierarchy-col) { min-width: 0 !important; }
+/* The whole-season view alone scrolls horizontally; preserve its staff context. */
+.planner-table-wrapper.season-view .sticky-hierarchy-col {
+    position: sticky;
+    left: 0;
+    z-index: 30;
 }
 
 @media (max-width: 1536px) {
@@ -661,13 +671,19 @@ tr.row-selected > td:last-child {
 
 /* Vacancy Row in Planner Grid */
 tr.vacancy-row {
-  background-color: rgba(254, 243, 199, 0.15);
-  border-bottom: 1px solid rgba(252, 211, 77, 0.7);
+ background-color: rgba(254, 243, 199, 0.15);
+ border-bottom: 1px solid rgba(252, 211, 77, 0.7);
+}
+
+/* Keep the vacancy identity card level with the action cards when a day cell
+   is taller (for example, when it includes candidate preview controls). */
+tr.vacancy-row > td {
+  vertical-align: top !important;
 }
 
 tr.vacancy-row td.sticky-hierarchy-col {
-  background-color: #ffffff !important;
-  border-right: 1px solid var(--slate-200);
+ background-color: #ffffff !important;
+ border-right: 1px solid var(--slate-200);
 }
 
 .unallocated-slot-card {
@@ -904,6 +920,67 @@ body.modal-scroll-locked {
   padding: 1px 4px;
 }
 
+/* Navigation and period selection have separate, bounded layout regions. */
+.app-header { padding:0; }
+.header-container { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:20px; padding:10px 24px; }
+.brand-area { min-width:0; }
+.nav-tabs { justify-self:center; max-width:100%; flex-wrap:wrap; justify-content:center; }
+.header-actions { justify-self:end; flex-wrap:wrap; }
+.programme-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:8px 24px; background:var(--slate-50); color:var(--slate-700); border-top:1px solid var(--emerald-900); }
+.programme-year { display:flex; align-items:center; gap:8px; }
+.programme-toolbar label { color:var(--slate-600); font-size:12px; font-weight:600; white-space:nowrap; }
+.programme-toolbar .year-select { width:96px; height:32px; padding:4px 8px; background:white; color:var(--slate-800); border:1px solid var(--slate-300); }
+.planning-range-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.programme-toolbar-title { font-size:12px; font-weight:700; margin-right:4px; }
+.planning-range-controls input { width:142px; height:32px; font:inherit; font-size:12px; color:var(--slate-800); border:1px solid var(--slate-300); border-radius:5px; padding:4px 8px; background:white; }
+.planning-range-controls .btn { min-height:32px; font-size:12px; padding:5px 12px; white-space:nowrap; }
+.programme-toolbar input:focus-visible, .programme-toolbar select:focus-visible { outline:2px solid var(--emerald-600); outline-offset:2px; }
+@media (max-width:1500px) {
+  .header-container { grid-template-columns:minmax(0,1fr) auto; gap:10px 16px; }
+  .header-container .nav-tabs { grid-column:1 / -1; grid-row:2; justify-self:stretch; }
+}
+@media (max-width:760px) {
+  .header-container { padding:12px; gap:10px; }
+  .brand-title { font-size:14px; }
+  .brand-subtitle { font-size:9px; }
+  .brand-logo { display:none; }
+  .header-actions { display:grid; grid-template-columns:repeat(4,32px); gap:4px; }
+  .header-health-pill { grid-column:1 / -1; justify-self:end; }
+  .programme-toolbar { padding:8px 12px; }
+  .planning-range-controls { gap:6px; }
+  .programme-toolbar-title { width:100%; }
+}
+.recurrence-fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+.recurrence-fields label { display:flex; flex-direction:column; gap:5px; font-size:12px; font-weight:700; }
+.recurrence-days { display:flex; gap:12px; flex-wrap:wrap; padding:10px 0; }
+.recurrence-days label { font-size:12px; }
+.recurrence-editor { border:1px solid var(--slate-200); border-radius:6px; padding:12px; background:var(--slate-50); }
+.recurrence-editor p { font-size:12px; color:var(--slate-600); line-height:1.5; }
+.recurrence-preview { display:block; font-size:12px; background:white; border:1px solid var(--slate-200); padding:10px; margin-top:12px; line-height:1.7; overflow-wrap:anywhere; }
+.recurrence-date-preview-heading { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:10px; color:var(--slate-800); font-size:12px; font-weight:800; }
+.recurrence-date-preview-heading span { color:var(--slate-500); font-size:11px; font-weight:600; }
+.recurrence-date-calendar-grid { display:grid; grid-template-columns:repeat(4,minmax(132px,1fr)); gap:10px; }
+.recurrence-calendar-month { min-width:0; padding:8px; border:1px solid var(--slate-200); border-radius:5px; background:var(--slate-50); }
+.recurrence-calendar-month h4 { margin:0 0 6px; color:var(--slate-700); font-size:11px; font-weight:800; text-align:center; }
+.recurrence-calendar-weekdays,.recurrence-calendar-days { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); text-align:center; }
+.recurrence-calendar-weekdays { margin-bottom:3px; color:var(--slate-400); font-size:8px; font-weight:800; text-transform:uppercase; }
+.recurrence-calendar-days { row-gap:2px; }
+.recurrence-calendar-day { display:grid; place-items:center; width:20px; height:20px; justify-self:center; border-radius:50%; color:var(--slate-700); font-size:10px; font-weight:600; }
+.recurrence-calendar-day { border:0; background:transparent; font-family:inherit; padding:0; }
+.recurrence-calendar-day.is-scheduled { background:var(--emerald-700); color:#fff; box-shadow:0 0 0 2px var(--emerald-100); font-weight:800; }
+.recurrence-calendar-day.is-public-holiday { background:var(--amber-600); box-shadow:0 0 0 2px var(--amber-100); }
+.recurrence-calendar-day.is-exempt { background:var(--rose-700); box-shadow:0 0 0 2px var(--rose-100); }
+.recurrence-calendar-day.is-exemption-selectable { cursor:pointer; outline:1px dashed var(--rose-700); outline-offset:1px; }
+.recurrence-preview-slider { display:inline-flex; padding:2px; border:1px solid var(--slate-300); border-radius:999px; background:var(--slate-100); }
+.recurrence-preview-slider button { border:0; border-radius:999px; background:transparent; color:var(--slate-600); padding:3px 9px; font:inherit; font-size:11px; font-weight:700; cursor:pointer; }
+.recurrence-preview-slider button.is-active { background:#fff; color:var(--emerald-800); box-shadow:0 1px 2px rgba(15,23,42,.12); }
+.recurrence-exemption-list { margin-top:10px; padding-top:9px; border-top:1px solid var(--slate-200); }
+.recurrence-exemption-list h4 { margin:0 0 6px; color:var(--slate-700); font-size:11px; font-weight:800; }
+.recurrence-exemption-list > div { display:flex; flex-wrap:wrap; gap:5px; }
+.recurrence-exemption-chip { border:1px solid var(--rose-100); border-radius:999px; background:var(--rose-50); color:var(--rose-700); padding:3px 7px; font:inherit; font-size:10px; font-weight:700; cursor:pointer; }
+.recurrence-date-preview-empty { color:var(--slate-500); font-size:12px; }
+@media (max-width:900px) { .recurrence-date-calendar-grid { grid-template-columns:repeat(3,minmax(132px,1fr)); } }
+@media (max-width:620px) { .recurrence-date-calendar-grid { grid-template-columns:repeat(2,minmax(132px,1fr)); } }
 .repeat-count-select:disabled {
   background: var(--slate-100);
   color: var(--slate-400);
@@ -1329,6 +1406,204 @@ body.modal-scroll-locked {
   .allocator-columns .allocated-assignment-col select { min-width: 0; max-width: 100%; }
 }
 
+/* Work-pattern controls keep recurrence choices visible with the core job inputs. */
+.work-pattern-editor { border: 1px solid var(--slate-200); border-radius: 8px; padding: 1rem; background: var(--slate-50); display: grid; gap: .85rem; }
+.work-pattern-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.work-pattern-heading h3 { margin: 0; color: var(--slate-900); font-size: 1rem; }
+.work-pattern-heading p { margin: .2rem 0 0; color: var(--slate-600); font-size: .8rem; }
+.work-pattern-kicker { color: var(--emerald-700); font-size: .7rem !important; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.work-pattern-summary { max-width: 42%; padding: .45rem .6rem; border-radius: 999px; background: var(--emerald-100); color: var(--emerald-800); font-size: .75rem; font-weight: 700; text-align: right; }
+.work-pattern-mode-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.work-pattern-select { display: grid; gap: .3rem; max-width: 360px; color: var(--slate-700); font-size: .75rem; font-weight: 700; }
+.work-pattern-select small { color: var(--slate-500); font-size: .72rem; font-weight: 500; }
+.work-pattern-mode { display: flex; gap: .55rem; min-height: 72px; padding: .7rem; border: 1px solid var(--slate-300); border-radius: 7px; background: #fff; cursor: pointer; }
+.work-pattern-mode.is-selected { border-color: var(--emerald-600); box-shadow: 0 0 0 2px var(--emerald-100); }
+.work-pattern-mode input { margin-top: .18rem; }
+.work-pattern-mode strong, .work-pattern-mode small { display: block; }
+.work-pattern-mode small { margin-top: .2rem; color: var(--slate-600); font-size: .74rem; line-height: 1.35; }
+.work-pattern-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; align-items: end; }
+.work-pattern-fields > label, .work-pattern-exclusions { display: grid; gap: .3rem; color: var(--slate-700); font-size: .75rem; font-weight: 700; }
+.work-pattern-checkbox { grid-column: span 2; display: flex !important; align-items: center; gap: .45rem; min-height: 38px; font-weight: 600 !important; }
+.work-pattern-days { display: flex; flex-wrap: wrap; gap: .35rem; min-height: 30px; }
+.work-pattern-days > span { padding: .3rem .5rem; border-radius: 5px; background: var(--slate-200); color: var(--slate-700); font-size: .72rem; font-weight: 700; }
+.work-pattern-preview { display: grid; grid-template-columns: minmax(150px, .8fr) minmax(0, 2fr); gap: .75rem; align-items: center; padding: .7rem; border-radius: 6px; background: #fff; border: 1px solid var(--slate-200); }
+.work-pattern-preview strong, .work-pattern-preview span { display: block; }
+.work-pattern-preview span, .work-pattern-helper, .work-pattern-optional { color: var(--slate-500); font-size: .72rem; font-weight: 500; }
+.work-pattern-date-list { display: flex; flex-wrap: wrap; gap: .35rem; }
+.work-pattern-date { padding: .28rem .42rem; border-radius: 4px; background: var(--slate-100); color: var(--slate-700); font-size: .72rem; }
+.work-pattern-empty { color: var(--slate-500); font-size: .75rem; }
+.work-pattern-helper { margin: 0; line-height: 1.45; }
+.assignment-continuity-guide { display: block; margin: 0 0 .2rem; color: var(--slate-500); font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+
+/* Viewport-owned workspace and registry table shells. */
+body {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+#header-mount { flex: 0 0 auto; }
+.main-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* The planner owns the remaining space in the shared scroll shell.  Its
+   matrix scrolls inside this area, rather than extending past the viewport. */
+.main-wrapper:has(.forward-planner-workspace) {
+  display: flex;
+  overflow: hidden;
+}
+
+.main-wrapper:has(.forward-planner-workspace) #content-mount,
+.forward-planner-workspace {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.forward-planner-workspace > .recurrence-preview {
+  flex: 0 0 auto;
+}
+
+/* Keep the planner's controls at their designed height; only the matrix may
+   consume or release the remaining vertical space. */
+.forward-planner-workspace > .forward-planner-controls {
+  flex: 0 0 auto;
+  min-height: max-content;
+}
+
+.forward-planner-workspace > .planner-table-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+}
+
+:root { --registry-control-height: 34px; --registry-frame-gap: 8px; }
+.registry-table-scrollport {
+    max-width: 100%;
+    overflow: auto;
+    overscroll-behavior: contain;
+    max-height: calc(100vh - 265px);
+    min-height: 180px;
+}
+.registry-table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: var(--registry-frame-gap);
+    font-size: 13px;
+}
+.registry-table th,
+.registry-table td {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    vertical-align: middle;
+}
+.registry-table th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    color: var(--slate-700);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+}
+.registry-table th:not(.registry-action-cell) {
+    background: var(--slate-50);
+    box-shadow: 0 0 0 1px var(--slate-200);
+    border-radius: 5px;
+    padding: 9px 10px;
+}
+.registry-table td:not(.registry-action-cell) {
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--slate-200);
+    border-radius: 5px;
+    padding: 8px 10px;
+    min-height: var(--registry-control-height);
+}
+.registry-table tr:hover td:not(.registry-action-cell) {
+    box-shadow: 0 0 0 1px var(--emerald-300);
+}
+.registry-table .badge {
+    min-height: var(--registry-control-height);
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+}
+.registry-table-scrollport .form-input,
+.registry-table-scrollport .form-select,
+.registry-table-scrollport .btn,
+.registry-table-scrollport button,
+.panel-header .form-input,
+.panel-header .form-select {
+    min-height: var(--registry-control-height);
+    box-sizing: border-box;
+}
+.workforce-registry-table th:first-child,
+.workforce-registry-table td:first-child { min-width: 210px; }
+.workforce-registry-table th:nth-child(2),
+.workforce-registry-table td:nth-child(2) { min-width: 135px; }
+.workforce-registry-table th:nth-child(3),
+.workforce-registry-table td:nth-child(3),
+.workforce-registry-table th:nth-child(4),
+.workforce-registry-table td:nth-child(4) { min-width: 130px; }
+.workforce-registry-table th:nth-child(5),
+.workforce-registry-table td:nth-child(5) { min-width: 130px; }
+.workforce-registry-table th:nth-child(6),
+.workforce-registry-table td:nth-child(6) { min-width: 170px; }
+.workforce-registry-table .registry-action-cell {
+    position: sticky;
+    right: 0;
+    z-index: 4;
+    background: #fff;
+    padding-inline: var(--registry-frame-gap);
+    min-width: 246px;
+}
+.workforce-registry-table thead .registry-action-cell {
+    z-index: 7;
+    padding-block: 9px;
+    color: var(--slate-700);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+}
+.workforce-registry-table tbody .registry-action-cell { padding-block: 8px; }
+.workforce-registry-table .registry-action-cell > div { min-height: var(--registry-control-height); }
+.workforce-registry-table .workforce-action-button.has-action-data {
+  border-color: var(--emerald-700) !important;
+  box-shadow: 0 0 0 1px var(--emerald-700), 0 1px 2px rgba(4, 120, 87, 0.16);
+}
+.workforce-registry-table .workforce-action-button.has-action-data:hover {
+  border-color: var(--emerald-800) !important;
+  box-shadow: 0 0 0 1px var(--emerald-800), 0 2px 4px rgba(4, 120, 87, 0.2);
+}
+/* The accordion summary already names its staff set; the nested renderer's
+   one-group heading is therefore redundant. */
+.staff-allocator-priority-section [data-allocator-group] > div:first-child {
+  display: none;
+}
+.staff-allocator-priority-section [data-allocator-group] {
+  margin-top: 0 !important;
+  border-top: 0 !important;
+  padding-top: 0 !important;
+}
+.job-registry-table { min-width: 1080px; }
+.job-registry-table th { background: var(--slate-50); box-shadow: 0 0 0 1px var(--slate-200); border-radius: 5px; padding: 9px 10px; }
+.job-registry-table td { background: #fff; box-shadow: 0 0 0 1px var(--slate-200); border-radius: 5px; padding: 8px 10px; }
+@media (max-width: 760px) {
+    .main-wrapper { padding-inline: 8px; }
+    .registry-table-scrollport { max-height: calc(100vh - 290px); }
+    .workforce-registry-table .registry-action-cell { min-width: 230px; }
+}
+@media (max-width: 760px) { .work-pattern-heading, .work-pattern-preview { grid-template-columns: 1fr; display: grid; } .work-pattern-summary { max-width: none; text-align: left; justify-self: start; } .work-pattern-mode-grid, .work-pattern-fields { grid-template-columns: 1fr; } .work-pattern-checkbox { grid-column: auto; } }
+
 </style>
   <style data-source="css/candidate-preview.css">
 /* === INLINED: css/candidate-preview.css === */
@@ -1458,6 +1733,7 @@ body.modal-scroll-locked {
   <div id="staff-exemption-modal-root"></div>
   <div id="warnings-modal-root"></div>
   <div id="reset-workspace-modal-root"></div>
+  <div id="job-reset-modal-root"></div>
   <div id="storage-health-modal-root"></div>
   <div id="quarantine-viewer-modal-root"></div>
   <div id="staff-qualification-modal-root"></div>
@@ -2975,12 +3251,186 @@ if (typeof require !== 'undefined') {
 })();
 
 </script>
+  <script data-source="js/utils/recurrence.js">
+/* === INLINED: js/utils/recurrence.js === */
+// Canonical overtime dates. All comparisons and interval arithmetic use local
+// calendar keys and UTC day arithmetic, never a planner's display week number.
+(function () {
+  'use strict';
+  if (typeof window === 'undefined') global.window = global;
+  var DAY = 86400000;
+  var types = ['one_off', 'recurring_weeks', 'recurring_cadence', 'annual', 'seasonal', 'work_pattern'];
+  function fail(error) { return { valid: false, error: error }; }
+  function real(value) {
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    var date = new Date(value + 'T00:00:00Z');
+    return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  }
+  function time(date) { return Date.parse(date + 'T00:00:00Z'); }
+  function key(date) { return date.toISOString().slice(0, 10); }
+  function weekday(date) { return new Date(date + 'T00:00:00Z').getUTCDay(); }
+  function integer(value, min, max) { return Number.isInteger(value) && value >= min && value <= max; }
+  function md(value) { return typeof value === 'string' && /^\d{2}-\d{2}$/.test(value) && real('2000-' + value); }
+  function holiday(date) {
+    if (!window.HortOpsData || typeof window.HortOpsData.getPublicHolidaysForYear !== 'function') throw new Error('The South Australian public-holiday calendar is unavailable.');
+    return window.HortOpsData.getPublicHolidaysForYear(Number(date.slice(0, 4))).find(function (h) { return h.date === date && !h.isPartDay && !h.isPartialDay; });
+  }
+  function operating(date) {
+    if (!real(date)) return false;
+    var day = weekday(date);
+    return day === 0 || day === 6 || ((day === 1 || day === 5) && !!holiday(date));
+  }
+  function preferred(day) { return { saturday: 6, sunday: 0, friday: 5, monday: 1, friday_pre_holiday: 5, monday_post_holiday: 1 }[day || 'saturday']; }
+  function validateEnd(job) {
+    var end = job.scheduleEnd;
+    if (end === undefined) return { valid: true };
+    if (!end || typeof end !== 'object' || Array.isArray(end) || ['never', 'on_date', 'after_count'].indexOf(end.mode) < 0) return fail('Choose a valid series end condition.');
+    if (end.mode === 'on_date' && !real(end.date)) return fail('Choose a valid series end date.');
+    if (end.mode === 'after_count' && !integer(end.count, 1, 10000)) return fail('Occurrence count must be a whole number from 1 to 10000.');
+        var start;
+        if (job.frequencyType === 'one_off') start = job.targetDate;
+        else if (job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence') start = job.anchorDate;
+        else if (job.frequencyType === 'work_pattern') start = job.workPattern && job.workPattern.startDate;
+        else if (job.frequencyType === 'annual') start = job.annualRule && job.annualRule.startYear + '-01-01';
+        else if (job.frequencyType === 'seasonal') start = job.seasonalRule && job.seasonalRule.firstYear + '-' + job.seasonalRule.start;
+    if (end.mode === 'on_date' && start && end.date < start) return fail('The series end cannot precede its start.');
+    return { valid: true };
+  }
+    function validate(job) {
+        try { return validateRules(job); }
+        catch (error) { return fail('Recurrence validation unavailable: ' + error.message); }
+    }
+    function validateRules(job) {
+    if (!job || types.indexOf(job.frequencyType) < 0) return fail('Choose a supported schedule type.');
+    var check = validateEnd(job); if (!check.valid) return check;
+    if (job.frequencyType === 'one_off') {
+            if (!real(job.targetDate)) return fail('A valid Gregorian calendar targetDate (YYYY-MM-DD) is required.');
+            if (!operating(job.targetDate)) return fail('One-off targetDate has unsupported weekday: overtime is allowed on Saturday/Sunday, or public-holiday Friday/Monday only.');
+    }
+    if (job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence') {
+            if (!real(job.anchorDate)) return fail('A valid Gregorian calendar YYYY-MM-DD anchorDate is required.');
+            if (!integer(job.intervalWeeks, 1, 520)) return fail('An integer intervalWeeks >= 1 and <= 520 is required.');
+            if (preferred(job.preferredDay) === undefined) return fail('Recurring job has unsupported preferredDay.');
+            if (weekday(job.anchorDate) !== preferred(job.preferredDay)) return fail('anchorDate does not match preferredDay.');
+      if (!operating(job.anchorDate)) return fail('A Friday/Monday start must be a recognised public holiday.');
+    }
+    if (job.frequencyType === 'annual') {
+      var rule = job.annualRule;
+      if (!rule || !integer(rule.startYear, 2020, 2100) || !integer(rule.month, 1, 12)) return fail('Annual date requires an explicit first year, month and date rule.');
+      if (rule.kind === 'fixed') {
+        if (!integer(rule.day, 1, 31) || !real('2000-' + String(rule.month).padStart(2, '0') + '-' + String(rule.day).padStart(2, '0'))) return fail('Choose a real annual month/day.');
+      } else if (rule.kind === 'weekday') {
+        if ([0, 6].indexOf(rule.weekday) < 0 || [1, 2, 3, 4, 5, -1].indexOf(rule.ordinal) < 0) return fail('Choose the first–fifth or last Saturday/Sunday.');
+      } else return fail('Choose exact date or weekday-in-month for the annual date.');
+    }
+    if (job.frequencyType === 'seasonal') {
+      var season = job.seasonalRule;
+      if (!season || !md(season.start) || !md(season.end) || !md(season.anchor) || !integer(season.firstYear, 2020, 2100)) return fail('Specify season start, end, interval anchor and first season year.');
+      if (!integer(season.intervalWeeks, 1, 52)) return fail('Seasonal interval must be a whole number from 1 to 52 weeks.');
+      if (!Array.isArray(season.days) || !season.days.length || new Set(season.days).size !== season.days.length || !season.days.every(function (d) { return [0, 1, 5, 6].indexOf(d) >= 0; })) return fail('Select seasonal operating days.');
+      if (typeof season.includePublicHolidays !== 'boolean') return fail('Choose whether to include public-holiday Friday/Monday dates.');
+      if (season.end >= season.start ? season.anchor < season.start || season.anchor > season.end : season.anchor < season.start && season.anchor > season.end) return fail('The interval anchor must fall inside the season.');
+    }
+    if (job.frequencyType === 'work_pattern') {
+      var pattern = job.workPattern;
+      if (!pattern || !real(pattern.startDate) || (pattern.endDate !== undefined && !real(pattern.endDate)) || (pattern.endDate && pattern.endDate < pattern.startDate)) return fail('Choose valid pattern start/end dates.');
+      if (['weekly', 'run'].indexOf(pattern.mode) < 0 || typeof pattern.includePublicHolidays !== 'boolean') return fail('Choose a valid multi-day pattern.');
+      if (!Array.isArray(pattern.excludedDates) || new Set(pattern.excludedDates).size !== pattern.excludedDates.length || !pattern.excludedDates.every(real)) return fail('Excluded dates must be unique valid dates.');
+      if (pattern.mode === 'run') {
+        if (!integer(pattern.runLength, 1, 4)) return fail('A consecutive run must contain one to four calendar days.');
+        for (var index = 0; index < pattern.runLength; index++) if (!operating(key(new Date(time(pattern.startDate) + index * DAY)))) return fail('Every day of a consecutive run must be Saturday/Sunday or a public-holiday Friday/Monday.');
+      } else {
+        if (!Array.isArray(pattern.days) || new Set(pattern.days).size !== pattern.days.length || !pattern.days.every(function (d) { return [0, 1, 5, 6].indexOf(d) >= 0; }) || (!pattern.days.length && !pattern.includePublicHolidays)) return fail('Choose weekend days or public-holiday Friday/Monday dates.');
+        if (pattern.intervalWeeks !== undefined && !integer(pattern.intervalWeeks, 1, 52)) return fail('Pattern interval must be a whole number from 1 to 52 weeks.');
+      }
+    }
+    return { valid: true };
+  }
+  function annualDate(rule, year) {
+    var month = String(rule.month).padStart(2, '0');
+    if (rule.kind === 'fixed') return year + '-' + month + '-' + String(rule.day).padStart(2, '0');
+    var days = [];
+    for (var day = 1; day <= 31; day++) {
+      var date = year + '-' + month + '-' + String(day).padStart(2, '0');
+      if (real(date) && weekday(date) === rule.weekday) days.push(date);
+    }
+    return rule.ordinal === -1 ? days[days.length - 1] : days[rule.ordinal - 1];
+  }
+  function windowFor(rule, year) {
+    var crosses = rule.end < rule.start;
+    return { start: year + '-' + rule.start, end: (year + (crosses ? 1 : 0)) + '-' + rule.end,
+      anchor: (year + (crosses && rule.anchor < rule.start ? 1 : 0)) + '-' + rule.anchor };
+  }
+  function weeklyMatch(date, anchor, interval, days, includeHolidays) {
+    if (date < anchor) return false;
+    var anchorMonday = time(anchor) - ((weekday(anchor) + 6) % 7) * DAY;
+    var week = Math.floor((time(date) - anchorMonday) / (7 * DAY));
+    return week % interval === 0 && (days.indexOf(weekday(date)) >= 0 || (includeHolidays && !!holiday(date)));
+  }
+  function datesInRange(job, from, to) {
+    if (!real(from) || !real(to) || to < from) throw new Error('Choose a valid inclusive scheduling range.');
+    if (!validate(job).valid) return [];
+    var results = [], end = job.scheduleEnd || { mode: 'never' };
+    var exclusions = new Set(job.excludedDates || (job.workPattern && job.workPattern.excludedDates) || []);
+    if (end.mode === 'on_date') to = to < end.date ? to : end.date;
+    if (to < from) return [];
+    function emit(date) { if (date && date >= from && date <= to && !exclusions.has(date)) results.push(date); }
+    function collect(start, finish, match) {
+      if (finish > to) finish = to;
+      var count = 0;
+      // Counts run from the series/season origin, including occurrences outside
+      // the displayed horizon. A display or New Year never resets the counter.
+      var begin = end.mode === 'after_count' ? start : (start > from ? start : from);
+      for (var stamp = time(begin); stamp <= time(finish); stamp += DAY) {
+        var date = key(new Date(stamp));
+        if (!match(date) || !operating(date)) continue;
+        count++;
+        if (end.mode === 'after_count' && count > end.count) break;
+        emit(date);
+      }
+    }
+    if (job.frequencyType === 'one_off') emit(job.targetDate);
+    else if (job.frequencyType === 'annual') {
+      var rule = job.annualRule, count = 0;
+      for (var year = rule.startYear; year <= Number(to.slice(0, 4)); year++) {
+        var annual = annualDate(rule, year);
+        if (!annual || !operating(annual)) continue;
+        if (end.mode === 'after_count' && ++count > end.count) break;
+        emit(annual);
+      }
+    } else if (job.frequencyType === 'seasonal') {
+      var season = job.seasonalRule;
+      for (var sy = Math.max(season.firstYear, Number(from.slice(0, 4)) - 1); sy <= Number(to.slice(0, 4)); sy++) {
+        var bounds = windowFor(season, sy);
+        if (!real(bounds.start) || !real(bounds.end) || !real(bounds.anchor)) continue;
+        collect(bounds.start, bounds.end, function (date) { return weeklyMatch(date, bounds.anchor, season.intervalWeeks, season.days, season.includePublicHolidays); });
+      }
+    } else if (job.frequencyType === 'work_pattern') {
+      var pattern = job.workPattern, excluded = new Set(pattern.excludedDates);
+      collect(pattern.startDate, pattern.endDate || to, function (date) {
+        if (excluded.has(date)) return false;
+        return pattern.mode === 'run' ? time(date) - time(pattern.startDate) < pattern.runLength * DAY :
+          weeklyMatch(date, pattern.startDate, pattern.intervalWeeks || 1, pattern.days, pattern.includePublicHolidays);
+      });
+    } else {
+      collect(job.anchorDate, to, function (date) { return weekday(date) === preferred(job.preferredDay) && (time(date) - time(job.anchorDate)) % (job.intervalWeeks * 7 * DAY) === 0; });
+    }
+    return Array.from(new Set(results)).sort();
+  }
+  window.HortOpsRecurrence = { types: types, validate: validate, isRealDate: real,
+    isOperatingDate: operating, holiday: holiday, datesInRange: datesInRange,
+    dates: function (job, year) { return datesInRange(job, year + '-01-01', year + '-12-31'); },
+    seasonWindow: windowFor, annualDate: annualDate };
+}());
+
+</script>
   <script data-source="js/utils/planningRules.js">
 /* === INLINED: js/utils/planningRules.js === */
 // Overtime-owned pool and occurrence contracts. No allocation algorithm lives here.
 (function () {
     'use strict';
     if (typeof window === 'undefined') global.window = global;
+    if (!window.HortOpsRecurrence && typeof require !== 'undefined') require('./recurrence.js');
     var weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     function fail(error) { return {valid:false,error:error}; }
     function ymd(value) {
@@ -3021,6 +3471,7 @@ if (typeof require !== 'undefined') {
     }
     function validatePattern(job) {
         if (job.frequencyType !== 'work_pattern') return {valid:true};
+        if (window.HortOpsRecurrence) return window.HortOpsRecurrence.validate(job);
         var p = job.workPattern;
         if (!p || typeof p !== 'object' || Array.isArray(p)) return fail('Work pattern is required.');
         if (!ymd(p.startDate) || (p.endDate !== undefined && !ymd(p.endDate)) || (p.endDate && p.endDate < p.startDate)) return fail('Work pattern requires valid start/end dates.');
@@ -3054,6 +3505,11 @@ if (typeof require !== 'undefined') {
             }
         }
         for (var job of data.jobs || []) {
+            if (!job || typeof job !== 'object' || Array.isArray(job)) return fail('Invalid job record.');
+            if (window.HortOpsRecurrence) {
+                var recurrenceCheck = window.HortOpsRecurrence.validate(job);
+                if (!recurrenceCheck.valid) return recurrenceCheck;
+            }
             if (job.staffingSections !== undefined) {
                 var sections = job.staffingSections;
                 if (!sections || typeof sections !== 'object' || Array.isArray(sections) ||
@@ -3070,6 +3526,7 @@ if (typeof require !== 'undefined') {
         return {valid:true};
     }
     function dates(job, year) {
+        if (window.HortOpsRecurrence) return window.HortOpsRecurrence.dates(job, year);
         if (!validatePattern(job).valid || job.frequencyType !== 'work_pattern') return [];
         var p = job.workPattern, excluded = new Set(p.excludedDates), holidays = new Set(
             (window.HortOpsData.getPublicHolidaysForYear(year) || []).map(function(h) { return h.date; }));
@@ -3436,7 +3893,7 @@ window.HortOpsSchemaValidator = {
       // Declaring any extension, even empty/null, always requires the real rules.
       var ownPlanning = Object.prototype.hasOwnProperty;
       var extended = ownPlanning.call(parsed, 'poolTags') || parsed.roster.some(function(person) { return ownPlanning.call(person, 'poolTagIds') || ownPlanning.call(person, 'poolTagHistory'); }) || parsed.jobs.some(function(job) {
-        return job.frequencyType === 'work_pattern' || ['workPattern','preferredPoolTagIds','exclusivePoolTagIds','exclusivePoolSource','staffingSections'].some(function(field) { return ownPlanning.call(job,field); });
+                return job && (['work_pattern','annual','seasonal'].indexOf(job.frequencyType) !== -1 || ['workPattern','annualRule','seasonalRule','scheduleEnd','preferredPoolTagIds','exclusivePoolTagIds','exclusivePoolSource','staffingSections'].some(function(field) { return ownPlanning.call(job,field); }));
       });
       if (extended) return { valid: false, error: 'Pool/pattern validation unavailable' };
     } else {
@@ -3444,8 +3901,12 @@ window.HortOpsSchemaValidator = {
       if (!planningCheck.valid) return planningCheck;
     }
 
-    var validDays = ['friday', 'saturday', 'sunday', 'monday', 'friday_pre_holiday', 'monday_post_holiday'];
-    var validFreqs = ['recurring_weeks', 'recurring_cadence', 'annual', 'one_off', 'work_pattern'];
+        if (parsed.uiState && parsed.uiState.planningRange) {
+            var range = parsed.uiState.planningRange;
+            if (!window.HortOpsRecurrence || !window.HortOpsRecurrence.isRealDate(range.start) || !window.HortOpsRecurrence.isRealDate(range.end) || range.start > range.end || Number(range.end.slice(0,4)) - Number(range.start.slice(0,4)) > 5) return {valid:false,error:'Invalid programming horizon.'};
+        }
+        var validDays = ['friday', 'saturday', 'sunday', 'monday', 'friday_pre_holiday', 'monday_post_holiday'];
+    var validFreqs = ['recurring_weeks', 'recurring_cadence', 'annual', 'seasonal', 'one_off', 'work_pattern'];
     var seenJobIds = new Set();
 
     for (var i = 0; i < parsed.jobs.length; i++) {
@@ -3504,13 +3965,7 @@ window.HortOpsSchemaValidator = {
           return { valid: false, error: 'Recurring job "' + j.name + '" anchorDate ' + j.anchorDate + ' falls on ' + (dayNames[anchorDayOfWeek] || 'unknown weekday') + ', which does not match preferredDay (' + j.preferredDay + ').' };
         }
       } else if (j.frequencyType === 'annual') {
-        if (!j.targetMonth || typeof j.targetMonth !== 'number' || j.targetMonth < 1 || j.targetMonth > 12) {
-          return { valid: false, error: 'Annual job "' + j.name + '" requires a valid targetMonth (1-12).' };
-        }
-        var validAnnualDays = ['friday', 'saturday', 'sunday', 'monday'];
-        if (j.preferredDay && validAnnualDays.indexOf(String(j.preferredDay).toLowerCase()) === -1) {
-          return { valid: false, error: 'Annual job "' + j.name + '" has unsupported preferredDay "' + j.preferredDay + '". Only Friday, Saturday, Sunday, and Monday are supported.' };
-        }
+        if (!j.annualRule) return { valid: false, error: 'Annual date requires an explicit annualRule.' };
       } else if (j.frequencyType === 'one_off') {
         if (!j.targetDate || !this.isRealYmd(j.targetDate)) {
           return { valid: false, error: 'One-off job "' + j.name + '" requires a valid Gregorian calendar targetDate (YYYY-MM-DD).' };
@@ -7917,6 +8372,20 @@ window.HortOpsRosteringEngine = {
       }
     });
 
+    // A range view can end in the middle of a year. Fill the represented years
+    // before looking ahead so continuation never jumps from February to the
+    // following January, and partial views yield the same occurrence sequence.
+    if (window.HortOpsScheduler && sourceShiftId && sourceShiftId.indexOf('@') !== -1 && window.HortOpsApp && window.HortOpsApp.state && window.HortOpsApp.state.uiState && window.HortOpsApp.state.uiState.planningRange) {
+      var sourceYear = Number(sourceShiftId.split('@')[1].slice(0, 4));
+      var lastYear = unique.reduce(function(last, shift) { return Math.max(last, Number(shift.date.slice(0, 4))); }, sourceYear);
+      for (var fillYear = sourceYear; fillYear <= lastYear; fillYear++) {
+        var complete = window.HortOpsScheduler.generateOperationalDigest(jobs || [job], fillYear);
+        complete.allShifts.forEach(function(shift) {
+          if (shift.jobId === targetJobId && !seen.has(shift.shiftId)) { seen.add(shift.shiftId); unique.push(shift); }
+        });
+      }
+    }
+
     unique.sort(function(a, b) {
       if (a.date !== b.date) {
         return a.date.localeCompare(b.date);
@@ -7929,7 +8398,7 @@ window.HortOpsRosteringEngine = {
     // Cross-year recurrence resolution if needed for recurring/annual jobs
     var isRecurring = job.frequencyType === 'recurring_weeks' ||
                       job.frequencyType === 'recurring_cadence' ||
-                      job.frequencyType === 'annual' || job.frequencyType === 'work_pattern';
+                      job.frequencyType === 'annual' || job.frequencyType === 'seasonal' || job.frequencyType === 'work_pattern';
 
     // Source-relative remaining count (Defect A):
     var sourceIndex = sourceShiftId ? unique.findIndex(function(s) { return s.shiftId === sourceShiftId; }) : -1;
@@ -8029,7 +8498,7 @@ window.HortOpsRosteringEngine = {
     if (job.frequencyType === 'one_off') return 1;
 
     var remaining = this.resolveRemainingOccurrences(currentShiftId, allShifts, job, this.UI_REPEAT_CAP, jobs);
-    if (job.frequencyType === 'annual' || job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence' || job.frequencyType === 'work_pattern') {
+    if (job.frequencyType === 'annual' || job.frequencyType === 'seasonal' || job.frequencyType === 'recurring_weeks' || job.frequencyType === 'recurring_cadence' || job.frequencyType === 'work_pattern') {
       return Math.max(1, Math.min(remaining.length, this.UI_REPEAT_CAP));
     }
     return Math.max(1, remaining.length);
@@ -9612,16 +10081,18 @@ window.HortOpsSchedulerEngine = {
   },
 
   generateWeekendSlots: function(year) {
-    var holidays = window.HortOpsData.getPublicHolidaysForYear(year);
+    var holidays = [].concat(window.HortOpsData.getPublicHolidaysForYear(year - 1), window.HortOpsData.getPublicHolidaysForYear(year), window.HortOpsData.getPublicHolidaysForYear(year + 1));
     var slots = [];
 
     var jan1 = new Date(year, 0, 1);
     var dayOfWeek = jan1.getDay();
     var daysUntilFirstSat = (6 - dayOfWeek + 7) % 7;
     var currentSat = new Date(year, 0, 1 + daysUntilFirstSat);
+    // January Sunday/Monday belongs to the weekend starting in December.
+    if (daysUntilFirstSat >= 5) currentSat.setDate(currentSat.getDate() - 7);
 
     var weekNum = 1;
-    while (currentSat.getFullYear() === year) {
+    while (currentSat.getFullYear() <= year) {
       var sat = new Date(currentSat);
       var sun = new Date(currentSat);
       sun.setDate(sun.getDate() + 1);
@@ -9773,6 +10244,9 @@ window.HortOpsSchedulerEngine = {
       return false;
     }
 
+    if (window.HortOpsRecurrence) {
+      return window.HortOpsRecurrence.dates(job, parseInt(dateStr.slice(0, 4), 10)).indexOf(dateStr) !== -1;
+    }
     if (job.frequencyType === 'work_pattern') {
       var rules = window.HortOpsPlanningRules;
       return !!rules && rules.dates(job, parseInt(dateStr.slice(0,4),10)).indexOf(dateStr) !== -1;
@@ -10080,6 +10554,42 @@ window.HortOpsSchedulerEngine = {
     }
   },
 
+  generateRangeDigest: function(jobs, from, to, includeResolved, customAssignments, staffList, customPermits, customSnapshots, detachedContext) {
+    var rules = window.HortOpsRecurrence;
+    if (!rules || !rules.isRealDate(from) || !rules.isRealDate(to) || from > to) throw new Error('Invalid programming horizon.');
+    var byDate = {}, byId = {}, issues = [], self = this;
+    for (var year = Number(from.slice(0, 4)); year <= Number(to.slice(0, 4)); year++) {
+      var digest = this.generateOperationalDigest(jobs, year, includeResolved, customAssignments, staffList, customPermits, customSnapshots, true);
+      digest.slots.forEach(function(slot) {
+        if ([slot.fridayDate, slot.saturdayDate, slot.sundayDate, slot.mondayDate].every(function(date) { return date < from || date > to; })) return;
+        var bucket = byDate[slot.saturdayDate];
+        if (!bucket) {
+          bucket = byDate[slot.saturdayDate] = Object.assign({}, slot, { shifts: [], publicHolidays: slot.publicHolidays.slice(), calendarWeekNumber: slot.weekNumber, slotId: slot.saturdayDate });
+        }
+        slot.publicHolidays.forEach(function(h) { if (!bucket.publicHolidays.some(function(other) { return other.date === h.date; })) bucket.publicHolidays.push(h); });
+        slot.shifts.forEach(function(shift) {
+          if (shift.date < from || shift.date > to || byId[shift.shiftId]) return;
+          byId[shift.shiftId] = shift; bucket.shifts.push(shift);
+        });
+      });
+      issues = issues.concat(digest.integrityIssues.filter(function(issue) { return !issue.date || (issue.date >= from && issue.date <= to); }));
+    }
+    var slots = Object.values(byDate).sort(function(a, b) { return a.saturdayDate.localeCompare(b.saturdayDate); });
+    var shifts = Object.values(byId).sort(function(a, b) { return a.date.localeCompare(b.date) || a.shiftId.localeCompare(b.shiftId); });
+    slots.forEach(function(slot, index) {
+      // The display index is continuous throughout the horizon. Dates are the
+      // stable identity; calendar week numbers are retained only as metadata.
+      slot.weekNumber = index + 1;
+      slot.shifts.forEach(function(shift) { shift.calendarWeekNumber = shift.weekNumber; shift.weekNumber = slot.weekNumber; shift.slotId = slot.slotId; });
+      slot.totalShifts = slot.shifts.length;
+      slot.totalCrewHours = slot.shifts.reduce(function(sum, s) { return sum + (Number(s.durationHours) || 0) * (Number(s.crewSize) || 0); }, 0);
+      slot.isOverloaded = slot.shifts.length >= 3;
+      slot.hasArterialConflict = slot.shifts.filter(function(s) { return s.category === 'Arterial Road'; }).length >= 2;
+    });
+    if (!detachedContext) shifts.forEach(function(shift) { self.revalidateShiftAssignments(shift, staffList || [], jobs.find(function(job) { return job.id === shift.jobId; }), shifts); });
+    return { slots: slots, allShifts: shifts, integrityIssues: issues, range: { start: from, end: to } };
+  },
+
   generateOperationalDigest: function(jobs, year, includeResolved, customAssignments, staffList, customPermits, customSnapshots, detachedContext) {
     var self = this;
     if (includeResolved === undefined) includeResolved = true;
@@ -10130,7 +10640,7 @@ window.HortOpsSchedulerEngine = {
           return;
         }
 
-        var slot = (job && job.frequencyType === 'work_pattern' && window.HortOpsPlanningRules) ? window.HortOpsPlanningRules.slotFor(slots,hist.date) : slots.find(function(s) {
+        var slot = window.HortOpsPlanningRules ? window.HortOpsPlanningRules.slotFor(slots,hist.date) : slots.find(function(s) {
           if (hist.weekNumber !== undefined && hist.weekNumber !== null) return s.weekNumber === hist.weekNumber;
           return s.saturdayDate === hist.date || s.sundayDate === hist.date || s.fridayDate === hist.date || s.mondayDate === hist.date;
         });
@@ -10182,10 +10692,11 @@ window.HortOpsSchedulerEngine = {
     });
 
     eligibleJobs.forEach(function(job, jobIdx) {
-      if (job.frequencyType === 'work_pattern') {
+      if (window.HortOpsRecurrence || job.frequencyType === 'work_pattern') {
         var rules = window.HortOpsPlanningRules;
         if (!rules) throw new Error('Work pattern engine unavailable');
-        rules.dates(job, year).forEach(function(date) {
+        var generatedDates = window.HortOpsRecurrence ? window.HortOpsRecurrence.dates(job, year) : rules.dates(job, year);
+        generatedDates.forEach(function(date) {
           var shiftId = job.id + '@' + date, dateKey = job.id + '_' + date;
           if (seededShiftKeys.has(shiftId) || seededShiftKeys.has(dateKey)) return;
           var slot = rules.slotFor(slots, date);
@@ -10637,6 +11148,14 @@ window.HortOpsSchedulerEngine = {
       }
     }
 
+    // Never project off-calendar records into an operational schedule. Saved
+    // audit snapshots remain untouched, including any older invalid records.
+    if (window.HortOpsRecurrence) {
+      allShifts = allShifts.filter(function(shift) {
+        return window.HortOpsRecurrence.isOperatingDate(shift.date);
+      });
+      slots.forEach(function(slot) { slot.shifts = slot.shifts.filter(function(shift) { return allShifts.indexOf(shift) !== -1; }); });
+    }
     // Calculate totals and clash flags
     slots.forEach(function(slot) {
       slot.totalShifts = slot.shifts.length;
@@ -10693,7 +11212,7 @@ window.HortOpsSchedulerEngine = {
         (j.status || '') + ':' +
         (j.startTime || '') + ':' +
         (j.durationHours || '') + ':' +
-        JSON.stringify(j.staffingSections || null) + ':' + JSON.stringify(j.workPattern || null) + ':' + JSON.stringify(j.preferredPoolTagIds || []) + ':' + JSON.stringify(j.exclusivePoolTagIds || []) + ':' + (j.exclusivePoolSource || '') + ':' + (j.frequencyType || '') + ':' +
+        JSON.stringify(j.staffingSections || null) + ':' + JSON.stringify(j.workPattern || null) + ':' + JSON.stringify(j.annualRule || null) + ':' + JSON.stringify(j.seasonalRule || null) + ':' + JSON.stringify(j.scheduleEnd || null) + ':' + JSON.stringify(j.preferredPoolTagIds || []) + ':' + JSON.stringify(j.exclusivePoolTagIds || []) + ':' + (j.exclusivePoolSource || '') + ':' + (j.frequencyType || '') + ':' +
         (j.preferredDay || '') + ':' +
         (j.intervalWeeks || '') + ':' +
         (j.anchorWeek !== undefined ? j.anchorWeek : '') + ':' +
@@ -10833,6 +11352,8 @@ if (typeof require !== 'undefined') {
   if (typeof window === 'undefined') {
     global.window = global;
   }
+  if (!window.HortOpsRecurrence) require('./recurrence.js');
+  if (!window.HortOpsPlanningRules) require('./planningRules.js');
   if (typeof window.HortOpsCostCalculator === 'undefined') {
     try { require('./scheduler/costCalculator.js'); } catch (e) {}
   }
@@ -10935,6 +11456,11 @@ window.HortOpsScheduler = {
       throw new Error('Scheduler engine unavailable: window.HortOpsSchedulerEngine is required');
     }
     return window.HortOpsSchedulerEngine.resolveShiftHistoricalTiming(shiftId, jobId, dateStr, customSnapshots);
+  },
+
+  generateRangeDigest: function(jobs, from, to, includeResolved, customAssignments, staffList, customPermits, customSnapshots) {
+    if (!window.HortOpsSchedulerEngine || typeof window.HortOpsSchedulerEngine.generateRangeDigest !== 'function') throw new Error('Range scheduler unavailable.');
+    return window.HortOpsSchedulerEngine.generateRangeDigest(jobs, from, to, includeResolved, customAssignments, staffList, customPermits, customSnapshots);
   },
 
   generateOperationalDigest: function(jobs, year, includeResolved, customAssignments, staffList, customPermits, customSnapshots) {
@@ -11908,7 +12434,10 @@ window.HortOpsHeader = {
   render: function(state) {
     var icons = window.HortOpsIcons;
     var activeView = state.activeView;
-    var currentYear = state.currentYear;
+        var currentYear = state.currentYear;
+        var range = state.uiState && state.uiState.planningRange;
+        var programmeStart = range && window.HortOpsRecurrence.isRealDate(range.start) ? range.start : currentYear + '-11-01';
+        var programmeEnd = range && window.HortOpsRecurrence.isRealDate(range.end) ? range.end : (currentYear + 1) + '-02-28';
     var clashCount = state.clashCount || 0;
 
     var tabs = [
@@ -11998,9 +12527,6 @@ window.HortOpsHeader = {
         '<nav class="nav-tabs">' + tabsHtml + '</nav>' +
 
         '<div class="header-actions">' +
-          '<select class="year-select" onchange="window.HortOpsApp.setYear(parseInt(this.value, 10))">' +
-            yearOptionsHtml +
-          '</select>' +
 
           '<div class="header-health-pill" id="btn-header-storage-health" role="button" tabindex="0" onclick="window.HortOpsApp.handleHealthPillClick()" title="' + titleText + ' (Click to inspect storage health)" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--slate-200); font-size: 11px; color: var(--slate-600); background: #ffffff; cursor: pointer;">' +
             '<span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:' + dotColor + ';"></span>' +
@@ -12030,7 +12556,11 @@ window.HortOpsHeader = {
           '</button>' +
         '</div>' +
       '</div>' +
-    '</header>';
+      '<div class="programme-toolbar" aria-label="Planning period">' +
+        '<div class="programme-year"><label for="planning-year">Calendar year</label><select id="planning-year" class="year-select" aria-label="Calendar year" onchange="window.HortOpsApp.setYear(parseInt(this.value, 10))">' + yearOptionsHtml + '</select></div>' +
+        '<div class="planning-range-controls"><span class="programme-toolbar-title">Programme</span><label for="planning-range-start">From</label><input type="date" id="planning-range-start" value="' + programmeStart + '"><label for="planning-range-end">To</label><input type="date" id="planning-range-end" value="' + programmeEnd + '"><button class="btn btn-secondary" id="planning-range-apply" onclick="window.HortOpsApp.applyPlanningRange()">View programme</button></div>' +
+      '</div>' +
+      '</header>';
   },
 
   updateStorageHealthIndicator: function() {
@@ -12179,7 +12709,10 @@ window.HortOpsForwardPlannerControls = {
     var totalWeeks = ctx.totalWeeks;
     var totalActiveColumns = ctx.totalActiveColumns;
     var totalAssignedInWindowCount = ctx.totalAssignedInWindowCount;
-    var currentWeekNum = ctx.currentWeekNum;
+        var currentWeekNum = ctx.currentWeekNum;
+        var isSeasonView = self.viewMode === 'season' && !!ctx.programme;
+        var canPrevious = self.startWeek > (ctx.scopeStartWeek || 1);
+        var canNext = endWeek < (ctx.scopeEndWeek || totalWeeks);
     var icons = ctx.icons || window.HortOpsIcons;
     var esc = ctx.esc;
     var escAttr = ctx.escAttr;
@@ -12252,21 +12785,21 @@ window.HortOpsForwardPlannerControls = {
             'Weeks <strong style="color: var(--slate-900);">' + self.startWeek + ' - ' + endWeek + '</strong> of ' + totalWeeks + ' (' + totalActiveColumns + ' active days) • ' +
             '<strong style="color: var(--emerald-700);">' + totalAssignedInWindowCount + ' Rostered</strong>' +
           '</span>' +
-          '<div style="display: flex; align-items: center; gap: 0.25rem;">' +
-            '<button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 11px; font-weight: 700; color: var(--emerald-700);" onclick="window.HortOpsForwardPlanner.jumpToCurrentWeek()">' +
-              'Current Wk (W' + currentWeekNum + ')' +
+                    '<div style="display: ' + (isSeasonView ? 'none' : 'flex') + '; align-items: center; gap: 0.25rem;">' +
+            '<button class="btn btn-secondary" id="fp-current-week" style="padding: 0.25rem 0.5rem; font-size: 11px; font-weight: 700; color: var(--emerald-700);" onclick="window.HortOpsForwardPlanner.returnToCurrentWeek()">' +
+                'Current week (Week ' + currentWeekNum + ')' +
             '</button>' +
-            '<button class="btn btn-secondary" style="padding: 0.3rem 0.5rem;" onclick="window.HortOpsForwardPlanner.prevWeeks()"' + (self.startWeek <= 1 ? ' disabled' : '') + '>' +
+            '<button class="btn btn-secondary" style="padding: 0.3rem 0.5rem;" onclick="window.HortOpsForwardPlanner.prevWeeks()"' + (!canPrevious ? ' disabled' : '') + '>' +
               icons.render('chevronLeft', 'w-3.5 h-3.5') +
             '</button>' +
-            '<button class="btn btn-secondary" style="padding: 0.3rem 0.5rem;" onclick="window.HortOpsForwardPlanner.nextWeeks()"' + (endWeek >= totalWeeks ? ' disabled' : '') + '>' +
+            '<button class="btn btn-secondary" style="padding: 0.3rem 0.5rem;" onclick="window.HortOpsForwardPlanner.nextWeeks()"' + (!canNext ? ' disabled' : '') + '>' +
               icons.render('chevronRight', 'w-3.5 h-3.5') +
             '</button>' +
           '</div>' +
-          '<div style="display: flex; align-items: center; gap: 0.2rem;">' +
+            '<div style="display: flex; align-items: center; gap: 0.2rem;">' +
             [4, 6, 8].map(function(sz) {
               return '<button class="btn ' + (self.windowSize === sz ? 'btn-primary' : 'btn-secondary') + '" style="padding: 0.25rem 0.5rem; font-size: 11px;" onclick="window.HortOpsForwardPlanner.setWindowSize(' + sz + ')">' + sz + ' Wks</button>';
-            }).join('') +
+            }).join('') + (ctx.programme ? '<button class="btn ' + (isSeasonView ? 'btn-primary' : 'btn-secondary') + '" style="padding: 0.25rem 0.5rem; font-size: 11px; margin-left: 0.35rem;" onclick="window.HortOpsForwardPlanner.setSeasonView(' + (!isSeasonView ? 'true' : 'false') + ')" title="Recommended for Super-wide monitors">' + (isSeasonView ? 'Use week view' : 'Entire season') + ' <span style="font-weight: 500;">(Recommended for Super-wide monitors)</span></button>' : '') +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -12620,7 +13153,8 @@ window.HortOpsForwardPlanner = {
   hideUnassigned: true,
   filterDrawerOpen: false,
   selectedJobId: null,
-  startWeek: 1,
+    startWeek: 1,
+    viewMode: 'window',
   windowSize: (typeof window !== 'undefined' && window.innerWidth < 1600) ? 4 : 6,
 
   render: function(state) {
@@ -12638,16 +13172,30 @@ window.HortOpsForwardPlanner = {
     // 1. Resolve current week and auto-initialize
     var totalWeeks = (slots && slots.length) ? slots.length : 52;
     var currentWeekNum = (dateUtils && dateUtils.getCurrentWeekNumber) ? dateUtils.getCurrentWeekNumber(slots) : 36;
+        // A programme selects scheduling data. Showing every week is an explicit
+        // whole-season mode, not an implicit consequence of applying a programme.
+        var programme = state.uiState && state.uiState.planningRange;
+        var programmeSlots = programme ? slots.filter(function(s) {
+            return s.saturdayDate <= programme.end && s.sundayDate >= programme.start;
+        }) : slots;
+        var scopeStartWeek = programmeSlots.length ? programmeSlots[0].weekNumber : 1;
+        var scopeEndWeek = programmeSlots.length ? programmeSlots[programmeSlots.length - 1].weekNumber : totalWeeks;
+    var programmeKey = programme ? programme.start + ':' + programme.end : '';
+    if (programmeKey !== self.programmeKey) {
+      self.programmeKey = programmeKey;
+      self.startWeekInitialized = false;
+    }
+    var maxStartWeek = Math.max(scopeStartWeek, scopeEndWeek - self.windowSize + 1);
     if (!self.startWeekInitialized) {
-      self.startWeek = Math.min(totalWeeks - self.windowSize + 1, Math.max(1, currentWeekNum));
+      self.startWeek = Math.min(maxStartWeek, Math.max(scopeStartWeek, currentWeekNum));
       self.startWeekInitialized = true;
     }
-
-    // Sliced slots in window
-    var endWeek = Math.min(totalWeeks, self.startWeek + self.windowSize - 1);
-    var visibleSlots = slots.filter(function(s) {
-      return s.weekNumber >= self.startWeek && s.weekNumber <= endWeek;
-    });
+    self.startWeek = Math.min(maxStartWeek, Math.max(scopeStartWeek, self.startWeek));
+        var isSeasonView = self.viewMode === 'season' && !!programme;
+        var endWeek = isSeasonView ? scopeEndWeek : Math.min(scopeEndWeek, self.startWeek + self.windowSize - 1);
+        var visibleSlots = programmeSlots.filter(function(s) {
+            return isSeasonView || (s.weekNumber >= self.startWeek && s.weekNumber <= endWeek);
+        });
     var visibleWeekNumbers = new Set(visibleSlots.map(function(s) { return s.weekNumber; }));
 
     // 2. Build Slot Day Columns (Split into Saturday & Sunday, plus Friday / Monday if holiday)
@@ -12728,6 +13276,7 @@ window.HortOpsForwardPlanner = {
             availableShifts:slot.shifts.filter(function(s) { return s.date === shift.date; }),hasOvertime:true});
         }
       });
+      if (programme) days = days.filter(function(d) { return d.dateStr >= programme.start && d.dateStr <= programme.end; });
       days.sort(function(a,b) { return a.dateStr.localeCompare(b.dateStr); });
       days.forEach(function(d,i) { d.isFirstInWeekend = i === 0; });
       slotDayMap[slot.weekNumber] = days;
@@ -12910,6 +13459,7 @@ window.HortOpsForwardPlanner = {
 
 
     var ctx = {
+      programme: programme,
       self: self,
       hierarchy: hierarchy,
       filteredStaff: filteredStaff,
@@ -12920,6 +13470,9 @@ window.HortOpsForwardPlanner = {
       staffScheduleMap: staffScheduleMap,
       tableRows: tableRows,
       endWeek: endWeek,
+      scopeStartWeek: scopeStartWeek,
+      scopeEndWeek: scopeEndWeek,
+      isSeasonView: isSeasonView,
       totalWeeks: totalWeeks,
       totalActiveColumns: totalActiveColumns,
       totalAssignedInWindowCount: totalAssignedInWindowCount,
@@ -12936,15 +13489,17 @@ window.HortOpsForwardPlanner = {
     var tbodyRowsHtml = window.HortOpsForwardPlannerMatrix ?
       window.HortOpsForwardPlannerMatrix.renderTbody(ctx) : '';
 
-    return toolbarHtml +
-      '<div class="planner-table-wrapper">' +
+    return '<section class="forward-planner-workspace">' +
+        (programme ? '<p class="recurrence-preview">Programming horizon: ' + esc(programme.start) + ' – ' + esc(programme.end) + '. All dates are shown in order; scroll horizontally to reach later months.</p>' : '') + toolbarHtml +
+            '<div class="planner-table-wrapper ' + (isSeasonView ? 'season-view' : 'compact-week-view') + '">' +
         '<table class="planner-table">' +
           theadHtml +
           '<tbody>' +
             tbodyRowsHtml +
           '</tbody>' +
         '</table>' +
-      '</div>';
+    '</div>' +
+    '</section>';
   },
 
 
@@ -12993,7 +13548,7 @@ window.HortOpsForwardPlanner = {
     window.HortOpsApp.renderCurrentView();
   },
 
-  jumpToCurrentWeek: function() {
+    jumpToCurrentWeek: function() {
     var dateUtils = window.HortOpsDateUtils;
     var slots = (window.HortOpsApp && window.HortOpsApp.state) ? window.HortOpsApp.state.slots : [];
     var totalWeeks = (slots && slots.length) ? slots.length : 52;
@@ -13014,9 +13569,18 @@ window.HortOpsForwardPlanner = {
     window.HortOpsApp.renderCurrentView();
   },
 
-  setWindowSize: function(sz) {
-    this.windowSize = sz;
-    window.HortOpsApp.renderCurrentView();
+    setWindowSize: function(sz) {
+        this.windowSize = sz;
+        this.viewMode = 'window';
+        window.HortOpsApp.renderCurrentView();
+    },
+    returnToCurrentWeek: function() {
+        this.viewMode = 'window';
+        this.jumpToCurrentWeek();
+    },
+    setSeasonView: function(enabled) {
+        this.viewMode = enabled ? 'season' : 'window';
+        window.HortOpsApp.renderCurrentView();
   },
 
   toggleFilterDrawer: function(forceState) {
@@ -13061,6 +13625,7 @@ window.HortOpsCalendarView = {
     var dateUtils = window.HortOpsDateUtils;
     var slots = state.slots;
     var self = this;
+    var programme = state.uiState && state.uiState.planningRange;
 
     var esc = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml) ? window.HortOpsSecurityUtils.escapeHtml : function(s) { return String(s || ''); };
     var escAttr = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtmlAttr) ? window.HortOpsSecurityUtils.escapeHtmlAttr : function(s) { return String(s || ''); };
@@ -13075,7 +13640,7 @@ window.HortOpsCalendarView = {
 
     // A weekday pattern occurrence can belong to a different month than its Saturday bucket.
     var monthSlots = slots.filter(function(s) {
-      return s.month === self.selectedMonth || s.shifts.some(function(sh) {
+      return !!programme || s.month === self.selectedMonth || s.shifts.some(function(sh) {
         return sh.frequencyType === 'work_pattern' &&
           Number(String(sh.date).slice(5, 7)) === self.selectedMonth &&
           Number(String(sh.date).slice(0, 4)) === Number(state.currentYear);
@@ -13092,6 +13657,7 @@ window.HortOpsCalendarView = {
         '</button>';
       }).join('') +
     '</div>';
+    if (programme) monthNav = '<span class="badge badge-emerald">' + esc(programme.start) + ' – ' + esc(programme.end) + '</span>';
 
     var weekendCardsHtml = monthSlots.map(function(slot) {
       var isCurrentWeek = slot.weekNumber === currentWeekNum;
@@ -13140,7 +13706,8 @@ window.HortOpsCalendarView = {
           dayCols.push({ date: sh.date, dayName: sh.dayOfWeek || 'Overtime Day' });
         }
       });
-      dayCols.sort(function(a, b) { return a.date.localeCompare(b.date); });
+            if (programme) dayCols = dayCols.filter(function(d) { return d.date >= programme.start && d.date <= programme.end; });
+            dayCols.sort(function(a, b) { return a.date.localeCompare(b.date); });
       var patternRange = slot.shifts.some(function(sh) { return sh.frequencyType === 'work_pattern'; });
       var displayRange = patternRange ?
         dateUtils.formatDisplayDate(dayCols[0].date) + ' – ' + dateUtils.formatDisplayDate(dayCols[dayCols.length - 1].date) :
@@ -13215,7 +13782,7 @@ window.HortOpsCalendarView = {
 
     return '<div class="panel-card">' +
       '<div class="panel-header">' +
-        '<span class="panel-title">' + icons.render('calendar', 'w-4 h-4') + esc(monthNames[self.selectedMonth - 1]) + ' ' + state.currentYear + ' Operational Roster</span>' +
+        '<span class="panel-title">' + icons.render('calendar', 'w-4 h-4') + (programme ? 'Programme Operational Roster' : esc(monthNames[self.selectedMonth - 1]) + ' ' + state.currentYear + ' Operational Roster') + '</span>' +
         monthNav +
       '</div>' +
       '<div class="panel-body">' + weekendCardsHtml + '</div>' +
@@ -13334,8 +13901,12 @@ window.HortOpsJobRegistry = {
           cadenceHtml = '<span class="badge badge-emerald">Every ' + job.intervalWeeks + ' wks</span>';
         } else if (job.frequencyType === 'annual') {
           cadenceHtml = '<span class="badge badge-sky">Annual</span>';
+        } else if (job.frequencyType === 'seasonal') {
+            cadenceHtml = '<span class="badge badge-sky">Annual seasonal series</span>';
+        } else if (job.frequencyType === 'work_pattern') {
+            cadenceHtml = '<span class="badge badge-emerald">Multiple days</span>';
         } else {
-          cadenceHtml = '<span class="badge badge-purple">One-Off</span>';
+            cadenceHtml = '<span class="badge badge-purple">One-Off</span>';
         }
 
         var reqQuals = Array.isArray(job.requiredQualifications) ? job.requiredQualifications : [];
@@ -13490,8 +14061,8 @@ window.HortOpsJobRegistry = {
       '</div>' +
 
       // Table
-      '<div style="overflow-x: auto;">' +
-        '<table class="planner-table" style="min-width: 1000px;">' +
+            '<div class="registry-table-scrollport job-table-scrollport">' +
+                '<table class="registry-table job-registry-table">' +
           '<thead><tr>' +
             '<th style="width: 260px;">Job Name & Location</th>' +
             '<th style="width: 130px;">Category</th>' +
@@ -13576,6 +14147,21 @@ window.HortOpsJobRegistry = {
 };
 
 })();
+
+</script>
+  <script data-source="js/components/jobResetBindings.js">
+/* === INLINED: js/components/jobResetBindings.js === */
+(function() {
+  var registry = window.HortOpsJobRegistry; if (!registry || !registry.render) return;
+  registry.openReset = function(jobId) { if (window.HortOpsJobResetModal) window.HortOpsJobResetModal.open(jobId); };
+  var original = registry.render;
+  registry.render = function(state) {
+    var html = original.call(this, state);
+    html = html.replace(/(<button class="btn btn-danger" style="padding: 0\.25rem 0\.4rem;" onclick="event\.stopPropagation\(\); window\.HortOpsJobRegistry\.deleteJob\('([^']+)'\)" title="Delete Job">)/g, '<button class="btn btn-secondary" style="padding:0.25rem 0.45rem;margin-right:4px" onclick="event.stopPropagation();window.HortOpsJobRegistry.openReset(\'$2\')" title="Reset allocations">↻ Reset</button>$1');
+    html = html.replace(/(Edit Job Specifications<\/button>)/, '$1<button class="btn btn-secondary" style="width:100%;margin-top:0.5rem" onclick="window.HortOpsJobRegistry.openReset(\'' + (this.selectedJobId || '') + '\')">Reset allocations</button>');
+    return html.replace('width: 100px; text-align: right;">Actions</th>', 'width: 150px; text-align: right;">Actions</th>');
+  };
+}());
 
 </script>
   <script data-source="js/components/staffRegistry.js">
@@ -13739,20 +14325,24 @@ window.HortOpsStaffRegistry = {
         }
       }
 
+      var workforceState = (window.HortOpsApp && window.HortOpsApp.state) || {};
+      var hasHoursEvidence = Array.isArray(staff.overtimeHoursEvidence) && staff.overtimeHoursEvidence.length > 0;
+      var hasLeaveHistory = (Array.isArray(workforceState.absences) && workforceState.absences.some(function(entry) { return entry && entry.staffId === staff.id; })) ||
+        (Array.isArray(workforceState.refusalHistory) && workforceState.refusalHistory.some(function(entry) { return entry && entry.staffId === staff.id; }));
       var actionHtml = '<div style="display: flex; gap: 0.35rem; justify-content: center;">' +
-        '<button type="button" class="btn btn-secondary" data-hours-evidence-staff="' + escAttr(staff.id) + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" title="Record verified year-to-date overtime hours">' +
+        '<button type="button" class="btn btn-secondary workforce-action-button' + (hasHoursEvidence ? ' has-action-data' : '') + '" data-hours-evidence-staff="' + escAttr(staff.id) + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" title="Record verified year-to-date overtime hours">' +
           icons.render('clock', 'w-3 h-3 text-emerald-600') +
           '<span>Hours</span>' +
         '</button>' +
-        '<button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffQualificationModal.open(\'' + escAttr(staff.id) + '\')" title="Manage Qualifications & Accreditations">' +
+        '<button type="button" class="btn btn-secondary workforce-action-button' + (quals.length ? ' has-action-data' : '') + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffQualificationModal.open(\'' + escAttr(staff.id) + '\')" title="Manage Qualifications & Accreditations">' +
           icons.render('shield', 'w-3 h-3 text-emerald-600') +
           '<span>Tickets</span>' +
         '</button>' +
-        '<button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffAbsenceModal.open(\'' + escAttr(staff.id) + '\')" title="Manage Absence Intervals & Refusal History">' +
+        '<button type="button" class="btn btn-secondary workforce-action-button' + (hasLeaveHistory ? ' has-action-data' : '') + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffAbsenceModal.open(\'' + escAttr(staff.id) + '\')" title="Manage Absence Intervals & Refusal History">' +
           icons.render('calendar', 'w-3 h-3 text-amber-600') +
           '<span>Leave</span>' +
         '</button>' +
-        '<button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffExemptionModal.open(\'' + escAttr(staff.id) + '\')" title="Edit Overtime Exemption">' +
+        '<button type="button" class="btn btn-secondary workforce-action-button' + (isExempt ? ' has-action-data' : '') + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffExemptionModal.open(\'' + escAttr(staff.id) + '\')" title="Edit Overtime Exemption">' +
           icons.render('edit', 'w-3 h-3 text-slate-500') +
           '<span>Exempt</span>' +
         '</button>' +
@@ -13764,7 +14354,6 @@ window.HortOpsStaffRegistry = {
             '<span style="width: 10px; height: 10px; border-radius: 50%; background: ' + safeColor(staff.avatarColor, '#10b981') + '; shrink: 0;"></span>' +
             '<div>' +
               '<div style="font-weight: 700; color: var(--slate-900);">' + esc(staff.name) + '</div>' +
-              '<div style="font-size: 12px; color: var(--slate-400);">' + esc(staff.email || '') + '</div>' +
             '</div>' +
           '</div>' +
         '</td>' +
@@ -13778,7 +14367,7 @@ window.HortOpsStaffRegistry = {
         '<td><span class="badge badge-slate" style="font-size: 11px;">' + esc(staff.userType || 'App') + '</span></td>' +
         '<td>' + statusBadge + '</td>' +
         '<td>' + otStatusHtml + '</td>' +
-        '<td style="text-align: center;">' + actionHtml + '</td>' +
+                '<td class="registry-action-cell" style="text-align: center;">' + actionHtml + '</td>' +
       '</tr>';
     }).join('');
 
@@ -13793,21 +14382,21 @@ window.HortOpsStaffRegistry = {
         '<span style="font-size: 13px; color: var(--slate-500);">' + filtered.length + ' of ' + staffList.length + ' personnel</span>' +
       '</div>' +
 
-      '<div style="overflow-x: auto;">' +
-        '<table class="planner-table">' +
+            '<div class="registry-table-scrollport workforce-table-scrollport">' +
+                '<table class="registry-table workforce-registry-table">' +
           '<thead><tr>' +
-            '<th style="width: 210px;">Employee</th>' +
-            '<th style="width: 130px;">Department</th>' +
-            '<th style="width: 120px;">Team / Unit</th>' +
-            '<th style="width: 120px;">Crew / Depot</th>' +
-            '<th style="width: 110px;">Role</th>' +
-            '<th style="width: 150px;">Accreditations</th>' +
-            '<th style="width: 110px;">Fatigue</th>' +
-            '<th style="width: 120px;">Plant Operator</th>' +
-            '<th style="width: 80px;">User Type</th>' +
-            '<th style="width: 90px;">Status</th>' +
-            '<th style="width: 90px;">Overtime</th>' +
-            '<th style="width: 130px; text-align: center;">Action</th>' +
+                    '<th>Employee</th>' +
+                    '<th>Department</th>' +
+                    '<th>Team / Unit</th>' +
+                    '<th>Crew / Depot</th>' +
+                    '<th>Role</th>' +
+                    '<th>Accreditations</th>' +
+                    '<th>Fatigue</th>' +
+                    '<th>Plant Operator</th>' +
+                    '<th>User Type</th>' +
+                    '<th>Status</th>' +
+                    '<th>Overtime</th>' +
+                    '<th class="registry-action-cell" style="text-align: center;">Action</th>' +
           '</tr></thead>' +
           '<tbody>' + rowsHtml + '</tbody>' +
         '</table>' +
@@ -14441,6 +15030,40 @@ window.HortOpsStaffAssignFilterBar = {
       }).join('');
       return '<div style="max-height:400px;overflow-y:auto;overflow-x:hidden;padding-right:2px">' + content + '</div>';
     }
+  };
+}());
+
+</script>
+  <script data-source="js/components/staffAssignModal/candidateSections.js">
+/* === INLINED: js/components/staffAssignModal/candidateSections.js === */
+// Add two concise, non-overlapping browse accordions around the candidate list.
+(function() {
+  'use strict';
+  var list = window.HortOpsStaffAssignCandidateList;
+  if (!list || !list.render) return;
+  var original = list.render;
+
+  list.render = function(ctx) {
+    var candidates = ctx.filteredStaff || [];
+    var priority = ctx.getStaffPriority || function() { return 5; };
+
+    function section(id, label, people, open) {
+      var sectionContext = Object.assign({}, ctx, {
+        filteredStaff: people,
+        // The underlying renderer receives only this accordion's staff.
+        allocatorGroups: [{ id: id, label: label, staff: people }]
+      });
+      return '<details class="staff-allocator-priority-section"' + (open ? ' open' : '') +
+        ' style="border:1px solid var(--slate-200);border-radius:6px;background:#fff">' +
+        '<summary style="cursor:pointer;padding:0.65rem 0.75rem;font-weight:800;font-size:13px;color:var(--slate-700);display:flex;justify-content:space-between">' +
+        '<span>' + label + '</span><span class="badge badge-slate">' + people.length + '</span></summary>' +
+        '<div style="padding:0 0.5rem 0.5rem">' + original(sectionContext) + '</div></details>';
+    }
+
+    return '<div style="display:flex;flex-direction:column;gap:0.6rem">' +
+      section('matching', 'Matching staff', candidates.filter(function(person) { return priority(person) <= 4; }), true) +
+      section('other', 'Other staff', candidates.filter(function(person) { return priority(person) > 4; }), false) +
+      '</div>';
   };
 }());
 
@@ -15615,6 +16238,46 @@ window.HortOpsStaffAssignCandidateModel = {
   root.HortOpsHoursAllocation = { build: build };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.HortOpsHoursAllocation;
 })(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+  <script data-source="js/utils/hoursAllocationInference.js">
+/* === INLINED: js/utils/hoursAllocationInference.js === */
+// Non-persistent, allocation-derived worked-hours coverage for the proposal only.
+(function(root) {
+  var service = root.HortOpsHoursAllocation;
+  if (!service || typeof service.build !== 'function') return;
+  var originalBuild = service.build;
+  service.build = function(input) {
+    var ctx = JSON.parse(JSON.stringify(input || {}));
+    var state = ctx.state || {}, target = ctx.occurrence || ctx.shift || {};
+    var today = ctx.currentDate || (root.HortOpsDateUtils && root.HortOpsDateUtils.getLocalDateKey && root.HortOpsDateUtils.getLocalDateKey());
+    var year = Number(String(target.date || '').slice(0, 4));
+    var roster = state.staffList || state.roster || ctx.roster || [], shifts = ctx.allShifts || state.allShifts || [];
+    var inferred = Object.create(null), seen = Object.create(null), coverage = Object.create(null);
+    roster.forEach(function(staff) { coverage[staff.id] = root.HortOpsHoursEvidence && root.HortOpsHoursEvidence.latest ? root.HortOpsHoursEvidence.latest(staff.overtimeHoursEvidence || [], year) : null; });
+    shifts.forEach(function(shift) {
+      if (!shift || !shift.shiftId || seen[shift.shiftId]) return; seen[shift.shiftId] = true;
+      if (!shift.date || Number(String(shift.date).slice(0, 4)) !== year || shift.date > today || shift.unverifiedSchedule || typeof shift.durationHours !== 'number' || !isFinite(shift.durationHours) || shift.durationHours <= 0) return;
+      Array.from(new Set(shift.assignedStaffIds || [])).forEach(function(id) { if (!coverage[id] || shift.date > coverage[id].throughDate) inferred[id] = (inferred[id] || 0) + shift.durationHours; });
+    });
+    var cloneRoster = roster.map(function(staff) {
+      var person = Object.assign({}, staff), prior = (staff.overtimeHoursEvidence || []).slice();
+      var latest = coverage[staff.id];
+      var total = (latest ? latest.hours : 0) + (inferred[staff.id] || 0);
+      var source = latest ? 'Verified evidence plus assigned hours through ' + today : 'Inferred from assigned hours through ' + today;
+      prior.push({ id: 'HOURS-INFERRED-' + staff.id + '-' + year, year: year, throughDate: today, hours: total, source: source, recordedAt: '9999-12-31T23:59:59Z', verification: 'allocation_inferred' });
+      person.overtimeHoursEvidence = prior;
+      return person;
+    });
+    ctx.state = Object.assign({}, state, { staffList: cloneRoster, roster: cloneRoster });
+    ctx.roster = cloneRoster;
+    var result = originalBuild(ctx);
+    (result.staffRows || []).forEach(function(row) { row.inferredHours = inferred[row.id] || 0; });
+    result.policy.actual = 'verified_evidence_plus_assigned_hours_through_today';
+    result.messages = ['Hours worked are inferred from assigned past/current occurrences where verified coverage is absent; future commitments remain planned hours.'].concat(result.messages || []);
+    return result;
+  };
+}(typeof window !== 'undefined' ? window : globalThis));
 
 </script>
   <script data-source="js/utils/mixedPolicyPlan.js">
@@ -17087,7 +17750,7 @@ window.HortOpsStaffAssignModal = {
     var targetYear = targetDate ? parseInt(targetDate.slice(0, 4), 10) : null;
 
     if (targetYear && window.HortOpsApp && typeof window.HortOpsApp.setYear === 'function') {
-      if (state && state.currentYear !== targetYear) {
+      if (state && state.currentYear !== targetYear && !state.allShifts.some(function(shift) { return shift.shiftId === targetShiftId; })) {
         window.HortOpsApp.setYear(targetYear);
       }
     }
@@ -17632,10 +18295,10 @@ window.HortOpsStaffAssignModal = {
       historicalSnapshots: planRes.snapshots,
       permits: state.customPermits,
       budgetSettings: state.budgetSettings,
-      uiState: {
-        activeView: state.activeView,
-        currentYear: state.currentYear
-      }
+            uiState: Object.assign({}, state.uiState, {
+                activeView: state.activeView,
+                currentYear: state.currentYear
+            })
     });
 
     // Strict mandatory baseline reader and evidence key retention check
@@ -17847,156 +18510,145 @@ window.HortOpsJobEditTeamPreferences = {
 </script>
   <script data-source="js/components/jobEditModal/recurrenceForm.js">
 /* === INLINED: js/components/jobEditModal/recurrenceForm.js === */
-// Job Edit Modal Recurrence & Frequency Form Sub-module
-// Renders cadence selectors, annual targets, one-off dates, and recurring interval / anchor controls.
-window.HortOpsJobEditRecurrenceForm = {
-  render: function(ctx) {
-    var data = ctx.data;
-    var escAttr = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtmlAttr) || function(s) { return s || ''; };
-
-    if (data.frequencyType === 'annual') {
-      return '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">' +
-        '<div>' +
-          '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Frequency Cadence</label>' +
-          '<select class="form-select" onchange="window.HortOpsJobEditModal.updateField(\'frequencyType\', this.value); window.HortOpsJobEditModal.renderModal();">' +
-            '<option value="recurring_weeks">Recurring Every N Weeks</option>' +
-            '<option value="annual" selected>Annual Shift</option>' +
-            '<option value="one_off">One-off Shift</option>' +
-          '</select>' +
-        '</div>' +
-        '<div>' +
-          '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Target Month *</label>' +
-          '<select class="form-select" onchange="window.HortOpsJobEditModal.updateField(\'targetMonth\', parseInt(this.value, 10))">' +
-            ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(function(mName, mIdx) {
-              var mVal = mIdx + 1;
-              return '<option value="' + mVal + '"' + ((data.targetMonth || 2) === mVal ? ' selected' : '') + '>' + mName + '</option>';
-            }).join('') +
-          '</select>' +
-        '</div>' +
-      '</div>';
+// Canonical recurrence editor: the cadence control is present in every mode.
+(function () {
+    var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+    function field(label, path, value, type, numeric, attrs) {
+        return '<label>' + esc(label) + '<input aria-label="' + esc(label) + '" class="form-input" type="' + (type || 'text') + '" value="' + esc(value) + '" ' + (attrs || '') + ' onchange="window.HortOpsJobEditModal.setRecurrenceField(\'' + path + '\', ' + (numeric ? 'Number(this.value)' : 'this.value') + ')" /></label>';
     }
-
-    if (data.frequencyType === 'one_off') {
-      return '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">' +
-        '<div>' +
-          '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Frequency Cadence</label>' +
-          '<select class="form-select" onchange="window.HortOpsJobEditModal.updateField(\'frequencyType\', this.value); window.HortOpsJobEditModal.renderModal();">' +
-            '<option value="recurring_weeks">Recurring Every N Weeks</option>' +
-            '<option value="annual">Annual Shift</option>' +
-            '<option value="one_off" selected>One-off Shift</option>' +
-          '</select>' +
-        '</div>' +
-        '<div>' +
-          '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Target Overtime Date *</label>' +
-          '<input type="date" class="form-input" required value="' + escAttr(data.targetDate || '') + '" onchange="window.HortOpsJobEditModal.updateField(\'targetDate\', this.value)" />' +
-        '</div>' +
-      '</div>';
+    function select(label, path, value, options, numeric) {
+        return '<label>' + esc(label) + '<select aria-label="' + esc(label) + '" class="form-select" onchange="window.HortOpsJobEditModal.setRecurrenceField(\'' + path + '\', ' + (numeric ? 'Number(this.value)' : 'this.value') + ')">' +
+            options.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(value) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>';
     }
-
-    // Default: Recurring Every N Weeks
-    return '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">' +
-      '<div>' +
-        '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Frequency Cadence</label>' +
-        '<select class="form-select" onchange="window.HortOpsJobEditModal.updateField(\'frequencyType\', this.value); window.HortOpsJobEditModal.renderModal();">' +
-          '<option value="recurring_weeks" selected>Recurring Every N Weeks</option>' +
-          '<option value="annual">Annual Shift</option>' +
-          '<option value="one_off">One-off Shift</option>' +
-        '</select>' +
-      '</div>' +
-      '<div>' +
-        '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Interval (Every N Weeks)</label>' +
-        '<input type="number" min="1" max="52" class="form-input" value="' + (data.intervalWeeks || 4) + '" oninput="window.HortOpsJobEditModal.updateField(\'intervalWeeks\', parseInt(this.value, 10))" />' +
-      '</div>' +
-    '</div>' +
-    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: var(--slate-50); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--slate-200);">' +
-      '<div>' +
-        '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Anchor Start Date (Required for recurring)</label>' +
-        '<input type="date" class="form-input" required value="' + escAttr(data.anchorDate || '') + '" onchange="window.HortOpsJobEditModal.handleAnchorDateChange(this.value)" />' +
-        '<span style="font-size: 11px; color: var(--slate-500);">Specific date job must start from</span>' +
-      '</div>' +
-      '<div>' +
-        '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Anchor Week</label>' +
-        '<input type="number" min="1" max="53" class="form-input" id="jem-anchor-week" value="' + (data.anchorWeek || 1) + '" oninput="window.HortOpsJobEditModal.updateField(\'anchorWeek\', parseInt(this.value, 10))" />' +
-        '<span style="font-size: 11px; color: var(--slate-500);">Starting baseline week</span>' +
-      '</div>' +
-    '</div>';
+    function days(path, rule) {
+        return '<div class="recurrence-days">' + [[6,'Saturday'],[0,'Sunday'],[5,'Friday public holidays'],[1,'Monday public holidays']].map(function (d) {
+            return '<label><input type="checkbox"' + ((rule.days || []).indexOf(d[0]) !== -1 ? ' checked' : '') + ' onchange="window.HortOpsJobEditModal.setRecurrenceDay(\'' + path + '.days\',' + d[0] + ',this.checked)" /> ' + d[1] + '</label>';
+        }).join('') + '<label><input type="checkbox"' + (rule.includePublicHolidays ? ' checked' : '') + ' onchange="window.HortOpsJobEditModal.setRecurrenceField(\'' + path + '.includePublicHolidays\',this.checked)" /> Also include eligible Friday/Monday public holidays in interval weeks</label></div>';
+    }
+  function renderDateCalendars(dates, exemptions, exemptionMode) {
+    var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var scheduled = {};
+    var publicHolidays = {};
+    var months = {};
+    (dates || []).forEach(function(date) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+      scheduled[date] = true;
+      months[date.slice(0, 7)] = true;
+      var year = Number(date.slice(0, 4));
+      if (window.HortOpsData && typeof window.HortOpsData.getPublicHolidaysForYear === 'function') {
+        var holiday = window.HortOpsData.getPublicHolidaysForYear(year).find(function(item) { return item.date === date; });
+        if (holiday) publicHolidays[date] = holiday.name;
+      }
+    });
+    var monthKeys = Object.keys(months).sort();
+    if (!monthKeys.length) return '<div class="recurrence-date-preview-empty">No scheduled dates fall within this preview horizon.</div>';
+    return '<div class="recurrence-date-calendar-grid" aria-label="Scheduled date preview">' + monthKeys.map(function(key) {
+      var parts = key.split('-');
+      var year = Number(parts[0]), month = Number(parts[1]) - 1;
+      var firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
+      var daysInMonth = new Date(year, month + 1, 0).getDate();
+      var cells = [];
+      for (var blank = 0; blank < firstDay; blank++) cells.push('<span class="recurrence-calendar-day is-empty" aria-hidden="true"></span>');
+      for (var day = 1; day <= daysInMonth; day++) {
+        var iso = key + '-' + String(day).padStart(2, '0');
+        var isScheduled = !!scheduled[iso];
+        var holidayName = publicHolidays[iso];
+        var isExempt = (exemptions || []).indexOf(iso) !== -1;
+        cells.push('<button type="button" class="recurrence-calendar-day' + (isScheduled ? ' is-scheduled' : '') + (holidayName ? ' is-public-holiday' : '') + (isExempt ? ' is-exempt' : '') + (exemptionMode && isScheduled ? ' is-exemption-selectable' : '') + '"' + (isScheduled ? ' aria-label="' + (isExempt ? 'Exempted ' : 'Scheduled ') + esc(iso) + '"' : ' disabled aria-hidden="true"') + (exemptionMode && isScheduled ? ' onclick="window.HortOpsJobEditModal.toggleRecurrenceExemption(\'' + iso + '\')"' : '') + '>' + day + '</button>');
+      }
+      return '<section class="recurrence-calendar-month" aria-label="' + esc(monthNames[month] + ' ' + year) + '">' +
+        '<h4>' + esc(monthNames[month]) + ' ' + year + '</h4>' +
+        '<div class="recurrence-calendar-weekdays"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>' +
+        '<div class="recurrence-calendar-days">' + cells.join('') + '</div>' +
+      '</section>';
+    }).join('') + '</div>';
   }
-};
+
+  function render(ctx) {
+        var d = ctx.data, type = d.frequencyType === 'recurring_cadence' ? 'recurring_weeks' : d.frequencyType;
+        var html = '<div class="recurrence-editor"><label>Frequency Cadence<select id="job-cadence" class="form-select" onchange="window.HortOpsJobEditModal.setFrequencyType(this.value)">' +
+            [['recurring_weeks','Recurring every N weeks'],['annual','Annual date'],['seasonal','Annual seasonal series'],['one_off','One-off shift'],['work_pattern','Multiple days / public holidays']].map(function (o) {
+                return '<option value="' + o[0] + '"' + (type === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+            }).join('') + '</select></label><div class="recurrence-fields">';
+        var year = (window.HortOpsApp.state.currentYear || new Date().getFullYear()), r;
+        if (type === 'one_off') {
+            html += field('Overtime date', 'targetDate', d.targetDate, 'date',false,'required');
+        } else if (type === 'recurring_weeks') {
+            html += field('First occurrence / anchor date', 'anchorDate', d.anchorDate, 'date',false,'required') +
+                field('Every N weeks', 'intervalWeeks', d.intervalWeeks || 1, 'number', true, 'min="1" max="520"') +
+                select('Operating day', 'preferredDay', d.preferredDay || 'saturday', [['saturday','Saturday'],['sunday','Sunday'],['friday','Friday public holiday'],['monday','Monday public holiday']]);
+        } else if (type === 'annual') {
+            r = d.annualRule || {};
+            html += select('Annual date rule','annualRule.kind',r.kind || 'fixed',[['fixed','Exact month and day'],['weekday','Nth weekend day of month']]) +
+                field('First year','annualRule.startYear',r.startYear || year,'number',true,'min="2020" max="2100"') +
+                select('Month','annualRule.month',r.month || '', [['','Choose month']].concat(['January','February','March','April','May','June','July','August','September','October','November','December'].map(function (m,i) {return [i+1,m];})),true);
+            if (r.kind === 'weekday') {
+                html += select('Which occurrence','annualRule.ordinal',r.ordinal || '',[['','Choose occurrence'],[1,'First'],[2,'Second'],[3,'Third'],[4,'Fourth'],[5,'Fifth'],[-1,'Last']],true) +
+                    select('Weekend day','annualRule.weekday',r.weekday == null ? '' : r.weekday,[['','Choose day'],[6,'Saturday'],[0,'Sunday']],true);
+            } else html += field('Day of month','annualRule.day',r.day,'number',true,'min="1" max="31"');
+        } else if (type === 'seasonal') {
+            r = d.seasonalRule || {};
+            html += field('First season starts in year','seasonalRule.firstYear',r.firstYear || year,'number',true,'min="2020" max="2100"') +
+                field('Season starts (MM-DD)','seasonalRule.start',r.start,'text',false,'placeholder="11-01"') +
+                field('Season ends, inclusive (MM-DD)','seasonalRule.end',r.end,'text',false,'placeholder="02-28"') +
+                field('Interval anchor in season (MM-DD)','seasonalRule.anchor',r.anchor,'text',false,'placeholder="11-07"') +
+                field('Every N weeks','seasonalRule.intervalWeeks',r.intervalWeeks || 1,'number',true,'min="1" max="52"');
+        } else if (type === 'work_pattern') {
+            r = d.workPattern || {};
+            html += select('Pattern','workPattern.mode',r.mode || 'weekly',[['weekly','Selected days every N weeks'],['run','One consecutive operating-day run']]) +
+                field('First date','workPattern.startDate',r.startDate,'date',false,'required');
+            if (r.mode === 'run') html += field('Run length (calendar days)','workPattern.runLength',r.runLength || 1,'number',true,'min="1" max="4"');
+            else html += field('Every N weeks','workPattern.intervalWeeks',r.intervalWeeks || 1,'number',true,'min="1" max="52"');
+            html += field('Optional final pattern date','workPattern.endDate',r.endDate,'date');
+        }
+        html += '</div>';
+        if (type === 'seasonal' || (type === 'work_pattern' && r.mode !== 'run')) html += days(type === 'seasonal' ? 'seasonalRule' : 'workPattern',r);
+        if (type !== 'one_off' && !(type === 'work_pattern' && r.mode === 'run')) {
+            var end = d.scheduleEnd || {mode:'never'};
+            html += '<div class="recurrence-fields">' + select('End series','scheduleEnd.mode',end.mode,[['never',type === 'seasonal' ? 'At season end, repeat each year' : 'No end'],['on_date','On inclusive date'],['after_count',type === 'seasonal' ? 'After N occurrences per season' : 'After N occurrences']]);
+            if (end.mode === 'on_date') html += field('Inclusive end date','scheduleEnd.date',end.date,'date');
+            if (end.mode === 'after_count') html += field(type === 'seasonal' ? 'Staffable occurrences per season' : 'Staffable occurrences','scheduleEnd.count',end.count,'number',true,'min="1" max="10000"');
+            html += '</div>';
+        }
+        html += '<p>Operating dates are Saturdays and Sundays, plus Friday/Monday public holidays recognised by the application. Each selected day counts as one occurrence.</p>';
+        if (type === 'annual') html += '<p>An exact annual date outside the operating calendar is skipped, not moved. February 29 occurs only in eligible leap years.</p>';
+        if (type === 'seasonal') html += '<p>An end month/day earlier than the start means the following year. Interval weeks and occurrence counts continue across New Year; the count starts afresh each season.</p>';
+        var recurrence = window.HortOpsRecurrence, check = recurrence.validate(d);
+        var range = window.HortOpsApp.state.uiState && window.HortOpsApp.state.uiState.planningRange;
+        var from = range ? range.start : String(type === 'annual' ? (d.annualRule || {}).startYear || year : type === 'seasonal' ? (d.seasonalRule || {}).firstYear || year : year) + '-01-01';
+        var to = range ? range.end : String(Number(from.slice(0,4))+1) + '-12-31';
+        var exemptions = Array.from(new Set([].concat(d.excludedDates || [], (d.workPattern && d.workPattern.excludedDates) || []))).sort();
+        var previewData = JSON.parse(JSON.stringify(d)); delete previewData.excludedDates;
+        if (previewData.workPattern) previewData.workPattern.excludedDates = [];
+        var dates = check.valid ? recurrence.datesInRange(previewData,from,to) : [];
+        var exemptionEligible = type !== 'one_off';
+        var exemptionMode = exemptionEligible && window.HortOpsJobEditModal.recurrencePreviewMode === 'exemption';
+        var slider = exemptionEligible ? '<div class="recurrence-preview-slider"><button type="button" class="' + (!exemptionMode ? 'is-active' : '') + '" onclick="window.HortOpsJobEditModal.setRecurrencePreviewMode(\'preview\')">Preview</button><button type="button" class="' + (exemptionMode ? 'is-active' : '') + '" onclick="window.HortOpsJobEditModal.setRecurrencePreviewMode(\'exemption\')">Exemption</button></div>' : 'Preview dates';
+        var exemptionList = exemptions.length ? '<section class="recurrence-exemption-list"><h4>Exemption dates</h4><div>' + exemptions.map(function(date) { return '<button type="button" class="recurrence-exemption-chip" onclick="window.HortOpsJobEditModal.toggleRecurrenceExemption(\'' + esc(date) + '\')">' + esc(date) + ' ×</button>'; }).join('') + '</div></section>' : '';
+        html += '<div class="recurrence-preview" role="status"><div class="recurrence-date-preview-heading">' + slider + '<span>' + (check.valid ? dates.length + ' occurrence(s)' : '') + '</span></div>' + (check.valid ? renderDateCalendars(dates,exemptions,exemptionMode) : '<div class="recurrence-date-preview-empty">' + esc(check.error) + '</div>') + exemptionList + '</div></div>';
+        return html;
+    }
+    window.HortOpsJobEditRecurrenceForm = {render:render,renderCanonical:render};
+}());
 
 </script>
   <script data-source="js/components/jobEditModal/formValidator.js">
 /* === INLINED: js/components/jobEditModal/formValidator.js === */
-// Job Edit Modal Form Validator Sub-module
-// Performs pre-save validation across recurrence rules, frequency requirements, and dates.
+// Job editor validation uses the same dates as preview, planner and rostering.
 window.HortOpsJobEditFormValidator = {
-  validate: function(formData) {
-    if (!formData || !formData.name || !formData.name.trim()) {
-      return { valid: false, message: 'Please specify a valid Job Name.' };
-    }
-
-    // P0-07, P0-09, N-P1-02: Validation by frequency type
-    if (formData.frequencyType === 'work_pattern') {
-      var patternRules = window.HortOpsPlanningRules;
-      if (!patternRules) return {valid:false,message:'Work pattern validation unavailable.'};
-      var patternCheck = patternRules.validatePattern(formData);
-      if (!patternCheck.valid) return {valid:false,message:patternCheck.error};
-    }
-    if (formData.frequencyType === 'one_off') {
-      if (!formData.targetDate) {
-        return { valid: false, message: 'Please specify an overtime date for this one-off shift.' };
-      }
-      var d = new Date(formData.targetDate + 'T12:00:00');
-      var dayOfWeek = d.getDay(); // 0 Sun, 1 Mon, 2 Tue, 3 Wed, 4 Thu, 5 Fri, 6 Sat
-      if (dayOfWeek >= 2 && dayOfWeek <= 4) {
-        return {
-          valid: false,
-          message: 'Unsupported one-off overtime date: Scheduled overtime operations occur exclusively on Friday, Saturday, Sunday, or Monday.'
-        };
-      }
-    } else if (formData.frequencyType === 'annual') {
-      if (!formData.targetMonth) {
-        formData.targetMonth = 2; // Default February
-      }
-    } else if (formData.frequencyType === 'recurring_weeks') {
-      if (!formData.anchorDate) {
-        return { valid: false, message: 'Please specify an Anchor Date (YYYY-MM-DD) for this recurring job.' };
-      }
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.anchorDate)) {
-        return { valid: false, message: 'Invalid Anchor Date format. Please use YYYY-MM-DD.' };
-      }
-
-      var anchorDt = new Date(formData.anchorDate + 'T12:00:00');
-      var anchorDayOfWeek = anchorDt.getDay(); // 0 Sun, 1 Mon, 5 Fri, 6 Sat
-      var pref = (formData.preferredDay || 'saturday').toLowerCase();
-      var expectedDayOfWeek = (pref === 'sunday') ? 0
-                            : (pref === 'monday' || pref === 'monday_post_holiday') ? 1
-                            : (pref === 'friday' || pref === 'friday_pre_holiday') ? 5
-                            : 6;
-      if (anchorDayOfWeek !== expectedDayOfWeek) {
-        var dayNames = { 0: 'Sunday', 1: 'Monday', 5: 'Friday', 6: 'Saturday' };
-        return {
-          valid: false,
-          message: 'Anchor Start Date must fall on the selected preferred overtime day (' + (formData.preferredDay || 'Saturday') + '). The selected date falls on ' + (dayNames[anchorDayOfWeek] || 'an unsupported weekday') + '.'
-        };
-      }
-
-      if (window.HortOpsDateUtils && window.HortOpsDateUtils.calculateWeekFromDate) {
-        formData.anchorWeek = window.HortOpsDateUtils.calculateWeekFromDate(formData.anchorDate);
-      }
-      if (!formData.intervalWeeks || formData.intervalWeeks < 1) {
-        formData.intervalWeeks = 4;
-      }
-    }
-
-    if (!formData.staffingSections || formData.staffingSections.teams !== false) {
-      var primary = formData.primaryTeam || formData.defaultTeam || 'Parks';
-      formData.primaryTeam = primary;
-      formData.defaultTeam = primary;
-      formData.preferredTeam = primary;
-    }
-
-    return { valid: true };
-  },
+    validate: function(formData) {
+        if (!formData || !formData.name || !formData.name.trim()) return {valid:false,message:'Please specify a valid Job Name.'};
+        if (!window.HortOpsRecurrence) return {valid:false,message:'Canonical recurrence validation unavailable.'};
+        var check = window.HortOpsRecurrence.validate(formData);
+        if (!check.valid) return {valid:false,message:check.error};
+        if (!formData.staffingSections || formData.staffingSections.teams !== false) {
+            var primary = formData.primaryTeam || formData.defaultTeam || 'Parks';
+            formData.primaryTeam = primary;
+            formData.defaultTeam = primary;
+            formData.preferredTeam = primary;
+        }
+        return {valid:true};
+    },
   // Offline17.5f: Resolves chronologically ordered occurrence dates for an instruction
   resolveInstructionOccurrences: function(job, startShiftIdOrDate, repeatCount) {
     if (!job || !startShiftIdOrDate) return [];
@@ -18036,10 +18688,10 @@ window.HortOpsJobEditFormValidator = {
   // Offline17.5i: Detects if proposed Job mutations alter operational occurrence generation
   doesProposedJobChangeOperationalSchedule: function(existingJob, proposedJob) {
     if (!existingJob || !proposedJob) return false;
-    var recurrenceFields = ['frequencyType', 'intervalWeeks', 'anchorDate', 'anchorWeek', 'targetDate', 'targetMonth', 'preferredDay', 'status', 'workPattern'];
+        var recurrenceFields = ['frequencyType', 'intervalWeeks', 'anchorDate', 'anchorWeek', 'targetDate', 'targetMonth', 'preferredDay', 'status', 'workPattern', 'annualRule', 'seasonalRule', 'scheduleEnd'];
     return recurrenceFields.some(function(field) {
       if (proposedJob[field] === undefined && existingJob[field] === undefined) return false;
-      if (field === 'workPattern') return JSON.stringify(proposedJob[field] || null) !== JSON.stringify(existingJob[field] || null);
+            if (['workPattern','annualRule','seasonalRule','scheduleEnd'].indexOf(field) !== -1) return JSON.stringify(proposedJob[field] || null) !== JSON.stringify(existingJob[field] || null);
       return String(proposedJob[field] || '') !== String(existingJob[field] || '');
     });
   },
@@ -18409,13 +19061,17 @@ window.HortOpsJobEditModal = {
                 '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Color Tag</label>' +
                 '<input type="color" class="form-input" style="height: 32px; padding: 2px;" value="' + escapeAttr(safeColor(data.color, '#047857')) + '" onchange="window.HortOpsJobEditModal.updateField(\'color\', this.value)" />' +
               '</div>' +
-            '</div>' +
+      '</div>' +
+      '<div>' +
+        '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Location</label>' +
+        '<input type="text" class="form-input" value="' + escapeAttr(data.locationDetails || '') + '" oninput="window.HortOpsJobEditModal.updateField(\'locationDetails\', this.value)" />' +
+      '</div>' +
 
-            // Row 2: Team Preferences & Exclusive Rules
+      // Row 2: Team Preferences & Exclusive Rules
             teamPreferencesHtml +
 
             // Row 3: Operational Requirements
-            '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.75rem;">' +
+        '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">' +
               '<div>' +
                 '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Crew Size Required</label>' +
                 '<input type="number" min="1" max="20" class="form-input" value="' + (data.crewSize || 3) + '" oninput="window.HortOpsJobEditModal.updateField(\'crewSize\', parseInt(this.value, 10))" />' +
@@ -18428,16 +19084,10 @@ window.HortOpsJobEditModal = {
                 '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Start Time</label>' +
                 '<input type="text" class="form-input" value="' + escapeAttr(data.startTime || '06:00 AM') + '" oninput="window.HortOpsJobEditModal.updateField(\'startTime\', this.value)" />' +
               '</div>' +
-              '<div>' +
-                '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Preferred Day</label>' +
-                '<select class="form-select" onchange="window.HortOpsJobEditModal.updateField(\'preferredDay\', this.value)">' +
-                  '<option value="saturday"' + (data.preferredDay === 'saturday' ? ' selected' : '') + '>Saturday</option>' +
-                  '<option value="sunday"' + (data.preferredDay === 'sunday' ? ' selected' : '') + '>Sunday</option>' +
-                  '<option value="friday"' + (data.preferredDay === 'friday' ? ' selected' : '') + '>Friday</option>' +
-                  '<option value="monday"' + (data.preferredDay === 'monday' ? ' selected' : '') + '>Monday</option>' +
-                '</select>' +
-              '</div>' +
             '</div>' +
+
+            // Row 4: Cadence & Frequency-Specific Configuration
+            recurrenceFormHtml +
 
             // Plant Operator Requirement (Mandate Section 10)
             '<div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 0.5rem 0.75rem;">' +
@@ -18465,16 +19115,7 @@ window.HortOpsJobEditModal = {
               '</div>' +
             '</div>' +
 
-            // Row 4: Cadence & Frequency-Specific Configuration (P0-07)
-            recurrenceFormHtml +
-
-            // Row 5: Location Details
-            '<div>' +
-              '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Location Details</label>' +
-              '<input type="text" class="form-input" value="' + escapeAttr(data.locationDetails || '') + '" oninput="window.HortOpsJobEditModal.updateField(\'locationDetails\', this.value)" />' +
-            '</div>' +
-
-            // Row 6: Regulatory Permits & Approvals
+      // Row 5: Regulatory Permits & Approvals
             '<div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.75rem;">' +
               '<label style="display: block; font-weight: 700; font-size: 12px; color: #92400e; margin-bottom: 0.5rem;">Regulatory Permits & Corridor Approvals</label>' +
               '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">' +
@@ -18857,7 +19498,7 @@ window.HortOpsExportModal = {
 
   exportJobs: function() {
     var jobs = (window.HortOpsApp && window.HortOpsApp.state && window.HortOpsApp.state.jobs) || [];
-    var headers = ['ID', 'Name', 'Category', 'FrequencyType', 'IntervalWeeks', 'AnchorDate', 'PrimaryTeam', 'SecondaryTeam', 'TertiaryTeam', 'IsExclusive', 'ExclusiveTeams', 'CrewSize', 'DurationHours', 'StartTime', 'Status', 'TeamSuitabilityEnabled', 'PoolsEnabled'];
+    var headers = ['ID', 'Name', 'Category', 'FrequencyType', 'IntervalWeeks', 'AnchorDate', 'PrimaryTeam', 'SecondaryTeam', 'TertiaryTeam', 'IsExclusive', 'ExclusiveTeams', 'CrewSize', 'DurationHours', 'StartTime', 'Status', 'TeamSuitabilityEnabled', 'PoolsEnabled', 'TargetDate', 'AnnualRule', 'SeasonalRule', 'WorkPattern', 'ScheduleEnd'];
     var rows = jobs.map(function(j) {
       var excl = (j.exclusiveTeams || []).join(';');
       return [
@@ -18877,7 +19518,12 @@ window.HortOpsExportModal = {
         j.startTime,
         j.status,
         !window.HortOpsPlanningRules || window.HortOpsPlanningRules.sectionEnabled(j, 'teams') ? 'YES' : 'NO',
-        !window.HortOpsPlanningRules || window.HortOpsPlanningRules.sectionEnabled(j, 'pools') ? 'YES' : 'NO'
+      !window.HortOpsPlanningRules || window.HortOpsPlanningRules.sectionEnabled(j, 'pools') ? 'YES' : 'NO',
+      j.targetDate || '',
+      JSON.stringify(j.annualRule || null),
+      JSON.stringify(j.seasonalRule || null),
+      JSON.stringify(j.workPattern || null),
+      JSON.stringify(j.scheduleEnd || null)
       ];
     });
 
@@ -18990,7 +19636,7 @@ window.HortOpsImportModal = {
           '</div>' +
 
           // Upload Dropzone
-          '<div style="border: 2px dashed ' + (diff || jsonBackup ? 'var(--emerald-400)' : 'var(--slate-300)') + '; border-radius: 8px; padding: 1.25rem; text-align: center; background: ' + (diff || jsonBackup ? 'var(--emerald-50)' : 'var(--slate-50)') + '; cursor: pointer;" onclick="document.getElementById(\'staff-csv-file-input\').click()">' +
+      '<div id="import-file-dropzone" role="button" tabindex="0" aria-label="Choose or drop a users CSV or workspace JSON file" style="border: 2px dashed ' + (diff || jsonBackup ? 'var(--emerald-400)' : 'var(--slate-300)') + '; border-radius: 8px; padding: 1.25rem; text-align: center; background: ' + (diff || jsonBackup ? 'var(--emerald-50)' : 'var(--slate-50)') + '; cursor: pointer; transition: border-color 120ms ease, background-color 120ms ease;" onclick="document.getElementById(\'staff-csv-file-input\').click()" onkeydown="return window.HortOpsImportModal.handleDropzoneKey(event)" ondragenter="return window.HortOpsImportModal.handleDragEnter(event)" ondragover="return window.HortOpsImportModal.handleDragOver(event)" ondragleave="return window.HortOpsImportModal.handleDragLeave(event)" ondrop="return window.HortOpsImportModal.handleDrop(event)">' +
             '<input type="file" id="staff-csv-file-input" accept=".csv,.json" style="display: none;" onchange="window.HortOpsImportModal.handleFileSelect(event)" />' +
             '<div style="margin-bottom: 0.4rem; color: var(--emerald-700);">' + icons.render('upload', 'w-6 h-6') + '</div>' +
             '<div style="font-size: 13px; font-weight: 700; color: var(--slate-800);">' +
@@ -19134,15 +19780,14 @@ window.HortOpsImportModal = {
     var rows = staffList.map(function(s) {
       return '<tr style="border-bottom: 1px solid var(--slate-100); font-size: 12px;">' +
         '<td style="padding: 0.4rem; font-weight: 600;">' + esc(s.name) + '</td>' +
-        '<td style="padding: 0.4rem;">' + esc(s.email || '—') + '</td>' +
         '<td style="padding: 0.4rem;">' + esc(s.department) + '</td>' +
         '<td style="padding: 0.4rem;">' + esc(s.team) + '</td>' +
         '<td style="padding: 0.4rem;">' + esc(s.role) + '</td>' +
       '</tr>';
     }).join('');
 
-    return '<table style="width: 100%; border-collapse: collapse;">' +
-      '<thead><tr style="background: var(--slate-50); font-size: 11px; text-transform: uppercase; color: var(--slate-600); text-align: left;"><th style="padding: 0.4rem;">Name</th><th style="padding: 0.4rem;">Email</th><th style="padding: 0.4rem;">Department</th><th style="padding: 0.4rem;">Team</th><th style="padding: 0.4rem;">Role</th></tr></thead>' +
+        return '<table style="width: 100%; border-collapse: collapse;">' +
+            '<thead><tr style="background: var(--slate-50); font-size: 11px; text-transform: uppercase; color: var(--slate-600); text-align: left;"><th style="padding: 0.4rem;">Name</th><th style="padding: 0.4rem;">Department</th><th style="padding: 0.4rem;">Team</th><th style="padding: 0.4rem;">Role</th></tr></thead>' +
       '<tbody>' + rows + '</tbody>' +
     '</table>';
   },
@@ -19176,16 +19821,71 @@ window.HortOpsImportModal = {
     this.renderModal();
   },
 
+  setDropzoneActive: function(active) {
+    var zone = document.getElementById('import-file-dropzone');
+    if (!zone) return;
+    zone.style.borderColor = active ? 'var(--emerald-600)' : (this.currentDiff || this.pendingJsonBackup ? 'var(--emerald-400)' : 'var(--slate-300)');
+    zone.style.background = active ? 'var(--emerald-100)' : (this.currentDiff || this.pendingJsonBackup ? 'var(--emerald-50)' : 'var(--slate-50)');
+  },
+
+  handleDragEnter: function(event) {
+    event.preventDefault();
+    this.setDropzoneActive(true);
+    return false;
+  },
+
+  handleDragOver: function(event) {
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    this.setDropzoneActive(true);
+    return false;
+  },
+
+  handleDragLeave: function(event) {
+    // Dragging over an inner element emits dragleave on the container too.
+    if (!event.currentTarget || !event.currentTarget.contains(event.relatedTarget)) this.setDropzoneActive(false);
+    return false;
+  },
+
+  handleDrop: function(event) {
+    event.preventDefault();
+    this.setDropzoneActive(false);
+    var files = event.dataTransfer && event.dataTransfer.files;
+    this.handleFile(files && files.length ? files[0] : null);
+    return false;
+  },
+
+  handleDropzoneKey: function(event) {
+    if (event.key !== 'Enter' && event.key !== ' ') return true;
+    event.preventDefault();
+    var input = document.getElementById('staff-csv-file-input');
+    if (input) input.click();
+    return false;
+  },
+
   handleFileSelect: function(e) {
-    var file = e.target.files[0];
+    this.handleFile(e && e.target && e.target.files ? e.target.files[0] : null);
+  },
+
+  handleFile: function(file) {
     if (!file) return;
+
+    var lowerName = String(file.name || '').toLowerCase();
+    if (!lowerName.endsWith('.csv') && !lowerName.endsWith('.json')) {
+      this.fileName = '';
+      this.currentDiff = null;
+      this.pendingJsonBackup = null;
+      this.errorMessage = 'Choose a .csv user table or .json workspace backup.';
+      this.renderModal();
+      return;
+    }
 
     this.fileName = file.name + ' (' + Math.round(file.size / 1024) + ' KB)';
     var self = this;
 
     var reader = new FileReader();
     var writerGeneration = window.HortOpsWriterSession && window.HortOpsWriterSession.status().generation;
-    if (file.name.toLowerCase().endsWith('.json')) {
+    if (lowerName.endsWith('.json')) {
       this.isJsonMode = true;
       reader.onload = function(evt) {
         if (window.HortOpsWriterSession && (!window.HortOpsWriterSession.canWrite() || window.HortOpsWriterSession.status().generation !== writerGeneration)) return;
@@ -21039,6 +21739,45 @@ window.HortOpsResetWorkspaceModal = {
 };
 
 </script>
+  <script data-source="js/components/jobResetModal.js">
+/* === INLINED: js/components/jobResetModal.js === */
+window.HortOpsJobResetModal = {
+  jobId: null, scope: 'current_and_future',
+  open: function(jobId) { this.jobId = jobId; this.scope = 'current_and_future'; if (window.HortOpsModalUtils) window.HortOpsModalUtils.lockBackgroundScroll(); this.render(); },
+  close: function() { var root = document.getElementById('job-reset-modal-root'); if (root) root.innerHTML = ''; this.jobId = null; if (window.HortOpsModalUtils) window.HortOpsModalUtils.unlockBackgroundScroll(); },
+  setScope: function(scope) { this.scope = scope === 'all' ? 'all' : 'current_and_future'; this.render(); },
+  setConfirmationState: function(confirmed) {
+    var button = document.getElementById('job-reset-confirm');
+    if (!button) return;
+    button.disabled = !confirmed;
+    button.setAttribute('aria-disabled', confirmed ? 'false' : 'true');
+    // Match the Workspace DANGER-reset affordance: the action is visibly
+    // unavailable until the exact confirmation has been typed.
+    button.style.setProperty('opacity', confirmed ? '1' : '0.5', 'important');
+    button.style.setProperty('cursor', confirmed ? 'pointer' : 'not-allowed', 'important');
+    button.style.setProperty('filter', confirmed ? 'none' : 'saturate(0.72)', 'important');
+  },
+  confirmInput: function(value) { this.setConfirmationState(String(value || '') === 'RESET'); },
+  execute: function() {
+    var input = document.getElementById('job-reset-confirmation'); if (!input || input.value !== 'RESET') return;
+    var feedback = document.getElementById('job-reset-feedback'), result;
+    try { result = window.HortOpsApp.resetJobAllocations(this.jobId, this.scope); }
+    catch (error) { result = { success: false, error: error && error.message ? error.message : 'Reset could not be completed.' }; }
+    if (!result.success) { feedback.style.display = 'block'; feedback.textContent = result.error || 'Reset failed; no data was changed.'; return; }
+    feedback.style.display = 'block'; feedback.style.background = 'var(--emerald-50)'; feedback.style.borderColor = 'var(--emerald-200)'; feedback.style.color = 'var(--emerald-800)';
+    feedback.textContent = 'Reset complete: cleared ' + result.counts.cleared + ' live record(s); retained ' + result.retainedSnapshots + ' historical snapshot(s).';
+    this.setConfirmationState(false);
+  },
+  render: function() {
+    var root = document.getElementById('job-reset-modal-root'), app = window.HortOpsApp; if (!root || !this.jobId) return;
+    var job = (app.state.jobs || []).find(function(item) { return item.id === window.HortOpsJobResetModal.jobId; }); if (!job) return this.close();
+    var counts = app.getJobAllocationResetPreview(this.jobId, this.scope), danger = this.scope === 'all';
+    var esc = window.HortOpsSecurityUtils.escapeHtml;
+    root.innerHTML = '<div class="modal-overlay" onclick="if(event.target===this)window.HortOpsJobResetModal.close()"><div class="modal-card modal-md" role="dialog" aria-modal="true" aria-labelledby="job-reset-title" style="max-width:620px"><div class="modal-header" style="'+(danger?'background:#fff1f2;border-bottom:1px solid #fecdd3':'')+'"><div><h3 id="job-reset-title">Reset allocations</h3><div style="font-size:12px;color:var(--slate-500)">'+esc(job.name)+'</div></div><button class="modal-close-btn" aria-label="Close" onclick="window.HortOpsJobResetModal.close()">×</button></div><div class="modal-body" style="display:flex;flex-direction:column;gap:12px"><p style="margin:0">The job definition, staff records, absences, refusals, and historical snapshots remain unchanged.</p><label style="padding:10px;border:1px solid '+(!danger?'var(--emerald-300);background:var(--emerald-50)':'var(--slate-200)')+';border-radius:6px"><input type="radio" name="scope" '+(!danger?'checked':'')+' onchange="window.HortOpsJobResetModal.setScope(\'current_and_future\')"> <strong>Reset current and future allocations</strong><br><small>Clears commitments dated '+counts.today+' or later.</small></label><label style="padding:10px;border:1px solid '+(danger?'#fda4af;background:#fff1f2':'var(--slate-200)')+';border-radius:6px"><input type="radio" name="scope" '+(danger?'checked':'')+' onchange="window.HortOpsJobResetModal.setScope(\'all\')"> <strong style="color:#b91c1c">Reset all allocations — DANGER</strong><br><small>Clears every live commitment; snapshots remain audit history.</small></label><div style="display:grid;grid-template-columns:1fr auto;gap:5px;padding:10px;border:1px solid var(--slate-200);border-radius:6px;background:var(--slate-50);font-size:13px"><span>Assignments</span><b>'+counts.assignments+'</b><span>Permit overrides</span><b>'+counts.permitOverrides+'</b><span>Rostering instructions / provenance</span><b>'+counts.rosteringInstructions+' / '+counts.rosteringProvenance+'</b><span>Snapshots retained</span><b>'+counts.historicalSnapshots+'</b></div><label>Type <code>RESET</code> to enable the reset action<input id="job-reset-confirmation" class="form-input" autocomplete="off" oninput="window.HortOpsJobResetModal.confirmInput(this.value)"></label><div id="job-reset-feedback" role="status" style="display:none;padding:9px;border:1px solid #fecaca;border-radius:6px;color:#b91c1c"></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="window.HortOpsJobResetModal.close()">Cancel</button><button id="job-reset-confirm" class="btn '+(danger?'btn-danger':'btn-primary')+'" disabled aria-disabled="true" style="opacity:0.5;cursor:not-allowed;filter:saturate(0.72)" onclick="window.HortOpsJobResetModal.execute()">Reset allocations</button></div></div></div>';
+  }
+};
+
+</script>
   <script data-source="js/components/storageHealthModal.js">
 /* === INLINED: js/components/storageHealthModal.js === */
 // Storage Quota & Health Monitoring Modal Component (Stage 2 Mandate)
@@ -21954,6 +22693,62 @@ window.HortOpsQuarantineViewerModal = window.HortOpsQuarantineModal;
 })();
 
 </script>
+  <script data-source="js/components/cadenceSwitchFix.js">
+/* === INLINED: js/components/cadenceSwitchFix.js === */
+// One explicit change path for every cadence; keep drafts while switching.
+(function () {
+  var modal = window.HortOpsJobEditModal;
+  modal.recurrencePreviewMode = 'preview';
+  modal.setRecurrencePreviewMode = function(mode) {
+    this.recurrencePreviewMode = mode === 'exemption' ? 'exemption' : 'preview';
+    this.renderModal();
+  };
+  modal.toggleRecurrenceExemption = function(date) {
+    var d = this.formData || this.data;
+    if (!d || d.frequencyType === 'one_off' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    var dates = Array.from(new Set([].concat(d.excludedDates || [], (d.workPattern && d.workPattern.excludedDates) || [])));
+    var index = dates.indexOf(date);
+    if (index === -1) dates.push(date); else dates.splice(index, 1);
+    d.excludedDates = dates.sort();
+    if (d.workPattern) d.workPattern.excludedDates = [];
+    this.renderModal();
+  };
+    window.HortOpsJobEditRecurrenceForm.render = window.HortOpsJobEditRecurrenceForm.renderCanonical;
+    modal.setFrequencyType = function (type) {
+        if (['one_off','annual','seasonal','recurring_weeks','work_pattern'].indexOf(type) === -1) return;
+        var d = this.formData || this.data;
+        if (!d) return;
+        this._cadenceDrafts = this._cadenceDrafts || {};
+        this._cadenceDrafts[d.frequencyType] = JSON.parse(JSON.stringify(d.scheduleEnd || {mode:'never'}));
+        d.frequencyType = type;
+        d.scheduleEnd = this._cadenceDrafts[type] || {mode:'never'};
+        var year = window.HortOpsApp.state.currentYear;
+        if (type === 'annual' && !d.annualRule) d.annualRule = {kind:'fixed',startYear:year};
+        if (type === 'seasonal' && !d.seasonalRule) d.seasonalRule = {firstYear:year,start:'',end:'',anchor:'',intervalWeeks:1,days:[6],includePublicHolidays:false};
+        if (type === 'work_pattern' && !d.workPattern) d.workPattern = {mode:'weekly',startDate:'',intervalWeeks:1,runLength:1,days:[6,0],includePublicHolidays:false,excludedDates:[]};
+        this.renderModal();
+    };
+    modal.setRecurrenceField = function (path, value) {
+        if (!/^(targetDate|anchorDate|intervalWeeks|preferredDay|annualRule\.(kind|startYear|month|day|weekday|ordinal)|seasonalRule\.(firstYear|start|end|anchor|intervalWeeks|includePublicHolidays)|workPattern\.(mode|startDate|endDate|intervalWeeks|runLength|includePublicHolidays)|scheduleEnd\.(mode|date|count))$/.test(path)) return;
+        var d = this.formData || this.data, parts = path.split('.');
+        if (!d) return;
+        if (parts.length === 1) d[path] = value;
+        else { d[parts[0]] = d[parts[0]] || {}; d[parts[0]][parts[1]] = value; }
+        this.renderModal();
+    };
+    modal.setRecurrenceDay = function (path, day, checked) {
+        if (['seasonalRule.days','workPattern.days'].indexOf(path) === -1 || [0,1,5,6].indexOf(day) === -1) return;
+        var d = this.formData || this.data, r = d && d[path.split('.')[0]];
+        if (!r) return;
+        r.days = (r.days || []).filter(function (v) { return v !== day; });
+        if (checked) r.days.push(day);
+        this.renderModal();
+    };
+    var open = modal.open;
+    modal.open = function () { this._cadenceDrafts = {}; return open.apply(this,arguments); };
+}());
+
+</script>
   <script data-source="js/app.js">
 /* === INLINED: js/app.js === */
 // Main Application Controller & State Store
@@ -22790,13 +23585,16 @@ window.HortOpsApp = {
 
   recomputeDigest: function() {
     var scheduler = window.HortOpsScheduler;
-    var digest = scheduler.generateOperationalDigest(
+    var range = this.state.uiState && this.state.uiState.planningRange;
+    var digest = range ? scheduler.generateRangeDigest(this.state.jobs, range.start, range.end, true,
+      this.state.customAssignments, this.state.staffList, this.state.customPermits, this.state.historicalSnapshots) : scheduler.generateOperationalDigest(
       this.state.jobs,
       this.state.currentYear || 2026,
       true,
       this.state.customAssignments,
       this.state.staffList,
-      this.state.customPermits
+      this.state.customPermits,
+      this.state.historicalSnapshots
     );
 
     this.state.slots = digest.slots;
@@ -22882,6 +23680,11 @@ window.HortOpsApp = {
 
   setActiveView: function(viewId) {
     this.state.activeView = viewId;
+    if (viewId === 'forward_planner' && window.HortOpsForwardPlanner) {
+      // Opening the planner always begins at the current operational week.
+      // Within an open planner session, its own navigation remains unchanged.
+      window.HortOpsForwardPlanner.startWeekInitialized = false;
+    }
     if (this.state.uiState && typeof this.state.uiState === 'object') {
       this.state.uiState.activeView = viewId;
     }
@@ -22894,10 +23697,28 @@ window.HortOpsApp = {
     this.state.currentYear = parsedYear;
     if (this.state.uiState && typeof this.state.uiState === 'object') {
       this.state.uiState.currentYear = parsedYear;
+      delete this.state.uiState.planningRange;
     }
     this.recomputeDigest();
     this.renderCurrentView();
     this.saveCurrentWorkspace();
+  },
+
+  setPlanningRange: function(start, end) {
+    var rules = window.HortOpsRecurrence;
+    if (!rules || !rules.isRealDate(start) || !rules.isRealDate(end) || end < start || Number(end.slice(0, 4)) - Number(start.slice(0, 4)) > 5) return { success: false, error: 'Choose an inclusive horizon of up to five years.' };
+    var ui = Object.assign({}, this.state.uiState, { planningRange: { start: start, end: end } });
+    var result = this._commitCanonicalProposal({ uiState: ui });
+    if (!result.success) return result;
+    if (window.HortOpsForwardPlanner) { window.HortOpsForwardPlanner.startWeek = 1; window.HortOpsForwardPlanner.startWeekInitialized = true; }
+    this.recomputeDigest(); this.renderCurrentView();
+    return { success: true };
+  },
+
+  applyPlanningRange: function() {
+    var start = document.getElementById('planning-range-start'), end = document.getElementById('planning-range-end');
+    var result = this.setPlanningRange(start && start.value, end && end.value);
+    if (!result.success) alert(result.error);
   },
 
   updateShiftStaff: function(shiftId, assignedStaffIds) {
@@ -22959,6 +23780,81 @@ window.HortOpsApp = {
     return { success: true, instructionsSealed: instructionsToSeal };
   },
 
+  getJobAllocationResetPreview: function(jobId, scope, state) {
+    state = state || this.state;
+    var today = window.HortOpsDateUtils && window.HortOpsDateUtils.getLocalDateKey ? window.HortOpsDateUtils.getLocalDateKey() : new Date().toISOString().slice(0, 10);
+    var all = scope === 'all';
+    var jobKey = function(key) { key = String(key || ''); return key.indexOf(jobId + '@') === 0 || key.indexOf(jobId + '_') === 0 || key.indexOf(jobId + '-w') === 0 || key.indexOf(jobId + '-oneoff-') === 0; };
+    var recordDate = function(key, item) { var value = item && (item.date || item.startDate); if (/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return value; var values = [key, item && item.sourceShiftId, item && item.startShiftId, item && item.targetShiftId]; for (var i = 0; i < values.length; i++) { var match = String(values[i] || '').match(/\d{4}-\d{2}-\d{2}/); if (match) return match[0]; } return ''; };
+    var scoped = function(key, item) { var date = recordDate(key, item); return all || (date && date >= today); };
+    var counts = { assignments: 0, permitOverrides: 0, rosteringInstructions: 0, rosteringProvenance: 0, historicalSnapshots: 0, today: today };
+    var affectedAssignments = {};
+    Object.keys(state.customAssignments || {}).forEach(function(key) { if (jobKey(key) && scoped(key) && Array.isArray(state.customAssignments[key]) && state.customAssignments[key].length) affectedAssignments[key] = true; });
+    // Retained snapshots are also an assignment fallback. Count occurrences, not
+    // both copies of the same commitment, and honour explicit vacancy overrides.
+    Object.keys(state.historicalSnapshots || {}).forEach(function(key) {
+      var item = state.historicalSnapshots[key];
+      if (!item || !(item.jobId === jobId || jobKey(key) || jobKey(item.shiftId)) || !scoped(key, item)) return;
+      var shiftId = item.shiftId || (jobId + '@' + item.date);
+      var live = state.customAssignments || {};
+      var assigned = live[shiftId] || live[jobId + '@' + item.date] || live[jobId + '_' + item.date] || item.assignedStaffIds || [];
+      if (assigned.length) affectedAssignments[shiftId] = true;
+    });
+    counts.assignments = Object.keys(affectedAssignments).length;
+    Object.keys(state.customPermits || state.permits || {}).forEach(function(key) { var item = (state.customPermits || state.permits || {})[key]; if (jobKey(key) && scoped(key, item)) counts.permitOverrides++; });
+    var instructions = (state.rostering && state.rostering.instructions) || {};
+    Object.keys(instructions).forEach(function(key) { if (instructions[key] && instructions[key].jobId === jobId && (scoped(key, instructions[key]) || instructions[key].status !== 'historical')) counts.rosteringInstructions++; });
+    Object.keys((state.rostering && state.rostering.provenance) || {}).forEach(function(key) { var item = state.rostering.provenance[key] || {}; var linked = jobKey(key) || jobKey(item.sourceShiftId) || jobKey(item.targetShiftId) || (item.instructionId && instructions[item.instructionId] && instructions[item.instructionId].jobId === jobId); if (linked && scoped(key, item)) counts.rosteringProvenance++; });
+    Object.keys(state.historicalSnapshots || {}).forEach(function(key) { var item = state.historicalSnapshots[key]; if (item && (item.jobId === jobId || jobKey(key) || jobKey(item.shiftId))) counts.historicalSnapshots++; });
+    counts.cleared = counts.assignments + counts.permitOverrides + counts.rosteringInstructions + counts.rosteringProvenance;
+    return counts;
+  },
+  resetJobAllocations: function(jobId, scope) {
+    if (scope !== 'current_and_future' && scope !== 'all') return { success: false, error: 'Invalid reset scope' };
+    if (!(this.state.jobs || []).some(function(job) { return job.id === jobId; })) return { success: false, error: 'Job not found' };
+    var counts = this.getJobAllocationResetPreview(jobId, scope, this.state), all = scope === 'all', self = this;
+    var jobKey = function(key) { key = String(key || ''); return key.indexOf(jobId + '@') === 0 || key.indexOf(jobId + '_') === 0 || key.indexOf(jobId + '-w') === 0 || key.indexOf(jobId + '-oneoff-') === 0; };
+    var recordDate = function(key, item) { var value = item && (item.date || item.startDate); if (/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return value; var values = [key, item && item.sourceShiftId, item && item.startShiftId, item && item.targetShiftId]; for (var i = 0; i < values.length; i++) { var match = String(values[i] || '').match(/\d{4}-\d{2}-\d{2}/); if (match) return match[0]; } return ''; };
+    var scoped = function(key, item) { var date = recordDate(key, item); return all || (date && date >= counts.today); };
+    var assignments = JSON.parse(JSON.stringify(this.state.customAssignments || {}));
+    var permits = JSON.parse(JSON.stringify(this.state.customPermits || this.state.permits || {}));
+    var rostering = JSON.parse(JSON.stringify(this.state.rostering || { instructions: {}, provenance: {} }));
+    rostering.instructions = rostering.instructions || {}; rostering.provenance = rostering.provenance || {};
+    Object.keys(assignments).forEach(function(key) { if (jobKey(key) && scoped(key)) delete assignments[key]; });
+    // Absence of an override means "use the saved snapshot", not "vacant".
+    // Preserve the audit record byte-for-byte and explicitly clear its live
+    // projection, including snapshot-only occurrences and legacy ID aliases.
+    Object.keys(this.state.historicalSnapshots || {}).forEach(function(key) {
+      var item = self.state.historicalSnapshots[key];
+      if (!item || !(item.jobId === jobId || jobKey(key) || jobKey(item.shiftId)) || !scoped(key, item)) return;
+      assignments[item.shiftId || (jobId + '@' + item.date)] = [];
+      assignments[jobId + '@' + item.date] = [];
+    });
+    Object.keys(permits).forEach(function(key) { if (jobKey(key) && scoped(key, permits[key])) delete permits[key]; });
+    Object.keys(rostering.instructions).forEach(function(key) {
+      var item = rostering.instructions[key];
+      if (!item || item.jobId !== jobId) return;
+      if (scoped(key, item)) { delete rostering.instructions[key]; return; }
+      // A rule starting in the past can still own future commitments. Stop it
+      // without deleting the explanation for pre-today allocations.
+      if (item.status !== 'historical') {
+        item.status = 'historical';
+        var job = self.state.jobs.find(function(j) { return j.id === jobId; });
+        var source = item.sourceShiftId || item.startShiftId;
+        var series = window.HortOpsRosteringEngine.resolveSeries(job, self.state.allShifts, item.repeatCount + 2, self.state.jobs, source);
+        var start = series.findIndex(function(s) { return s.shiftId === source; });
+        if (start >= 0) item.repeatCount = Math.max(1, series.slice(start, start + item.repeatCount).filter(function(s) { return s.date < counts.today; }).length);
+      }
+    });
+    Object.keys(rostering.provenance).forEach(function(key) { var item = rostering.provenance[key] || {}; var linked = jobKey(key) || jobKey(item.sourceShiftId) || jobKey(item.targetShiftId) || (item.instructionId && self.state.rostering && self.state.rostering.instructions && self.state.rostering.instructions[item.instructionId] && self.state.rostering.instructions[item.instructionId].jobId === jobId); if (linked && scoped(key, item)) delete rostering.provenance[key]; });
+    var commit = this._commitCanonicalProposal({ assignments: assignments, permits: permits, rostering: rostering, historicalSnapshots: this.state.historicalSnapshots });
+    if (!commit.success) return { success: false, error: commit.error || 'Workspace save failed. Reset was not applied.' };
+    this.state.customAssignments = assignments; this.state.assignments = assignments;
+    this.state.customPermits = permits; this.state.permits = permits;
+    this.state.rostering = rostering; this.state.storageStatus = commit.storageMode === 'session-only' ? 'session_only' : 'saved';
+    this.recomputeDigest(); this.renderCurrentView();
+    return { success: true, scope: scope, counts: counts, retainedSnapshots: counts.historicalSnapshots };
+  },
   getJobDependencies: function(jobId, state) {
     state = state || this.state;
     var assignmentsCount = 0;
@@ -23623,7 +24519,9 @@ if (typeof document !== 'undefined') {
         state.customAssignments, state.staffList, state.customPermits,
         state.historicalSnapshots, true);
     }
-    var digest = generate(year);
+    var horizon = state.uiState && state.uiState.planningRange;
+    var digest = horizon && shiftId.slice(-10) >= horizon.start && shiftId.slice(-10) <= horizon.end ? engine.generateRangeDigest(state.jobs, horizon.start, horizon.end, true,
+      state.customAssignments, state.staffList, state.customPermits, state.historicalSnapshots, true) : generate(year);
     if (!digest || !Array.isArray(digest.allShifts)) throw new Error('Saved occurrences cannot be resolved.');
     var allShifts = digest.allShifts;
     var occurrence = allShifts.find(function (shift) { return shift.shiftId === shiftId; });
@@ -23976,6 +24874,32 @@ if (typeof document !== 'undefined') {
 }());
 
 </script>
+  <script data-source="js/components/staffAssignmentContinuityGuide.js">
+/* === INLINED: js/components/staffAssignmentContinuityGuide.js === */
+// Makes the existing fixed/rotation repeat control explicit without changing allocation policy.
+(function () {
+  'use strict';
+  var modal = window.HortOpsStaffAssignModal;
+  if (!modal || typeof modal.renderModal !== 'function') return;
+  var originalRender = modal.renderModal;
+  modal.renderModal = function () {
+    var result = originalRender.apply(this, arguments);
+    var root = document.getElementById('staff-assign-modal-root');
+    if (!root) return result;
+    root.querySelectorAll('.repeat-count-select').forEach(function (select) {
+      select.setAttribute('aria-label', 'Number of following occurrences for this staff assignment');
+      if (select.previousElementSibling && select.previousElementSibling.hasAttribute('data-continuity-guide')) return;
+      var guide = document.createElement('span');
+      guide.setAttribute('data-continuity-guide', '');
+      guide.className = 'assignment-continuity-guide';
+      guide.textContent = 'Apply to next occurrences';
+      select.parentNode.insertBefore(guide, select);
+    });
+    return result;
+  };
+}());
+
+</script>
     <script data-source="js/utils/writerSession.js">
 /* === INLINED: js/utils/writerSession.js === */
 'use strict';
@@ -24012,9 +24936,10 @@ if (typeof document !== 'undefined') {
       };
     });
   }
-  guard(app, ['init', '_commitCanonicalProposal', 'saveCurrentWorkspace', 'updatePermit', 'updateShiftStaff', 'saveJob', 'deleteJob', 'restoreWorkspaceJson', 'resetToCleanSlate', 'reconcileStaffSnapshot', 'importStaffMembers', 'updateStaffMember', 'recordOvertimeHoursEvidence', 'handleAutoStagger', 'saveAbsenceAndRefusalData', 'openStaffAssignModal', 'openAddJobModal', 'openEditJobModal', 'openImportModal', 'openResetWorkspaceModal']);
+ guard(app, ['init', '_commitCanonicalProposal', 'saveCurrentWorkspace', 'updatePermit', 'updateShiftStaff', 'saveJob', 'deleteJob', 'resetJobAllocations', 'restoreWorkspaceJson', 'resetToCleanSlate', 'reconcileStaffSnapshot', 'importStaffMembers', 'updateStaffMember', 'recordOvertimeHoursEvidence', 'handleAutoStagger', 'saveAbsenceAndRefusalData', 'openStaffAssignModal', 'openAddJobModal', 'openEditJobModal', 'openImportModal', 'openResetWorkspaceModal']);
   guard(storage, ['set', 'remove', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'retireCompositeParentBundle', 'compactStorage', 'importWorkspaceJson', 'saveWorkspace']);
   guard(driver, ['set', 'remove', '_restoreRawStorageSnapshot', '_restoreEmergencyRecoveryMetadata', '_stageTransactionRecoveryBundle', '_stageEmergencyRecoveryArtifact', '_executeCompensatingRollback', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'retireCompositeParentBundle', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'compactStorage']);
+  guard(app, ['setPlanningRange','applyPlanningRange']);
   var editorBoundaries = [
     [window.HortOpsStaffAssignModal, ['open','addStaff','openActiveContinuation','removeStaff','removeAllUnaccredited','removeAllFatigued','removeAllIneligible','autoFillTeam','autoAddEligible','applyHoursProposal','approveMixedPolicyPlan','setPoolTag','updatePermit','updatePermitNotes','updateSlotMode','updateSlotRepeat','saveAllocation']],
     [window.HortOpsHoursEvidenceModal, ['open','save']],
@@ -24024,7 +24949,7 @@ if (typeof document !== 'undefined') {
     [window.HortOpsStaffQualificationModal, ['open','addQualification','removeQualification','save']],
     [window.HortOpsStaffAbsenceModal, ['open','addAbsence','updateAbsence','removeAbsence','addRefusal','updateRefusal','removeRefusal','save','saveDirect']],
     [window.HortOpsAbsenceImpactModal, ['open','approve','saveAbsenceOnly']],
-    [window.HortOpsJobEditModal, ['open','handleSubmit','setPlanningField','togglePatternDay','setPoolSource','togglePoolTag','setStaffingSection']],
+    [window.HortOpsJobEditModal, ['open','handleSubmit','setPlanningField','togglePatternDay','setPoolSource','togglePoolTag','setStaffingSection','setFrequencyType','setRecurrenceField','setRecurrenceDay']],
     [window.HortOpsStaffPoolModal, ['open','save','createTag','setTagActive','setMembership']],
     [window.HortOpsImportModal, ['open','handleFileSelect','processJsonContent','processCsvContent','confirmSync','confirmJsonRestore']],
     [window.HortOpsResetWorkspaceModal, ['open','executeReset']]

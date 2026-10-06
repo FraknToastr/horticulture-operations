@@ -145,8 +145,9 @@ async function main() {
     await page.locator('[data-pattern="includePublicHolidays"]').check();
     await page.locator('[data-pattern="excludedDates"]').fill('2026-04-05');
     await page.locator('[data-pattern="excludedDates"]').dispatchEvent('change');
-    await page.locator('#job-edit-modal-root button[type="submit"]').click();
-    await page.waitForFunction(()=>!HortOpsJobEditModal.formData);
+  await page.locator('#job-edit-modal-root button[type="submit"]').click();
+  await page.waitForTimeout(250);
+  await page.waitForFunction(()=>!HortOpsJobEditModal.formData);
     checked('Real Job Registry form edits and saves recurring weekdays, holidays and exclusions');
     const occurrences=await page.evaluate(()=>HortOpsApp.state.allShifts.filter(s=>s.jobId==='JOB-PATTERN').map(s=>s.shiftId));
     assert.deepEqual(occurrences.filter(s=>s>='JOB-PATTERN@2026-04-03'&&s<='JOB-PATTERN@2026-04-06'),['JOB-PATTERN@2026-04-03','JOB-PATTERN@2026-04-04','JOB-PATTERN@2026-04-06']);
@@ -191,6 +192,16 @@ async function main() {
     await page.locator('input[oninput*="updateField"][oninput*="name"]').fill('Four-day year-boundary service');
     await page.locator('input[oninput*="updateField"][oninput*="crewSize"]').fill('1');
     await page.locator('select[onchange*="frequencyType"]').selectOption('work_pattern');
+    assert.equal(await page.evaluate(()=>{
+      const pattern=document.querySelector('.work-pattern-editor');
+      const children=Array.from(document.querySelector('#job-edit-modal-root .modal-body').children);
+      const patternIndex=children.findIndex(node=>node.contains(pattern));
+      const plantIndex=children.findIndex(node=>node.textContent.includes('Requires Certified Plant Operator'));
+      return patternIndex > -1 && plantIndex > patternIndex;
+    }),true,'Schedule controls must appear before the plant-operator requirement');
+    await page.locator('[data-consecutive-start]').selectOption('6');
+    await page.locator('[data-consecutive-length]').selectOption('3');
+    assert.deepEqual(await page.evaluate(()=>HortOpsJobEditModal.formData.workPattern.days),[6,0,1]);
     await page.locator('[data-pattern="mode"]').selectOption('run');
     await page.locator('[data-pattern="startDate"]').fill('2026-12-30');
     await page.locator('[data-pattern="startDate"]').dispatchEvent('change');
@@ -200,12 +211,14 @@ async function main() {
     await page.locator('[data-exclusive-pool="POOL-RANGER"]').check();
     const runId=await page.evaluate(()=>HortOpsJobEditModal.formData.id);
     await page.locator('#job-edit-modal-root button[type="submit"]').click();
+    await page.waitForTimeout(250);
     await page.waitForFunction(()=>!HortOpsJobEditModal.formData);
     assert.deepEqual(await page.evaluate(id=>HortOpsApp.state.allShifts.filter(s=>s.jobId===id).map(s=>s.shiftId.split('@')[1]),runId),['2026-12-30','2026-12-31']);
     checked('Real Job Creator creates a four-day run with arbitrary weekdays');
     await page.evaluate(id=>HortOpsStaffAssignModal.open(id+'@2026-12-30'),runId);
     await page.locator('button[onclick*="addStaff"][onclick*="EMP-POOL-2"]').click();
     await page.locator('select.assignment-mode-select[onchange*="EMP-POOL-2"]').selectOption('fixed');
+    assert.equal(await page.locator('.assignment-continuity-guide').count(),1,'Assignment recurrence control has an explanatory label');
     assert.equal(await page.locator('select.repeat-count-select[onchange*="EMP-POOL-2"] option[value="4"]').count(),1,'Cross-year run must offer all four occurrences');
     await page.locator('select.repeat-count-select[onchange*="EMP-POOL-2"]').selectOption('4');
     await page.locator('button[onclick*="saveAllocation"]').click();

@@ -126,7 +126,7 @@ const validObservedBase = {
     { id: 'job-parks-1', name: 'Parks Main', category: 'Parks', frequencyType: 'recurring_weeks', intervalWeeks: 1, anchorDate: '2026-06-06', preferredDay: 'saturday', startTime: '08:00 PM', durationHours: 8, crewSize: 2, status: 'active' },
     { id: 'job-irrigation-2', name: 'Irrigation Check', category: 'Irrigation', frequencyType: 'recurring_weeks', intervalWeeks: 1, anchorDate: '2026-06-07', preferredDay: 'sunday', startTime: '05:00 AM', durationHours: 4, crewSize: 1, status: 'active' },
     { id: 'job-street-3', name: 'Streetscape Sweeping', category: 'Streetscapes', frequencyType: 'recurring_weeks', intervalWeeks: 1, anchorDate: '2026-06-08', preferredDay: 'monday', startTime: '14:30', durationHours: 6, crewSize: 2, status: 'active' },
-    { id: 'job-trees-4', name: 'Tree Pruning', category: 'Trees', frequencyType: 'recurring_weeks', intervalWeeks: 1, anchorDate: '2026-06-05', preferredDay: 'friday', startTime: '5:00', durationHours: 5, crewSize: 1, status: 'active' },
+    { id: 'job-trees-4', name: 'Tree Pruning', category: 'Trees', frequencyType: 'recurring_weeks', intervalWeeks: 1, anchorDate: '2026-04-03', preferredDay: 'friday', startTime: '5:00', durationHours: 5, crewSize: 1, status: 'active' },
     { id: 'job-night-5', name: 'Night Works', category: 'Civil', frequencyType: 'recurring_weeks', intervalWeeks: 1, anchorDate: '2026-06-13', preferredDay: 'saturday', startTime: '22:00', durationHours: 7, crewSize: 3, status: 'active' }
   ],
   roster: [

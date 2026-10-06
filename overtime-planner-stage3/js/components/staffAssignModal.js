@@ -594,7 +594,7 @@ window.HortOpsStaffAssignModal = {
     var targetYear = targetDate ? parseInt(targetDate.slice(0, 4), 10) : null;
 
     if (targetYear && window.HortOpsApp && typeof window.HortOpsApp.setYear === 'function') {
-      if (state && state.currentYear !== targetYear) {
+      if (state && state.currentYear !== targetYear && !state.allShifts.some(function(shift) { return shift.shiftId === targetShiftId; })) {
         window.HortOpsApp.setYear(targetYear);
       }
     }
@@ -1139,10 +1139,10 @@ window.HortOpsStaffAssignModal = {
       historicalSnapshots: planRes.snapshots,
       permits: state.customPermits,
       budgetSettings: state.budgetSettings,
-      uiState: {
-        activeView: state.activeView,
-        currentYear: state.currentYear
-      }
+            uiState: Object.assign({}, state.uiState, {
+                activeView: state.activeView,
+                currentYear: state.currentYear
+            })
     });
 
     // Strict mandatory baseline reader and evidence key retention check

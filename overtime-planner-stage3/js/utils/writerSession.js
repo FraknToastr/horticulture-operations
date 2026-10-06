@@ -32,9 +32,10 @@
       };
     });
   }
-  guard(app, ['init', '_commitCanonicalProposal', 'saveCurrentWorkspace', 'updatePermit', 'updateShiftStaff', 'saveJob', 'deleteJob', 'restoreWorkspaceJson', 'resetToCleanSlate', 'reconcileStaffSnapshot', 'importStaffMembers', 'updateStaffMember', 'recordOvertimeHoursEvidence', 'handleAutoStagger', 'saveAbsenceAndRefusalData', 'openStaffAssignModal', 'openAddJobModal', 'openEditJobModal', 'openImportModal', 'openResetWorkspaceModal']);
+ guard(app, ['init', '_commitCanonicalProposal', 'saveCurrentWorkspace', 'updatePermit', 'updateShiftStaff', 'saveJob', 'deleteJob', 'resetJobAllocations', 'restoreWorkspaceJson', 'resetToCleanSlate', 'reconcileStaffSnapshot', 'importStaffMembers', 'updateStaffMember', 'recordOvertimeHoursEvidence', 'handleAutoStagger', 'saveAbsenceAndRefusalData', 'openStaffAssignModal', 'openAddJobModal', 'openEditJobModal', 'openImportModal', 'openResetWorkspaceModal']);
   guard(storage, ['set', 'remove', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'retireCompositeParentBundle', 'compactStorage', 'importWorkspaceJson', 'saveWorkspace']);
   guard(driver, ['set', 'remove', '_restoreRawStorageSnapshot', '_restoreEmergencyRecoveryMetadata', '_stageTransactionRecoveryBundle', '_stageEmergencyRecoveryArtifact', '_executeCompensatingRollback', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'retireCompositeParentBundle', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'compactStorage']);
+  guard(app, ['setPlanningRange','applyPlanningRange']);
   var editorBoundaries = [
     [window.HortOpsStaffAssignModal, ['open','addStaff','openActiveContinuation','removeStaff','removeAllUnaccredited','removeAllFatigued','removeAllIneligible','autoFillTeam','autoAddEligible','applyHoursProposal','approveMixedPolicyPlan','setPoolTag','updatePermit','updatePermitNotes','updateSlotMode','updateSlotRepeat','saveAllocation']],
     [window.HortOpsHoursEvidenceModal, ['open','save']],
@@ -44,7 +45,7 @@
     [window.HortOpsStaffQualificationModal, ['open','addQualification','removeQualification','save']],
     [window.HortOpsStaffAbsenceModal, ['open','addAbsence','updateAbsence','removeAbsence','addRefusal','updateRefusal','removeRefusal','save','saveDirect']],
     [window.HortOpsAbsenceImpactModal, ['open','approve','saveAbsenceOnly']],
-    [window.HortOpsJobEditModal, ['open','handleSubmit','setPlanningField','togglePatternDay','setPoolSource','togglePoolTag','setStaffingSection']],
+    [window.HortOpsJobEditModal, ['open','handleSubmit','setPlanningField','togglePatternDay','setPoolSource','togglePoolTag','setStaffingSection','setFrequencyType','setRecurrenceField','setRecurrenceDay']],
     [window.HortOpsStaffPoolModal, ['open','save','createTag','setTagActive','setMembership']],
     [window.HortOpsImportModal, ['open','handleFileSelect','processJsonContent','processCsvContent','confirmSync','confirmJsonRestore']],
     [window.HortOpsResetWorkspaceModal, ['open','executeReset']]

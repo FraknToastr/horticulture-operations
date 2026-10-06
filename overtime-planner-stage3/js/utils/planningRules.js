@@ -2,6 +2,7 @@
 (function () {
     'use strict';
     if (typeof window === 'undefined') global.window = global;
+    if (!window.HortOpsRecurrence && typeof require !== 'undefined') require('./recurrence.js');
     var weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     function fail(error) { return {valid:false,error:error}; }
     function ymd(value) {
@@ -42,6 +43,7 @@
     }
     function validatePattern(job) {
         if (job.frequencyType !== 'work_pattern') return {valid:true};
+        if (window.HortOpsRecurrence) return window.HortOpsRecurrence.validate(job);
         var p = job.workPattern;
         if (!p || typeof p !== 'object' || Array.isArray(p)) return fail('Work pattern is required.');
         if (!ymd(p.startDate) || (p.endDate !== undefined && !ymd(p.endDate)) || (p.endDate && p.endDate < p.startDate)) return fail('Work pattern requires valid start/end dates.');
@@ -75,6 +77,11 @@
             }
         }
         for (var job of data.jobs || []) {
+            if (!job || typeof job !== 'object' || Array.isArray(job)) return fail('Invalid job record.');
+            if (window.HortOpsRecurrence) {
+                var recurrenceCheck = window.HortOpsRecurrence.validate(job);
+                if (!recurrenceCheck.valid) return recurrenceCheck;
+            }
             if (job.staffingSections !== undefined) {
                 var sections = job.staffingSections;
                 if (!sections || typeof sections !== 'object' || Array.isArray(sections) ||
@@ -91,6 +98,7 @@
         return {valid:true};
     }
     function dates(job, year) {
+        if (window.HortOpsRecurrence) return window.HortOpsRecurrence.dates(job, year);
         if (!validatePattern(job).valid || job.frequencyType !== 'work_pattern') return [];
         var p = job.workPattern, excluded = new Set(p.excludedDates), holidays = new Set(
             (window.HortOpsData.getPublicHolidaysForYear(year) || []).map(function(h) { return h.date; }));

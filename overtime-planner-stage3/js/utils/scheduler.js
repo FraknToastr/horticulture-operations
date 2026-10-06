@@ -4,6 +4,8 @@ if (typeof require !== 'undefined') {
   if (typeof window === 'undefined') {
     global.window = global;
   }
+  if (!window.HortOpsRecurrence) require('./recurrence.js');
+  if (!window.HortOpsPlanningRules) require('./planningRules.js');
   if (typeof window.HortOpsCostCalculator === 'undefined') {
     try { require('./scheduler/costCalculator.js'); } catch (e) {}
   }
@@ -106,6 +108,11 @@ window.HortOpsScheduler = {
       throw new Error('Scheduler engine unavailable: window.HortOpsSchedulerEngine is required');
     }
     return window.HortOpsSchedulerEngine.resolveShiftHistoricalTiming(shiftId, jobId, dateStr, customSnapshots);
+  },
+
+  generateRangeDigest: function(jobs, from, to, includeResolved, customAssignments, staffList, customPermits, customSnapshots) {
+    if (!window.HortOpsSchedulerEngine || typeof window.HortOpsSchedulerEngine.generateRangeDigest !== 'function') throw new Error('Range scheduler unavailable.');
+    return window.HortOpsSchedulerEngine.generateRangeDigest(jobs, from, to, includeResolved, customAssignments, staffList, customPermits, customSnapshots);
   },
 
   generateOperationalDigest: function(jobs, year, includeResolved, customAssignments, staffList, customPermits, customSnapshots) {

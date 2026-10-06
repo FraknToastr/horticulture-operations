@@ -11,6 +11,8 @@
     "test:stage3:smoke": "node scripts/test_stage3_browser_smoke.cjs",
     "test:writer": "node scripts/test_single_writer_application.cjs",
     "test:handoff": "node scripts/test_writer_domain_handoff.cjs",
+    "test:job-reset": "node scripts/test_job_reset.cjs",
+    "test:import-dropzone": "node scripts/test_import_dropzone.cjs",
     "test:security": "node scripts/test_color_security.cjs",
     "test:tooling": "node scripts/test_release_tooling_portability.cjs && node scripts/test_browser_harness_portability.cjs",
     "test:inherited": "node scripts/run_inherited_probes.cjs",
@@ -31,7 +33,8 @@
     "test:allocator": "node scripts/test_allocator_usability.cjs",
     "test:stage4d": "node scripts/test_hours_allocation.cjs",
     "test:stage4e": "node scripts/test_mixed_policy_planning.cjs",
-    "test:stage4f": "node scripts/test_absence_impact_planning.cjs"
+    "test:stage4f": "node scripts/test_absence_impact_planning.cjs",
+    "test:recurrence-programme": "node scripts/test_recurrence_programme.cjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",

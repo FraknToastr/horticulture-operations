@@ -210,7 +210,7 @@ window.HortOpsExportModal = {
 
   exportJobs: function() {
     var jobs = (window.HortOpsApp && window.HortOpsApp.state && window.HortOpsApp.state.jobs) || [];
-    var headers = ['ID', 'Name', 'Category', 'FrequencyType', 'IntervalWeeks', 'AnchorDate', 'PrimaryTeam', 'SecondaryTeam', 'TertiaryTeam', 'IsExclusive', 'ExclusiveTeams', 'CrewSize', 'DurationHours', 'StartTime', 'Status', 'TeamSuitabilityEnabled', 'PoolsEnabled'];
+    var headers = ['ID', 'Name', 'Category', 'FrequencyType', 'IntervalWeeks', 'AnchorDate', 'PrimaryTeam', 'SecondaryTeam', 'TertiaryTeam', 'IsExclusive', 'ExclusiveTeams', 'CrewSize', 'DurationHours', 'StartTime', 'Status', 'TeamSuitabilityEnabled', 'PoolsEnabled', 'TargetDate', 'AnnualRule', 'SeasonalRule', 'WorkPattern', 'ScheduleEnd'];
     var rows = jobs.map(function(j) {
       var excl = (j.exclusiveTeams || []).join(';');
       return [
@@ -230,7 +230,12 @@ window.HortOpsExportModal = {
         j.startTime,
         j.status,
         !window.HortOpsPlanningRules || window.HortOpsPlanningRules.sectionEnabled(j, 'teams') ? 'YES' : 'NO',
-        !window.HortOpsPlanningRules || window.HortOpsPlanningRules.sectionEnabled(j, 'pools') ? 'YES' : 'NO'
+      !window.HortOpsPlanningRules || window.HortOpsPlanningRules.sectionEnabled(j, 'pools') ? 'YES' : 'NO',
+      j.targetDate || '',
+      JSON.stringify(j.annualRule || null),
+      JSON.stringify(j.seasonalRule || null),
+      JSON.stringify(j.workPattern || null),
+      JSON.stringify(j.scheduleEnd || null)
       ];
     });
 

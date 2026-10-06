@@ -3,7 +3,10 @@ window.HortOpsHeader = {
   render: function(state) {
     var icons = window.HortOpsIcons;
     var activeView = state.activeView;
-    var currentYear = state.currentYear;
+        var currentYear = state.currentYear;
+        var range = state.uiState && state.uiState.planningRange;
+        var programmeStart = range && window.HortOpsRecurrence.isRealDate(range.start) ? range.start : currentYear + '-11-01';
+        var programmeEnd = range && window.HortOpsRecurrence.isRealDate(range.end) ? range.end : (currentYear + 1) + '-02-28';
     var clashCount = state.clashCount || 0;
 
     var tabs = [
@@ -93,9 +96,6 @@ window.HortOpsHeader = {
         '<nav class="nav-tabs">' + tabsHtml + '</nav>' +
 
         '<div class="header-actions">' +
-          '<select class="year-select" onchange="window.HortOpsApp.setYear(parseInt(this.value, 10))">' +
-            yearOptionsHtml +
-          '</select>' +
 
           '<div class="header-health-pill" id="btn-header-storage-health" role="button" tabindex="0" onclick="window.HortOpsApp.handleHealthPillClick()" title="' + titleText + ' (Click to inspect storage health)" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--slate-200); font-size: 11px; color: var(--slate-600); background: #ffffff; cursor: pointer;">' +
             '<span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:' + dotColor + ';"></span>' +
@@ -125,7 +125,11 @@ window.HortOpsHeader = {
           '</button>' +
         '</div>' +
       '</div>' +
-    '</header>';
+      '<div class="programme-toolbar" aria-label="Planning period">' +
+        '<div class="programme-year"><label for="planning-year">Calendar year</label><select id="planning-year" class="year-select" aria-label="Calendar year" onchange="window.HortOpsApp.setYear(parseInt(this.value, 10))">' + yearOptionsHtml + '</select></div>' +
+        '<div class="planning-range-controls"><span class="programme-toolbar-title">Programme</span><label for="planning-range-start">From</label><input type="date" id="planning-range-start" value="' + programmeStart + '"><label for="planning-range-end">To</label><input type="date" id="planning-range-end" value="' + programmeEnd + '"><button class="btn btn-secondary" id="planning-range-apply" onclick="window.HortOpsApp.applyPlanningRange()">View programme</button></div>' +
+      '</div>' +
+      '</header>';
   },
 
   updateStorageHealthIndicator: function() {

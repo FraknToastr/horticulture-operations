@@ -13,6 +13,7 @@ class MockLocalStorage {
 }
 global.window.localStorage = new MockLocalStorage();
 require('../js/data/staffRoster.js');
+require('../js/data/holidays.js');
 require('../js/data/initialJobs.js');
 require('../js/utils/dateUtils.js');
 window.HortOpsDateUtils.getLocalDateKey = function() { return '2026-03-01'; };
@@ -32,6 +33,7 @@ console.log('=== RUNNING OFFLINE17 ROSTERING ENGINE TEST SUITE ===');
 // Mock data fixtures
 const mockJob = {
   id: 'JOB-TEST-ROSTER',
+  scheduleEnd: {mode:'after_count',count:6},
   name: 'Playford Reserve Turf Maintenance',
   status: 'active',
   frequencyType: 'recurring_weeks',

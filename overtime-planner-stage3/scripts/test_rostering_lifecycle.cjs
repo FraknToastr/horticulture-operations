@@ -630,6 +630,7 @@ const jobAnnual = {
   status: 'active',
   frequencyType: 'annual',
   targetMonth: 11,
+  annualRule: {kind:'weekday',startYear:2026,month:11,ordinal:2,weekday:6},
   preferredDay: 'saturday',
   crewSize: 1,
   plantOperatorRequired: false

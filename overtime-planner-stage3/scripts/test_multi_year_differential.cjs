@@ -35,7 +35,8 @@ years.forEach(year => {
   const digest = window.HortOpsScheduler.generateOperationalDigest(jobs, year);
   const allShifts = digest.allShifts || [];
   
-  assert(allShifts.length > 0, `Year ${year} must generate non-zero shifts`);
+  if (year >= 2026) assert(allShifts.length > 0, `Year ${year} must generate non-zero shifts`);
+  else assert.strictEqual(allShifts.filter(s => !s.isHistorical).length, 0, 'No generated occurrences may precede the explicit 2026 starts');
   
   // Check canonical shift IDs
   const shiftIds = new Set();

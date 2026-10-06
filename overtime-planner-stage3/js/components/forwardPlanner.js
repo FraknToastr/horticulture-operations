@@ -9,7 +9,8 @@ window.HortOpsForwardPlanner = {
   hideUnassigned: true,
   filterDrawerOpen: false,
   selectedJobId: null,
-  startWeek: 1,
+    startWeek: 1,
+    viewMode: 'window',
   windowSize: (typeof window !== 'undefined' && window.innerWidth < 1600) ? 4 : 6,
 
   render: function(state) {
@@ -27,16 +28,30 @@ window.HortOpsForwardPlanner = {
     // 1. Resolve current week and auto-initialize
     var totalWeeks = (slots && slots.length) ? slots.length : 52;
     var currentWeekNum = (dateUtils && dateUtils.getCurrentWeekNumber) ? dateUtils.getCurrentWeekNumber(slots) : 36;
+        // A programme selects scheduling data. Showing every week is an explicit
+        // whole-season mode, not an implicit consequence of applying a programme.
+        var programme = state.uiState && state.uiState.planningRange;
+        var programmeSlots = programme ? slots.filter(function(s) {
+            return s.saturdayDate <= programme.end && s.sundayDate >= programme.start;
+        }) : slots;
+        var scopeStartWeek = programmeSlots.length ? programmeSlots[0].weekNumber : 1;
+        var scopeEndWeek = programmeSlots.length ? programmeSlots[programmeSlots.length - 1].weekNumber : totalWeeks;
+    var programmeKey = programme ? programme.start + ':' + programme.end : '';
+    if (programmeKey !== self.programmeKey) {
+      self.programmeKey = programmeKey;
+      self.startWeekInitialized = false;
+    }
+    var maxStartWeek = Math.max(scopeStartWeek, scopeEndWeek - self.windowSize + 1);
     if (!self.startWeekInitialized) {
-      self.startWeek = Math.min(totalWeeks - self.windowSize + 1, Math.max(1, currentWeekNum));
+      self.startWeek = Math.min(maxStartWeek, Math.max(scopeStartWeek, currentWeekNum));
       self.startWeekInitialized = true;
     }
-
-    // Sliced slots in window
-    var endWeek = Math.min(totalWeeks, self.startWeek + self.windowSize - 1);
-    var visibleSlots = slots.filter(function(s) {
-      return s.weekNumber >= self.startWeek && s.weekNumber <= endWeek;
-    });
+    self.startWeek = Math.min(maxStartWeek, Math.max(scopeStartWeek, self.startWeek));
+        var isSeasonView = self.viewMode === 'season' && !!programme;
+        var endWeek = isSeasonView ? scopeEndWeek : Math.min(scopeEndWeek, self.startWeek + self.windowSize - 1);
+        var visibleSlots = programmeSlots.filter(function(s) {
+            return isSeasonView || (s.weekNumber >= self.startWeek && s.weekNumber <= endWeek);
+        });
     var visibleWeekNumbers = new Set(visibleSlots.map(function(s) { return s.weekNumber; }));
 
     // 2. Build Slot Day Columns (Split into Saturday & Sunday, plus Friday / Monday if holiday)
@@ -117,6 +132,7 @@ window.HortOpsForwardPlanner = {
             availableShifts:slot.shifts.filter(function(s) { return s.date === shift.date; }),hasOvertime:true});
         }
       });
+      if (programme) days = days.filter(function(d) { return d.dateStr >= programme.start && d.dateStr <= programme.end; });
       days.sort(function(a,b) { return a.dateStr.localeCompare(b.dateStr); });
       days.forEach(function(d,i) { d.isFirstInWeekend = i === 0; });
       slotDayMap[slot.weekNumber] = days;
@@ -299,6 +315,7 @@ window.HortOpsForwardPlanner = {
 
 
     var ctx = {
+      programme: programme,
       self: self,
       hierarchy: hierarchy,
       filteredStaff: filteredStaff,
@@ -309,6 +326,9 @@ window.HortOpsForwardPlanner = {
       staffScheduleMap: staffScheduleMap,
       tableRows: tableRows,
       endWeek: endWeek,
+      scopeStartWeek: scopeStartWeek,
+      scopeEndWeek: scopeEndWeek,
+      isSeasonView: isSeasonView,
       totalWeeks: totalWeeks,
       totalActiveColumns: totalActiveColumns,
       totalAssignedInWindowCount: totalAssignedInWindowCount,
@@ -325,15 +345,17 @@ window.HortOpsForwardPlanner = {
     var tbodyRowsHtml = window.HortOpsForwardPlannerMatrix ?
       window.HortOpsForwardPlannerMatrix.renderTbody(ctx) : '';
 
-    return toolbarHtml +
-      '<div class="planner-table-wrapper">' +
+    return '<section class="forward-planner-workspace">' +
+        (programme ? '<p class="recurrence-preview">Programming horizon: ' + esc(programme.start) + ' – ' + esc(programme.end) + '. All dates are shown in order; scroll horizontally to reach later months.</p>' : '') + toolbarHtml +
+            '<div class="planner-table-wrapper ' + (isSeasonView ? 'season-view' : 'compact-week-view') + '">' +
         '<table class="planner-table">' +
           theadHtml +
           '<tbody>' +
             tbodyRowsHtml +
           '</tbody>' +
         '</table>' +
-      '</div>';
+    '</div>' +
+    '</section>';
   },
 
 
@@ -382,7 +404,7 @@ window.HortOpsForwardPlanner = {
     window.HortOpsApp.renderCurrentView();
   },
 
-  jumpToCurrentWeek: function() {
+    jumpToCurrentWeek: function() {
     var dateUtils = window.HortOpsDateUtils;
     var slots = (window.HortOpsApp && window.HortOpsApp.state) ? window.HortOpsApp.state.slots : [];
     var totalWeeks = (slots && slots.length) ? slots.length : 52;
@@ -403,9 +425,18 @@ window.HortOpsForwardPlanner = {
     window.HortOpsApp.renderCurrentView();
   },
 
-  setWindowSize: function(sz) {
-    this.windowSize = sz;
-    window.HortOpsApp.renderCurrentView();
+    setWindowSize: function(sz) {
+        this.windowSize = sz;
+        this.viewMode = 'window';
+        window.HortOpsApp.renderCurrentView();
+    },
+    returnToCurrentWeek: function() {
+        this.viewMode = 'window';
+        this.jumpToCurrentWeek();
+    },
+    setSeasonView: function(enabled) {
+        this.viewMode = enabled ? 'season' : 'window';
+        window.HortOpsApp.renderCurrentView();
   },
 
   toggleFilterDrawer: function(forceState) {

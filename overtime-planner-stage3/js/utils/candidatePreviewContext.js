@@ -44,7 +44,9 @@
         state.customAssignments, state.staffList, state.customPermits,
         state.historicalSnapshots, true);
     }
-    var digest = generate(year);
+    var horizon = state.uiState && state.uiState.planningRange;
+    var digest = horizon && shiftId.slice(-10) >= horizon.start && shiftId.slice(-10) <= horizon.end ? engine.generateRangeDigest(state.jobs, horizon.start, horizon.end, true,
+      state.customAssignments, state.staffList, state.customPermits, state.historicalSnapshots, true) : generate(year);
     if (!digest || !Array.isArray(digest.allShifts)) throw new Error('Saved occurrences cannot be resolved.');
     var allShifts = digest.allShifts;
     var occurrence = allShifts.find(function (shift) { return shift.shiftId === shiftId; });

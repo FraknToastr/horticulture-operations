@@ -94,7 +94,7 @@ const friJob = {
   category: 'CBD Corridor',
   frequencyType: 'recurring_weeks',
   intervalWeeks: 2,
-  anchorDate: '2026-01-09',
+  anchorDate: '2026-04-03',
   preferredDay: 'friday',
   startTime: '06:00 AM',
   durationHours: 6,
@@ -107,7 +107,7 @@ const monJob = {
   category: 'Parklands',
   frequencyType: 'recurring_weeks',
   intervalWeeks: 2,
-  anchorDate: '2026-01-12',
+  anchorDate: '2026-04-06',
   preferredDay: 'monday',
   startTime: '06:00 AM',
   durationHours: 6,
@@ -122,6 +122,9 @@ assert(friShifts.length > 0, 'Friday recurring job must generate shifts');
 assert(friShifts.every(s => s.dayOfWeek === 'Friday'), 'Friday job shifts must have dayOfWeek === Friday');
 assert(monShifts.length > 0, 'Monday recurring job must generate shifts');
 assert(monShifts.every(s => s.dayOfWeek === 'Monday'), 'Monday job shifts must have dayOfWeek === Monday');
+assert(friShifts.concat(monShifts).every(s => window.HortOpsRecurrence.holiday(s.date)), 'Friday/Monday occurrences must be recognised public holidays');
+assert.strictEqual(window.HortOpsRecurrence.validate(Object.assign({}, friJob, {anchorDate:'2026-01-09'})).valid, false, 'Ordinary Friday cannot anchor overtime');
+assert.strictEqual(window.HortOpsRecurrence.validate(Object.assign({}, monJob, {anchorDate:'2026-01-12'})).valid, false, 'Ordinary Monday cannot anchor overtime');
 console.log('[PASS] Friday and Monday overtime recurrence verified.');
 
 // 6. Explicit occurrence suppresses generated duplicate (Mandate Section 1)
@@ -165,10 +168,10 @@ console.log('[PASS] Assignment overrides on explicit occurrences resolved correc
 
 // 9. NEW: One-Off Year Isolation (Mandate Section 2, 17)
 const oneOff2027Dates = [
-  { day: 'Friday', date: '2027-07-09' },
+  { day: 'Friday', date: '2027-01-01' },
   { day: 'Saturday', date: '2027-07-10' },
   { day: 'Sunday', date: '2027-07-11' },
-  { day: 'Monday', date: '2027-07-12' }
+  { day: 'Monday', date: '2027-03-29' }
 ];
 
 oneOff2027Dates.forEach(({ day, date }) => {
@@ -400,7 +403,7 @@ const annualFridayJob = [{
   id: 'annual-fri',
   name: 'Annual Friday Job',
   frequencyType: 'annual',
-  targetMonth: 6,
+  annualRule: {kind:'fixed',startYear:2026,month:4,day:3},
   preferredDay: 'friday',
   status: 'active'
 }];
@@ -408,7 +411,7 @@ const annualFriDigest = window.HortOpsScheduler.generateOperationalDigest(annual
 const annualFriShifts = annualFriDigest.allShifts.filter(s => s.jobId === 'annual-fri');
 assert.strictEqual(annualFriShifts.length, 1, 'Annual job with preferredDay Friday must generate 1 shift');
 assert.strictEqual(annualFriShifts[0].dayOfWeek, 'Friday', 'Generated shift must fall on Friday');
-console.log('[PASS] Annual job preferredDay validation verified: Tuesday skipped, Friday scheduled.');
+console.log('[PASS] Explicit annual dates: missing rule rejected; Good Friday scheduled.');
 
 // 16. Seeded Schedule Plant Operator Diagnostic Audit (Mandate Section 9, 27, 33)
 const auditDigest = digest2026.allShifts;
