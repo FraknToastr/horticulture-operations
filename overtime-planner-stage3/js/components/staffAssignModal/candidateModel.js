@@ -8,6 +8,160 @@ if (typeof require !== 'undefined') {
 }
 
 window.HortOpsStaffAssignCandidateModel = {
+  // Keep array metadata (notably boundary lookup failures) while detaching inputs.
+  _allocatorCopy: function(value) {
+    if (!value || typeof value !== 'object') return value;
+    var copy = Array.isArray(value) ? [] : {}, self = this;
+    Object.keys(value).forEach(function(key) { copy[key] = self._allocatorCopy(value[key]); });
+    return copy;
+  },
+
+  /** Browse every matching staff record, including canonical hard-check failures. */
+  resolveAllocatorModel: function(roster, ctx) {
+    ctx = this._allocatorCopy(ctx || {});
+    var self = this, rules = window.HortOpsPlanningRules, engine = window.HortOpsEligibilityEngine;
+    var state = (window.HortOpsApp && window.HortOpsApp.state) || {};
+    var shift = ctx.shift || {}, job = ctx.matchingJob || {};
+    var tags = ctx.poolTags || this._allocatorCopy(state.poolTags || []);
+    var absences = ctx.absences || this._allocatorCopy(state.absences || []);
+    var refusalHistory = ctx.refusalHistory || this._allocatorCopy(state.refusalHistory || []);
+    var allShifts = ctx.allShifts || [], assigned = ctx.stagedAssignedStaffIds || [];
+    var date = shift.date || shift.shiftDate || (shift.shiftId || '').split('@')[1] || '';
+    var prefs = ctx.jobPreferences || {
+      primaryTeam: job.primaryTeam || job.defaultTeam || job.preferredTeam || '',
+      secondaryTeam: job.secondaryTeam || '', tertiaryTeam: job.tertiaryTeam || '',
+      isExclusive: !!(job.isExclusiveTeams && (job.exclusiveTeams || []).length), exclusiveTeams: job.exclusiveTeams || []
+    };
+    if (rules) prefs = rules.effectivePrefs(job, prefs);
+    var teamsOn = !rules || rules.sectionEnabled(job, 'teams');
+    var poolsOn = !rules || rules.sectionEnabled(job, 'pools');
+    var source = rules ? rules.source(job) : (job.exclusivePoolSource || 'none');
+    var activeTags = tags.filter(function(tag) { return tag.active; });
+    var tagIds = poolsOn ? (source === 'tags' ? job.exclusivePoolTagIds || [] : job.preferredPoolTagIds || []) : [];
+    var activeIds = tagIds.filter(function(id) { return activeTags.some(function(tag) { return tag.id === id; }); });
+    var exclusiveTeams = shift.exclusiveTeams && shift.exclusiveTeams.length ? shift.exclusiveTeams : (job.exclusiveTeams || []);
+    var teamExclusive = teamsOn && (source === 'teams' || (!job.exclusivePoolSource && (shift.isExclusive || shift.isExclusiveTeams || job.isExclusive || job.isExclusiveTeams)));
+    var mode = poolsOn && (source === 'tags' || activeIds.length) ? 'pools' :
+      teamsOn && (prefs.primaryTeam || prefs.secondaryTeam || prefs.tertiaryTeam || (teamExclusive && exclusiveTeams.length)) ? 'teams' : 'neutral';
+    var reqQuals = Array.isArray(job.requiredQualifications) ? job.requiredQualifications : (shift.requiredQualifications || []);
+    var query = String(ctx.searchTerm || '').trim().toLowerCase();
+    var filtered = this._allocatorCopy(roster || []).filter(function(staff) {
+      var memberships = (staff.poolTagIds || []).slice();
+      staff._poolLabels = tags.filter(function(tag) { return memberships.indexOf(tag.id) !== -1; }).map(function(tag) { return tag.label; });
+      if (query) {
+        var fields = [staff.name,staff.id,staff.role,staff.team,staff.crew,staff.department].concat(staff._poolLabels,staff._poolLabels.map(function(label) { return '#' + label; }));
+        if (!fields.some(function(field) { return String(field || '').toLowerCase().indexOf(query) !== -1; })) return false;
+      }
+      if (ctx.selectedDept && ctx.selectedDept !== 'all' && staff.department !== ctx.selectedDept) return false;
+      if (ctx.selectedTeam && ctx.selectedTeam !== 'all' && staff.team !== ctx.selectedTeam) return false;
+      if (ctx.selectedPoolTag && ctx.selectedPoolTag !== 'all' && memberships.indexOf(ctx.selectedPoolTag) === -1) return false;
+      var result = engine && typeof engine.validateEmployeeForOccurrence === 'function' ? engine.validateEmployeeForOccurrence({
+        employee: staff, occurrence: shift, job: job, allAssignments: allShifts,
+        currentShiftAssignedIds: assigned, poolTags: tags, absences: absences
+      }) : { eligible: false, reasons: ['ELIGIBILITY_ENGINE_UNAVAILABLE'], warnings: [], hardBlock: true };
+      staff._eligibility = self._allocatorCopy(result);
+      staff._eligible = !!result.eligible; staff._isAssigned = assigned.indexOf(staff.id) !== -1;
+      staff._priorityTier = self.getStaffPriority(staff, prefs);
+      staff._isDoubleBooked = (result.reasons || []).indexOf('OVERLAPPING_SHIFT') !== -1;
+      var quals = window.HortOpsQualifications;
+      staff._qualEval = reqQuals.length ? (quals && typeof quals.evaluateStaffQualifications === 'function' ?
+        quals.evaluateStaffQualifications(staff, reqQuals, date) : { compliant: false, missingCodes: reqQuals.slice(), expiredCodes: [], validCodes: [] }) :
+        { compliant: true, missingCodes: [], expiredCodes: [], validCodes: [] };
+      staff._lacksQualifications = !staff._qualEval.compliant;
+      var fatigue = window.HortOpsFatigueEngine;
+      staff._fatigueEval = fatigue && typeof fatigue.evaluateStaffFatigue === 'function' ? fatigue.evaluateStaffFatigue(staff, allShifts, date) :
+        { tier: 'CRITICAL', consecutiveWeekends: 0, isHardBlocked: true, message: 'Fatigue engine unavailable' };
+      staff._preferenceMatch = mode === 'pools' ? !!(rules && rules.matches(staff, tagIds, tags)) :
+        mode === 'teams' ? staff._priorityTier < 5 || (teamExclusive && exclusiveTeams.some(function(team) { return String(team).toLowerCase() === String(staff.team || '').toLowerCase(); })) : staff._eligible;
+      return true;
+    });
+    function sort(group) {
+      var ordered = self.sortCandidates(group, { assignedIdsSet: new Set(assigned), prefs: prefs, matchingJob: job,
+        poolTags: tags, refusalHistory: refusalHistory, asOfDate: date });
+      // Presentation keeps actionable staff ahead of blocked members within each
+      // pool/team group; the existing comparator still orders each subset.
+      return ordered.filter(function(staff) { return staff._eligible; }).concat(
+        ordered.filter(function(staff) { return !staff._eligible; }));
+    }
+    var matching = sort(filtered.filter(function(staff) { return staff._preferenceMatch; }));
+    var other = sort(filtered.filter(function(staff) { return !staff._preferenceMatch; }));
+    return {
+      filteredStaff: matching.concat(other), matchingStaff: matching, otherStaff: other,
+      matchingCount: matching.length, preferredCrewCount: matching.length,
+      eligibleCount: filtered.filter(function(staff) { return staff._eligible; }).length,
+      blockedCount: filtered.filter(function(staff) { return !staff._eligible; }).length,
+      groupMode: mode, groupLabel: mode === 'pools' ? 'Matching pool members' : mode === 'teams' ? 'Matching teams' : 'Eligible staff',
+      jobPreferences: this._allocatorCopy(prefs), poolOptions: this._allocatorCopy(activeTags)
+    };
+  },
+
+  /** Pure staging proposal; save commands remain independently authoritative. */
+  selectAutoAddCandidates: function(ctx) {
+    ctx = this._allocatorCopy(ctx || {});
+    var self = this, roster = ctx.roster || [], shift = ctx.shift || {}, job = ctx.matchingJob || {};
+    var original = (ctx.stagedAssignedStaffIds || []).slice(), staged = original.slice(), chosen = [], errors = [];
+    var count = Number(shift.crewSize !== undefined ? shift.crewSize : job.crewSize) || 0;
+    var engine = window.HortOpsEligibilityEngine;
+    var state = (window.HortOpsApp && window.HortOpsApp.state) || {};
+    var tags = ctx.poolTags || this._allocatorCopy(state.poolTags || []);
+    var absences = ctx.absences || this._allocatorCopy(state.absences || []);
+    function evaluate(ids) {
+      var failures = [];
+      ids.forEach(function(id) {
+        var staff = roster.find(function(person) { return person.id === id; });
+        var result = engine && typeof engine.validateEmployeeForOccurrence === 'function' ? engine.validateEmployeeForOccurrence({
+          employee: staff, occurrence: shift, job: job, allAssignments: ctx.allShifts || [],
+          currentShiftAssignedIds: ids, poolTags: tags, absences: absences
+        }) : { eligible: false, reasons: ['ELIGIBILITY_ENGINE_UNAVAILABLE'] };
+        if (!result.eligible) failures.push({ id: id, reasons: (result.reasons || []).slice() });
+      });
+      return failures;
+    }
+    function crew(ids) {
+      return engine && typeof engine.validateCrewForOccurrence === 'function' ? engine.validateCrewForOccurrence({
+        occurrence: shift, job: job, assignedStaffIds: ids, roster: roster,
+        allAssignments: ctx.allShifts || [], poolTags: tags, absences: absences
+      }) : { valid: false, hardBlock: true, issues: [{ code: 'ELIGIBILITY_ENGINE_UNAVAILABLE', message: 'Crew validation is unavailable' }] };
+    }
+    function finish(success, message, ids, selected) {
+      return { success: success, selectedIds: selected.slice(), stagedIds: ids.slice(),
+        shortage: Math.max(0, count - ids.length), crewValidation: self._allocatorCopy(crew(ids)),
+        errors: errors, message: message };
+    }
+    errors = evaluate(staged);
+    if (errors.length) return finish(false, 'Existing staged staff fail current hard checks. Review them before auto-adding.', original, []);
+    var browse = this.resolveAllocatorModel(roster, Object.assign({}, ctx, { searchTerm: '', selectedDept: 'all', selectedTeam: 'all', selectedPoolTag: 'all' }));
+    var available = browse.filteredStaff.filter(function(staff) { return staff._eligible && !staff._isAssigned; });
+    this.sortCandidates(available, { assignedIdsSet: new Set(staged), prefs: browse.jobPreferences, matchingJob: job,
+      poolTags: tags, refusalHistory: ctx.refusalHistory || state.refusalHistory || [], asOfDate: shift.date || shift.shiftDate });
+    var plantRequired = !!(shift.plantOperatorRequired || shift.requiresPlantOperator || job.plantOperatorRequired);
+    var crewHasOperator = staged.some(function(id) { return roster.some(function(staff) { return staff.id === id && staff.isPlantOperator; }); });
+    if (plantRequired && !crewHasOperator) {
+      var operator = available.find(function(staff) { return staff.isPlantOperator; });
+      if (!operator || staged.length >= count) return finish(false, 'An eligible plant operator is required; no safe additions can satisfy this crew.', original, []);
+      available = [operator].concat(available.filter(function(staff) { return staff !== operator; }));
+    }
+    for (var i = 0; i < available.length && staged.length < count; i++) {
+      var proposed = staged.concat(available[i].id), failures = evaluate(proposed);
+      if (failures.length) { errors = errors.concat(failures); continue; }
+      // If an operator is required the first addition supplies it; every stage is
+      // crew-validated rather than assuming individual eligibility proves coverage.
+      var compliance = crew(proposed);
+      if (!compliance.valid) {
+        errors.push({ id: available[i].id, reasons: (compliance.issues || []).map(function(issue) { return issue.code; }) });
+        continue;
+      }
+      staged = proposed; chosen.push(available[i].id);
+    }
+    var finalFailures = evaluate(staged), finalCrew = crew(staged);
+    if (finalFailures.length || !finalCrew.valid) {
+      errors = errors.concat(finalFailures);
+      return finish(false, 'Current hard or crew checks prevent a safe auto-add proposal.', original, []);
+    }
+    return finish(true, staged.length < count ? (chosen.length ? 'Eligible staff added; some crew vacancies remain.' : 'No eligible additions are available; crew vacancies remain.') :
+      chosen.length ? 'Eligible staff added in the current preference order.' : 'No crew vacancies remain.', staged, chosen);
+  },
+
   /**
    * Calculates soft preference rank tier for an employee based on job team preferences:
    * Tier 1 = Primary Team
@@ -22,6 +176,7 @@ window.HortOpsStaffAssignCandidateModel = {
   getStaffPriority: function(staff, prefs) {
     if (!staff || !staff.team) return 5;
     prefs = prefs || {};
+    if (prefs.teamsEnabled === false) return 5;
     var t = staff.team.toLowerCase();
     var primaryTeam = prefs.primaryTeam;
     var secondaryTeam = prefs.secondaryTeam;
@@ -52,7 +207,9 @@ window.HortOpsStaffAssignCandidateModel = {
     var selectedDept = options.selectedDept || 'all';
     var selectedTeam = options.selectedTeam || 'all';
     var onlyPreferredCrew = options.onlyPreferredCrew;
-    var prefs = options.jobPreferences || {};
+    var rules = window.HortOpsPlanningRules;
+    var prefs = rules ? rules.effectivePrefs(options.matchingJob, options.jobPreferences) : (options.jobPreferences || {});
+    if (prefs.teamsEnabled === false) onlyPreferredCrew = false;
     var primaryTeam = prefs.primaryTeam;
     var secondaryTeam = prefs.secondaryTeam;
     var tertiaryTeam = prefs.tertiaryTeam;
@@ -73,7 +230,11 @@ window.HortOpsStaffAssignCandidateModel = {
 
     return candidateProjections.filter(function(staff) {
       var isDoubleBookedOnly = false;
-      var evalRes = engine.validateStaffEligibility(staff, shift, allShifts, stagedAssignedStaffIds);
+      // Preserve the legacy overload for jobs without the optional extension;
+      // explicit section settings must be evaluated against their actual job.
+      var evalRes = options.matchingJob && options.matchingJob.staffingSections !== undefined ?
+        engine.validateStaffEligibility(staff, shift, options.matchingJob, allShifts, stagedAssignedStaffIds) :
+        engine.validateStaffEligibility(staff, shift, allShifts, stagedAssignedStaffIds);
       if (!evalRes.eligible) {
         if (evalRes.reasons.length === 1 && evalRes.reasons[0] === 'OVERLAPPING_SHIFT') {
           isDoubleBookedOnly = true;
@@ -158,6 +319,8 @@ window.HortOpsStaffAssignCandidateModel = {
     var assignedIdsSet = options.assignedIdsSet || new Set();
     var prefs = options.prefs || {};
     var matchingJob = options.matchingJob || {};
+    var planningRules = window.HortOpsPlanningRules;
+    if (planningRules) prefs = planningRules.effectivePrefs(matchingJob, prefs);
     var self = this;
 
     candidates.sort(function(a, b) {
@@ -171,8 +334,8 @@ window.HortOpsStaffAssignCandidateModel = {
       if (aQualFail !== bQualFail) return aQualFail - bQualFail;
 
       var rules = window.HortOpsPlanningRules;
-      if (rules && (matchingJob.preferredPoolTagIds || []).length) {
-        var tags = (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
+      if (rules && rules.sectionEnabled(matchingJob, 'pools') && (matchingJob.preferredPoolTagIds || []).length) {
+        var tags = options.poolTags || (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
         var tagA = rules.matches(a, matchingJob.preferredPoolTagIds, tags) ? 0 : 1;
         var tagB = rules.matches(b, matchingJob.preferredPoolTagIds, tags) ? 0 : 1;
         if (tagA !== tagB) return tagA - tagB;
@@ -232,6 +395,7 @@ window.HortOpsStaffAssignCandidateModel = {
    */
   countPreferredCandidates: function(roster, prefs) {
     prefs = prefs || {};
+    if (prefs.teamsEnabled === false) return 0;
     var isExclusive = prefs.isExclusive;
     var exclusiveTeams = prefs.exclusiveTeams || [];
     var primaryTeam = prefs.primaryTeam;
@@ -276,7 +440,8 @@ window.HortOpsStaffAssignCandidateModel = {
       refusalHistory: ctx.refusalHistory
     });
 
-    var preferredCrewCount = this.countPreferredCandidates(roster, ctx.jobPreferences);
+    var rules = window.HortOpsPlanningRules;
+    var preferredCrewCount = this.countPreferredCandidates(roster, rules ? rules.effectivePrefs(ctx.matchingJob, ctx.jobPreferences) : ctx.jobPreferences);
 
     return {
       filteredStaff: filteredStaff,

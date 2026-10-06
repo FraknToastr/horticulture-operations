@@ -32,7 +32,9 @@ window.HortOpsEligibilityEngine = {
           employee: staff,
           occurrence: occurrence,
           job: job,
-          allAssignments: allAssignments
+          allAssignments: allAssignments,
+          poolTags: params.poolTags,
+          absences: params.absences
         });
 
         var isEligible = (val.valid !== undefined) ? val.valid : val.eligible;
@@ -322,7 +324,9 @@ window.HortOpsEligibilityEngine = {
     var poolJob = job || context.job || (window.HortOpsApp && window.HortOpsApp.state &&
       (window.HortOpsApp.state.jobs || []).find(function(j) { return occurrence && j.id === occurrence.jobId; })) || occurrence || {};
     var poolRules = window.HortOpsPlanningRules;
-    if (poolJob.exclusivePoolSource === 'tags') {
+    var teamsEnabled = !poolRules || poolRules.sectionEnabled(poolJob, 'teams');
+    var poolsEnabled = !poolRules || poolRules.sectionEnabled(poolJob, 'pools');
+    if (poolsEnabled && poolJob.exclusivePoolSource === 'tags') {
       var catalogue = params.poolTags || context.poolTags || (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
       if (!poolRules || !poolRules.matches(employee, poolJob.exclusivePoolTagIds || [], catalogue)) { reasons.push('POOL_NOT_ALLOWED'); hardBlock = true; }
     }
@@ -331,7 +335,7 @@ window.HortOpsEligibilityEngine = {
     if (poolJob.exclusivePoolSource === 'tags' || poolJob.exclusivePoolSource === 'none') isExclusive = false;
     if (poolJob.exclusivePoolSource === 'teams') isExclusive = true;
     var exclusiveTeams = (occurrence && occurrence.exclusiveTeams && occurrence.exclusiveTeams.length > 0) ? occurrence.exclusiveTeams : (job && job.exclusiveTeams ? job.exclusiveTeams : []);
-    if (isExclusive && exclusiveTeams && exclusiveTeams.length > 0) {
+    if (teamsEnabled && isExclusive && exclusiveTeams && exclusiveTeams.length > 0) {
       var staffTeam = (employee.team || '').toLowerCase();
       var isAllowedTeam = exclusiveTeams.some(function(t) {
         return t.toLowerCase() === staffTeam;

@@ -251,17 +251,22 @@ window.HortOpsStaffAssignStagedCrew = {
           }
         }
 
-        return '<div class="allocated-staff-row" style="' + cardBorder + '">' +
+        var poolTagsHtml = (staff.poolTagIds || []).map(function(id) {
+          var tag = (ctx.poolTags || []).find(function(item) { return item.id === id; });
+          return tag ? '<span data-staff-pool-tag="' + escAttr(id) + '" class="badge ' + (tag.active ? 'badge-emerald' : 'badge-slate') + '" style="font-size:10px;white-space:normal;overflow-wrap:anywhere">#' + escHtml(tag.label) + (tag.active ? '' : ' (retired)') + '</span>' : '';
+        }).join('');
+
+        return '<div class="allocated-staff-row" data-staged-staff="' + escAttr(staff.id) + '" style="' + cardBorder + 'white-space:normal;">' +
           assignmentColHtml +
-          '<div style="display: flex; align-items: center; gap: 0.5rem; flex: 1 1 auto; min-width: 0; overflow: hidden;">' +
+          '<div style="display: flex; align-items: center; flex-wrap:wrap; gap: 0.5rem; flex: 1 1 auto; min-width: 0; overflow-wrap:anywhere;">' +
             dotHtml +
             plantOpPill +
             qualBadge +
             fatigueBadge +
-            '<span style="font-weight: 700; color: var(--slate-900); font-size: 13px; flex-shrink: 0;">' + escHtml(staff.name) + '</span>' +
-            '<span style="font-size: 12px; color: var(--slate-600); flex-shrink: 0;">' + escHtml(staff.role) + '</span>' +
+            '<span style="font-weight: 700; color: var(--slate-900); font-size: 13px; min-width:0;">' + escHtml(staff.name) + '</span>' + poolTagsHtml +
+            '<span style="font-size: 12px; color: var(--slate-600); min-width:0;">' + escHtml(staff.role) + '</span>' +
             '<span style="color: var(--slate-300); font-size: 11px; flex-shrink: 0;">•</span>' +
-            '<span style="font-size: 12px; color: var(--slate-500); flex-shrink: 0;">' + escHtml(staff.team) + '</span>' +
+            '<span style="font-size: 12px; color: var(--slate-500); min-width:0;">' + escHtml(staff.team) + '</span>' +
             ineligBadge +
           '</div>' +
           '<div style="flex-shrink: 0; margin-left: 0.5rem;">' +

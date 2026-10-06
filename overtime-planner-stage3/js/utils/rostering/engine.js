@@ -226,6 +226,8 @@ window.HortOpsRosteringEngine = {
       isExclusive: job ? job.isExclusive : (occurrence ? occurrence.isExclusive : false),
       exclusiveTeams: job ? job.exclusiveTeams : (occurrence ? occurrence.exclusiveTeams : [])
     };
+    var planningRules = window.HortOpsPlanningRules;
+    if (planningRules) jobPrefs = planningRules.effectivePrefs(job || occurrence, jobPrefs);
 
     var isPlantOpReq = Boolean(occurrence && (occurrence.plantOperatorRequired || (job && job.plantOperatorRequired)));
     var crewHasPlantOp = currentAssignedIds.some(function(id) {
@@ -278,7 +280,7 @@ window.HortOpsRosteringEngine = {
 
     var deterministicSort = function(a, b) {
       var poolRules = window.HortOpsPlanningRules;
-      if (poolRules && job && (job.preferredPoolTagIds || []).length) {
+      if (poolRules && job && poolRules.sectionEnabled(job, 'pools') && (job.preferredPoolTagIds || []).length) {
         var poolTags = params.poolTags || (window.HortOpsApp && window.HortOpsApp.state.poolTags) || [];
         var preferredA = poolRules.matches(a, job.preferredPoolTagIds, poolTags) ? 0 : 1;
         var preferredB = poolRules.matches(b, job.preferredPoolTagIds, poolTags) ? 0 : 1;

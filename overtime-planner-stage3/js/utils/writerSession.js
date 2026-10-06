@@ -32,15 +32,19 @@
       };
     });
   }
-  guard(app, ['init', '_commitCanonicalProposal', 'saveCurrentWorkspace', 'updatePermit', 'updateShiftStaff', 'saveJob', 'deleteJob', 'restoreWorkspaceJson', 'resetToCleanSlate', 'reconcileStaffSnapshot', 'importStaffMembers', 'updateStaffMember', 'handleAutoStagger', 'saveAbsenceAndRefusalData', 'openStaffAssignModal', 'openAddJobModal', 'openEditJobModal', 'openImportModal', 'openResetWorkspaceModal']);
+  guard(app, ['init', '_commitCanonicalProposal', 'saveCurrentWorkspace', 'updatePermit', 'updateShiftStaff', 'saveJob', 'deleteJob', 'restoreWorkspaceJson', 'resetToCleanSlate', 'reconcileStaffSnapshot', 'importStaffMembers', 'updateStaffMember', 'recordOvertimeHoursEvidence', 'handleAutoStagger', 'saveAbsenceAndRefusalData', 'openStaffAssignModal', 'openAddJobModal', 'openEditJobModal', 'openImportModal', 'openResetWorkspaceModal']);
   guard(storage, ['set', 'remove', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'retireCompositeParentBundle', 'compactStorage', 'importWorkspaceJson', 'saveWorkspace']);
   guard(driver, ['set', 'remove', '_restoreRawStorageSnapshot', '_restoreEmergencyRecoveryMetadata', '_stageTransactionRecoveryBundle', '_stageEmergencyRecoveryArtifact', '_executeCompensatingRollback', 'resetWorkspace', 'restoreEmergencyRecoveryArtifact', 'retireCompositeParentBundle', 'recordParentEvidenceInspected', 'recordParentEvidenceExportInitiated', 'acknowledgeParentPriorEvidence', 'compactStorage']);
   var editorBoundaries = [
-    [window.HortOpsStaffAssignModal, ['open','addStaff','openActiveContinuation','removeStaff','removeAllUnaccredited','removeAllFatigued','removeAllIneligible','autoFillTeam','updatePermit','updatePermitNotes','updateSlotMode','updateSlotRepeat','saveAllocation']],
+    [window.HortOpsStaffAssignModal, ['open','addStaff','openActiveContinuation','removeStaff','removeAllUnaccredited','removeAllFatigued','removeAllIneligible','autoFillTeam','autoAddEligible','applyHoursProposal','approveMixedPolicyPlan','setPoolTag','updatePermit','updatePermitNotes','updateSlotMode','updateSlotRepeat','saveAllocation']],
+    [window.HortOpsHoursEvidenceModal, ['open','save']],
+    [window.HortOpsHoursAllocationModal, ['open','apply']],
+    [window.HortOpsMixedPolicyPlanModal, ['open','approve']],
     [window.HortOpsStaffExemptionModal, ['open','toggleExempt','setPreset','save']],
     [window.HortOpsStaffQualificationModal, ['open','addQualification','removeQualification','save']],
-    [window.HortOpsStaffAbsenceModal, ['open','addAbsence','updateAbsence','removeAbsence','addRefusal','updateRefusal','removeRefusal','save']],
-    [window.HortOpsJobEditModal, ['open','handleSubmit','setPlanningField','togglePatternDay','setPoolSource','togglePoolTag']],
+    [window.HortOpsStaffAbsenceModal, ['open','addAbsence','updateAbsence','removeAbsence','addRefusal','updateRefusal','removeRefusal','save','saveDirect']],
+    [window.HortOpsAbsenceImpactModal, ['open','approve','saveAbsenceOnly']],
+    [window.HortOpsJobEditModal, ['open','handleSubmit','setPlanningField','togglePatternDay','setPoolSource','togglePoolTag','setStaffingSection']],
     [window.HortOpsStaffPoolModal, ['open','save','createTag','setTagActive','setMembership']],
     [window.HortOpsImportModal, ['open','handleFileSelect','processJsonContent','processCsvContent','confirmSync','confirmJsonRestore']],
     [window.HortOpsResetWorkspaceModal, ['open','executeReset']]
@@ -71,6 +75,8 @@
   function readOnlyAction(element) {
     if (element.closest('#export-modal-root, #warnings-modal-root, #storage-health-modal-root')) return true;
     var button = element.closest('button');
+    if (button && button.hasAttribute('data-candidate-preview')) return true;
+    if (button && button.closest('#candidate-preview-modal-root') && /^(refresh|close)$/.test(button.getAttribute('data-candidate-preview-action') || '')) return true;
     var action = button && button.getAttribute('onclick') || '';
     return /\.(close|copyQuarantinePayload|exportQuarantineFile|exportParentEvidence)\(/.test(action);
   }
@@ -133,6 +139,7 @@
   }
   function release() {
     generation++; releaseWanted = true; reason = 'Editing was released. Try editing to reload the latest saved workspace.';
+    window.HortOpsCandidatePreviewModal.close();
     // Discard editor models as well as their DOM. A retained save callback must
     // not regain access to an old form when this tab later reacquires editing.
     editorBoundaries.forEach(function(entry) { entry[0].close(); });
@@ -143,6 +150,7 @@
   }
   function acquire() {
     if (canWrite() || pending) return Promise.resolve(status());
+    window.HortOpsCandidatePreviewModal.close();
     var attempt = generation;
     pending = true; mode = 'starting'; reason = 'Checking exclusive workspace ownership'; decorate();
     return new Promise(function(ready) {

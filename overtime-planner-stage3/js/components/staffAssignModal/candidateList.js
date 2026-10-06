@@ -1,110 +1,50 @@
+// Show the complete browsed workforce, including blocked pool members and canonical reasons.
 (function() {
-// Imported colours never enter CSS/HTML without token validation.
-var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safeColor) || function() { return '#10b981'; };
-// Staff Assignment Candidate List Sub-module
-// Renders candidate staff cards, suitability scoring, availability pills, and conflict warnings.
-window.HortOpsStaffAssignCandidateList = {
-  render: function(ctx) {
-    var filteredStaff = ctx.filteredStaff || [];
-    var assignedIdsSet = ctx.assignedIdsSet || new Set();
-    var isExclusive = ctx.isExclusive;
-    var getStaffPriority = ctx.getStaffPriority;
-    var icons = ctx.icons || window.HortOpsIcons;
-    var escHtml = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml) || function(s) { return s || ''; };
-    var escAttr = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtmlAttr) || function(s) { return s || ''; };
-
-    // Candidate Cards HTML
-    var candidatesHtml = filteredStaff.length === 0 ?
-      '<div style="text-align: center; padding: 3rem 1rem; color: var(--slate-400); font-size: 13px; background: var(--slate-50); border-radius: 6px; border: 1px solid var(--slate-200);">' +
-        'No employees match the active filters and exclusive team constraints.' +
-      '</div>' :
-      filteredStaff.map(function(staff) {
-        var isAssigned = assignedIdsSet.has(staff.id);
-        var prio = getStaffPriority ? getStaffPriority(staff) : 5;
-
-        var badgeHtml = '';
-        if (prio === 1) {
-          badgeHtml = '<span class="badge badge-emerald" title="Primary Team Preference">' + icons.render('star', 'w-2.5 h-2.5') + 'Primary</span>';
-        } else if (prio === 2) {
-          badgeHtml = '<span class="badge badge-sky" title="Secondary Preference">🥈 2nd Pref</span>';
-        } else if (prio === 3) {
-          badgeHtml = '<span class="badge badge-amber" title="Tertiary Preference">🥉 3rd Pref</span>';
-        } else if (isExclusive && prio === 4) {
-          badgeHtml = '<span class="badge badge-purple" title="Exclusive Team">' + icons.render('lock', 'w-2.5 h-2.5') + 'Exclusive</span>';
+  'use strict';
+  window.HortOpsStaffAssignCandidateList = {
+    render: function(ctx) {
+      var esc = window.HortOpsSecurityUtils.escapeHtml, attr = window.HortOpsSecurityUtils.escapeHtmlAttr;
+      var icons = ctx.icons || window.HortOpsIcons, assigned = ctx.assignedIdsSet || new Set(), tags = ctx.poolTags || [];
+      var groups = ctx.allocatorGroups || [{id:'all',label:'All staff',staff:ctx.filteredStaff || []}];
+      function reasonText(value) {
+        if (value && typeof value === 'object') return value.message || value.code || '';
+        return ctx.getHumanIneligibleReason ? ctx.getHumanIneligibleReason(value) : window.HortOpsEligibilityEngine.getHumanIneligibleReason(value);
+      }
+      function renderCard(person) {
+        var isAssigned = assigned.has(person.id) || person._isAssigned;
+        var check = person._eligibility || {eligible:!person._isDoubleBooked && !person._lacksQualifications && !(person._fatigueEval && person._fatigueEval.isHardBlocked),reasons:[],warnings:[]};
+        var priority = ctx.getStaffPriority ? ctx.getStaffPriority(person) : 5;
+        var tierLabels = {1:'Primary',2:'2nd preference',3:'3rd preference',4:'Exclusive'};
+        var badges = ctx.teamsEnabled !== false && tierLabels[priority] ? '<span class="badge badge-emerald">' + tierLabels[priority] + '</span>' : '';
+        if (person.isPlantOperator) badges += '<span class="badge badge-amber">Plant Op</span>';
+        if (person._qualEval && (!person._qualEval.compliant || (person._qualEval.validCodes || []).length)) {
+          var qualLabel = person._qualEval.compliant ? 'Accredited' : (person._qualEval.expiredCodes || []).length ? 'Ticket Expired' : 'Ticket Missing';
+          badges += '<span class="badge ' + (person._qualEval.compliant ? 'badge-emerald' : 'badge-amber') + '" title="' + attr((person._qualEval.validCodes || []).concat(person._qualEval.missingCodes || [],person._qualEval.expiredCodes || []).join(', ')) + '">' + qualLabel + '</span>';
         }
-
-        var isDoubleBooked = !!staff._isDoubleBooked;
-        var doubleBookedBadge = isDoubleBooked ? '<span class="badge badge-amber" style="font-size: 10px; font-weight: 700; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;">⚠️ Double-Booked</span>' : '';
-        var plantOpBadge = staff.isPlantOperator ? '<span class="badge badge-amber" style="font-size: 11px;">Plant Op</span>' : '';
-
-        var qualBadgeHtml = '';
-        if (staff._qualEval && !staff._qualEval.compliant) {
-          if (staff._qualEval.expiredCodes && staff._qualEval.expiredCodes.length > 0) {
-            qualBadgeHtml = '<span class="badge" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-size: 10px; font-weight: 700;" title="Expired Accreditations: ' + escAttr(staff._qualEval.expiredCodes.join(', ')) + '">' + icons.render('alertTriangle', 'w-2.5 h-2.5') + 'Ticket Expired</span>';
-          } else {
-            qualBadgeHtml = '<span class="badge" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-size: 10px; font-weight: 700;" title="Missing Accreditations: ' + escAttr(staff._qualEval.missingCodes.join(', ')) + '">' + icons.render('lock', 'w-2.5 h-2.5') + 'Ticket Missing</span>';
-          }
-        } else if (staff._qualEval && staff._qualEval.validCodes && staff._qualEval.validCodes.length > 0) {
-          qualBadgeHtml = '<span class="badge badge-emerald" style="font-size: 10px; font-weight: 700;" title="Holds required accreditations: ' + escAttr(staff._qualEval.validCodes.join(', ')) + '">' + icons.render('shield', 'w-2.5 h-2.5') + 'Accredited</span>';
+        if (person._fatigueEval && person._fatigueEval.tier !== 'LOW') {
+          var fatigueLabel = person._fatigueEval.tier === 'CRITICAL' ? 'Rest Req' : person._fatigueEval.consecutiveWeekends + ' Wknds';
+          badges += '<span class="badge badge-amber" title="' + attr(person._fatigueEval.message || '') + '">' + esc(fatigueLabel) + '</span>';
         }
-
-        var fatigueBadgeHtml = '';
-        var fEval = staff._fatigueEval;
-        if (fEval) {
-          if (fEval.tier === 'CRITICAL') {
-            fatigueBadgeHtml = '<span class="badge" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-size: 10px; font-weight: 700;" title="' + escAttr(fEval.message) + '">' + icons.render('alertTriangle', 'w-2.5 h-2.5') + 'Rest Req</span>';
-          } else if (fEval.tier === 'HIGH') {
-            fatigueBadgeHtml = '<span class="badge" style="background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; font-size: 10px; font-weight: 700;" title="' + escAttr(fEval.message) + '">⚠️ ' + fEval.consecutiveWeekends + ' Wknds</span>';
-          } else if (fEval.tier === 'MODERATE') {
-            fatigueBadgeHtml = '<span class="badge badge-amber" style="font-size: 10px; font-weight: 700;" title="' + escAttr(fEval.message) + '">' + fEval.consecutiveWeekends + ' Wknds</span>';
-          }
-        }
-
-        var actionBtn = isAssigned ?
-          '<button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; color: var(--emerald-800); background: var(--emerald-50); border-color: var(--emerald-300);" onclick="window.HortOpsStaffAssignModal.removeStaff(\'' + staff.id + '\')">' +
-            icons.render('check', 'w-3 h-3') + '<span>Allocated</span>' +
-          '</button>' :
-          isDoubleBooked ?
-          '<button disabled class="btn btn-secondary" style="padding: 0.25rem 0.5rem; opacity: 0.55; cursor: not-allowed;" title="Already allocated to another shift on this date">' +
-            '<span>Double-Booked</span>' +
-          '</button>' :
-          staff._lacksQualifications ?
-          '<button disabled class="btn btn-secondary" style="padding: 0.25rem 0.5rem; opacity: 0.55; cursor: not-allowed;" title="Officer lacks mandatory accreditations (' + escAttr(((staff._qualEval.missingCodes || []).concat(staff._qualEval.expiredCodes || [])).join(', ')) + ')">' +
-            '<span>Lacks Ticket</span>' +
-          '</button>' :
-          (staff._fatigueEval && staff._fatigueEval.isHardBlocked) ?
-          '<button disabled class="btn btn-secondary" style="padding: 0.25rem 0.5rem; opacity: 0.55; cursor: not-allowed;" title="' + escAttr(staff._fatigueEval.message) + '">' +
-            '<span>Rest Req</span>' +
-          '</button>' :
-          '<button class="btn btn-primary" style="padding: 0.25rem 0.6rem;" onclick="window.HortOpsStaffAssignModal.addStaff(\'' + staff.id + '\')">' +
-            icons.render('plus', 'w-3 h-3') + '<span>Add</span>' +
-          '</button>';
-
-        var candDotHtml = (window.HortOpsData && window.HortOpsData.renderTeamDot) ?
-          window.HortOpsData.renderTeamDot(staff.team) :
-          '<span class="team-dot" style="background-color: ' + safeColor(staff.avatarColor, '#10b981') + ';"></span>';
-
-        return '<div class="candidate-card ' + (isAssigned ? 'is-assigned' : '') + '">' +
-          '<div style="display: flex; align-items: center; gap: 0.5rem; flex: 1 1 auto; min-width: 0; overflow: hidden;">' +
-            candDotHtml +
-            badgeHtml +
-            plantOpBadge +
-            doubleBookedBadge +
-            qualBadgeHtml +
-            fatigueBadgeHtml +
-            '<span style="font-weight: 700; font-size: 13px; color: var(--slate-900); flex-shrink: 0;">' + escHtml(staff.name) + '</span>' +
-            '<span style="font-size: 12px; color: var(--slate-600); flex-shrink: 0;">' + escHtml(staff.role) + '</span>' +
-            '<span style="color: var(--slate-300); font-size: 11px; flex-shrink: 0;">•</span>' +
-            '<span style="font-size: 12px; color: var(--slate-500); flex-shrink: 0;">' + escHtml(staff.team) + '</span>' +
-          '</div>' +
-          '<div style="flex-shrink: 0; margin-left: 0.5rem;">' + actionBtn + '</div>' +
-        '</div>';
+        var tagChips = (person.poolTagIds || []).map(function(id) {
+          var tag = tags.find(function(item) { return item.id === id; });
+          return tag ? '<span class="badge ' + (tag.active ? 'badge-emerald' : 'badge-slate') + '" data-staff-pool-tag="' + attr(id) + '" style="font-size:10px;white-space:normal;overflow-wrap:anywhere">#' + esc(tag.label) + (tag.active ? '' : ' (retired)') + '</span>' : '';
+        }).join('');
+        var reasons = (check.reasons || []).map(function(reason) { return '<li>' + esc(reasonText(reason)) + '</li>'; }).join('');
+        var warnings = (check.warnings || []).map(function(reason) { return '<li>' + esc(reasonText(reason)) + '</li>'; }).join('');
+        var blockedLabel = person._isDoubleBooked ? 'Double-Booked' : person._lacksQualifications ? 'Lacks Ticket' : person._fatigueEval && person._fatigueEval.isHardBlocked ? 'Rest Req' : 'Unavailable';
+        var action = isAssigned ? '<button type="button" disabled class="btn btn-secondary" style="padding:.25rem .5rem">' + icons.render('check','w-3 h-3') + 'Assigned</button>' :
+          !check.eligible ? '<button type="button" disabled aria-disabled="true" class="btn btn-secondary" style="padding:.25rem .5rem;opacity:.6" title="' + attr((check.reasons || []).map(reasonText).join('; ')) + '">' + blockedLabel + '</button>' :
+          '<button type="button" class="btn btn-primary" style="padding:.25rem .5rem"' + (ctx.vacancies !== undefined && ctx.vacancies <= 0 ? ' disabled title="Crew target is already filled"' : '') + ' onclick="window.HortOpsStaffAssignModal.addStaff(' + attr("'" + String(person.id).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '\\r').replace(/\n/g, '\\n').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + "'") + ')">' + icons.render('plus','w-3 h-3') + 'Add</button>';
+        return '<div class="candidate-card ' + (isAssigned ? 'is-assigned' : '') + '" data-allocator-staff="' + attr(person.id) + '" style="display:flex;align-items:flex-start;flex-wrap:wrap;gap:.5rem;height:auto;min-height:0;white-space:normal"><div style="flex:1 1 180px;min-width:0;overflow-wrap:anywhere"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:.35rem"><strong style="font-size:13px;color:var(--slate-900);min-width:0">' + esc(person.name || person.id) + '</strong>' + tagChips + '</div><div style="font-size:12px;color:var(--slate-500);margin:.25rem 0">' + esc(person.role || '') + ' · ' + esc(person.team || '') + '</div><div style="display:flex;flex-wrap:wrap;gap:.25rem">' + badges + '</div>' +
+          (reasons ? '<ul data-allocator-reasons style="font-size:11px;color:var(--rose-700);line-height:1.5;padding-left:1rem;margin:.4rem 0 0">' + reasons + '</ul>' : '') +
+          (warnings ? '<ul style="font-size:11px;color:var(--amber-800);line-height:1.5;padding-left:1rem;margin:.4rem 0 0">' + warnings + '</ul>' : '') + '</div><div style="flex-shrink:0">' + action + '</div></div>';
+      }
+      var content = groups.map(function(group,index) {
+        var staff = group.staff || [], eligible = staff.filter(function(person) { return person._eligibility && person._eligibility.eligible && !assigned.has(person.id) && !person._isAssigned; }).length;
+        var blocked = staff.filter(function(person) { return person._eligibility && !person._eligibility.eligible; }).length;
+        return '<section data-allocator-group="' + attr(group.id) + '" style="margin-top:' + (index ? '1rem;border-top:2px solid var(--slate-300);padding-top:.75rem' : '0') + '"><div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:.35rem;margin-bottom:.5rem"><strong style="font-size:12px;color:' + (index ? 'var(--slate-700)' : 'var(--emerald-800)') + '">' + esc(group.label) + '</strong><span style="font-size:11px;color:var(--slate-500)">' + staff.length + ' shown · ' + eligible + ' available · ' + blocked + ' blocked</span></div>' + (staff.length ? staff.map(renderCard).join('') : '<p style="font-size:12px;color:var(--slate-500)">No staff match these browsing filters.</p>') + '</section>';
       }).join('');
-
-    return '<div style="max-height: 400px; overflow-y: auto; padding-right: 2px;">' +
-      candidatesHtml +
-    '</div>';
-  }
-};
-
-})();
+      return '<div style="max-height:400px;overflow-y:auto;overflow-x:hidden;padding-right:2px">' + content + '</div>';
+    }
+  };
+}());

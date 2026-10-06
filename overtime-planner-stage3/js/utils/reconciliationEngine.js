@@ -141,6 +141,7 @@ window.HortOpsReconciliationEngine = (function() {
         skills: match.skills || [],
         poolTagIds: (match.poolTagIds || []).slice(),
         poolTagHistory: JSON.parse(JSON.stringify(match.poolTagHistory || [])),
+        overtimeHoursEvidence: JSON.parse(JSON.stringify(match.overtimeHoursEvidence || [])),
         qualifications: JSON.parse(JSON.stringify(match.qualifications || [])),
           phone: match.phone || '',
           avatarColor: match.avatarColor || '#10b981',
@@ -157,6 +158,8 @@ window.HortOpsReconciliationEngine = (function() {
           ytdOvertimeHours: match.ytdOvertimeHours || 0,
           ytdShiftCount: match.ytdShiftCount || 0
         };
+
+        if (match.overtimeHoursEvidence === undefined) delete reconciledRecord.overtimeHoursEvidence;
 
         if (changedFields.length > 0) {
           updated.push({

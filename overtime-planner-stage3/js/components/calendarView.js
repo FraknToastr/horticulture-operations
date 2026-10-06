@@ -122,6 +122,7 @@ window.HortOpsCalendarView = {
                 esc(timeMeta) +
               '</div>' +
               (sh.locationDetails ? ('<div style="font-size: 11px; color: var(--slate-400); margin-top: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + esc(sh.locationDetails) + '</div>') : '') +
+              '<button type="button" class="btn btn-secondary candidate-preview-entry" data-candidate-preview="' + escAttr(sh.shiftId) + '">Preview candidates</button>' +
             '</div>';
           }).join('');
 

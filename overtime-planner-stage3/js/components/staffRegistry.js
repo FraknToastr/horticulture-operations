@@ -158,6 +158,10 @@ window.HortOpsStaffRegistry = {
       }
 
       var actionHtml = '<div style="display: flex; gap: 0.35rem; justify-content: center;">' +
+        '<button type="button" class="btn btn-secondary" data-hours-evidence-staff="' + escAttr(staff.id) + '" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" title="Record verified year-to-date overtime hours">' +
+          icons.render('clock', 'w-3 h-3 text-emerald-600') +
+          '<span>Hours</span>' +
+        '</button>' +
         '<button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.2rem; border-color: #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); window.HortOpsStaffQualificationModal.open(\'' + escAttr(staff.id) + '\')" title="Manage Qualifications & Accreditations">' +
           icons.render('shield', 'w-3 h-3 text-emerald-600') +
           '<span>Tickets</span>' +

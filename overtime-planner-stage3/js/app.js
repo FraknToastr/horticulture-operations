@@ -263,6 +263,23 @@ window.HortOpsApp = {
         if (proposedRoster === undefined) proposedRoster = [];
       }
 
+      // Corrections append evidence; ordinary edits/imports cannot erase prior records.
+      if (!isRestoreOrReset && Array.isArray(proposedRoster) && this._domainBaselines) {
+        var baselineRoster = this._domainBaselines.roster || [];
+        function evidenceEqual(a, b) {
+          return ['id','year','throughDate','hours','source','recordedAt','verification'].every(function(field) { return a[field] === b[field]; });
+        }
+        for (var previousStaff of baselineRoster) {
+          var previousEvidence = previousStaff.overtimeHoursEvidence || [];
+          if (!previousEvidence.length) continue;
+          var proposedStaff = proposedRoster.find(function(person) { return person.id === previousStaff.id; });
+          var proposedEvidence = proposedStaff && proposedStaff.overtimeHoursEvidence;
+          if (!Array.isArray(proposedEvidence) || previousEvidence.some(function(record) {
+            return !proposedEvidence.some(function(next) { return evidenceEqual(record, next); });
+          })) return { success: false, error: 'Overtime hours evidence history cannot be removed or rewritten by an ordinary workspace edit.' };
+        }
+      }
+
       var proposedAssignments;
       if (own.call(proposalOverrides, 'assignments')) {
         proposedAssignments = proposalOverrides.assignments;

@@ -1,6 +1,10 @@
 # Overtime Planner Stage 3 development transition
 
-Status: Phase 8 closed and corrected Stage 3 baseline accepted by explicit owner authority. Stage 4A design/policy baseline complete; stopped before 4B. Earlier phase stop/acceptance statements below are historical. No independent Review 65 verdict or expanded runtime certification is claimed.
+## Current Stage 4F transition
+
+Stage 4F absence-impact review and bounded one-off replacement planning is complete locally under the owner-approved date-range and policy-preservation rules. `STAGE4F_CHECKPOINT.md` supersedes earlier stop-before-4F wording below. Regular working hours remain excluded. Stage 4 roadmap work is complete through 4F; stop before post-Stage 4 work until the owner resumes it. No GitHub update or independent review verdict is included.
+
+Status: Phase 8 closed and corrected Stage 3 baseline accepted by explicit owner authority. Stage 4C explainable occurrence preview implemented and verified locally; stopped before Stage 4D. Earlier phase stop/acceptance statements below are historical. No independent Review 65 verdict or expanded runtime certification is claimed.
 
 ## Identity, source and selected copy
 
@@ -124,3 +128,17 @@ The owner resumed Stage 4B after the documented Stage 4A baseline. Approved impl
 Bounded `work_pattern` recurrence supports consecutive cyclic weekly weekdays (maximum four), optional full-day SA public holidays with date exclusions taking precedence, and one-off one-to-four-day runs. Job/date unions are deduplicated and each daily occurrence is staffed separately, including Easter and year crossings. This increment does not implement a new allocation algorithm, legacy migration or saved-history rewriting.
 
 `STAGE4B_CHECKPOINT.md` records the exact scope and completed parent-coordinated verification: 30 focused checks with zero browser errors, 24 retained suites, six Stage 3 contracts and seven browser checks, 18 writer checks, 15 handoff checks, seven security groups, six runtime checks, six existing Planner assignment checks, two tooling groups and ten inherited Review 55–63 scripts. These are local technical results, not a new independent Review 65 verdict or additional Windows/browser certification. Stage 4A's D02/D03 implementation boundary is settled only for these described contracts; remaining fairness, fixed fallback and regular-hours policy choices are not authorised defaults. Stage 4B is complete locally. Stop until the owner explicitly resumes Stage 4C. App isolation, original constitution/review preservation, manual packaging and publication boundaries remain unchanged.
+
+## Stage 4C completed increment — current transition
+
+The owner resumed Stage 4C and explicitly reaffirmed agents. This increment implements an explainable candidate preview for one saved occurrence, accessible from Forward Planner and Calendar, including read-only peer tabs. Verified saved bytes supply detached occurrence/workforce/pool/absence context; canonical eligibility and crew checks and the existing comparator supply the explanations. Unknown/import-defaulted zero hours remain unverified, regular-work intervals remain absent, and no allocation/fairness policy is introduced. Preview actions leave saved bytes and live domain records unchanged; stale or unreadable results remove current eligibility claims. Existing guarded allocation independently validates when saving.
+
+`STAGE4C_CHECKPOINT.md` records 11 model groups, 23 browser groups with zero errors, the completed retained/supplementary regression matrix, standalone parity and preserved host/history bytes. Current governance and the 410-file transport allowlist reflect this increment; raw results, images, inventories, research and scratch files remain local. Earlier stop-before-4C statements are historical. Stop before Stage 4D until the owner resumes and its relevant fairness/regular-hours policies are settled. Original constitution/signed history, application isolation, manual packaging and separate GitHub authority remain preserved. No independent Review 65 verdict or new Windows certification is claimed.
+
+## Owner-requested per-job staffing sections prerequisite
+
+After Stage 4C the owner requested section controls and selected per-job scope. `JOB_STAFFING_SECTIONS_CHECKPOINT.md` records Team Suitability and Pools controls, their canonical eligibility/ordering integration, persistence, compatibility, and completed checks. Missing flags keep existing jobs unchanged. Off sections retain their configuration; mandatory safety protections remain active. Stage 4D remains the next unstarted phase with its policy decisions pending. No GitHub update is included.
+
+## Owner-requested allocator usability increment
+
+The owner explicitly resumed the allocator requirements appended to the Stage 4 baseline. All five controls are implemented and locally verified; see `ALLOCATOR_USABILITY_CHECKPOINT.md`. The general button stages canonical eligible candidates in existing preference order, protecting selected staff and explaining shortages. Grouped directory visibility, tags, search and slicers do not grant assignment authority. This is the current checkpoint; stop before Stage 4D and its pending policies. Original constitutional/history bytes and application independence remain protected.

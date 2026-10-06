@@ -24,7 +24,14 @@
     "test:ordering": "node scripts/test_candidate_ordering.cjs",
     "test:runtime": "node scripts/test_runtime_qualification.cjs",
     "test:planner:assignments": "node scripts/test_forward_planner_assignments.cjs",
-    "test:stage4b": "node scripts/test_staff_pools_work_patterns.cjs"
+    "test:stage4b": "node scripts/test_staff_pools_work_patterns.cjs",
+    "test:stage4c:model": "node scripts/test_candidate_preview_model.cjs",
+    "test:stage4c": "node scripts/test_candidate_preview_model.cjs && node scripts/test_candidate_preview.cjs",
+    "test:staffing-sections": "node scripts/test_job_staffing_sections.cjs",
+    "test:allocator": "node scripts/test_allocator_usability.cjs",
+    "test:stage4d": "node scripts/test_hours_allocation.cjs",
+    "test:stage4e": "node scripts/test_mixed_policy_planning.cjs",
+    "test:stage4f": "node scripts/test_absence_impact_planning.cjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",

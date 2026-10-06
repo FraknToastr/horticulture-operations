@@ -280,7 +280,7 @@ window.HortOpsSchemaValidator = {
       // Declaring any extension, even empty/null, always requires the real rules.
       var ownPlanning = Object.prototype.hasOwnProperty;
       var extended = ownPlanning.call(parsed, 'poolTags') || parsed.roster.some(function(person) { return ownPlanning.call(person, 'poolTagIds') || ownPlanning.call(person, 'poolTagHistory'); }) || parsed.jobs.some(function(job) {
-        return job.frequencyType === 'work_pattern' || ['workPattern','preferredPoolTagIds','exclusivePoolTagIds','exclusivePoolSource'].some(function(field) { return ownPlanning.call(job,field); });
+        return job.frequencyType === 'work_pattern' || ['workPattern','preferredPoolTagIds','exclusivePoolTagIds','exclusivePoolSource','staffingSections'].some(function(field) { return ownPlanning.call(job,field); });
       });
       if (extended) return { valid: false, error: 'Pool/pattern validation unavailable' };
     } else {
@@ -388,10 +388,25 @@ window.HortOpsSchemaValidator = {
 
     var validStaffStatuses = ['active', 'departed', 'inactive', 'on_leave', 'temporarily_unavailable'];
     var seenIds = new Set();
+    var seenHoursIds = new Set();
     for (var k = 0; k < parsed.roster.length; k++) {
       var s = parsed.roster[k];
       if (!s || typeof s !== 'object' || Array.isArray(s)) {
         return { valid: false, error: 'Invalid staff object at index ' + k };
+      }
+      if (Object.prototype.hasOwnProperty.call(s, 'overtimeHoursEvidence')) {
+        if (!Array.isArray(s.overtimeHoursEvidence)) return { valid: false, error: 'Overtime hours evidence must be an array.' };
+        var hoursEvidence = window.HortOpsHoursEvidence;
+        if (!hoursEvidence && typeof require !== 'undefined') {
+          try { require('../hoursEvidence.js'); hoursEvidence = window.HortOpsHoursEvidence; } catch (hoursError) {}
+        }
+        if (!hoursEvidence || typeof hoursEvidence.validate !== 'function') return { valid: false, error: 'Overtime hours evidence validation unavailable.' };
+        var hoursCheck = hoursEvidence.validate(s.overtimeHoursEvidence);
+        if (!hoursCheck.valid) return { valid: false, error: hoursCheck.error };
+        for (var hoursRecord of s.overtimeHoursEvidence) {
+          if (seenHoursIds.has(hoursRecord.id)) return { valid: false, error: 'Duplicate overtime hours evidence identity across workforce records.' };
+          seenHoursIds.add(hoursRecord.id);
+        }
       }
       if (!s.id || !s.name) {
         return { valid: false, error: 'Staff member at index ' + k + ' missing required id or name.' };

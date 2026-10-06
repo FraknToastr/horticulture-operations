@@ -1,5 +1,7 @@
 # Stage 4 Smart Rostering design and policy baseline
 
+Current status, 6 October 2026: the owner-authorised Stage 4 roadmap is implemented locally through Stage 4F. `STAGE4F_CHECKPOINT.md` is the current checkpoint and supersedes historical unstarted/stop wording below. No post-Stage 4 work or publication is authorised by that completion.
+
 Date: 5 October 2026. Status: Stage 4A documentation increment complete.
 Authority: current owner instructions and selections; implementation of later
 increments requires explicit resumption. This is not an implemented feature set.
@@ -136,14 +138,14 @@ The current client starts empty, so legacy sample hours are not a fairness basel
 | A05 | Several selected tags use any-tag membership; deduplicate staff | OWNER APPROVED selection. |
 | A06 | Exclusive source explicitly chooses team or tags; hard checks still apply | APPROVED design baseline; retain current jobs until deliberate change. |
 | A07 | Preserve memberships on matched workforce updates; identify future impacts | APPROVED design baseline; exact identity-conflict workflow required before coding. |
-| F01 | Fairness time window: rolling period, season or YTD | PENDING before new fairness algorithm. Compare outcomes on the same synthetic scenarios. |
-| F02 | How actual hours and planned commitments contribute | PENDING; prevent double-counting and show missing evidence. |
-| F03 | Comparison populations and part-time/availability opportunity adjustment | PENDING; do not treat identical hours as equal opportunity automatically. |
-| F04 | Refusals, cancelled work and current refusal bonus | PENDING; preserve current scoring until an explicit approved replacement. |
-| F05 | Ordering between future hours fairness, team preference and fatigue preferences | PENDING beyond the approved tag grouping; hard safety limits remain mandatory. |
-| M01 | Fixed staff ineligible: leave open or propose an approved substitute | PENDING before mixed automatic planning; preserve current vacancy behaviour meanwhile. |
-| M02 | Fixed scope by count/date and post-scope behaviour | PENDING; no silent conversion to automatic staffing. |
-| D01 | Authoritative regular-work intervals, verification and unknown-data handling | PENDING before claiming fully verified rest-based automatic approval. |
+| F01 | Fairness time window: rolling period, season or YTD | OWNER APPROVED FOR 4D: calendar year-to-date. |
+| F02 | How actual hours and planned commitments contribute | OWNER APPROVED FOR 4D: latest operator-verified actual overtime evidence plus saved future overtime commitments in the same calendar year. Canonical staff/shift pairs count once; unresolved or overlapping evidence remains unknown. |
+| F03 | Comparison populations and part-time/availability opportunity adjustment | OWNER APPROVED FOR 4D: compare raw overtime hours among otherwise eligible candidates. Do not apply part-time or availability normalization. |
+| F04 | Refusals, cancelled work and current refusal bonus | OWNER APPROVED FOR 4D: no refusal bonus in the hours-aware proposal. Existing legacy scoring remains unchanged; cancelled or unsaved work does not add hours. |
+| F05 | Ordering between future hours fairness, team preference and fatigue preferences | OWNER APPROVED FOR 4D: preserve current pool, team and fatigue preference order, then compare approved overtime-hour totals. All canonical safety limits remain mandatory. |
+| M01 | Fixed staff ineligible: leave open or propose an approved substitute | OWNER APPROVED FOR 4E: retain the fixed conflict and propose a separate eligible manual substitute for operator approval. Never silently replace or alter the fixed instruction. |
+| M02 | Fixed scope by count/date and post-scope behaviour | OWNER APPROVED FOR 4E: use the existing occurrence repeat count. After that count, leave occurrences unstaffed unless another saved policy applies; never silently convert to rotation or automatic staffing. |
+| D01 | Authoritative regular-work intervals, verification and unknown-data handling | OWNER DECISION FOR 4D: regular working hours are excluded and require no operator entry or review. Existing overtime assignment safety checks remain authoritative; the app makes no claim of complete regular-hours rest coverage. Unknown overtime evidence remains unknown. |
 | D02 | Pool maintenance authority, ambiguous re-imports, retirement review and tag audit | PENDING before Stage 4B implementation; expose conflicts instead of guessing. |
 | D03 | Exact tag persistence contract and compatibility with existing v2 workspaces | PENDING before Stage 4B implementation; require backup/round-trip/failure evidence. |
 | X01 | Adjacent-day restrictions/overrides, general holiday series and extended weekdays | UNAPPROVED research proposals; separate policy/design increments. |
@@ -160,8 +162,8 @@ each dependent capability waits for the corresponding decision and authorisation
 | 4A — current | This research reconciliation, approved directions, policy register and scenario catalogue | Source-grounded documentation, owner closure recorded, unchanged application and preserved history. Stop here. |
 | 4B — proposed | Canonical tags, membership editing and job preferred/exclusive pools | D02/D03 settled; pool behaviour consistent across UI, commands and persistence; no new allocation algorithm. |
 | 4C — proposed | Explainable candidate preview for one occurrence | No roster writes; current hard checks/reasons visible; current ranking explained; missing regular-hours facts labelled. |
-| 4D — proposed | One-occurrence hours-aware assisted allocation | F01–F05/D01 settled for scope; deterministic proposal, operator approval and fail-closed commit. |
-| 4E — proposed | Bounded mixed-policy planning across occurrences | M01/M02 settled; scarcity ordering/limited repair assessed against fixtures; protected assignments and shortages explained. |
+| 4D — completed locally | One-occurrence hours-aware assisted allocation | F01–F05/D01 settled for this scope; deterministic proposal, operator review, manual staging and fail-closed commit. Stop before 4E. |
+| 4E — completed locally | Bounded mixed-policy planning across occurrences | M01/M02 settled; fixed/rotation occurrence-count projection, protected manual assignments, overtime-prioritised manual repairs, shortages, stale-state rejection and atomic operator-controlled save verified. Stop before 4F. |
 | 4F — proposed | Absence impact/replacement recommendations | Explicit change preview, bounded churn, revalidation and operator-controlled persistence. |
 
 Each increment ends with a durable checkpoint and stops until resumed. Additional
@@ -189,3 +191,17 @@ Synthetic scenario catalogue for later meaningful tests (not tests executed in 4
 
 No real customer identities, email addresses, historical workbook values or health
 details are required for these fixtures. They will belong solely to Overtime tests.
+
+## 8. Owner-requested allocator usability requirements — 6 October 2026
+
+After Stage 4C and the per-job staffing-section prerequisite, the owner requested the following explicit Staff Allocator features. These requirements are now implemented and locally verified under explicit owner resumption; see `ALLOCATOR_USABILITY_CHECKPOINT.md`. They do not start Stage 4D. The original phase table above describes its historical approved baseline.
+
+| Requirement | Intended behaviour | Current status |
+|---|---|---|
+| Auto-add eligible/preferred staff | A general allocator button stages eligible candidates in the existing preference order, up to remaining vacancies. Preserve selected staff; respect active team/pool sections, all canonical safety checks and crew requirements. Report shortages. Operator reviews and saves the staged allocation. | Implemented: general staged auto-add works for pool-only, team and unrestricted jobs. |
+| Visible candidate division | For a tagged-only job, show its pool members above a visible divider and all other staff below. Within the matching group, distinguish eligible candidates from blocked members and show reasons. Nonmembers and anyone blocked by mandatory checks remain visible but cannot be added. For preferred-only pools, eligible nonmembers remain selectable below the preferred group. | Implemented: matching/other groups retain canonical blocked reasons and disabled Add actions. |
+| Tags beside staff names | Show the person's pool hashtags beside their name in candidate and staged/assigned staff cards. Resolve canonical tag IDs to labels; distinguish retired tags, avoid duplicate staff and escape imported text. | Implemented in allocator candidate and staged/assigned cards. |
+| Tag-aware smart search | Search allocator staff by canonical pool label with or without the leading hashtag, case-insensitively, alongside existing name/ID/role/team/crew/department matching. Searching changes visibility, never eligibility. | Implemented alongside existing search fields. |
+| Pool slicer | Add a pool/tag selector in the allocator slicer row, using the canonical catalogue. It should work with smart search and existing slicers, preserve the candidate division, and never widen job restrictions. | Implemented alongside department and team slicers. |
+
+Implement these as a bounded allocator usability increment before introducing the Stage 4D hours-aware algorithm. Auto-add in this increment uses the existing comparator and stages changes for review; it does not settle or introduce the pending fairness policies. Per-job section switches control restrictions/preferences, while browsing by a staff's team or tag remains available independently.

@@ -1,5 +1,15 @@
 # Independent Overtime tooling
 
+## Stage 4E mixed-policy planning checks
+
+Run `rtk proxy npm run test:stage4e`. The browser test covers fixed and rotation occurrence-count scope, protected manual assignments, visible fixed conflicts, overtime-prioritised manual substitute proposals, zero-write review/approval, atomic save, repair provenance, post-scope vacancies, stale proposals and read-only peers. Screenshots and JSON results stay ignored under `test_reports/stage4e/`.
+
+## Stage 4D overtime-hours allocation checks
+
+Run `rtk proxy npm run test:stage4d`. The self-contained contract and browser test covers strict append-only overtime evidence, verified zero versus unknown, saved future commitment deduplication, the overtime-only policy, legacy-score isolation, canonical safety checks, stale proposals, allocator staging, save/reload and read-only peers.
+
+Inspection screenshots and JSON results stay ignored under `test_reports/stage4d/`; no evidence or review package is generated.
+
 Run commands from `overtime-planner-stage3/`. This project owns its packages,
 browser runtime, scripts and test outputs. It does not use NSA/EVT dependencies,
 test configuration, fixtures or servers.
@@ -136,3 +146,15 @@ Six checks use real assignment buttons with clean synthetic User Table workforce
 input. Partial/full/reloaded one-off and recurring crews retain assigned cards and
 saved evidence. Reports stay in test_reports/forward-planner-assignments/. This is
 a supplemental regression, not an amendment to the frozen 24-suite runner.
+
+## Stage 4C preview checks
+
+`npm run test:stage4c` runs the self-contained detached-model and browser preview checks. `npm run test:stage4c:model` runs the model checks alone. They use only this project's source, fixtures and installed Playwright/browser runtime. Browser results and local inspection images stay under ignored `test_reports/candidate-preview/`; no evidence package is generated. See `STAGE4C_CHECKPOINT.md` for the completed 11-model/23-browser result and full independent regression matrix.
+
+## Per-job staffing sections checks
+
+Run `rtk proxy npm run test:staffing-sections` for self-contained schema, canonical eligibility, preview, ordering/rotation and browser persistence/editor/peer checks. Uses the same child-local Playwright and browser runtime. Results and inspection screenshots remain local under ignored `test_reports/staffing-sections/`; no review package is generated.
+
+## Allocator usability checks
+
+Run `rtk proxy npm run test:allocator` for the self-contained source/model and browser allocator proofs. It covers matching/other groups, canonical blockers, pool labels/search/slicers, staged auto-add and operator shortages, existing staff/slot preservation, save/reload, read-only guards and mobile overflow. It uses only child-local source, synthetic fixtures and the established Playwright/browser runtime. Results and screenshots stay ignored under `test_reports/allocator-usability/`; no evidence/review package is generated.

@@ -7,6 +7,18 @@ window.HortOpsJobEditModal = {
   editingJobId: null,
   formData: null,
 
+  isStaffingSectionEnabled: function(section) {
+    return !this.formData || !this.formData.staffingSections || this.formData.staffingSections[section] !== false;
+  },
+
+  setStaffingSection: function(section, enabled) {
+    if (!this.formData || ['teams', 'pools'].indexOf(section) === -1 || typeof enabled !== 'boolean') return;
+    var current = this.formData.staffingSections || {};
+    this.formData.staffingSections = { teams: current.teams !== false, pools: current.pools !== false };
+    this.formData.staffingSections[section] = enabled;
+    this.renderModal();
+  },
+
   open: function(jobId, targetDate, preferredDay) {
     this.editingJobId = jobId;
     var state = window.HortOpsApp.state;
@@ -76,8 +88,12 @@ window.HortOpsJobEditModal = {
     var hierarchy = window.HortOpsData.getDepartmentHierarchy(roster);
 
     var deptMap = {};
+    var teamCounts = {};
     hierarchy.forEach(function(d) {
       deptMap[d.name] = d.teams.map(function(t) { return t.name; });
+      d.teams.forEach(function(t) {
+        teamCounts[t.name] = (teamCounts[t.name] || 0) + t.count;
+      });
     });
 
     // Section 18: Preserve existing job suitability values if historical department/team no longer in current hierarchy
@@ -103,6 +119,7 @@ window.HortOpsJobEditModal = {
       deptMap: deptMap,
       availableTeams: availableTeams,
       allKnownTeams: allKnownTeams,
+      teamCounts: teamCounts,
       icons: icons,
       escHtml: escHtml,
       escAttr: escAttr
@@ -283,10 +300,13 @@ window.HortOpsJobEditModal = {
   },
 
   updateField: function(field, val) {
+    if (!this.formData) return;
+    if (!this.isStaffingSectionEnabled('teams') && ['defaultDepartment', 'defaultTeam', 'primaryTeam', 'preferredTeam', 'secondaryTeam', 'tertiaryTeam', 'isExclusiveTeams', 'isExclusive', 'exclusiveTeams'].indexOf(field) !== -1) return;
     this.formData[field] = val;
   },
 
   handleDeptChange: function(newDept) {
+    if (!this.formData || !this.isStaffingSectionEnabled('teams')) return;
     this.formData.defaultDepartment = newDept;
     var roster = (window.HortOpsApp && window.HortOpsApp.state && window.HortOpsApp.state.staffList) || [];
     var hierarchy = window.HortOpsData.getDepartmentHierarchy(roster);
@@ -298,6 +318,7 @@ window.HortOpsJobEditModal = {
   },
 
   toggleExclusiveCheck: function(checked) {
+    if (!this.formData || !this.isStaffingSectionEnabled('teams')) return;
     this.formData.isExclusiveTeams = checked;
     if (checked && (!this.formData.exclusiveTeams || this.formData.exclusiveTeams.length === 0)) {
       var primary = this.formData.primaryTeam || this.formData.defaultTeam;
@@ -307,6 +328,7 @@ window.HortOpsJobEditModal = {
   },
 
   toggleExclusiveTeam: function(team) {
+    if (!this.formData || !this.isStaffingSectionEnabled('teams')) return;
     var list = this.formData.exclusiveTeams || [];
     var idx = list.indexOf(team);
     if (idx === -1) {
@@ -319,6 +341,7 @@ window.HortOpsJobEditModal = {
   },
 
   addPreferredToExclusive: function() {
+    if (!this.formData || !this.isStaffingSectionEnabled('teams')) return;
     var p = this.formData.primaryTeam || this.formData.defaultTeam;
     var s = this.formData.secondaryTeam;
     var t = this.formData.tertiaryTeam;
@@ -346,6 +369,7 @@ window.HortOpsJobEditModal = {
   },
 
   clearExclusive: function() {
+    if (!this.formData || !this.isStaffingSectionEnabled('teams')) return;
     this.formData.exclusiveTeams = [];
     this.renderModal();
   },
@@ -370,10 +394,12 @@ window.HortOpsJobEditModal = {
       }
     } else {
       if (!this.formData.name || !this.formData.name.trim()) return;
-      var primary = this.formData.primaryTeam || this.formData.defaultTeam || 'Parks';
-      this.formData.primaryTeam = primary;
-      this.formData.defaultTeam = primary;
-      this.formData.preferredTeam = primary;
+      if (this.isStaffingSectionEnabled('teams')) {
+        var primary = this.formData.primaryTeam || this.formData.defaultTeam || 'Parks';
+        this.formData.primaryTeam = primary;
+        this.formData.defaultTeam = primary;
+        this.formData.preferredTeam = primary;
+      }
     }
 
     var saveRes = window.HortOpsApp.saveJob(this.formData);

@@ -89,7 +89,8 @@ const requiredRoots = [
   'export-modal-root',
   'import-modal-root',
   'staff-exemption-modal-root',
-  'staff-absence-modal-root'
+    'staff-absence-modal-root',
+    'absence-impact-modal-root'
 ];
 requiredRoots.forEach(id => {
   if (!html.includes(`id="${id}"`)) {

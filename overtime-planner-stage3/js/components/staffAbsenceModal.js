@@ -322,11 +322,11 @@ var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safe
       }
     },
 
-    save: function() {
+    saveDirect: function() {
       if (!this.activeStaff) return;
       if (!window.HortOpsApp || typeof window.HortOpsApp.saveAbsenceAndRefusalData !== 'function') {
         this.showError('Canonical application persistence handler unavailable.');
-        return;
+        return { success: false, error: 'Canonical persistence unavailable.' };
       }
 
       var options = {
@@ -338,10 +338,24 @@ var safeColor = (window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.safe
       var res = window.HortOpsApp.saveAbsenceAndRefusalData(this.workingAbsences, this.workingRefusals, options);
       if (res && !res.success) {
         this.showError('Failed to save absence and refusal data: ' + (res.error || 'Validation error'));
-        return;
+        return res;
       }
 
       this.close();
+      return { success: true };
+    },
+
+    save: function() {
+      if (!this.activeStaff) return;
+      if (!window.HortOpsApp || typeof window.HortOpsApp.getAbsenceImpactDraft !== 'function' || !window.HortOpsAbsenceImpactModal) return this.saveDirect();
+      try {
+        var draft = window.HortOpsApp.getAbsenceImpactDraft();
+        if (draft.model && draft.model.affected && draft.model.affected.length) return window.HortOpsAbsenceImpactModal.open();
+      } catch (error) {
+        this.showError('Cannot review absence impact: ' + error.message);
+        return { success: false, error: error.message };
+      }
+      return this.saveDirect();
     },
 
     render: function() {

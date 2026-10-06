@@ -1,10 +1,16 @@
 # Current Overtime status and evidence attribution
 
-This document supersedes historical status claims for current development without rewriting the constitution, signed reviews or frozen contracts. Consult it with `DEVELOPMENT_TRANSITION.md`, `STAGE4A_CHECKPOINT.md`, `STAGE4_SMART_ROSTERING_BASELINE.md` and `SUPPORTED_RUNTIME.md`. Earlier phase narratives below describe their status at the time and are superseded by current owner authority.
+## Current Stage 4F checkpoint
+
+Stage 4F absence-impact review and one-off replacement planning is implemented and verified locally. `STAGE4F_CHECKPOINT.md` supersedes earlier stop-before-4F statements in this document. Stage 4 roadmap work is complete through 4F; stop before any post-Stage 4 increment. No publication, independent Review 65 verdict or expanded runtime certification is claimed.
+
+Stage 4E projects staged manual, fixed and rotation slots across their existing occurrence repeat counts. Manual and unrelated assignments remain protected. An ineligible fixed officer remains a visible conflict; the planner may propose a separate overtime-prioritised eligible manual substitute that requires explicit approval and the allocator's normal save action. Fixed and rotation instructions remain unchanged, and later occurrences stay unstaffed unless another saved policy applies. Regular working hours remain excluded. Canonical safety, evidence, scarcity, stale-state and exclusive-writer protections remain mandatory.
+
+This document supersedes historical status claims for current development without rewriting the constitution, signed reviews or frozen contracts. Consult it with `DEVELOPMENT_TRANSITION.md`, `STAGE4C_CHECKPOINT.md`, `STAGE4A_CHECKPOINT.md`, `STAGE4_SMART_ROSTERING_BASELINE.md` and `SUPPORTED_RUNTIME.md`. Earlier phase narratives below describe their status at the time and are superseded by current owner authority.
 
 - Original candidate: PR26_07, rejected for Stage 3 closure by Review 64 on 4 October 2026.
 - Current corrective candidate: PR26_08, Phase 5 clean-client writer implementation, Phase 6 colour security/traceability, Phase 7 stale-editor correction/domain handoff proof and Phase 8 bounded runtime qualification.
-- Stage 1 and Stage 2 remain frozen. Phase 8 is closed and corrected PR26_08 accepted by explicit owner authority for Stage 3 closure and Stage 4 commencement. Stage 4B is implemented and verified locally; stop before Stage 4C until the owner resumes.
+- Stage 1 and Stage 2 remain frozen. Phase 8 is closed and corrected PR26_08 accepted by explicit owner authority for Stage 3 closure and Stage 4 commencement. Stage 4C is implemented and verified locally; stop before Stage 4D until the owner resumes.
 - No independent Review 65 verdict is claimed. Closure is the explicit owner decision, not a developer inference from tests or an expanded browser certification.
 
 | Verification regime | Exact attribution | Current command |
@@ -18,6 +24,9 @@ This document supersedes historical status claims for current development withou
 | Review 55–63 retained probes | Ten unchanged scripts; inspect each original contract | `npm run test:inherited` |
 | Review 64 historical reproductions | Two unchanged reproduction scripts; raw exit 0 denotes reproduction, not safety | `npm run probe:review64` |
 | Tooling boundaries | Independent build/runner/browser-dependency proofs | `npm run test:tooling` |
+| Allocator usability | 17 focused groups; full directory, tag search/slicer, safe staged auto-add and peer guards | `npm run test:allocator` |
+| Per-job staffing sections | 17 focused groups; legacy defaults, canonical restrictions, saved controls and peer guards | `npm run test:staffing-sections` |
+| Stage 4C candidate preview | 11 model groups and 23 browser groups; no roster writes, canonical checks/order and saved-state/peer protections | `npm run test:stage4c` |
 
 The original concurrency reproduction remains vulnerable in unguarded compatibility/raw-storage paths. The corrected colour reproduction exits 1 after observing both invalid schema colours rejected and zero injected handlers; it is not relabelled as a conventional passing test. The positive production suites are the new implementation evidence. Node/Chromium versions, actual results and limitations belong in the current checkpoint; raw logs and digest records stay in ignored local storage.
 
@@ -77,3 +86,21 @@ The owner resumed Stage 4B. Cross-team pool catalogue/membership and job preferr
 The authorised work-pattern capability supports up to four consecutive cyclic weekly weekdays, the union with full-day South Australian public holidays and overriding excluded dates, or a one-off one-to-four-day run crossing year boundaries. Each job/date is emitted once and staffed independently. The owner's Saturday/Sunday plus nearly every public holiday requirement uses explicit exceptions; Easter Friday–Monday yields four daily dates without duplicates.
 
 See `STAGE4B_CHECKPOINT.md` for exact fields, compatibility and completed verification. New allocation/fairness algorithms are not implemented. Earlier Stage 4A stop-before-4B statements are historical and superseded by this explicit resumption. All 30 focused Stage 4B checks passed with zero browser errors, alongside all required retained and applicable supplementary suites; stop before Stage 4C until resumed. Original signed reviews remain unchanged, and no independent Review 65 verdict or publication is claimed.
+
+## Stage 4C current update — completed locally
+
+The owner resumed Stage 4C and reaffirmed agent approval. Forward Planner and Calendar now offer a separate read-only candidate preview for one saved occurrence, including in read-only peer tabs. It shows canonical eligibility reasons for all workforce records, the existing ordered eligible candidates and their actual ranking inputs, assigned staff, saved crew compliance and unverified overtime/regular-hours evidence. Numeric zero introduced by imports is not presented as verified worked hours. It introduces no new allocation/fairness policy or schema.
+
+See `STAGE4C_CHECKPOINT.md` for the saved-state, stale-result, ownership and zero-write contracts. All 11 model groups and 23 browser groups passed with zero browser errors, alongside the complete required retained and supplementary matrix. Both standalone outputs match. All 433 host files and 841 preserved local history/constitution/image files remain unchanged; the reviewed transport list contains 410 unique existing files and excludes raw results, screenshots, scratch outputs and history. Earlier stop-before-4C statements are historical. Stop before Stage 4D until the owner resumes; F01–F05, M01/M02 and D01 remain pending. No independent Review 65 verdict, expanded Windows certification or GitHub publication is claimed.
+
+## Per-job staffing sections prerequisite — completed locally
+
+The owner selected separate per-job Team Suitability and Pools switches. Existing jobs keep both sections enabled when the optional setting is absent. Disabled section settings remain saved but stop restricting or preferring candidates. Pool-only restriction uses the existing Tagged staff only source with active selected tags; all qualification, availability, fatigue, rest and crew safeguards remain mandatory.
+
+See `JOB_STAFFING_SECTIONS_CHECKPOINT.md` for the verified scope and tests. This prerequisite does not implement Stage 4D, authorize publication, or expand runtime certification.
+
+## Allocator usability — completed locally
+
+The owner resumed all five requested allocator controls: general auto-add, a matching/other workforce divider, pool hashtags beside candidate and staged names, tag-aware smart search, and a pool slicer. Blocked staff remain visible with canonical reasons; hard restrictions still apply. Auto-add uses the existing preference comparator and stages additions for operator review, preserving existing strategies and requiring the existing explicit save path.
+
+`ALLOCATOR_USABILITY_CHECKPOINT.md` records the completed 17-group focused result, mandatory retained and supplementary regression matrix, responsive inspection and preservation/transport audit. Stage 4D remains unstarted with its policy decisions pending. No publication, independent review verdict or broader runtime certification is claimed.

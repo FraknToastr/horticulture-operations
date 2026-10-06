@@ -1307,3 +1307,15 @@ body.modal-scroll-locked {
 /* Workspace ownership stays visible without changing the established layout. */
 .workspace-ownership { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .65rem 1.25rem; background: var(--slate-100, #f1f5f9); color: var(--slate-700, #334155); border-bottom: 1px solid var(--slate-200, #e2e8f0); font-size: .875rem; }
 .workspace-ownership .btn { white-space: nowrap; }
+
+/* Overtime allocator: retain the compact desktop layout and readable mobile cards. */
+.allocator-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; }
+.allocator-columns > div { min-width: 0; }
+.allocator-columns .candidate-card { align-items: flex-start; }
+.allocator-columns [data-staff-pool-tag] { max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+@media (max-width: 900px) {
+  .allocator-columns { grid-template-columns: minmax(0, 1fr); }
+  .allocator-columns .allocated-staff-row { flex-wrap: wrap; gap: .5rem; }
+  .allocator-columns .allocated-assignment-col { width: 100% !important; max-width: 100%; margin-right: 0 !important; padding-right: 0 !important; border-right: 0 !important; }
+  .allocator-columns .allocated-assignment-col select { min-width: 0; max-width: 100%; }
+}

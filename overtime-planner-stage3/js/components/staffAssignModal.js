@@ -68,6 +68,8 @@ window.HortOpsStaffAssignModal = {
   searchTerm: '',
   selectedDept: 'all',
   selectedTeam: 'all',
+  selectedPoolTag: 'all',
+  autoAddStatus: '',
   onlyPreferredCrew: false,
   stagedAssignedStaffIds: [],
   stagedSlots: [],
@@ -78,6 +80,8 @@ window.HortOpsStaffAssignModal = {
     this.searchTerm = '';
     this.selectedDept = 'all';
     this.selectedTeam = 'all';
+    this.selectedPoolTag = 'all';
+    this.autoAddStatus = '';
     this.onlyPreferredCrew = false;
 
     var state = window.HortOpsApp.state;
@@ -197,6 +201,9 @@ window.HortOpsStaffAssignModal = {
   },
 
   close: function() {
+    if (window.HortOpsHoursAllocationModal) window.HortOpsHoursAllocationModal.close();
+    if (window.HortOpsMixedPolicyPlanModal) window.HortOpsMixedPolicyPlanModal.close();
+    this._mixedPolicyApproval = null;
     this.activeShiftId = null;
     var el = document.getElementById('staff-assign-modal-root');
     if (el) el.innerHTML = '';
@@ -230,11 +237,14 @@ window.HortOpsStaffAssignModal = {
       return j.id === shift.jobId || (j.name && shift.jobName && j.name.toLowerCase() === shift.jobName.toLowerCase());
     }) || {};
 
-    var primaryTeam = matchingJob.primaryTeam || matchingJob.defaultTeam || matchingJob.preferredTeam || '';
-    var secondaryTeam = matchingJob.secondaryTeam || '';
-    var tertiaryTeam = matchingJob.tertiaryTeam || '';
-    var isExclusive = !!(matchingJob.isExclusiveTeams && matchingJob.exclusiveTeams && matchingJob.exclusiveTeams.length > 0);
-    var exclusiveTeams = matchingJob.exclusiveTeams || [];
+    var planningRules = window.HortOpsPlanningRules;
+    var teamsEnabled = !planningRules || planningRules.sectionEnabled(matchingJob, 'teams');
+    var effectiveJob = planningRules ? planningRules.effectiveJob(matchingJob) : matchingJob;
+    var primaryTeam = effectiveJob.primaryTeam || effectiveJob.defaultTeam || effectiveJob.preferredTeam || '';
+    var secondaryTeam = effectiveJob.secondaryTeam || '';
+    var tertiaryTeam = effectiveJob.tertiaryTeam || '';
+    var isExclusive = !!(effectiveJob.isExclusiveTeams && effectiveJob.exclusiveTeams && effectiveJob.exclusiveTeams.length > 0);
+    var exclusiveTeams = effectiveJob.exclusiveTeams || [];
 
     var assignedIds = this.stagedAssignedStaffIds || [];
     var assignedIdsSet = new Set(assignedIds);
@@ -253,21 +263,25 @@ window.HortOpsStaffAssignModal = {
     };
 
     var candidateModelRes;
-    if (window.HortOpsStaffAssignCandidateModel && typeof window.HortOpsStaffAssignCandidateModel.resolveCandidateModel === 'function') {
-      candidateModelRes = window.HortOpsStaffAssignCandidateModel.resolveCandidateModel(roster, {
+    if (window.HortOpsStaffAssignCandidateModel && typeof window.HortOpsStaffAssignCandidateModel.resolveAllocatorModel === 'function') {
+      candidateModelRes = window.HortOpsStaffAssignCandidateModel.resolveAllocatorModel(roster, {
         shift: shift,
         allShifts: allShifts,
         stagedAssignedStaffIds: self.stagedAssignedStaffIds,
         searchTerm: self.searchTerm,
         selectedDept: self.selectedDept,
         selectedTeam: self.selectedTeam,
+        selectedPoolTag: self.selectedPoolTag,
+        poolTags: state.poolTags || [],
+        absences: state.absences || [],
+        refusalHistory: state.refusalHistory || [],
         onlyPreferredCrew: self.onlyPreferredCrew,
         jobPreferences: jobPreferences,
         assignedIdsSet: assignedIdsSet,
         matchingJob: matchingJob
       });
     } else {
-      candidateModelRes = { filteredStaff: [], preferredCrewCount: 0 };
+      candidateModelRes = { filteredStaff: [], matchingStaff: [], otherStaff: [], preferredCrewCount: 0, groupLabel: 'Eligibility service unavailable' };
     }
 
     var filteredStaff = candidateModelRes.filteredStaff;
@@ -307,6 +321,7 @@ window.HortOpsStaffAssignModal = {
       self: self,
       shift: shift,
       matchingJob: matchingJob,
+      teamsEnabled: teamsEnabled,
       stagedSlots: this.stagedSlots || [],
       stagedSlotStrategies: this.stagedSlotStrategies || {},
       stagedAssignedStaffIds: this.stagedAssignedStaffIds || [],
@@ -322,6 +337,14 @@ window.HortOpsStaffAssignModal = {
       assignedIdsSet: assignedIdsSet,
       assignedStaffList: assignedStaffList,
       filteredStaff: filteredStaff,
+      allocatorGroups: [
+        { id: 'matching', label: candidateModelRes.groupLabel || 'Eligible / preferred staff', staff: candidateModelRes.matchingStaff || [] },
+        { id: 'other', label: candidateModelRes.groupMode === 'neutral' ? 'Other staff · unavailable or blocked' : 'Other staff', staff: candidateModelRes.otherStaff || [] }
+      ],
+      groupMode: candidateModelRes.groupMode,
+      eligibleCount: candidateModelRes.eligibleCount || 0,
+      poolTags: state.poolTags || [],
+      autoAddStatus: this.autoAddStatus,
       roster: roster,
       hierarchy: hierarchy,
       vacancies: vacancies,
@@ -372,7 +395,7 @@ window.HortOpsStaffAssignModal = {
 
         // Body
         '<div class="modal-body" style="padding: 1rem;">' + permitComplianceHtml +
-          '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">' +
+          '<div class="allocator-columns">' +
             // LEFT COLUMN: Assigned Staff (P1-05, P1-10, P1-12)
             '<div>' +
               stagedCrewHtml +
@@ -390,10 +413,42 @@ window.HortOpsStaffAssignModal = {
 
     el.innerHTML = modalHtml;
 
+    var slicer = el.querySelector('.slicer-container');
+    if (slicer) {
+      var hoursButton = document.createElement('button');
+      hoursButton.type = 'button';
+      hoursButton.className = 'btn btn-secondary';
+      hoursButton.setAttribute('data-hours-allocation-open', '');
+      hoursButton.textContent = 'Plan by overtime hours';
+      hoursButton.title = 'Rank eligible staff using verified overtime hours and saved future overtime commitments';
+      hoursButton.disabled = !(vacancies > 0);
+      slicer.appendChild(hoursButton);
+      var mixedButton = document.createElement('button');
+      mixedButton.type = 'button';
+      mixedButton.className = 'btn btn-secondary';
+      mixedButton.setAttribute('data-mixed-policy-open', '');
+      mixedButton.textContent = 'Plan future mix';
+      mixedButton.title = 'Preview bounded manual, fixed and rotation outcomes across their occurrence counts';
+      mixedButton.disabled = !(this.stagedSlots || []).some(function (slot) { return slot.mode !== 'manual' && Number(slot.repeatCount || 1) > 1; });
+      slicer.appendChild(mixedButton);
+    }
+
     // Delegated click listener for auto-fill team (P0 Security: no inline JS evaluation)
     var modalRoot = document.getElementById('staff-assign-modal-root');
     if (modalRoot) {
       modalRoot.onclick = function(e) {
+        var mixedBtn = e.target.closest('button[data-mixed-policy-open]');
+        if (mixedBtn) {
+          e.preventDefault();
+          window.HortOpsMixedPolicyPlanModal.open(window.HortOpsStaffAssignModal.activeShiftId);
+          return;
+        }
+        var hoursBtn = e.target.closest('button[data-hours-allocation-open]');
+        if (hoursBtn) {
+          e.preventDefault();
+          window.HortOpsHoursAllocationModal.open(window.HortOpsStaffAssignModal.activeShiftId);
+          return;
+        }
         var autoBtn = e.target.closest('button.btn-autofill-team[data-team]');
         if (autoBtn) {
           e.preventDefault();
@@ -437,18 +492,27 @@ window.HortOpsStaffAssignModal = {
     this.renderModal();
   },
 
+  setPoolTag: function(val) {
+    var tags = (window.HortOpsApp.state.poolTags || []);
+    this.selectedPoolTag = val === 'all' || tags.some(function(tag) { return tag.id === val; }) ? val : 'all';
+    this.renderModal();
+  },
+
   togglePreferred: function() {
     this.onlyPreferredCrew = !this.onlyPreferredCrew;
     this.renderModal();
   },
 
   addStaff: function(staffId) {
+    this.autoAddStatus = '';
     if (!this.stagedAssignedStaffIds) this.stagedAssignedStaffIds = [];
     if (!this.stagedSlots) this.stagedSlots = [];
     if (this.stagedAssignedStaffIds.indexOf(staffId) === -1) {
       var state = window.HortOpsApp.state;
       var shift = state.allShifts.find(function(s) { return s.shiftId === window.HortOpsStaffAssignModal.activeShiftId; });
+      if (!shift) return;
       var staff = (state.staffList || []).find(function(s) { return s.id === staffId; });
+      if (!staff) return;
       var jobs = state.jobs || [];
       var matchingJob = jobs.find(function(j) { return j.id === shift.jobId || (j.name && shift.jobName && j.name.toLowerCase() === shift.jobName.toLowerCase()); });
       if (staff && shift) {
@@ -472,7 +536,7 @@ window.HortOpsStaffAssignModal = {
 
         // Fatigue Compliance Check (Stage 3 Gate 3C)
         if (window.HortOpsFatigueEngine && typeof window.HortOpsFatigueEngine.simulateAssignmentFatigue === 'function') {
-          var fatigueSim = window.HortOpsFatigueEngine.simulateAssignmentFatigue(staff, shift, state.allShifts);
+          var fatigueSim = window.HortOpsFatigueEngine.simulateAssignmentFatigue(staff, shift, getEffectiveShiftsForModal(shift));
           if (fatigueSim && fatigueSim.isHardBlocked) {
             alert('Cannot assign ' + staff.name + ':\n- ' + fatigueSim.message);
             return;
@@ -487,7 +551,7 @@ window.HortOpsStaffAssignModal = {
           employee: staff,
           occurrence: shift,
           job: matchingJob,
-          allAssignments: state.allShifts,
+          allAssignments: getEffectiveShiftsForModal(shift),
           currentShiftAssignedIds: this.stagedAssignedStaffIds
         });
         if (!evalRes.eligible) {
@@ -553,6 +617,7 @@ window.HortOpsStaffAssignModal = {
   },
 
   removeStaff: function(staffId) {
+    this.autoAddStatus = '';
     if (!this.stagedAssignedStaffIds) return;
     var slot = (this.stagedSlots || []).find(function(s) { return s.staffId === staffId; });
     if (slot && slot.isSealedHistorical) {
@@ -665,6 +730,49 @@ window.HortOpsStaffAssignModal = {
     this.renderModal();
   },
 
+  autoAddEligible: function() {
+    var state = window.HortOpsApp.state;
+    var shift = (state.allShifts || []).find(function(item) { return item.shiftId === this.activeShiftId; }, this);
+    var model = window.HortOpsStaffAssignCandidateModel;
+    if (!shift || !model || typeof model.selectAutoAddCandidates !== 'function') {
+      this.autoAddStatus = 'Auto-add unavailable: the occurrence or eligibility service could not be resolved.';
+      this.renderModal();
+      return false;
+    }
+    var job = (state.jobs || []).find(function(item) { return item.id === shift.jobId; }) || {};
+    var current = (this.stagedAssignedStaffIds || []).slice();
+    var result = model.selectAutoAddCandidates({
+      roster: state.staffList || [], shift: shift, matchingJob: job,
+      allShifts: getEffectiveShiftsForModal(shift), stagedAssignedStaffIds: current,
+      assignedIdsSet: new Set(current), poolTags: state.poolTags || [],
+      absences: state.absences || [], refusalHistory: state.refusalHistory || []
+    });
+    this.autoAddStatus = (result.message || 'No eligible candidates were staged.') +
+      ' ' + (result.selectedIds || []).length + ' added to the staged crew; ' + result.shortage + ' crew vacancies remain. Review before saving.';
+    if (!result.success) { this.renderModal(); return false; }
+    var added = result.selectedIds || [];
+    // Prepare new manual slots without altering an existing strategy or provenance.
+    var slots = (this.stagedSlots || []).slice();
+    var strategies = Object.assign({}, this.stagedSlotStrategies || {});
+    var used = new Set();
+    slots.forEach(function(slot) {
+      var match = slot.slotId && slot.slotId.match(/SLOT-(\d+)/);
+      if (match) used.add(Number(match[1]));
+    });
+    added.forEach(function(id) {
+      var next = 1; while (used.has(next)) next++;
+      used.add(next);
+      slots.push({ slotId: 'SLOT-' + next, staffId: id, mode: 'manual', repeatCount: 1,
+        isInherited: false, sourceDate: shift.date || '' });
+      strategies[id] = { mode: 'manual', repeatCount: 1 };
+    });
+    this.stagedAssignedStaffIds = current.concat(added);
+    this.stagedSlots = slots;
+    this.stagedSlotStrategies = strategies;
+    this.renderModal();
+    return true;
+  },
+
   autoFillTeam: function(teamName) {
     var state = window.HortOpsApp.state;
     var shift = state.allShifts.find(function(s) { return s.shiftId === window.HortOpsStaffAssignModal.activeShiftId; });
@@ -677,6 +785,8 @@ window.HortOpsStaffAssignModal = {
 
     var jobs = state.jobs || [];
     var matchingJob = jobs.find(function(j) { return j.id === shift.jobId || j.name.toLowerCase() === shift.jobName.toLowerCase(); });
+
+    if (window.HortOpsPlanningRules && !window.HortOpsPlanningRules.sectionEnabled(matchingJob, 'teams')) return;
 
     var candidates = roster.filter(function(s) {
       if (s.team.toLowerCase() !== teamName.toLowerCase()) return false;
@@ -963,6 +1073,14 @@ window.HortOpsStaffAssignModal = {
     if (!rosterRes || !rosterRes.success) {
       alert('Cannot save allocation: Rostering engine failed to process assignment.');
       return;
+    }
+    if (window.HortOpsApp && typeof window.HortOpsApp._applyApprovedMixedPolicyRepairs === 'function') {
+      var mixedRepairResult = window.HortOpsApp._applyApprovedMixedPolicyRepairs(shift.shiftId, rosterRes);
+      if (!mixedRepairResult || mixedRepairResult.success === false) {
+        alert('Cannot save allocation: ' + (mixedRepairResult && mixedRepairResult.error || 'Approved mixed-policy repairs are no longer valid.'));
+        return;
+      }
+      rosterRes = mixedRepairResult.result;
     }
 
     // Pure scheduled-commitment delta planning (Stage 1 Gate B2)

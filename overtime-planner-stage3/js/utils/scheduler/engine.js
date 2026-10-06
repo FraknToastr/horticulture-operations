@@ -522,7 +522,7 @@ window.HortOpsSchedulerEngine = {
    * @param {Object} [customSnapshots]
    * @returns {{ found: boolean, shiftId?: string, jobId?: string, date?: string, startTime?: string, durationHours?: number, crewSize?: number, assignedStaffIds?: string[] }}
    */
-  resolveShiftHistoricalTiming: function(shiftId, jobId, dateStr, customSnapshots) {
+  resolveShiftHistoricalTiming: function(shiftId, jobId, dateStr, customSnapshots, detachedContext) {
     if (!dateStr && shiftId && shiftId.indexOf('@') !== -1) {
       dateStr = shiftId.split('@')[1];
     }
@@ -533,7 +533,7 @@ window.HortOpsSchedulerEngine = {
 
     // 1. Check workspace historicalSnapshots (passed or from HortOpsApp.state)
     var snaps = customSnapshots;
-    if (!snaps && window.HortOpsApp && window.HortOpsApp.state && window.HortOpsApp.state.historicalSnapshots) {
+    if (!detachedContext && !snaps && window.HortOpsApp && window.HortOpsApp.state && window.HortOpsApp.state.historicalSnapshots) {
       snaps = window.HortOpsApp.state.historicalSnapshots;
     }
 
@@ -565,7 +565,7 @@ window.HortOpsSchedulerEngine = {
     }
 
     // 2. Check fallback from global app historicalSnapshots or test ledger
-    var sourceSnapshots = getNonEmptySnapshots(customSnapshots) ||
+    var sourceSnapshots = detachedContext ? (customSnapshots || {}) : getNonEmptySnapshots(customSnapshots) ||
                           getNonEmptySnapshots(window.HortOpsApp && window.HortOpsApp.state && window.HortOpsApp.state.historicalSnapshots) ||
                           getTestLedger();
     var histOccs = [];
@@ -598,10 +598,10 @@ window.HortOpsSchedulerEngine = {
     return { found: false };
   },
 
-  _applyHistoricalTimingToShift: function(shift, job, shiftDate, assignedIds, todayStr, customSnapshots, integrityIssues) {
+  _applyHistoricalTimingToShift: function(shift, job, shiftDate, assignedIds, todayStr, customSnapshots, integrityIssues, detachedContext) {
     if (shiftDate < todayStr) {
       shift.isHistorical = true;
-      var snapMatch = this.resolveShiftHistoricalTiming(shift.shiftId, job.id, shiftDate, customSnapshots);
+      var snapMatch = this.resolveShiftHistoricalTiming(shift.shiftId, job.id, shiftDate, customSnapshots, detachedContext);
       if (assignedIds && assignedIds.length > 0) {
         shift.isHistoricalCommitment = true;
         if (snapMatch && snapMatch.found && snapMatch.startTime && snapMatch.durationHours !== null && snapMatch.durationHours !== undefined) {
@@ -644,7 +644,7 @@ window.HortOpsSchedulerEngine = {
     }
   },
 
-  generateOperationalDigest: function(jobs, year, includeResolved, customAssignments, staffList, customPermits, customSnapshots) {
+  generateOperationalDigest: function(jobs, year, includeResolved, customAssignments, staffList, customPermits, customSnapshots, detachedContext) {
     var self = this;
     if (includeResolved === undefined) includeResolved = true;
     if (!customAssignments) customAssignments = {};
@@ -658,7 +658,7 @@ window.HortOpsSchedulerEngine = {
 
     // Seed immutable historical / explicit occurrences (Mandate Section 1, 4, 5, 11)
     var histOccs = [];
-    var sourceSnapshots = getNonEmptySnapshots(customSnapshots) ||
+    var sourceSnapshots = detachedContext ? (customSnapshots || {}) : getNonEmptySnapshots(customSnapshots) ||
                           getNonEmptySnapshots(window.HortOpsApp && window.HortOpsApp.state && window.HortOpsApp.state.historicalSnapshots) ||
                           getTestLedger();
     if (Array.isArray(sourceSnapshots)) {
@@ -760,7 +760,7 @@ window.HortOpsSchedulerEngine = {
             weekNumber:slot.weekNumber,dayOfWeek:rules.weekdays[new Date(date+'T12:00:00Z').getUTCDay()],
             assignedStaffIds:assigned.slice(),isPublicHoliday:!!holiday,holidayName:holiday ? holiday.name : undefined
           });
-          self._applyHistoricalTimingToShift(shift,job,date,assigned,todayStr,customSnapshots,integrityIssues);
+          self._applyHistoricalTimingToShift(shift,job,date,assigned,todayStr,customSnapshots,integrityIssues,detachedContext);
           if (holiday && !slot.publicHolidays.some(function(h) { return h.date === date; })) slot.publicHolidays.push(holiday);
           slot.shifts.push(shift); allShifts.push(shift); seededShiftKeys.add(shiftId); seededShiftKeys.add(dateKey);
         });
@@ -873,7 +873,7 @@ window.HortOpsSchedulerEngine = {
               tpoNotes: permitMeta.tpoNotes
             };
 
-            self._applyHistoricalTimingToShift(shift, job, shiftDate, assignedIds, todayStr, customSnapshots, integrityIssues);
+            self._applyHistoricalTimingToShift(shift, job, shiftDate, assignedIds, todayStr, customSnapshots, integrityIssues, detachedContext);
             if (!seededShiftKeys.has(shiftId) && !seededShiftKeys.has(dateKey)) {
               seededShiftKeys.add(shiftId);
               seededShiftKeys.add(dateKey);
@@ -970,7 +970,7 @@ window.HortOpsSchedulerEngine = {
             tpoNotes: permitMeta.tpoNotes
           };
 
-          self._applyHistoricalTimingToShift(shift, job, shiftDate, assignedIds, todayStr, customSnapshots, integrityIssues);
+          self._applyHistoricalTimingToShift(shift, job, shiftDate, assignedIds, todayStr, customSnapshots, integrityIssues, detachedContext);
           if (!seededShiftKeys.has(shiftId) && !seededShiftKeys.has(dateKey)) {
             seededShiftKeys.add(shiftId);
             seededShiftKeys.add(dateKey);
@@ -1054,7 +1054,7 @@ window.HortOpsSchedulerEngine = {
           tpoNotes: permitMeta.tpoNotes
         };
 
-        self._applyHistoricalTimingToShift(shift, job, targetDateStr, assignedIds, todayStr, customSnapshots, integrityIssues);
+        self._applyHistoricalTimingToShift(shift, job, targetDateStr, assignedIds, todayStr, customSnapshots, integrityIssues, detachedContext);
         if (!seededShiftKeys.has(shiftId) && !seededShiftKeys.has(dateKey)) {
           seededShiftKeys.add(shiftId);
           seededShiftKeys.add(dateKey);
@@ -1129,7 +1129,7 @@ window.HortOpsSchedulerEngine = {
         var dayName = dayIdx === 0 ? 'Sunday' : dayIdx === 5 ? 'Friday' : dayIdx === 1 ? 'Monday' : 'Saturday';
 
         // Check if there is an authoritative historical occurrence snapshot (Peer Review 04 & 05)
-        var histMatch = self.resolveShiftHistoricalTiming(canonicalShiftId, aJobId, aDateStr, customSnapshots);
+        var histMatch = self.resolveShiftHistoricalTiming(canonicalShiftId, aJobId, aDateStr, customSnapshots, detachedContext);
 
         if (histMatch && histMatch.found && histMatch.startTime && histMatch.durationHours !== undefined && histMatch.durationHours !== null) {
           // Authoritative historical snapshot exists - preserve recorded timing verbatim
@@ -1221,7 +1221,9 @@ window.HortOpsSchedulerEngine = {
     var jobMap = {};
     jobs.forEach(function(j) { jobMap[j.id] = j; });
     allShifts.forEach(function(shift) {
-      revalidateShiftAssignments(shift, staffList, jobMap[shift.jobId], allShifts);
+      // Detached previews validate through the canonical explanation model using
+      // their saved absence/pool context, rather than live application fallbacks.
+      if (!detachedContext) revalidateShiftAssignments(shift, staffList, jobMap[shift.jobId], allShifts);
     });
 
     // Mandatory uniqueness release gate (Mandate Section 3.6)
@@ -1255,7 +1257,7 @@ window.HortOpsSchedulerEngine = {
         (j.status || '') + ':' +
         (j.startTime || '') + ':' +
         (j.durationHours || '') + ':' +
-        JSON.stringify(j.workPattern || null) + ':' + JSON.stringify(j.preferredPoolTagIds || []) + ':' + JSON.stringify(j.exclusivePoolTagIds || []) + ':' + (j.exclusivePoolSource || '') + ':' + (j.frequencyType || '') + ':' +
+        JSON.stringify(j.staffingSections || null) + ':' + JSON.stringify(j.workPattern || null) + ':' + JSON.stringify(j.preferredPoolTagIds || []) + ':' + JSON.stringify(j.exclusivePoolTagIds || []) + ':' + (j.exclusivePoolSource || '') + ':' + (j.frequencyType || '') + ':' +
         (j.preferredDay || '') + ':' +
         (j.intervalWeeks || '') + ':' +
         (j.anchorWeek !== undefined ? j.anchorWeek : '') + ':' +

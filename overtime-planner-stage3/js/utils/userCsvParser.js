@@ -229,6 +229,7 @@ window.HortOpsUserCsvParser = (function() {
         isContractor: isContractor,
         isPlantOperator: isPlantOperator,
         poolTagIds: existingMatch ? (existingMatch.poolTagIds || []).slice() : [],
+        overtimeHoursEvidence: existingMatch && existingMatch.overtimeHoursEvidence !== undefined ? JSON.parse(JSON.stringify(existingMatch.overtimeHoursEvidence)) : [],
         skills: existingMatch ? (existingMatch.skills || []) : [],
         phone: existingMatch ? (existingMatch.phone || '') : '',
         avatarColor: (existingMatch && existingMatch.avatarColor) ? existingMatch.avatarColor : AVATAR_COLORS[parsedStaff.length % AVATAR_COLORS.length],
@@ -243,6 +244,7 @@ window.HortOpsUserCsvParser = (function() {
         ytdShiftCount: existingMatch ? (existingMatch.ytdShiftCount || 0) : 0,
         departedDate: existingMatch ? (existingMatch.departedDate || '') : ''
       });
+      if (!existingMatch || existingMatch.overtimeHoursEvidence === undefined) delete parsedStaff[parsedStaff.length - 1].overtimeHoursEvidence;
     }
 
     var allErrors = duplicateErrors.concat(errors);

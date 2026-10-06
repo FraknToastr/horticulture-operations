@@ -11,7 +11,8 @@ window.HortOpsJobRegistry = {
 
   render: function(state) {
     var icons = window.HortOpsIcons;
-    var jobs = state.jobs;
+    var rules = window.HortOpsPlanningRules;
+      var jobs = rules ? state.jobs.map(function(job) { return rules.effectiveJob(job); }) : state.jobs;
     var self = this;
     function esc(str) {
       if (window.HortOpsSecurityUtils && typeof window.HortOpsSecurityUtils.escapeHtml === 'function') {
@@ -77,7 +78,7 @@ window.HortOpsJobRegistry = {
     var rowsHtml = filtered.length === 0 ?
       '<tr><td colspan="8" style="text-align: center; padding: 2.5rem; color: var(--slate-400);">No jobs match the active search and filter criteria.</td></tr>' :
       filtered.map(function(job) {
-        var primary = job.primaryTeam || job.defaultTeam || 'Unassigned';
+        var primary = rules && !rules.sectionEnabled(job, 'teams') ? 'Team Suitability disabled' : job.primaryTeam || job.defaultTeam || 'Unassigned';
         var isSelected = self.selectedJobId === job.id;
 
         var exclusiveTag = (job.isExclusiveTeams && (job.exclusiveTeams || []).length > 0) ?
@@ -164,13 +165,14 @@ window.HortOpsJobRegistry = {
         '<div style="padding: 1.25rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1rem;">' +
           '<div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 6px; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;">' +
             '<div style="display: flex; justify-content: space-between;"><span style="color: var(--slate-500);">Category:</span><span style="font-weight: 700;">' + esc(selectedJob.category) + '</span></div>' +
-            '<div style="display: flex; justify-content: space-between;"><span style="color: var(--slate-500);">Primary Team:</span><span style="font-weight: 700; color: var(--emerald-800);">' + esc(selectedJob.primaryTeam || selectedJob.defaultTeam || 'Unassigned') + '</span></div>' +
+            '<div style="display: flex; justify-content: space-between;"><span style="color: var(--slate-500);">Pools:</span><span>' + (rules && !rules.sectionEnabled(selectedJob, 'pools') ? 'Disabled' : 'Enabled') + '</span></div>' +
+          '<div style="display: flex; justify-content: space-between;"><span style="color: var(--slate-500);">Primary Team:</span><span style="font-weight: 700; color: var(--emerald-800);">' + esc(rules && !rules.sectionEnabled(selectedJob, 'teams') ? 'Disabled' : selectedJob.primaryTeam || selectedJob.defaultTeam || 'Unassigned') + '</span></div>' +
             (selectedJob.secondaryTeam ? '<div style="display: flex; justify-content: space-between;"><span style="color: var(--slate-500);">2nd Preference:</span><span style="font-weight: 600;">' + esc(selectedJob.secondaryTeam) + '</span></div>' : '') +
             (selectedJob.tertiaryTeam ? '<div style="display: flex; justify-content: space-between;"><span style="color: var(--slate-500);">3rd Preference:</span><span style="font-weight: 600;">' + esc(selectedJob.tertiaryTeam) + '</span></div>' : '') +
             '<div style="display: flex; justify-content: space-between; align-items: center;"><span style="color: var(--slate-500);">Exclusive Choices:</span>' +
               (selectedJob.isExclusiveTeams && (selectedJob.exclusiveTeams || []).length > 0 ?
                 '<span class="badge badge-amber">' + icons.render('lock', 'w-2.5 h-2.5') + esc(selectedJob.exclusiveTeams.join(', ')) + '</span>' :
-                '<span style="color: var(--slate-500);">None (Open to all staff)</span>') +
+                '<span style="color: var(--slate-500);">' + (rules && rules.source(selectedJob) === 'tags' ? 'Tagged staff only' : 'No team restriction') + '</span>') +
             '</div>' +
             '<div style="display: flex; justify-content: space-between;"><span style="color: var(--slate-500);">Crew Required:</span><span style="font-weight: 700;">' + selectedJob.crewSize + ' Staff</span></div>' +
             '<div style="display: flex; justify-content: space-between;"><span style="color: var(--slate-500);">Duration:</span><span style="font-weight: 700;">' + selectedJob.durationHours + ' Hours @ ' + selectedJob.startTime + '</span></div>' +

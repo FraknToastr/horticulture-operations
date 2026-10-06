@@ -60,10 +60,12 @@ window.HortOpsJobEditFormValidator = {
       }
     }
 
-    var primary = formData.primaryTeam || formData.defaultTeam || 'Parks';
-    formData.primaryTeam = primary;
-    formData.defaultTeam = primary;
-    formData.preferredTeam = primary;
+    if (!formData.staffingSections || formData.staffingSections.teams !== false) {
+      var primary = formData.primaryTeam || formData.defaultTeam || 'Parks';
+      formData.primaryTeam = primary;
+      formData.defaultTeam = primary;
+      formData.preferredTeam = primary;
+    }
 
     return { valid: true };
   },

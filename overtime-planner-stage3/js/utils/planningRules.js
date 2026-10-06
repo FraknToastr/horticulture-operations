@@ -12,7 +12,30 @@
     function ids(value) { return Array.isArray(value) && value.every(function(v) {
         return typeof v === 'string' && /^POOL-[A-Za-z0-9_-]+$/.test(v);
     }) && new Set(value).size === value.length; }
-    function source(job) { return job.exclusivePoolSource || ((job.isExclusiveTeams || job.isExclusive) ? 'teams' : 'none'); }
+    function sectionEnabled(job, section) { return !job || !job.staffingSections || job.staffingSections[section] !== false; }
+    function source(job) {
+        job = job || {};
+        var selected = job.exclusivePoolSource || ((job.isExclusiveTeams || job.isExclusive) ? 'teams' : 'none');
+        return (selected === 'teams' && !sectionEnabled(job, 'teams')) || (selected === 'tags' && !sectionEnabled(job, 'pools')) ? 'none' : selected;
+    }
+    function effectivePrefs(job, prefs) {
+        var result = Object.assign({}, prefs || {});
+        if (!sectionEnabled(job, 'teams')) {
+            result.primaryTeam = ''; result.secondaryTeam = ''; result.tertiaryTeam = '';
+            result.isExclusive = false; result.exclusiveTeams = []; result.teamsEnabled = false;
+        }
+        return result;
+    }
+    function effectiveJob(job) {
+        var result = Object.assign({}, job || {});
+        if (!sectionEnabled(job, 'teams')) {
+            ['primaryTeam','defaultTeam','preferredTeam','secondaryTeam','tertiaryTeam'].forEach(function(key) { result[key] = ''; });
+            result.isExclusive = false; result.isExclusiveTeams = false; result.exclusiveTeams = [];
+        }
+        if (!sectionEnabled(job, 'pools')) { result.preferredPoolTagIds = []; result.exclusivePoolTagIds = []; }
+        if ((job && job.exclusivePoolSource !== undefined) || !sectionEnabled(job, 'teams')) result.exclusivePoolSource = source(job);
+        return result;
+    }
     function matches(staff, tagIds, catalogue) {
         var active = new Set((catalogue || []).filter(function(t) { return t.active; }).map(function(t) { return t.id; }));
         return (tagIds || []).some(function(id) { return active.has(id) && (staff.poolTagIds || []).indexOf(id) !== -1; });
@@ -52,8 +75,16 @@
             }
         }
         for (var job of data.jobs || []) {
+            if (job.staffingSections !== undefined) {
+                var sections = job.staffingSections;
+                if (!sections || typeof sections !== 'object' || Array.isArray(sections) ||
+                    Object.keys(sections).length !== 2 || !Object.prototype.hasOwnProperty.call(sections,'teams') ||
+                    !Object.prototype.hasOwnProperty.call(sections,'pools') || typeof sections.teams !== 'boolean' || typeof sections.pools !== 'boolean') {
+                    return fail('Staffing sections must specify teams and pools as booleans.');
+                }
+            }
             if (job.exclusivePoolSource !== undefined && ['none','teams','tags'].indexOf(job.exclusivePoolSource) === -1) return fail('Invalid exclusive pool source.');
-            if (source(job) === 'tags' && (job.isExclusiveTeams || job.isExclusive)) return fail('Choose team or tag exclusivity, not both.');
+            if (source(job) === 'tags' && sectionEnabled(job,'teams') && (job.isExclusiveTeams || job.isExclusive)) return fail('Choose team or tag exclusivity, not both.');
             var pattern = validatePattern(job);
             if (!pattern.valid) return pattern;
         }
@@ -79,5 +110,6 @@
             slots.filter(function(s) { return s.saturdayDate <= date; }).slice(-1)[0] || slots[0];
     }
     window.HortOpsPlanningRules = {validateWorkspace:validateWorkspace,validatePattern:validatePattern,
-        dates:dates,slotFor:slotFor,source:source,matches:matches,weekdays:weekdays,isRealDate:ymd};
+        dates:dates,slotFor:slotFor,source:source,matches:matches,weekdays:weekdays,isRealDate:ymd,
+        sectionEnabled:sectionEnabled,effectiveJob:effectiveJob,effectivePrefs:effectivePrefs};
 }());

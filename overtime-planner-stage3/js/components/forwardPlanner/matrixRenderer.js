@@ -102,6 +102,7 @@ window.HortOpsForwardPlannerMatrix = {
                     '</div>' +
                     '<span style="font-size: 12px; font-weight: 600; color: var(--slate-600); font-family: var(--font-mono); margin-top: 1px;">' + shift.startTime + ' (' + shift.durationHours + 'h)</span>' +
                   '</button>' +
+                  '<button type="button" class="btn btn-secondary candidate-preview-entry" data-candidate-preview="' + escAttr(shift.shiftId) + '">Preview candidates</button>' +
                 '</td>'
               );
             } else {
@@ -205,7 +206,8 @@ window.HortOpsForwardPlannerMatrix = {
                   '<div class="shift-card-meta">' + esc(timeMetaStr) + '</div>' +
                 '</div>' +
                 plantOpRightBadge +
-              '</button>';
+              '</button>' +
+              '<button type="button" class="btn btn-secondary candidate-preview-entry" data-candidate-preview="' + escAttr(sh.shiftId) + '">Preview candidates</button>';
             }).join('');
 
             staffDayCells.push(
