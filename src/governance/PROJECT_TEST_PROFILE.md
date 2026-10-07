@@ -34,7 +34,7 @@ The authoritative wording and exceptions remain in the named governance files. T
 | Register and lineage | T-001–T-007; PC-001–PC-006 | Register root, one active Project, ownership, independent Location/Work Geometry, deliberate geometry-to-Job promotion and immutable Job origin. Model and Planner/Map boundaries. |
 | Commercial history | T-008–T-011; PC-007–PC-010, PC-013 | Cost snapshots, Quote draft versus Issue readiness, issued revision immutability, payment traceability and protected dependencies. Costing/Quote/model boundaries. |
 | Persistence and lifecycle | T-012–T-014; PC-011–PC-012 | Complete graph recovery, rejection of corrupt states, owner isolation and separate domain lifecycles. Storage, migration, import/export and UI projection boundaries. |
-| UI/operability | PC-014–PC-019; `UX_RULES.md` | Sidebar surfaces, Location/Polygon cards, Scheduler routing/signalling, accordion floor and Register drawer growth; accessible Rate Item Category/Description sorting; inline Register budget rows in the Delivery Project grid. Shared CSS/JS and browser-delivery boundaries. |
+| UI/operability | PC-014–PC-019; `UX_RULES.md` | One full-height floor and outer-scroll lock for native Register and all mounted modules; row-header alignment and scroll restoration; Planner edge-to-edge checklist; Map/Scheduler 4px dividers; full-page Budget floor. Use focused browser tests for touched UI plus cross-module drawer checks, not the full regime unless risk justifies it. |
 | Annual budget | T-015–T-018; PC-021–PC-025 | NSA/EVT July–June owner/year authority, Register allocations, approved append-only signed adjustments, atomic transfers, closed-year history and carry-forward decisions without automatic money movement. Budget/model/persistence/UI boundaries. |
 | Three Job paths | T-019; PC-020, PC-026–PC-028 | Planner Task, Calculator work or Map geometry as exactly one origin; idempotent Operational Task Draft Job creation; separate scheduling, costing and Quote inclusion decisions. Planner/Calculator/Scheduler/Map/Quote boundaries. |
 
@@ -76,3 +76,18 @@ Status: **NOT RUN / awaiting explicit verification approval.** These prepared te
 **Known baseline failures and deferred issues:** no complete, signed baseline/deferral ledger is established by this profile. Build one at G0 from the exact reviewed revision, including existing release blockers and reproducible test failures. Do not relabel unknown failures as accepted exceptions.
 
 **Approval/ownership decisions still required:** named product and release gate owners; exact browser/device/OS and accessibility targets; offline first-launch guarantee and distribution parity; performance and representative-data budgets; reviewer test-patch integration owner/CI command; authorised baseline exceptions. Until recorded, related review rows remain `UNKNOWN`, `UNPROVEN` or `BLOCKED` as appropriate. Reviewer test patches use the repository's CJS Node tests or Playwright JavaScript convention and require owner approval to merge.
+## Conservative test execution policy
+
+The default test selection is impact-scoped. For a change confined to one JavaScript module or a clearly bounded module set, run:
+
+1. the directly relevant unit/model tests;
+2. the directly relevant browser/UI test, when the module has a browser boundary;
+3. the smallest cross-module check covering the persistence, storage, API, or workflow boundary changed.
+
+Do not run the complete Node and browser regimes solely because a change is small. Record the scope, selected tests, result, and the reason a full run was not necessary. Use the complete regime for changes that cross schemas, storage, migrations, shared contracts, release gates, security, build/runtime configuration, or multiple unrelated feature areas; for release candidates; or when targeted results reveal an unexplained failure. “Conservative” means narrower but sufficient evidence, not omitted evidence for an impacted boundary.
+
+The project test profile therefore distinguishes:
+
+- **Targeted verification:** required default for bounded module changes.
+- **Cross-module verification:** required whenever the changed module persists data, publishes an API, or feeds another user-visible module.
+- **Full verification:** required for broad or high-risk changes and release evidence.

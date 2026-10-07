@@ -54,9 +54,9 @@ test("targeted Cost Calculator UI corrections preserve filtering and automatic A
     await expect(row.locator("[data-costing-add-rate]")).toBeVisible();
     await expect(row.locator("[data-costing-edit-rate]")).toBeVisible();
     await expect(row.locator("[data-costing-delete-rate]")).toBeVisible();
-    const labels = await row.locator(".program-category-pill, .program-rate-state").evaluateAll((items) => items.map((item) => ({ text: item.textContent, overflow: getComputedStyle(item).textOverflow, tooltip: item.getAttribute("data-uos-tooltip"), name: item.getAttribute("aria-label") })));
+    const labels = await row.locator(".program-category-pill, .program-rate-state").evaluateAll((items) => items.map((item) => ({ text: item.textContent, category: item.classList.contains("program-category-pill"), overflow: getComputedStyle(item).textOverflow, tooltip: item.getAttribute("data-uos-tooltip"), name: item.getAttribute("aria-label") })));
     for (const item of labels) {
-      expect(item.overflow).toBe("clip");
+      expect(item.overflow).toBe(item.category ? "clip" : "ellipsis");
       expect(item.tooltip).toBeTruthy();
       expect(item.name).toBeTruthy();
       if (item.text.endsWith("...")) expect(item.tooltip.startsWith(item.text.slice(0, -3))).toBe(true);

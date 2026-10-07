@@ -10,7 +10,7 @@
   function all(selector) { return Array.prototype.slice.call(document.querySelectorAll(selector)); }
   function setText(selector, value) { var node = one(selector); if (node) node.textContent = String(value == null ? "" : value); }
   function setHidden(selector, hidden) { all(selector).forEach(function (node) { node.hidden = Boolean(hidden); }); }
-  function destination(value) { return DESTINATIONS.indexOf(value) >= 0 ? value : "dashboard"; }
+  function destination(value) { return DESTINATIONS.indexOf(value) >= 0 ? value : "register"; }
   function returnDestinationFromData(workspace) {
     var value = workspace && workspace.workspace && workspace.workspace.dataReturnDestination;
     return DESTINATIONS.indexOf(value) >= 0 && value !== "data" ? value : "register";
@@ -25,6 +25,29 @@
       var value = new URLSearchParams(window.location.search || "").get("owner");
       return value === "EVT" ? "EVT" : value === "NSA" ? "NSA" : "";
     } catch (error) { return ""; }
+  }
+  function factoryResetRequested() {
+    try {
+      var owner = entryOwner() || "NSA";
+      var store = window.parent && window.parent !== window ? window.parent.sessionStorage : window.sessionStorage;
+      var key = "uos.factory-reset-intent." + owner;
+      var createdAt = Number(store.getItem(key));
+      if (!createdAt || Date.now() - createdAt > 120000) {
+        store.removeItem(key);
+        return false;
+      }
+      return true;
+    } catch (_) { return false; }
+  }
+  function clearFactoryResetRequest() {
+    try {
+      var owner = entryOwner() || "NSA";
+      var store = window.parent && window.parent !== window ? window.parent.sessionStorage : window.sessionStorage;
+      store.removeItem("uos.factory-reset-intent." + owner);
+      var url = new URL(window.location.href);
+      url.searchParams.delete("factory-reset");
+      window.history.replaceState({}, "", url.pathname + (url.search || "") + (url.hash || ""));
+    } catch (_) {}
   }
   function workingOwner(workspace) {
     var configured = appConfig();
@@ -88,7 +111,7 @@
 
   function recoverableStartupError(error) {
     var message = String(error && error.message || error || "");
-    return /Invalid unified workspace|requires exactly one Register parent|requires projectId|Project must have exactly one existing Register parent|Work Geometry has no existing Project/.test(message);
+    return /Invalid unified workspace|Invalid status control plane|requires exactly one Register parent|requires projectId|Project must have exactly one existing Register parent|Work Geometry has no existing Project/.test(message);
   }
 
   function removeStartupRecoveryNotice() {
@@ -116,11 +139,15 @@
 
     var copy = document.createElement("div");
     var heading = document.createElement("h3");
-    heading.textContent = "Import a workspace to continue";
+    heading.textContent = "Workspace recovery";
     var description = document.createElement("p");
-    description.textContent = "The previous workspace could not be opened. Select a valid Horticulture workspace ZIP or JSON file. The stored workspace will not be replaced unless the selected file passes validation and you confirm Apply import.";
+    description.textContent = "The stored workspace could not be opened. Data & Settings remains available for backup, import, and Danger Zone. The original stored data is retained until you explicitly replace or delete it.";
     copy.appendChild(heading);
     copy.appendChild(description);
+    var detail = document.createElement("p");
+    detail.textContent = state.error && state.error.message || "The stored workspace could not be opened.";
+    detail.setAttribute("data-program-recovery-error", "");
+    copy.appendChild(detail);
 
     var choose = document.createElement("button");
     choose.className = "uos-button uos-button--primary";
@@ -134,6 +161,12 @@
     notice.appendChild(icon);
     notice.appendChild(copy);
     notice.appendChild(choose);
+    var retry = document.createElement("button");
+    retry.type = "button";
+    retry.className = "uos-button uos-button--secondary";
+    retry.setAttribute("data-program-retry", "");
+    retry.textContent = "Try again";
+    notice.appendChild(retry);
     dataView.insertBefore(notice, dataMain);
   }
 
@@ -155,7 +188,7 @@
     state.isSessionCleared = true;
     state.error = error instanceof Error ? error : new Error(String(error || "The stored workspace could not be opened."));
     showStartupRecoveryNotice();
-    setText("[data-program-data-status]", "Workspace import required. Choose a valid v3 workspace ZIP or JSON file.");
+    setText("[data-program-data-status]", "Stored workspace could not be opened. Data & Settings remains available for backup, import and Danger zone. Try again reloads the stored data without changing it.");
     programStatus("Import required", "warning");
     return state.workspace;
   }
@@ -172,26 +205,30 @@
   function renderMigration() {
     var preview = state.staged && state.staged.preview;
     var counts = preview && preview.counts || { total: 0, byCollection: {}, byOwner: {} };
-    setText("[data-program-migration-total]", counts.total || 0);
-    setText("[data-program-migration-nature]", counts.byOwner && counts.byOwner.NSA || 0);
-    setText("[data-program-migration-remediation]", counts.byOwner && counts.byOwner.EVT || 0);
+    var sourceLabels = { unified: "Current saved workspace", nature: "Legacy Nature Strip storage", remediation: "Legacy Remediation storage" };
+    var sources = preview && preview.sources || [];
+    setText("[data-program-migration-sources]", "Sources included: " + (sources.length ? sources.map(function (source) {
+      return (sourceLabels[source.kind] || source.kind) + (source.app ? " (" + source.app + ")" : "");
+    }).join("; ") : "No stored source workspace") + ". Counts describe the reviewed result, before applying changes.");
+    setText("[data-program-migration-owners]", "Ownership totals (included in the counts below): NSA " + (counts.byOwner.NSA || 0) + "; EVT " + (counts.byOwner.EVT || 0) + "; shared or unassigned " + (counts.byOwner.unknown || 0) + ". These are records of all types, not Register counts.");
+    var labels = { applications: "Register applications", events: "Register events", projects: "Projects", jobs: "Jobs", tasks: "Planner tasks", costingLines: "Resource Calculator lines", rateItems: "Rate Items", catalogs: "Catalogs", geometries: "Map geometries", quotes: "Quotes", quoteLines: "Quote lines", payments: "Payments", actuals: "Actual cost entries", statusEvents: "Status history entries", statusRecommendations: "Status recommendations", assets: "Assets", documents: "Documents", attachments: "Attachments" };
+    var primary = ["applications", "events", "projects", "jobs", "tasks", "costingLines"];
+    var names = primary.concat(Object.keys(counts.byCollection).filter(function (name) { return primary.indexOf(name) < 0 && counts.byCollection[name] > 0; }).sort());
     var summary = one("[data-program-migration-counts]");
-    if (summary && !one("[data-program-migration-total]")) {
+    if (summary) {
       while (summary.firstChild) summary.removeChild(summary.firstChild);
-      [["Records", counts.total || 0], ["Nature Strip", counts.byOwner && counts.byOwner.NSA || 0], ["Remediation", counts.byOwner && counts.byOwner.EVT || 0]].forEach(function (entry) {
+      [["total", "All stored records", counts.total || 0]].concat(names.map(function (name) {
+        return [name, labels[name] || name.replace(/([a-z])([A-Z])/g, function (_, left, right) { return left + " " + right; }), counts.byCollection[name] || 0];
+      })).forEach(function (entry) {
         var card = document.createElement("div");
         var label = document.createElement("span");
         var value = document.createElement("strong");
-        label.textContent = entry[0];
-        value.textContent = String(entry[1]);
-        card.appendChild(label);
-        card.appendChild(value);
-        summary.appendChild(card);
+        label.textContent = entry[1];
+        value.textContent = String(entry[2]);
+        value.setAttribute("data-program-migration-count", entry[0]);
+        card.appendChild(label); card.appendChild(value); summary.appendChild(card);
       });
     }
-    all("[data-program-migration-count]").forEach(function (node) {
-      node.textContent = String(counts.byCollection && counts.byCollection[node.getAttribute("data-program-migration-count")] || 0);
-    });
     var warnings = one("[data-program-migration-warnings]");
     if (warnings) {
       while (warnings.firstChild) warnings.removeChild(warnings.firstChild);
@@ -851,17 +888,39 @@ function resetStartupWorkspace(workspace) {
   function init() {
     state.phase = "loading";
     state.error = null;
+    state.startupRecovery = false;
+    removeStartupRecoveryNotice();
     state.isSessionCleared = false;
     render();
-   return (typeof UOS.ProgramStorage.getRaw === "function" ? UOS.ProgramStorage.getRaw() : UOS.ProgramStorage.get()).then(function (workspace) {
+    function loadStoredWorkspace() {
+      return (typeof UOS.ProgramStorage.getRaw === "function" ? UOS.ProgramStorage.getRaw() : UOS.ProgramStorage.get()).then(function (workspace) {
       /* A stored workspace may legitimately lack a rollout marker after an
          import. Startup is never authority to delete operational records. */
       if (workspace) return repairStoredWorkspace(workspace);
       return activate(UOS.ProgramModel.blank());
-    }).catch(function (error) {
-      if (recoverableStartupError(error)) return openStartupImportRecovery(error);
-      return fail(error);
-    });
+      }).catch(function (error) {
+        if (recoverableStartupError(error)) return openStartupImportRecovery(error);
+        return fail(error);
+      });
+    }
+    if (factoryResetRequested()) {
+      clearFactoryResetRequest();
+      var confirmation = UOS.dialogs && typeof UOS.dialogs.confirm === "function" ? UOS.dialogs.confirm({
+        title: "Factory reset this workspace?",
+        message: "This permanently deletes every Register record, linked Project, Planner task, budget and other stored workspace record in this browser. This cannot be undone.",
+        confirmLabel: "Permanently factory reset",
+        cancelLabel: "Keep stored workspace",
+        danger: true
+      }) : Promise.resolve(false);
+      return confirmation.then(function (confirmed) {
+        if (!confirmed) return loadStoredWorkspace();
+        return UOS.ProgramStorage.factoryReset().then(function (fresh) {
+          if (UOS.toast) UOS.toast("Factory reset complete. The Register and default Rate Library are ready.", "success");
+          return activate(fresh, { focus: "register" });
+        });
+      }).catch(fail);
+    }
+    return loadStoredWorkspace();
   }
 
   function applyMigration() {
@@ -1163,6 +1222,7 @@ function resetStartupWorkspace(workspace) {
       }
       else if (open) { event.preventDefault(); navigate(open.getAttribute("data-open-destination")); }
       else if (retry) { event.preventDefault(); init(); }
+      else if (event.target.closest("[data-program-recovery-settings]")) { event.preventDefault(); openStartupImportRecovery(state.error); }
 
       if (modeSlider || collapse || nav || open) {
         setTimeout(updateRailTheme, 0);
@@ -1234,6 +1294,15 @@ function resetStartupWorkspace(workspace) {
     });
   }
 
+ function workspaceBackup() {
+   // Recovery displays a safe empty view. A backup must retain the actual
+   // unreadable record, including its revision, rather than exporting that view.
+   if (state.startupRecovery) return UOS.ProgramStorage.getRaw().then(function (raw) {
+     if (!raw) throw new Error("No stored workspace is available to back up.");
+     return clone(raw);
+   });
+   return Promise.resolve(clone(state.workspace));
+ }
  function deleteStoredWorkspace(expectedRevision) {
  if (state.phase !== "ready") return Promise.reject(new Error("The program application is not ready."));
  if (!Number.isInteger(Number(expectedRevision)) || Number(expectedRevision) < 0) return Promise.reject(new TypeError("A current workspace revision is required before deletion."));
@@ -1246,7 +1315,10 @@ function resetStartupWorkspace(workspace) {
          this is false, a background UI save recreates a blank revision 1
          while the in-memory workspace remains revision 0, permanently
          conflicting with every staged recovery import. */
-      state.isSessionCleared = true;
+ state.isSessionCleared = true;
+ state.startupRecovery = false;
+ state.error = null;
+ removeStartupRecoveryNotice();
       var blank = UOS.ProgramModel.blank();
       blank.migration.status = "complete";
       blank.migration.migratedAt = new Date().toISOString();
@@ -1260,6 +1332,10 @@ function resetStartupWorkspace(workspace) {
  }).catch(function (err) {
  state.busy = false;
  if (err && err.name === "WorkspaceRevisionConflictError") {
+ if (state.startupRecovery) {
+   programStatus("Stored workspace changed. Back up the latest revision before deleting it.", "warning");
+   throw err;
+ }
    return UOS.ProgramStorage.get().then(function (latest) {
      if (latest) activate(latest);
      programStatus("Workspace changed. Create a new backup before deleting.", "warning");
@@ -1343,181 +1419,113 @@ function resetStartupWorkspace(workspace) {
   }
 
 
-  function shortcutContextForWorkspace(currentModule, sourceWorkspace) {
+  function shortcutContextForWorkspace(currentModule, sourceWorkspace, recordId) {
     var workspace = sourceWorkspace || state.workspace || {};
     var entities = workspace.entities || {};
     var ui = workspace.workspace || {};
-    var context = resolveWorkingContext(workspace, ui.selectedEntityId || ui.selectedProjectId || "");
+    var context = resolveWorkingContext(workspace, recordId || ui.selectedEntityId || ui.selectedProjectId || "");
     var project = (entities.projects || []).find(function (item) { return item.id === context.projectId; }) || null;
+    var record = (entities.applications || []).concat(entities.events || []).find(function (item) { return item.id === context.registerId; });
     var jobs = (entities.jobs || []).filter(function (job) {
-      return project && (job.projectId === project.id || job.applicationId === project.applicationId || job.eventId === project.eventId);
+      return project && job.owner === project.owner && (job.projectId === project.id || job.applicationId === context.registerId || job.eventId === context.registerId);
     });
     var jobIds = {};
     jobs.forEach(function (job) { jobIds[job.id] = true; });
+    function hasCoordinates(item) {
+      if (!item) return false;
+      var locations = (item.locations || []).concat([item.location || {}, item]);
+      return locations.some(function (location) {
+        var coordinate = location.coordinate;
+        return Array.isArray(coordinate) && coordinate.length >= 2 && typeof coordinate[0] === "number" && typeof coordinate[1] === "number";
+      }) || Boolean(item.polygons && item.polygons.length);
+    }
     return {
       currentModule: currentModule,
       linkedProject: project,
       hasRegister: Boolean(context.registerId),
       hasProject: Boolean(project),
-      hasMap: Boolean((entities.geometries || []).some(function (geometry) {
-        return geometry.projectId === context.projectId || geometry.applicationId === context.registerId || geometry.eventId === context.registerId;
-      })),
+      hasMap: hasCoordinates(record) || hasCoordinates(project) || (entities.geometries || []).some(function (geometry) {
+        var payload = geometry.payload || {};
+        return (context.projectId && geometry.projectId === context.projectId) ||
+          (context.registerId && (geometry.applicationId === context.registerId || geometry.eventId === context.registerId ||
+          payload.applicationId === context.registerId || payload.eventId === context.registerId)) ||
+          (context.projectId && payload.projectId === context.projectId);
+      }),
       hasJobs: jobs.length > 0,
-      hasCostedJobs: Boolean((entities.costingLines || []).some(function (line) { return line.projectId === context.projectId || jobIds[line.jobId]; }))
+      hasCostedJobs: Boolean(project && (entities.costingLines || []).some(function (line) {
+        return line.owner === project.owner && (line.projectId === project.id || jobIds[line.jobId]);
+      })),
+      hasQuotes: Boolean(project && (
+        (entities.costingLines || []).some(function (line) {
+          return line.owner === project.owner && line.projectId === project.id;
+        }) ||
+        (entities.quoteLines || []).some(function (line) {
+          return line.owner === project.owner && line.projectId === project.id &&
+            (entities.quotes || []).some(function (quote) {
+              return quote.id === line.quoteId && quote.owner === project.owner &&
+                quote.projectId === project.id && quote.status !== "Superseded";
+            });
+        })
+      )),
+      hasPlannerWork: Boolean(project && (entities.tasks || []).some(function (task) {
+        return task.owner === project.owner && task.projectId === project.id &&
+          UOS.ProgramPlannerModel.taskState(workspace, task).hasWork;
+      }))
     };
   }
 
   function evaluateShortcutRule(actionKey, context) {
     context = context || {};
-    var currentModule = context.currentModule || "";
-    var hasProject = Boolean(context.hasProject);
-    var hasMap = Boolean(context.hasMap);
-    var hasJobs = Boolean(context.hasJobs);
-    var hasCostedJobs = Boolean(context.hasCostedJobs);
-    var linkedProject = context.linkedProject || null;
-    var hasRegister = context.hasRegister === true || Boolean(linkedProject && (linkedProject.applicationId || linkedProject.eventId));
-
-    var isCurrent = (actionKey === currentModule);
-    var isDisabled = false;
-    var isLinked = false;
-    var tooltip = "";
-    var ariaLabel = "";
-
-    if (actionKey === "register") {
-      isLinked = !isCurrent && hasRegister;
-      tooltip = isCurrent ? "Currently in Register" : "View in Register";
-      ariaLabel = tooltip;
-    } else if (actionKey === "map") {
-      if (isCurrent) {
-        tooltip = "Currently in Space Map";
-      } else if (hasMap) {
-        isLinked = true;
-        tooltip = "View on Space Map";
-      } else {
-        tooltip = "Open Space Map to add a location or polygons";
-      }
-      ariaLabel = tooltip;
-    } else if (actionKey === "planner") {
-      if (isCurrent) {
-        tooltip = "Currently in Project Planner";
-      } else if (!hasProject) {
-        isDisabled = true;
-        tooltip = "Create a linked project first to open in Project Planner";
-      } else {
-        isLinked = true;
-        isDisabled = false;
-        tooltip = linkedProject ? ("Open linked Project: " + (linkedProject.title || linkedProject.name || linkedProject.id)) : "Open in Project Planner";
-      }
-      ariaLabel = tooltip;
-    } else if (actionKey === "costing") {
-      if (isCurrent) {
-        tooltip = "Currently in Cost Calculator";
-      } else if (!hasProject) {
-        isDisabled = true;
-        tooltip = "Create a linked delivery project first to open in Cost Calculator";
-      } else if (hasJobs) {
-        isLinked = true;
-        tooltip = "Open in Cost Calculator";
-      } else {
-        tooltip = "Open Cost Calculator — this Project has no Jobs yet";
-      }
-      ariaLabel = tooltip;
-    } else if (actionKey === "scheduler") {
-      if (isCurrent) {
-        tooltip = "Currently in Job Scheduler";
-      } else if (!hasJobs) {
-        isDisabled = true;
-        tooltip = "Create at least one Job before opening in Scheduler";
-      } else {
-        isLinked = true;
-        tooltip = "Schedule in Job Scheduler";
-      }
-      ariaLabel = tooltip;
-    } else if (actionKey === "quotes") {
-      if (isCurrent) {
-        tooltip = "Currently in Quote Builder";
-      } else if (!hasProject) {
-        isDisabled = true;
-        tooltip = "Create a linked delivery project first to open in Quote Builder";
-      } else {
-        isLinked = true;
-        tooltip = "Create or open Quote in Quote Builder";
-      }
-      ariaLabel = tooltip;
-    }
-
+    var labels = { register: "Register", map: "Space Map", planner: "Project Planner", costing: "Cost Calculator", scheduler: "Job Scheduler", quotes: "Quote Builder" };
+    var label = labels[actionKey] || actionKey;
+    var ready = actionKey === "register" || actionKey === "map" || Boolean(context.hasProject);
+    var used = { register: true, map: context.hasMap, planner: context.hasPlannerWork, costing: context.hasCostedJobs, scheduler: context.hasJobs, quotes: context.hasQuotes };
+    var usage = !ready ? "inactive" : used[actionKey] ? "in-use" : "unused";
+    var tooltip = !ready ? "Create a linked delivery project first to open " + label :
+      "Open " + label + (usage === "unused" ? " — no saved work yet" : "");
     return {
-      actionKey: actionKey,
-      isCurrent: isCurrent,
-      isDisabled: isDisabled,
-      isLinked: isLinked,
-      tooltip: tooltip,
-      ariaLabel: ariaLabel
+      actionKey: actionKey, isCurrent: actionKey === context.currentModule,
+      isDisabled: !ready, isLinked: usage === "in-use", usage: usage,
+      tooltip: tooltip, ariaLabel: tooltip
     };
   }
 
   function syncToolbarPrerequisites(container, context) {
     if (!container || typeof container.querySelectorAll !== "function") return;
+    if (!context || typeof context.hasPlannerWork !== "boolean" || typeof context.hasQuotes !== "boolean") {
+      var project = context && context.linkedProject;
+      var recordId = project && (project.applicationId || project.eventId) || "";
+      context = shortcutContextForWorkspace(context && context.currentModule, state.workspace, recordId);
+    }
     var buttons = container.querySelectorAll("button[data-register-action], button[data-planner-toolbar-jump], button[data-map-toolbar-jump], button[data-costing-toolbar-jump], button[data-scheduler-toolbar-jump], button[data-quotes-toolbar-jump]");
-
     Array.prototype.forEach.call(buttons, function (btn) {
       var actionKey = btn.getAttribute("data-register-action") ||
-                      btn.getAttribute("data-planner-toolbar-jump") ||
-                      btn.getAttribute("data-map-toolbar-jump") ||
-                      btn.getAttribute("data-costing-toolbar-jump") ||
-                      btn.getAttribute("data-scheduler-toolbar-jump") ||
-                      btn.getAttribute("data-quotes-toolbar-jump");
-
+        btn.getAttribute("data-planner-toolbar-jump") || btn.getAttribute("data-map-toolbar-jump") ||
+        btn.getAttribute("data-costing-toolbar-jump") || btn.getAttribute("data-scheduler-toolbar-jump") ||
+        btn.getAttribute("data-quotes-toolbar-jump");
       if (!actionKey) return;
       var rule = evaluateShortcutRule(actionKey, context);
-
- if (rule.isCurrent) {
- btn.classList.add("is-current-module");
- btn.classList.remove("is-available-module");
-        btn.classList.remove("program-register-action--linked");
-        btn.removeAttribute("data-linked-entity");
-        btn.setAttribute("aria-current", "page");
-        btn.disabled = true;
-        btn.removeAttribute("aria-disabled");
-      } else {
-        btn.classList.remove("is-current-module");
-        btn.removeAttribute("aria-current");
- if (rule.isDisabled) {
- btn.classList.remove("is-available-module");
-          btn.disabled = true;
-          btn.setAttribute("aria-disabled", "true");
-          btn.classList.remove("program-register-action--linked");
-          btn.removeAttribute("data-linked-entity");
- } else {
- btn.classList.add("is-available-module");
-          btn.disabled = false;
-          btn.removeAttribute("aria-disabled");
-          if (rule.isLinked) {
-            btn.classList.add("program-register-action--linked");
-            btn.setAttribute("data-linked-entity", "true");
-          } else {
-            btn.classList.remove("program-register-action--linked");
-            btn.removeAttribute("data-linked-entity");
-          }
-        }
-      }
-
-      if (rule.tooltip) {
-        btn.setAttribute("data-uos-tooltip", rule.tooltip);
-        btn.setAttribute("title", rule.tooltip);
-      }
-      if (rule.ariaLabel) {
-        btn.setAttribute("aria-label", rule.ariaLabel);
-      }
+      btn.classList.toggle("is-current-module", rule.isCurrent);
+      btn.classList.toggle("is-available-module", !rule.isDisabled);
+      btn.classList.toggle("program-register-action--linked", rule.isLinked);
+      btn.disabled = rule.isDisabled;
+      btn.setAttribute("data-shortcut-state", rule.usage);
+      if (rule.isCurrent) btn.setAttribute("aria-current", "page"); else btn.removeAttribute("aria-current");
+      if (rule.isDisabled) btn.setAttribute("aria-disabled", "true"); else btn.removeAttribute("aria-disabled");
+      if (rule.isLinked) btn.setAttribute("data-linked-entity", "true"); else btn.removeAttribute("data-linked-entity");
+      btn.setAttribute("data-uos-tooltip", rule.tooltip);
+      btn.setAttribute("title", rule.tooltip);
+      btn.setAttribute("aria-label", rule.ariaLabel);
     });
   }
 
   UOS.ProgramApp = {
+    shortcutContextForWorkspace: shortcutContextForWorkspace,
     evaluateShortcutRule: evaluateShortcutRule,
     syncToolbarPrerequisites: syncToolbarPrerequisites,
     destinations: DESTINATIONS.slice(), init: init, render: render, applyMigration: applyMigration,
     startEmpty: startEmpty, confirmStartEmpty: confirmStartEmpty, navigate: navigate,
-    updateWorkspace: updateWorkspace, adoptWorkspace: adoptWorkspace, deleteStoredWorkspace: deleteStoredWorkspace, clearInMemory: clearInMemory, restoreStoredData: restoreStoredData, reviewLegacyData: stageLegacy, entityById: entityById, resolveDeepLink: resolveDeepLink,
+    updateWorkspace: updateWorkspace, adoptWorkspace: adoptWorkspace, workspaceBackup: workspaceBackup, deleteStoredWorkspace: deleteStoredWorkspace, clearInMemory: clearInMemory, restoreStoredData: restoreStoredData, reviewLegacyData: stageLegacy, entityById: entityById, resolveDeepLink: resolveDeepLink,
     updateRailTheme: updateRailTheme, setWorkingContext: setWorkingContext,
  canEdit: function () { return true; },
     resolveWorkingContext: resolveWorkingContext, projectHasPolygon: projectHasPolygon,

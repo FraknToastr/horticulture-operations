@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horticulture Operations - Overtime &amp; Workforce Planner (Offline)</title>
+  <!-- Pure Vanilla Offline Stylesheet - Zero External CDN / Webfonts -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/candidate-preview.css">
+  <link rel="stylesheet" href="css/hours-allocation.css">
+</head>
+<body>
+    <div id="workspace-ownership" class="workspace-ownership" role="status" aria-live="polite">Checking exclusive workspace ownership…</div>
+  <!-- Header Mount -->
+  <div id="header-mount"></div>
+
+  <!-- Main View Mount -->
+  <main class="main-wrapper">
+    <div id="content-mount"></div>
+  </main>
+
+  <!-- Modal Roots -->
+  <div id="staff-assign-modal-root"></div>
+  <div id="job-edit-modal-root"></div>
+  <div id="export-modal-root"></div>
+  <div id="import-modal-root"></div>
+  <div id="staff-exemption-modal-root"></div>
+  <div id="warnings-modal-root"></div>
+  <div id="reset-workspace-modal-root"></div>
+  <div id="job-reset-modal-root"></div>
+  <div id="storage-health-modal-root"></div>
+  <div id="quarantine-viewer-modal-root"></div>
+  <div id="staff-qualification-modal-root"></div>
+  <div id="staff-absence-modal-root"></div>
+  <div id="pool-modal-root"></div>
+  <div id="candidate-preview-modal-root"></div>
+  <div id="hours-evidence-modal-root"></div>
+  <div id="hours-allocation-modal-root"></div>
+  <div id="mixed-policy-plan-modal-root"></div>
+  <div id="absence-impact-modal-root"></div>
+
+  <!-- 1. Data Scripts (Public calendar data only; zero prototype seeds) -->
+  <script src="js/data/holidays.js"></script>
+
+  <!-- 2. Utility Engines -->
+  <script src="js/utils/icons.js"></script>
+  <script src="js/utils/securityUtils.js"></script>
+  <script src="js/utils/dateUtils.js"></script>
+  <script src="js/utils/qualifications.js"></script>
+  <script src="js/utils/fatigueEngine.js"></script>
+  <script src="js/utils/absences.js"></script>
+  <script src="js/utils/recurrence.js"></script>
+  <script src="js/utils/planningRules.js"></script>
+  <script src="js/utils/hoursEvidence.js"></script>
+  <script src="js/utils/storage/schemaValidator.js"></script>
+    <script src="js/utils/storage/currentWorkspace.js"></script>
+    <script src="js/utils/storage/clientStorage.js"></script>
+  <script src="js/utils/storage/recoveryArtifact.js"></script>
+  <script src="js/utils/storage/storageDriver.js"></script>
+    <script src="js/utils/currentStorage.js"></script>
+  <script src="js/utils/eligibilityEngine.js"></script>
+  <script src="js/utils/rostering/engine.js"></script>
+  <script src="js/utils/rostering/commitmentPlanner.js"></script>
+  <script src="js/utils/scheduler/costCalculator.js"></script>
+  <script src="js/utils/scheduler/engine.js"></script>
+  <script src="js/utils/scheduler.js"></script>
+  <script src="js/utils/userCsvParser.js"></script>
+  <script src="js/utils/reconciliationEngine.js"></script>
+  <script src="js/utils/warningUtils.js"></script>
+  <script src="js/utils/modalUtils.js"></script>
+
+  <!-- 3. Component Views & Modals -->
+  <script src="js/components/header.js"></script>
+  <script src="js/components/forwardPlanner/header.js"></script>
+  <script src="js/components/forwardPlanner/controls.js"></script>
+  <script src="js/components/forwardPlanner/matrixRenderer.js"></script>
+  <script src="js/components/forwardPlanner.js"></script>
+  <script src="js/components/calendarView.js"></script>
+  <script src="js/components/jobRegistry.js"></script>
+  <script src="js/components/jobResetBindings.js"></script>
+  <script src="js/components/staffRegistry.js"></script>
+  <script src="js/components/peakWeekends.js"></script>
+  <script src="js/components/analytics.js"></script>
+    <script src="js/components/staffAssignModal/filterBar.js"></script>
+  <script src="js/components/staffAssignModal/candidateList.js"></script>
+  <script src="js/components/staffAssignModal/candidateSections.js"></script>
+  <script src="js/components/staffAssignModal/stagedCrew.js"></script>
+  <script src="js/components/staffAssignModal/candidateModel.js"></script>
+  <script src="js/utils/candidatePreview.js"></script>
+  <script src="js/utils/hoursAllocation.js"></script>
+  <script src="js/utils/hoursAllocationInference.js"></script>
+  <script src="js/utils/mixedPolicyPlan.js"></script>
+  <script src="js/utils/absenceImpactPlan.js"></script>
+  <script src="js/components/candidatePreviewModal.js"></script>
+  <script src="js/components/hoursEvidenceModal.js"></script>
+  <script src="js/components/hoursAllocationModal.js"></script>
+  <script src="js/components/mixedPolicyPlanModal.js"></script>
+  <script src="js/components/absenceImpactModal.js"></script>
+  <script src="js/components/staffAssignModal.js"></script>
+    <script src="js/components/jobEditModal/teamPreferences.js"></script>
+  <script src="js/components/jobEditModal/recurrenceForm.js"></script>
+  <script src="js/components/jobEditModal/formValidator.js"></script>
+  <script src="js/components/jobEditModal.js"></script>
+  <script src="js/components/exportModal.js"></script>
+  <script src="js/components/importModal.js"></script>
+  <script src="js/components/staffExemptionModal.js"></script>
+  <script src="js/components/staffQualificationModal.js"></script>
+  <script src="js/components/staffAbsenceModal.js"></script>
+  <script src="js/components/warningsModal.js"></script>
+  <script src="js/components/resetWorkspaceModal.js"></script>
+  <script src="js/components/jobResetModal.js"></script>
+  <script src="js/components/storageHealthModal.js"></script>
+  <script src="js/components/quarantineViewerModal.js"></script>
+
+  <!-- 4. Application Controller & State Store -->
+  <script src="js/components/planningEditors.js"></script>
+  <script src="js/components/cadenceSwitchFix.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/utils/candidatePreviewContext.js"></script>
+  <script src="js/utils/hoursAllocationController.js"></script>
+  <script src="js/utils/mixedPolicyPlanController.js"></script>
+  <script src="js/utils/absenceImpactController.js"></script>
+  <script src="js/components/staffAssignmentContinuityGuide.js"></script>
+    <script src="js/utils/writerSession.js"></script>
+</body>
+</html>

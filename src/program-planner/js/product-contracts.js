@@ -85,12 +85,12 @@
       version: 1,
       criticality: "critical",
       state: "enforced",
-      promise: "A polygon or line may exist as planning-only Project geometry. It enters the Job and Costing system only when the user deliberately creates/promotes the Job.",
+      promise: "A polygon or line may exist as planning-only Project geometry. Mapped costing enters canonical work commands; the Rate Item Scheduler flag controls automatic Job creation and explicit Create a Job overrides the flag.",
       invariants: [
         "Planning-only geometry may have zero mapped Jobs and zero mapped Costing Lines.",
         "Drawing, importing or editing geometry does not by itself create a Job.",
-        "Once promoted, one Work Geometry has exactly one canonical space-map Job and exactly one mapped Costing Line.",
-        "A promoted geometry may never have only half of that lineage.",
+        "Mapped work has exactly one Costing Line and an optional canonical space-map Job in the same Project and owner.",
+        "A linked command-created Job and Costing Line have exact reciprocal source identity; costing-only lineage is valid.",
         "Subsequent geometry changes update the existing mapped lineage rather than creating a duplicate Job."
       ],
       enforcement: ["WorkAreaService.syncGeometry", "WorkAreaService.canonicalLineage", "ProductContracts.validateHard", "ProgramDataHealth"]
@@ -117,7 +117,7 @@
       version: 1,
       criticality: "high",
       state: "enforced",
-      promise: "A Costing Line belongs to a Job and preserves the rate and description used for that estimate until an explicit refresh/change occurs.",
+      promise: "A Costing Line belongs to a Project, may link a Job, and preserves the rate and description used for that estimate until an explicit refresh/change occurs.",
       invariants: [
         "Every Costing Line belongs to one Job and the same Project.",
         "Costing values do not silently track later catalogue changes.",
@@ -208,8 +208,8 @@
       version: 1,
       criticality: "critical",
       state: "pending-proof",
-      promise: "Draft Quote creation remains permissive; issuing requires canonical scope, cost-basis and funding evidence.",
-      invariants: ["Module visitation is not Quote Readiness evidence.", "The readiness result and evidence basis are snapshotted at Issue."],
+      promise: "Draft Quote creation remains permissive; Issue requires scope, cost-basis, an explicit funding arrangement and proposed coverage of Calculator delivery cost ex GST. Customer acceptance confirms agreement after Issue.",
+      invariants: ["Module visitation is not Quote Readiness evidence.", "The readiness result and evidence basis are snapshotted at Issue.", "City/customer/mixed funding never silently changes Budget allocations or mixed customer contributions.", "City-funded Quotes have zero customer payable and prohibit payments/deposits.", "Funding mode and proposed contribution are immutable after Issue and locked while Draft payments or allocations remain active.", "Proposed, Awaiting acceptance and Accepted funding are distinct; declined/superseded Quotes are not confirmed customer funding."],
       enforcement: ["ProgramQuotes", "ProgramDataHealth", "Release Gate C"]
     },
     {
@@ -220,7 +220,7 @@
       criticality: "critical",
       state: "enforced",
       promise: "Operational sidebars use sanctioned surfaces only; compact, floating and undocked sidebar states cannot be activated.",
-      invariants: ["No loaded production source can create compact, floating or undocked sidebar state.", "No persisted preference can restore a retired sidebar mode.", "Normal full-size Planner, Costing and Quote Builder sidebars remain available."],
+      invariants: ["No loaded production source can create compact, floating or undocked sidebar state.", "No persisted preference can restore a retired sidebar mode.", "Normal full-size Planner, Costing and Quote Builder sidebars remain available.", "Icon rails use Register Action dimensions and established module SVGs; Rate Library spacing remains compact.", "Calculator source icons distinguish Calculator, Map and Planner; Job calendar precedes Delete and opens the exact Job sidebar.", "Escape closes only the topmost native or shared modal, restores opener focus and preserves drawer, active module, selection and background scroll.", "Selected Financial Year Budget form and all eight actions remain visible; unavailable actions are disabled, narrow rows overflow horizontally, and approved fields display immutable approval data."],
       enforcement: ["sidebar-architecture.spec.js", "Release Gate I"]
     },
     {
@@ -269,24 +269,24 @@
     },
     {
       id: "PC-019",
-      key: "REGISTER_DRAWER_GROWTH",
-      title: "Register drawers grow until the usable viewport boundary",
+      key: "UNIFIED_DRAWER_SCROLL",
+      title: "Every Register-row drawer shares one floor and scroll owner",
       version: 1,
       criticality: "critical",
       state: "pending-proof",
-      promise: "Register drawers retain intrinsic height until their visible floor reaches the viewport boundary, then scroll internally.",
-      invariants: ["Short records do not fill empty viewport.", "Long content remains reachable above a visible floor."],
-      enforcement: ["DrawerWorkspace.viewport", "drawer-viewport.spec.js", "Release Gate N"]
+      promise: "Every expanded row uses the same full-height 4px floor; its row header aligns below sticky headings and the outer table stays fixed while internal sections scroll.",
+      invariants: ["No module-specific floor exception.", "All rows remain in the DOM.", "Closing the last row restores the previous table position."],
+      enforcement: ["DrawerWorkspace.scroll", "drawer-scroll-ownership.spec.js", "Release Gate N"]
     },
-    { id: "PC-020", key: "PLANNER_TASK_MANAGEMENT", title: "Planner Task and Job lineage", version: 1, criticality: "critical", state: "pending-proof", promise: "Operational Planner Tasks create one canonical Draft Job before scheduling.", invariants: ["Inert Tasks have no delivery Job.", "Scheduling reuses the Planner Job."], enforcement: ["ProgramPlannerModel", "planner-draft-job.test.cjs", "Release Gate P"] },
+    { id: "PC-020", key: "PLANNER_TASK_MANAGEMENT", title: "Planner Task and Job lineage", version: 1, criticality: "critical", state: "pending-proof", promise: "An Operational Planner Task creates one canonical Draft Job through its explicit calendar action.", invariants: ["Reminder Tasks have no delivery Job.", "Task saves never create Jobs.", "Scheduling reuses the Planner Job."], enforcement: ["ProgramPlannerModel", "planner-draft-job.test.cjs", "Release Gate P"] },
     { id: "PC-021", key: "FINANCIAL_YEAR_CANON", title: "Financial year authority", version: 1, criticality: "critical", state: "pending-proof", promise: "Annual budgets are partitioned by owner and July–June financial year.", invariants: ["Years are consecutive YYYY-YY values.", "Owners never share a budget."], enforcement: ["ProgramBudget", "budget-model.test.cjs", "Release Gate O"] },
     { id: "PC-022", key: "ANNUAL_BUDGET_AUTHORITY", title: "Annual budget approval", version: 1, criticality: "critical", state: "pending-proof", promise: "One budget per owner and year has recorded approval and auditable changes.", invariants: ["Approved base is immutable.", "Adjustments are signed."], enforcement: ["ProgramBudget", "budget-model.test.cjs", "Release Gate O"] },
     { id: "PC-023", key: "BUDGET_ALLOCATION_LINEAGE", title: "Register allocation lineage", version: 1, criticality: "critical", state: "pending-proof", promise: "Register allocations retain their budget, owner, and year without requiring a Project.", invariants: ["Allocated totals cannot exceed approved funds.", "Projects project Register allocations."], enforcement: ["ProgramBudget", "budget-model.test.cjs", "Release Gate O"] },
     { id: "PC-024", key: "BUDGET_ADJUSTMENT_IMMUTABILITY", title: "Immutable budget history", version: 1, criticality: "critical", state: "pending-proof", promise: "Financial adjustments and charges are append-only with recorded actor and reason.", invariants: ["Past entries cannot be edited or deleted."], enforcement: ["ProgramBudget.assertTransition", "budget-model.test.cjs", "Release Gate O"] },
     { id: "PC-025", key: "FINANCIAL_PERIOD_CLOSURE", title: "Closed financial years", version: 1, criticality: "critical", state: "pending-proof", promise: "Closed years freeze writes and carry-forward requires review of verified unused funds.", invariants: ["Reopen is recorded.", "Carry-forward cannot exceed source balance."], enforcement: ["ProgramBudget", "budget-model.test.cjs", "Release Gate O"] },
-    { id: "PC-026", key: "JOB_ORIGIN_LINEAGE", title: "Three canonical Job origins", version: 1, criticality: "critical", state: "pending-proof", promise: "Calculator, Space Map, and Planner create traceable Jobs.", invariants: ["Planner and Map Jobs retain their source identities."], enforcement: ["ProgramPlannerModel", "ProgramCosting", "Release Gate P"] },
+    { id: "PC-026", key: "JOB_ORIGIN_LINEAGE", title: "Three canonical Job origins", version: 1, criticality: "critical", state: "pending-proof", promise: "Calculator, Space Map, and Planner create traceable Jobs.", invariants: ["Planner and Map Jobs retain their source identities.", "ProgramCosting createWork, recreateWorkJob and deleteWorkJob own Calculator and Map relationships.", "Stable operationId and geometry lineage make retries idempotent; distinct additions remain distinct.", "schedulerEnabled defaults on for Labour and Contractors, off otherwise; explicit flags affect future work only.", "Command-created Jobs have exactly one reciprocal source Costing Line in the same Project and owner.", "Creation and deletion persist atomically; Draft Jobs have no scheduling dates and confirmation reuses the Job.", "Job-only deletion suspends automatic recreation; deleting both records deliberate removal without deleting geometry."], enforcement: ["ProgramPlannerModel", "ProgramCosting", "Release Gate P"] },
     { id: "PC-027", key: "OPERATIONAL_TASK_PROMOTION", title: "Operational Planner Tasks", version: 1, criticality: "critical", state: "pending-proof", promise: "Explicit operational classification permits a Draft Planner Job.", invariants: ["Custom checklist Tasks stay inert until classified.", "Promotion is idempotent."], enforcement: ["ProgramPlannerModel", "planner-draft-job.test.cjs", "Release Gate P"] },
-    { id: "PC-028", key: "COSTING_AND_QUOTE_LINEAGE", title: "Deliberate costing and Quote inclusion", version: 1, criticality: "critical", state: "pending-proof", promise: "Planner Jobs are costed and quoted through explicit canonical actions.", invariants: ["Draft Job creation does not silently create costing or Quote Lines.", "Issued Quote snapshots stay immutable."], enforcement: ["ProgramCosting", "ProgramQuotes", "Release Gate Q"] }
+    { id: "PC-028", key: "COSTING_AND_QUOTE_LINEAGE", title: "Deliberate costing and Quote inclusion", version: 1, criticality: "critical", state: "pending-proof", promise: "Planner Jobs are costed and quoted through explicit canonical actions.", invariants: ["Draft Job creation does not silently create costing or Quote Lines.", "Issued Quote snapshots stay immutable.", "Project-owned Costing Lines may have no Job and remain visible in Calculator totals and Quotes.", "Existing aggregate Jobs, assigned lines and Planner Task ownership are preserved without conversion."], enforcement: ["ProgramCosting", "ProgramQuotes", "Release Gate Q", "canonical-work-governance.test.cjs"] }
   ]);
 
   var ISSUE_CONTRACTS = frozen({
@@ -410,8 +410,8 @@
       var mappedLines = lines.filter(function (line) { return text(line.sourceGeometryId) === text(geometry.id); });
       var operational = relatedJobs.length > 0 || mappedLines.length > 0 || text(geometry.syncState && geometry.syncState.code) === "synced";
       if (!operational) return; // Planning-only geometry is explicitly valid.
-      if (mappedJobs.length !== 1 || relatedJobs.length !== 1) violations.push(violation("PC-005", "CONTRACT_GEOMETRY_JOB_CARDINALITY", "geometries", geometry.id, "id", relatedJobs.map(function (item) { return item.id; }), "Promoted Work Geometry must have exactly one canonical space-map Job."));
-      if (mappedLines.length !== 1) violations.push(violation("PC-005", "CONTRACT_GEOMETRY_COST_CARDINALITY", "geometries", geometry.id, "id", mappedLines.map(function (item) { return item.id; }), "Promoted Work Geometry must have exactly one mapped Costing Line."));
+      if (mappedJobs.length > 1 || relatedJobs.length !== mappedJobs.length || mappedJobs.length === 0 && !(mappedLines.length === 1 && (mappedLines[0].workCommandVersion === 1 || mappedLines[0].jobCreationSuspended)) && !geometry.workRemoved) violations.push(violation("PC-005", "CONTRACT_GEOMETRY_JOB_CARDINALITY", "geometries", geometry.id, "id", relatedJobs.map(function (item) { return item.id; }), "Promoted Work Geometry requires its exact Job unless costing-only, deliberately suspended or removed."));
+      if (mappedLines.length !== 1 && !geometry.workRemoved) violations.push(violation("PC-005", "CONTRACT_GEOMETRY_COST_CARDINALITY", "geometries", geometry.id, "id", mappedLines.map(function (item) { return item.id; }), "Promoted Work Geometry must have exactly one mapped Costing Line."));
       if (mappedJobs.length === 1 && mappedLines.length === 1) {
         var job = mappedJobs[0], line = mappedLines[0];
         if (job.projectId !== geometry.projectId || job.owner !== geometry.owner || line.projectId !== geometry.projectId || line.owner !== geometry.owner || line.jobId !== job.id) {

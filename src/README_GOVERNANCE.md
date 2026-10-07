@@ -37,3 +37,6 @@ Run `npm run test:release` to execute Node tests followed by browser tests. Any 
 - Release gates I–L covering source retirement, Location/Polygon UI, Scheduler routing and calendar signalling
 
 The standalone viewer retains a single section-navigation sidebar with scroll-spy and viewport-follow behaviour.
+## Conservative test execution
+
+Project changes use impact-scoped verification by default: test the changed module(s), then the directly affected browser or cross-module boundary. Reserve the complete test regime for broad, high-risk, schema/storage/migration, shared-contract, security, release-gate, or release-candidate changes. Every change record must state the targeted tests run, results, and why broader suites were or were not required.

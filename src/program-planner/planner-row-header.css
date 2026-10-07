@@ -1,0 +1,107 @@
+/* Register summary row: compact factual columns, with an unbroken shortcut rail. */
+.program-register-layout .program-table-wrap,
+.program-register-table,
+.program-register-table tbody { overflow-anchor: none; }
+.program-register-table th,
+.program-register-table td { padding-inline: 8px !important; }
+.program-register-table__status-col, .program-register-table__status-cell { width: 104px !important; max-width: 104px !important; }
+.program-register-table__received-col, .program-register-table__received-cell { width: 88px !important; max-width: 88px !important; white-space: nowrap; }
+.program-register-table__reference-col, .program-register-table__reference-cell { width: 92px !important; max-width: 92px !important; white-space: nowrap; }
+.program-register-table__project-col, .program-register-table__project-cell { width: 104px !important; max-width: 104px !important; }
+.program-register-table__budget-col, .program-register-table__budget-cell { width: 92px !important; max-width: 92px !important; text-align: left !important; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.program-register-table__actions-col, .program-register-table__actions-cell { width: 286px !important; min-width: 286px !important; padding: 6px 8px !important; overflow: visible !important; text-align: right; }
+.program-register-table__actions-cell .program-register-mini-toolbar { display: inline-flex !important; flex-wrap: nowrap !important; align-items: center; justify-content: flex-end; gap: 8px !important; width: max-content !important; min-width: 0 !important; height: 46px !important; min-height: 46px !important; max-height: none !important; margin-left: auto; box-sizing: border-box; padding: 8px 10px !important; overflow: visible !important; background: var(--uos-surface, #fff) !important; }
+.program-register-table__actions-cell .program-register-mini-toolbar > button { flex: 0 0 auto !important; }
+.program-register-table { --register-shortcut-panel-width: 278px; }
+.program-register-actions-label { display: block; width: var(--register-shortcut-panel-width); margin-left: auto; padding-left: 10px; box-sizing: border-box; text-align: left; }
+.program-register-table__actions-cell .program-register-mini-toolbar { width: var(--register-shortcut-panel-width) !important; }
+.program-register-table__actions-cell .program-register-mini-toolbar > button { width: 30px; min-width: 30px; height: 30px; }
+#program-app .program-register-mini-toolbar button[data-shortcut-state="inactive"] {
+  opacity: .45 !important;
+  background: #f8fafc !important;
+  color: var(--uos-text-muted, #94a3b8) !important;
+  border: 1px solid var(--panel-border, #cbd5e1) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
+#program-app .program-register-mini-toolbar button[data-shortcut-state="unused"],
+#program-app .program-register-mini-toolbar button[data-shortcut-state="in-use"] {
+  color: var(--register-shortcut-owner) !important;
+  border: 1px solid var(--register-shortcut-owner) !important;
+  border-radius: 4px;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+#program-app .program-register-mini-toolbar button[data-shortcut-state="unused"] { background: #fff !important; }
+#program-app .program-register-mini-toolbar button[data-shortcut-state="in-use"] { background: var(--register-shortcut-owner-hover) !important; border-width: 2px !important; }
+#program-app .program-register-mini-toolbar button[data-shortcut-state]:not(:disabled):hover { background: var(--register-shortcut-owner-hover) !important; color: var(--register-shortcut-owner) !important; border-color: var(--register-shortcut-owner) !important; }
+
+/* Match the Planner task rail to the 30px Register shortcuts and 46px panel. */
+.planner-table-wrap {
+  box-sizing: border-box;
+  padding-inline-end: 4px;
+}
+.planner-checklist-wrap { --planner-action-background: #047857; }
+.planner-checklist-wrap[data-owner="EVT"] { --planner-action-background: #0369a1; }
+#program-app .planner-btn-add-item {
+  background: var(--planner-action-background, #047857) !important;
+  border-color: var(--planner-action-background, #047857) !important;
+}
+#program-app .planner-table thead th,
+#program-app .planner-table .planner-cat-header-row > th,
+#program-app .planner-table .planner-cat-header-row > td,
+#program-app .planner-table .planner-item-row > td { height: 46px; box-sizing: border-box; }
+#program-app .planner-table .planner-cat-header-row > th,
+#program-app .planner-table .planner-cat-header-row > td {
+  background: var(--planner-action-background, #047857) !important;
+  color: #fff !important;
+  font-weight: 900;
+  border-top-color: transparent !important;
+  border-bottom-color: transparent !important;
+}
+#program-app .planner-table td.planner-col-action {
+  justify-content: flex-end !important;
+  padding-block: 8px !important;
+  padding-inline-end: 8px !important;
+}
+#program-app .planner-table .planner-task-type-group {
+  margin: 0 8px 0 0 !important;
+  padding-right: 8px !important;
+  border-right: 1px solid var(--uos-border, #dbe3ea);
+}
+#program-app .planner-table .planner-task-maintenance-actions { margin-left: 0 !important; gap: 8px; }
+#program-app .planner-table .planner-task-type-group .planner-task-path,
+#program-app .planner-table .planner-maintenance-icon {
+  box-sizing: border-box;
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+}
+
+/* Only the Scheduler deletion dialog uses the compact one-row action layout. */
+.uos-modal--scheduler-delete {
+  width: min(620px, 100%);
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+}
+.uos-modal--scheduler-delete .uos-modal__head { grid-column: 1 / -1; }
+.uos-modal--scheduler-delete .uos-modal__body {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 14px 8px 14px 20px;
+}
+.uos-modal--scheduler-delete .uos-modal__foot {
+  justify-content: flex-end;
+  padding: 14px 20px 14px 8px;
+  border: 0;
+  background: var(--uos-surface, #fff);
+}
+.scheduler-delete-task-option { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
+.scheduler-delete-task-option input { margin: 0; }
+@media (max-width: 560px) {
+  .uos-modal--scheduler-delete { grid-template-columns: minmax(0, 1fr); }
+  .uos-modal--scheduler-delete .uos-modal__body { padding-bottom: 4px; }
+  .uos-modal--scheduler-delete .uos-modal__foot { padding-top: 4px; }
+}

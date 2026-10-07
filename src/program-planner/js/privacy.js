@@ -8,6 +8,7 @@
   var memoryState = true;
 
   var APPLICANT_CONTACT_FIELDS = {
+    quoteaddress: true,
     email: true,
     emailaddress: true,
     applicantemail: true,

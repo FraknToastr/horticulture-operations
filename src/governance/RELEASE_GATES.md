@@ -137,17 +137,17 @@ Acceptance proof across modules:
 - the last content/control remains reachable above the visible floor;
 - resizing the viewport recomputes the constraint without leaving stale off-screen geometry.
 
-## Gate N — Register drawer adaptive growth
+## Gate N — Unified Register-row floor and scroll ownership
 **Critical.**
 
 Acceptance proof:
-1. A short Register drawer uses content-driven height rather than unnecessarily filling the viewport.
-2. Increasing Notes/content grows the drawer downward while sufficient viewport space remains.
-3. Growth stops when the thick drawer floor reaches the usable viewport bottom.
-4. Further content growth does not move the floor off-screen.
-5. Excess Register content becomes internally scrollable.
-6. Reducing content allows the drawer to shrink again where appropriate.
-7. Opening/closing nested content or changing viewport height recomputes the available height correctly.
+1. Register, Planner, Space Map, Calculator, Scheduler and Quotes share the same full-height row drawer and 4px floor 4px above the usable viewport bottom.
+2. Opening any row places its header directly beneath the sticky column headings without removing other rows from the DOM.
+3. While any row is open, wheel, touch, keyboard and scroll chaining cannot move the outer Register table; internal regions remain scrollable.
+4. Closing the final row restores the pre-open outer-table scroll position.
+5. Switching modules, editing content, creating records and resizing the viewport do not move the floor or hide rows.
+6. Planner's checklist reaches the drawer edges without an inner rounded frame, leaving the right scrollbar gutter usable.
+7. Space Map and Scheduler sidebar dividers match Calculator's 4px green divider; Budget remains full-page with a hard floor and internally scrolling tables.
 
 Prepared regression acceptance additionally requires repeated Preliminaries/Margin saves inside NSA and Event Resource Calculator drawers to reuse the established viewport cap, preserve outer and inner scroll positions, keep Rate Items/assigned lines and the totals footer visible, and show percentage-labelled AUD breakdown amounts. Evidence remains **NOT RUN / awaiting explicit verification approval**.
 
@@ -179,3 +179,17 @@ Register carry-forward presentation follows the same authority boundary: keep th
 **Critical / RELEASE BLOCKER until implemented and proven.**
 
 Proof must cover all three exact origins: Planner Task, Calculator work, and Space Map geometry. Each Job retains immutable source ID and same-owner Register/Project lineage through save, import and recovery. An Inert Task creates no Job. Creating or promoting an Operational Task creates or resolves one Draft Planner Job, including on repeat actions; it does not schedule, cost or quote the Job. Explicit scheduling changes only Scheduler-owned state of that Job. Explicit costing with a valid basis creates or refreshes a snapshot under the same Job. Draft Quote inclusion is deliberate, remains traceable to Job and Costing Line, and cannot bypass Quote Readiness; issued history remains immutable. Legacy `manual` or ambiguous Job origins require review rather than invented lineage.
+## Test selection and evidence economy
+
+Release evidence must be risk-based. A bounded implementation change may use targeted tests for the affected module(s) plus the smallest relevant cross-module/browser check. The evidence record must name the tests, show their result, and state the untested boundary, if any.
+
+The complete Node/browser release regime remains mandatory for release candidates and for changes involving shared contracts, schema or storage format, migrations, persistence/recovery, security, build/runtime configuration, or multiple release gates. A targeted test result cannot close a gate whose boundary was not exercised, and test conservation is not a waiver of Critical-gate proof.
+
+## Register shortcut acceptance
+
+Focused proof must cover NSA and EVT inactive/unused/in-use states, Project-only Scheduler access, untouched generated tasks versus saved Planner changes, current-module re-entry, correct record context, and absence of navigation-created records. DOM geometry checks must prove Budget heading/value alignment and Actions heading/panel alignment with all buttons contained. Include affected drawer-context, scroll-ownership and floor regressions. These checks require no screenshot snapshots; bounded shortcut changes use targeted module and cross-module evidence under the conservative test rule.
+
+
+## Quote funding and customer agreement proof
+
+Run `node --test tests/quote-funding.test.cjs` and `playwright test tests/browser/quote-funding.spec.js`. Both owners must demonstrate all funding modes, costing-only Labour, shortfalls/surpluses, exclusion of City allocation in Customer mode, retained/manual/suggested contributions, reload/refresh/revisions, Issue before acceptance, agreement states, payment locks/reversal, City payment prohibition, legacy preservation, and preview/PDF wording and amounts.

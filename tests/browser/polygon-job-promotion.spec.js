@@ -118,6 +118,7 @@ test("PC-005 C3: Turfing polygon on fresh canonical Project resolves RATE-TURFIN
       jobSourceKind: job ? job.sourceKind : "",
       jobProjectId: job ? job.projectId : "",
       hasLine: Boolean(line),
+      lineDescription: line ? line.description : "",
       lineRateItemId: line ? line.rateItemId : "",
       lineUnit: line ? line.unit : "",
       lineUnitRate: line ? line.unitRate : 0,
@@ -134,7 +135,7 @@ test("PC-005 C3: Turfing polygon on fresh canonical Project resolves RATE-TURFIN
   expect(lineage.hasJob).toBe(true);
   expect(lineage.jobSourceKind).toBe("space-map");
   expect(lineage.jobProjectId).toBe(projId);
-  expect(lineage.jobTitle).toMatch(/^Turfing - /);
+  expect(lineage.jobTitle).toBe(lineage.lineDescription);
 
   expect(lineage.hasLine).toBe(true);
   expect(lineage.lineRateItemId).toBe("RATE-TURFING");
@@ -217,7 +218,7 @@ test("PC-005 C3: Unknown work type does not silently default to turfing and bloc
   await expect(createJobBtn).toBeVisible();
   await expect(createJobBtn).toBeDisabled();
   await expect(createJobBtn).not.toHaveClass(/is-created/);
-  await expect(createJobBtn).toHaveAttribute("title", "Select a valid work type before generating a Job");
+  await expect(createJobBtn).toHaveAttribute("data-uos-tooltip", "Select a valid work type before generating a Job");
 
   // 7. Verify workspace geometry still has no falsely inferred turfing value and no Job exists
   const preCheck = await child.evaluate(({ geometryId }) => {
@@ -239,7 +240,7 @@ test("PC-005 C3: Unknown work type does not silently default to turfing and bloc
 
   // 9. Verify Create Job button transitions to ENABLED
   await expect(createJobBtn).toBeEnabled();
-  await expect(createJobBtn).toHaveAttribute("title", "Generate operational Job and Costing Line from this polygon");
+  await expect(createJobBtn).toHaveAttribute("data-uos-tooltip", "Generate operational Job and Costing Line from this polygon");
 
   // 10. Click Create Job
   await createJobBtn.click();
@@ -259,6 +260,7 @@ test("PC-005 C3: Unknown work type does not silently default to turfing and bloc
       hasJob: Boolean(job),
       jobTitle: job ? job.title : "",
       hasLine: Boolean(line),
+      lineDescription: line ? line.description : "",
       lineRateItemId: line ? line.rateItemId : "",
       lineUnitRate: line ? line.unitRate : 0,
       geomSyncState: geom && geom.syncState ? geom.syncState.code : "",
@@ -267,7 +269,7 @@ test("PC-005 C3: Unknown work type does not silently default to turfing and bloc
   }, { geometryId: geomId, projectId: projId });
 
   expect(postCheck.hasJob).toBe(true);
-  expect(postCheck.jobTitle).toMatch(/^Turfing - /);
+  expect(postCheck.jobTitle).toBe(postCheck.lineDescription);
   expect(postCheck.hasLine).toBe(true);
   expect(postCheck.lineRateItemId).toBe("RATE-TURFING");
   expect(postCheck.lineUnitRate).toBe(45);

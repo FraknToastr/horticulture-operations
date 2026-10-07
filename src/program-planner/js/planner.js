@@ -94,19 +94,32 @@
     selectedChecklistItemId: ""
   };
 
-  function text(value) { return value == null ? "" : String(value).trim(); }
+function text(value) { return value == null ? "" : String(value).trim(); }
+function displayDate(value) {
+  var formatter = typeof window !== "undefined" && window.UOS && window.UOS.imports && window.UOS.imports.formatDate;
+  return formatter ? formatter(value) : (text(value) || "—");
+}
+  function sessionOperator() { try { return text(sessionStorage.getItem("uos.program.statusOperator")); } catch (error) { return ""; } }
+  function rememberSessionOperator(value) { try { sessionStorage.setItem("uos.program.statusOperator", text(value)); } catch (error) {} }
   function esc(value) { return text(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-  function one(selector) { return typeof document === "undefined" ? null : document.querySelector(selector); }
-  function all(selector) { return typeof document === "undefined" ? [] : Array.prototype.slice.call(document.querySelectorAll(selector)); }
+  var plannerRoot = null;
+  // Register rerenders briefly detach the mounted module before remounting it.
+  // Keep rendering the same Planner root while it is outside the document.
+  function one(selector) { return typeof document === "undefined" ? null : document.querySelector(selector) || plannerRoot && plannerRoot.querySelector(selector); }
+  function all(selector) {
+    if (typeof document === "undefined") return [];
+    var nodes = Array.prototype.slice.call(document.querySelectorAll(selector));
+    if (plannerRoot && !plannerRoot.isConnected) nodes = nodes.concat(Array.prototype.slice.call(plannerRoot.querySelectorAll(selector)));
+    return nodes;
+  }
 
   function getWorkspace() {
-    if (state.workspace) return state.workspace;
     var app = typeof window !== "undefined" && window.UOS && window.UOS.ProgramApp;
     if (app) {
       if (typeof app.getWorkspace === "function") return app.getWorkspace();
       if (typeof app.workspace === "function") return app.workspace();
     }
-    return null;
+    return state.workspace || null;
   }
 
   function getProjectsFromWorkspace() {
@@ -169,12 +182,13 @@
       : [];
     var canonical = {};
     canonicalTasks.slice().sort(function (a, b) { return Number(a.sortOrder || 0) - Number(b.sortOrder || 0); }).forEach(function (task) {
+      var taskState = window.UOS.ProgramPlannerModel.taskState(ws, task);
       canonical[task.id] = {
         id: task.id, templateKey: task.templateKey || task.legacyChecklistId || "", title: task.title || "",
         section: task.section || task.category || "", description: task.description || "", sortOrder: task.sortOrder,
-        status: window.UOS && window.UOS.ProgramStatus ? window.UOS.ProgramStatus.labelFor("task", task.status) : (task.status || "Not Started"), owner: task.assigneeId || "Not assigned", due: task.dueDate || "",
-        notes: task.notes || "", jobId: task.jobId || task.schedulerJobId || null,
-        schedulerJobId: task.schedulerJobId || null, operational: task.operational === true,
+ status: window.UOS && window.UOS.ProgramStatus ? window.UOS.ProgramStatus.labelFor("task", task.status) : (task.status || "Not Started"), owner: task.assigneeId || "Not assigned", due: displayDate(task.dueDate),
+ notes: task.notes || "", jobId: taskState.job ? taskState.job.id : null,
+        schedulerJobId: taskState.scheduled ? taskState.job.id : null, operational: task.operational === true,
         schedulable: task.schedulable === true, deleted: task.suppressed === true
       };
     });
@@ -450,7 +464,7 @@
     var topNavHtml = '<div class="planner-nav-header">' +
       '<div class="planner-nav-title" style="display:flex;align-items:center;gap:10px;">' +
         '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;color:var(--program-owner-strong);stroke-width:2;flex:0 0 auto;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
-        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--uos-text);">Project Checklists</h3>' +
+        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--uos-text);">Project Checklist</h3>' +
       '</div>' +
       '<div class="planner-nav-actions">' +
         '<span class="planner-duplicate-action" data-uos-tooltip="' + (state.selectedChecklistItemId ? 'Duplicate selected checklist row' : 'Select a checklist row to enable Duplicate') + '" title="' + (state.selectedChecklistItemId ? 'Duplicate selected checklist row' : 'Select a checklist row to enable Duplicate') + '"' + (state.selectedChecklistItemId ? '' : ' tabindex="0"') + '>' +
@@ -508,24 +522,15 @@
               '<button type="button" class="planner-chevron-btn" data-toggle-expand="' + it.id + '" title="Toggle description"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
             '</div>' +
           '</td>' +
-          '<td class="planner-col-status">' +
-            '<div class="planner-status-wrapper">' +
-              '<span class="planner-status-dot ' + dotColorClass + '"></span>' +
-              '<select class="planner-table-select" data-checklist-status="' + it.id + '">' + statusOptionsHtml + '</select>' +
-            '</div>' +
-          '</td>' +
-          '<td class="planner-col-owner">' +
-            '<select class="planner-table-select" data-checklist-owner="' + it.id + '">' + ownerOptionsHtml + '</select>' +
-          '</td>' +
-          '<td class="planner-col-due">' +
-            '<input type="date" class="planner-date-input" data-checklist-due="' + it.id + '" value="' + esc(itemSaved.due || "") + '" placeholder="dd/mm/yyyy">' +
-          '</td>' +
-          '<td class="planner-col-notes">' +
-            '<input type="text" class="planner-notes-input" data-checklist-notes="' + it.id + '" value="' + esc(itemSaved.notes || "") + '" placeholder="">' +
-          '</td>' +
+            '<td class="planner-col-status"><span class="planner-status-summary"><span class="planner-status-dot ' + dotColorClass + '"></span>' + esc(itemSaved.status) + '</span></td>' +
+            '<td class="planner-col-owner">' + esc(itemSaved.owner || "Not assigned") + '</td>' +
+            '<td class="planner-col-due">' + esc(itemSaved.due || "—") + '</td>' +
+            '<td class="planner-col-notes"><span class="planner-notes-summary">' + esc(itemSaved.notes || "—") + '</span></td>' +
           '<td class="planner-col-action">' +
-            (customTask && !linkedJob ? '<button type="button" class="planner-schedule-btn" data-planner-operational="' + esc(taskEntityId) + '" aria-pressed="' + String(itemSaved.operational) + '" title="' + (itemSaved.operational ? 'Unmark operational task' : 'Mark as an operational task') + '">' + (itemSaved.operational ? 'Operational' : 'Mark operational') + '</button>' : '') +
-            (schedulable ? '<button type="button" class="planner-schedule-btn' + (scheduled ? ' is-scheduled' : '') + '" data-planner-draft-job="' + esc(taskEntityId) + '" aria-label="' + (linkedJob ? 'Open Planner job for ' : 'Create draft job for ') + esc(it.title) + '" title="' + (linkedJob ? 'Open Planner job' : 'Create Draft Job') + '">' + (scheduled ? 'Scheduled' : linkedJob ? 'Open draft job' : 'Create Draft Job') + '</button>' : '') +
+          (schedulable ? (scheduled
+            ? '<button type="button" class="planner-task-path is-scheduled" data-planner-open-scheduled-job="' + esc(itemSaved.schedulerJobId) + '" data-planner-scheduled-project="' + esc(pId) + '">Scheduled Job</button>'
+: (linkedJob ? '<button type="button" class="planner-task-path is-linked-job" data-planner-open-scheduled-job="' + esc(itemSaved.jobId) + '" data-planner-scheduled-project="' + esc(pId) + '">Draft Planner Job</button>' : '<button type="button" class="planner-task-path" data-planner-draft-job="' + esc(taskEntityId) + '" data-planner-scheduled-project="' + esc(pId) + '">Operational</button>')) : '<span class="planner-task-path">Inert</span>') +
+            (taskEntityId ? '<button type="button" class="planner-schedule-btn" data-planner-edit-task="' + esc(taskEntityId) + '">Edit</button>' : '') +
             '<button type="button" class="planner-delete-btn" data-delete-item="' + it.id + '" title="Delete item">×</button>' +
           '</td>' +
         '</tr>' + descRowHtml;
@@ -631,6 +636,23 @@
     }, { command: "Planner.persistViewState" }).catch(function () { return null; });
   }
 
+  function openPlannerJob(jobId, projectId) {
+    var app = window.UOS.ProgramApp;
+    return app.navigate("scheduler").then(function () {
+      return app.updateWorkspace(function (candidate) {
+        candidate.workspace.destination = "scheduler";
+        candidate.workspace.selectedProjectId = projectId;
+        candidate.workspace.selectedEntityId = jobId;
+        candidate.workspace.scheduler = candidate.workspace.scheduler || {};
+        candidate.workspace.scheduler.selectedProjectId = projectId;
+        candidate.workspace.scheduler.selectedId = jobId;
+        candidate.workspace.scheduler.detail = true;
+        candidate.workspace.scheduler.inspectorMode = "detail";
+        return candidate;
+      }, { command: "Planner.openScheduler" });
+    }).then(function () { return window.UOS.ProgramSchedulerUI.selectJob(jobId); });
+  }
+
   function applyPlannerModel(action, taskId) {
     var app = window.UOS && window.UOS.ProgramApp;
     var plannerModel = window.UOS && window.UOS.ProgramPlannerModel;
@@ -642,11 +664,8 @@
         : plannerModel[action](candidate, state.selectedProjectId, taskId, {});
       return outcome && outcome.workspace ? outcome.workspace : outcome;
     }).then(function (saved) {
-      if (action === "createDraftJob" && saved) {
-        var jobId = outcome && outcome.job && outcome.job.id;
-        if (jobId) {
-          return app.updateWorkspace(function (candidate) { candidate.workspace = candidate.workspace || {}; candidate.workspace.destination = "scheduler"; candidate.workspace.selectedEntityId = jobId; candidate.workspace.scheduler = candidate.workspace.scheduler || {}; candidate.workspace.scheduler.selectedId = jobId; return candidate; }).then(function () { app.navigate("scheduler"); return saved; });
-        }
+      if (action === "createDraftJob" && saved && outcome && outcome.job) {
+        return openPlannerJob(outcome.job.id, state.selectedProjectId).then(function () { return saved; });
       }
       return saved;
     }).catch(function (error) {
@@ -655,24 +674,263 @@
     });
   }
 
-  function createPlannerTask() {
+  function plannerTask(taskId) {
+    var ws = getWorkspace();
+    return ws && ws.entities && (ws.entities.tasks || []).find(function (task) {
+      return task.id === taskId && task.projectId === state.selectedProjectId;
+    }) || null;
+  }
+
+  function calendarGuide() {
+    function icon(tick) {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M3 10h18' + (tick ? 'M8 16l2.5 2.5L16.5 13' : '') + '"></path></svg>';
+    }
+    var edit = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"></path><path d="m13.5 6.5 4 4"></path></svg>';
+    var reminder = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="1"></circle><circle cx="6" cy="12" r="1"></circle><circle cx="6" cy="17" r="1"></circle><path d="M10 7h8M10 12h8M10 17h8"></path></svg>';
+    return '<div class="planner-guide-column"><h3>Edit task</h3>' +
+      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon planner-guide-edit" aria-hidden="true">' + edit + '</span><span>Edit task details, purpose and status.</span></div>' +
+      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" aria-hidden="true">' + reminder + '</span><span>Reminder task</span></div>' +
+      '<div class="planner-calendar-guide__row planner-guide-conversion"><span class="planner-guide-symbols" aria-hidden="true"><span class="planner-calendar-guide__icon">' + reminder + '</span><span class="planner-guide-arrow">→</span><span class="planner-calendar-guide__icon">' + icon(false) + '</span></span><span>Any Reminder task can have its purpose changed to “Add to Scheduler”, allowing it to be added to the job and calendar system.</span></div></div>' +
+      '<div class="planner-guide-column"><h3>Scheduler</h3>' +
+      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" aria-hidden="true">' + icon(false) + '</span><span>Click to schedule a job</span></div>' +
+      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon is-linked-job" aria-hidden="true">' + icon(false) + '</span><span>Job Schedule not finalised</span></div>' +
+      '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon is-linked-job" aria-hidden="true">' + icon(true) + '</span><span>Job Schedule finalised</span></div></div>';
+  }
+
+ function syncTaskReason(form) {
+ var task = plannerTask(form.getAttribute("data-task-id")), status = window.UOS.ProgramStatus;
+ var required = Boolean(task && status.reasonRequired("task", status.codeFor("task", task.status), status.codeFor("task", form.elements.status.value)));
+ form.querySelector("[data-planner-task-reason]").hidden = !required;
+ form.elements.reason.disabled = !required;
+ form.elements.reason.required = required;
+ return required;
+ }
+ function renderTaskHistory(form, task) {
+ var history = form.querySelector("[data-planner-task-history]");
+ var events = task ? (getWorkspace().entities.statusEvents || []).filter(function (event) { return event.entityId === task.id; }) : [];
+ var entries = events.filter(function (event) { return event.action !== "Planner.resetTask"; }).concat(task && task.plannerResetEvents || []);
+ entries.sort(function (a, b) { return text(b.timestamp).localeCompare(text(a.timestamp)); });
+ history.hidden = !task || !entries.length;
+ history.innerHTML = '<summary>Task history</summary><ol>' + entries.map(function (entry) {
+ var transition = entry.fromStatus ? window.UOS.ProgramStatus.labelFor("task", entry.fromStatus) + ' → ' + window.UOS.ProgramStatus.labelFor("task", entry.toStatus) : window.UOS.ProgramStatus.labelFor("task", entry.toStatus);
+ var heading = entry.action === "Task reset" ? "Task reset" + (entry.fromStatus !== entry.toStatus ? " — " + transition : "") : transition;
+ var date = new Date(entry.timestamp), displayTime = Number.isNaN(date.getTime()) ? entry.timestamp : date.toLocaleString("en-AU", { dateStyle: "medium", timeStyle: "short" });
+ var name = text(entry.taskTitle);
+ var nameLabel = name ? 'Task name: ' + name : 'Current task name: ' + text(task && task.title);
+ var restoredName = text(entry.restoredTaskTitle);
+ return '<li><p class="planner-task-history__name"><strong>' + esc(nameLabel) + '</strong></p>' + (restoredName ? '<p>Restored task name: ' + esc(restoredName) + '</p>' : '') + '<strong>' + esc(heading) + '</strong><p>' + esc(entry.actor || "Status engine") + ' · <time datetime="' + esc(entry.timestamp) + '">' + esc(displayTime) + '</time></p>' + (entry.reason ? '<p>' + esc(entry.reason) + '</p>' : '') + '</li>';
+ }).join('') + '</ol>';
+ }
+ function stageTaskReset(form) {
+ var task = plannerTask(form.getAttribute("data-task-id"));
+ if (!task) return;
+ var values = window.UOS.ProgramPlannerModel.resetValues(task);
+ form.dataset.resetTask = "true";
+ delete form.dataset.deleteLinkedJob;
+ ["title", "description", "section", "assigneeId", "dueDate", "notes"].forEach(function (field) {
+ var value = values[field] || (field === "assigneeId" ? "Not assigned" : "");
+ if (field === "section" && !Array.from(form.elements.section.options).some(function (option) { return option.value === value; })) form.elements.section.add(new Option(value, value));
+ form.elements[field].value = value;
+ });
+ form.elements.classification.value = values.operational ? "operational" : "inert";
+ form.elements.status.value = window.UOS.ProgramStatus.labelFor("task", values.status);
+ form.elements.reason.value = "";
+ form.querySelector("[data-planner-task-reset-notice]").hidden = false;
+ form.querySelector("[data-planner-task-error]").hidden = true;
+ syncTaskReason(form);
+ if (form.elements.reason.required) form.elements.reason.focus();
+ }
+ function confirmTaskJobDeletion(form, resetting) {
+ var panel = form.querySelector("[data-planner-task-delete-confirm]"), dialog = form.closest("dialog");
+ var submit = form.querySelector('button[value="save"]'), reset = form.querySelector("[data-planner-task-reset]");
+ panel.querySelector("h3").textContent = resetting ? "Reset task and delete Job?" : "Change to reminder item?";
+ panel.querySelector("p").textContent = "This deletes the linked Planner Job and its related draft work. Task history will be retained. Protected delivery or financial history will block the change.";
+ panel.hidden = false;
+ submit.disabled = true;
+ reset.disabled = true;
+ var remove = panel.querySelector("[data-planner-task-confirm-delete]"), keep = panel.querySelector("[data-planner-task-keep-job]");
+ panel.scrollIntoView({ block: "nearest" });
+ keep.focus();
+ return new Promise(function (resolve) {
+ function finish(confirmed) {
+ panel.hidden = true;
+ submit.disabled = false;
+ reset.disabled = false;
+ remove.removeEventListener("click", yes);
+ keep.removeEventListener("click", no);
+ dialog.removeEventListener("close", no);
+ resolve(confirmed);
+ }
+ function yes() { finish(true); }
+ function no() { finish(false); }
+ remove.addEventListener("click", yes);
+ keep.addEventListener("click", no);
+ dialog.addEventListener("close", no);
+ });
+ }
+ function ensureTaskEditor() {
+    var dialog = one("[data-planner-task-dialog]");
+    if (dialog) return dialog;
+    dialog = document.createElement("dialog");
+    dialog.className = "program-dialog planner-task-dialog";
+    dialog.setAttribute("data-planner-task-dialog", "");
+    dialog.innerHTML = '<form method="dialog" class="planner-task-editor" data-planner-task-form>' +
+      '<header class="planner-task-editor__head"><div><p class="uos-eyebrow">Governed Planner task</p><h2 data-planner-task-dialog-title>Task editor</h2></div>' +
+ '<p class="planner-task-reset-pill" data-planner-task-reset-notice role="status" hidden>Original values restored for review. Save task to apply the reset.</p>' +
+ '<div class="planner-task-editor__head-actions"><button type="button" class="uos-button uos-button--secondary" data-planner-task-reset>Reset</button><button type="button" class="program-dialog__close" data-planner-task-cancel aria-label="Close task editor">×</button></div></header>' +
+      '<div class="planner-task-editor__body">' +
+      '<label class="uos-field planner-task-editor__wide"><span>Title</span><input class="uos-input" name="title" required></label>' +
+      '<label class="uos-field planner-task-editor__wide"><span>Description</span><textarea class="uos-input" name="description" rows="3" required></textarea></label>' +
+      '<label class="uos-field"><span id="planner-task-section-label">Section</span><select class="uos-select" name="section" aria-labelledby="planner-task-section-label" required></select></label>' +
+      '<label class="uos-field"><span id="planner-task-purpose-label">Task Purpose</span><select class="uos-select" name="classification" aria-labelledby="planner-task-purpose-label"><option value="inert">Reminder Task</option><option value="operational">Add to Scheduler</option></select></label>' +
+      '<label class="uos-field"><span>Status</span><select class="uos-select" name="status"></select></label>' +
+      '<label class="uos-field"><span>Session operator</span><input class="uos-input" name="operator" autocomplete="name" placeholder="Required when status changes"></label>' +
+      '<label class="uos-field"><span>Assignee</span><select class="uos-select" name="assigneeId"></select></label>' +
+      '<label class="uos-field"><span>Due date</span><input class="uos-input" type="date" name="dueDate"></label>' +
+ '<label class="uos-field planner-task-editor__wide" data-planner-task-reason hidden><span>Reason for status change</span><textarea class="uos-input" name="reason" rows="2" disabled></textarea></label>' +
+      '<label class="uos-field planner-task-editor__wide"><span>Notes</span><textarea class="uos-input" name="notes" rows="3"></textarea></label>' +
+      '<section class="planner-task-editor__job planner-task-editor__wide" data-planner-task-job aria-label="Scheduler calendar guide">' + calendarGuide() + '</section>' +
+ '<details class="planner-task-history planner-task-editor__wide" data-planner-task-history hidden aria-label="Task history"></details>' +
+  '<section class="planner-task-delete-confirm planner-task-editor__wide" data-planner-task-delete-confirm hidden aria-label="Confirm linked Job deletion"><h3></h3><p></p><div><button type="button" class="uos-button uos-button--secondary" data-planner-task-keep-job>Keep Job</button><button type="button" class="uos-button uos-button--danger" data-planner-task-confirm-delete>Delete Job and continue</button></div></section>' +
+ '</div><p class="program-form-error" data-planner-task-error hidden></p>' +
+      '<footer class="planner-task-editor__actions"><button type="button" class="uos-button uos-button--secondary" data-planner-task-cancel>Cancel</button>' +
+      '<button type="submit" class="uos-button uos-button--primary" value="save">Save task</button></footer></form>';
+ document.body.appendChild(dialog);
+ dialog.addEventListener("change", function (event) { if (event.target.name === "status") syncTaskReason(event.target.form); });
+ dialog.querySelector("[data-planner-task-reset]").addEventListener("click", function () { stageTaskReset(dialog.querySelector("form")); });
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      dialog.close();
+    });
+    dialog.addEventListener("cancel", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      dialog.close();
+    });
+    dialog.addEventListener("close", function () {
+      var opener = dialog._plannerOpener;
+      dialog._plannerOpener = null;
+      if (opener && opener.isConnected && typeof opener.focus === "function") opener.focus();
+    });
+    return dialog;
+  }
+
+  function openTaskEditor(taskId) {
+    var dialog = ensureTaskEditor();
+    var form = dialog.querySelector("[data-planner-task-form]");
+    var task = taskId ? plannerTask(taskId) : null;
+    var project = findProject(state.selectedProjectId);
+    var defaultSection = project && project.owner === "EVT" ? "Pre-Delivery Items" : "Planning and Approval";
+    var view = task && getProjectChecklistData(state.selectedProjectId)[task.id] || {};
+    var sections = [];
+    getChecklistItems(state.selectedProjectId).map(function (item) { return item.category; })
+      .concat(getActiveChecklistItems(state.selectedProjectId).map(function (item) { return item.category; }), task ? [task.section] : [])
+      .forEach(function (section) { if (text(section) && sections.indexOf(text(section)) < 0) sections.push(text(section)); });
+
+    form.reset();
+ delete form.dataset.deleteLinkedJob;
+ delete form.dataset.resetTask;
+ form.querySelector("[data-planner-task-delete-confirm]").hidden = true;
+ form.querySelector("[data-planner-task-reset-notice]").hidden = true;
+ dialog.querySelector("[data-planner-task-reset]").disabled = !task;
+ form.setAttribute("data-task-id", task ? task.id : "");
+    form.elements.title.value = task ? task.title : "";
+    form.elements.description.value = task ? task.description : "";
+    form.elements.section.innerHTML = sections.map(function (section) { return '<option value="' + esc(section) + '">' + esc(section) + '</option>'; }).join("");
+    form.elements.section.value = task ? task.section : defaultSection;
+    form.elements.classification.value = task && task.operational ? "operational" : "inert";
+    form.elements.classification.disabled = false;
+    form.elements.status.innerHTML = STATUS_OPTIONS.map(function (status) { return '<option value="' + esc(status) + '">' + esc(status) + '</option>'; }).join("");
+    form.elements.status.value = view.status || "Not Started";
+    form.elements.operator.value = sessionOperator();
+    form.elements.assigneeId.innerHTML = getOwnerOptions(state.selectedProjectId).map(function (owner) { return '<option value="' + esc(owner) + '">' + esc(owner) + '</option>'; }).join("");
+    form.elements.assigneeId.value = view.owner || "Not assigned";
+    form.elements.dueDate.value = task ? task.dueDate || "" : "";
+ syncTaskReason(form);
+ form.querySelector("[data-planner-task-history]").open = false;
+ renderTaskHistory(form, task);
+    form.elements.notes.value = task ? task.notes || "" : "";
+    dialog.querySelector("[data-planner-task-dialog-title]").textContent = task ? "Edit task" : "Add task";
+    dialog.querySelector("[data-planner-task-error]").hidden = true;
+    dialog._plannerOpener = document.activeElement;
+    dialog.showModal();
+    form.elements.title.focus();
+  }
+
+  function savePlannerTask(form) {
     var app = window.UOS && window.UOS.ProgramApp;
     var plannerModel = window.UOS && window.UOS.ProgramPlannerModel;
-    if (!app || !plannerModel || typeof plannerModel.createTask !== "function" || !state.selectedProjectId) return Promise.resolve(null);
+    var dialog = form.closest("[data-planner-task-dialog]");
+    var error = dialog.querySelector("[data-planner-task-error]");
+    var outcome = null;
+    var taskId = form.getAttribute("data-task-id") || null;
+    var existingTask = taskId ? plannerTask(taskId) : null;
+    var values = {
+      title: form.elements.title.value,
+      description: form.elements.description.value,
+      section: form.elements.section.value,
+      operational: form.elements.classification.value === "operational" || form.elements.classification.disabled,
+      status: form.elements.status.value,
+      assigneeId: form.elements.assigneeId.value,
+      dueDate: form.elements.dueDate.value,
+ sortOrder: existingTask ? (form.dataset.resetTask === "true" ? plannerModel.resetValues(existingTask).sortOrder : existingTask.sortOrder) : undefined,
+      notes: form.elements.notes.value
+    };
+    var currentStatus = existingTask && window.UOS && window.UOS.ProgramStatus && typeof window.UOS.ProgramStatus.labelFor === "function"
+      ? window.UOS.ProgramStatus.labelFor("task", existingTask.status) : (existingTask && existingTask.status || "Not Started");
+    var statusChanged = Boolean(existingTask && values.status !== currentStatus);
+    var actor = text(form.elements.operator.value);
+    error.hidden = true;
+ var resetting = form.dataset.resetTask === "true";
+ var needsReason = syncTaskReason(form);
+ var reason = needsReason ? text(form.elements.reason.value) : "";
+ if ((statusChanged || resetting) && !actor) {
+      error.textContent = "Enter a session operator name before changing status.";
+      error.hidden = false;
+      form.elements.operator.focus();
+      return Promise.resolve(null);
+    }
+ if (needsReason && !reason) {
+ error.textContent = "Enter a reason for this status change.";
+ error.hidden = false;
+ form.elements.reason.focus();
+ return Promise.resolve(null);
+ }
+ if (actor) rememberSessionOperator(actor);
+ var linkedJob = existingTask && plannerModel.taskState(app.workspace(), existingTask).job;
+ var requiresJobDeletion = Boolean(linkedJob && (resetting || existingTask.operational && values.operational === false));
+    if (requiresJobDeletion && form.dataset.deleteLinkedJob !== "true") {
+      var confirmation = confirmTaskJobDeletion(form, resetting);
+      return confirmation.then(function (confirmed) {
+        if (!confirmed) return null;
+        form.dataset.deleteLinkedJob = "true";
+        return savePlannerTask(form);
+      });
+    }
     return app.updateWorkspace(function (candidate) {
-      var suppressed = (candidate.entities.tasks || []).filter(function (task) { return task.projectId === state.selectedProjectId && task.suppressed === true; }).sort(function (a, b) { return Number(a.sortOrder || 0) - Number(b.sortOrder || 0); })[0];
-      if (suppressed) return plannerModel.updateTask(candidate, state.selectedProjectId, suppressed.id, { suppressed: false }, {}).workspace;
-      var project = (candidate.entities.projects || []).find(function (item) { return item.id === state.selectedProjectId; });
-      var section = project && project.owner === "EVT" ? "Pre-Delivery Items" : "Planning and Approval";
-      return plannerModel.createTask(candidate, state.selectedProjectId, { section: section, title: "New task", description: "Custom checklist task" }, {}).workspace;
-    }, { command: "Planner.createTask" }).catch(function (error) {
-      if (window.UOS && typeof window.UOS.toast === "function") window.UOS.toast(error.message || "Planner task creation failed.", "error");
+ var options = { deleteLinkedJob: form.dataset.deleteLinkedJob === "true", actor: actor, reason: reason };
+ outcome = resetting ? plannerModel.resetTask(candidate, state.selectedProjectId, taskId, values, options) : plannerModel.saveTask(candidate, state.selectedProjectId, taskId, values, options);
+      return outcome.workspace;
+ }, { command: resetting ? "Planner.resetTask" : "Planner.saveTask", actor: actor, reason: reason }).then(function (saved) {
+    dialog.close();
+    state.workspace = saved || (typeof app.workspace === "function" ? app.workspace() : state.workspace);
+    renderUI();
+    if (window.UOS && window.UOS.ProgramPlanner && typeof window.UOS.ProgramPlanner.renderUI === "function") {
+      window.requestAnimationFrame(function () { window.UOS.ProgramPlanner.renderUI(); });
+    }
+    return outcome;
+    }).catch(function (failure) {
+      error.textContent = failure.message || "Planner task could not be saved.";
+      error.hidden = false;
       return null;
     });
   }
 
   function bind() {
     if (state.bound || typeof document === "undefined") return;
+    plannerRoot = document.querySelector('[data-program-view="planner"]');
     state.bound = true;
 
     document.addEventListener("click", function (event) {
@@ -687,6 +945,9 @@
       var selectableRow = event.target.closest("[data-planner-selectable]");
       var draftJobBtn = event.target.closest("[data-planner-draft-job]");
       var operationalBtn = event.target.closest("[data-planner-operational]");
+      var scheduledJobBtn = event.target.closest("[data-planner-open-scheduled-job]");
+      var editTaskBtn = event.target.closest("[data-planner-edit-task]");
+      var cancelTaskBtn = event.target.closest("[data-planner-task-cancel]");
 
       // Shared mini-drawer contract: defer the list-rebuilding selection render
       // and persistence until the single opening motion has completed.
@@ -703,7 +964,21 @@
         return;
       }
 
-      if (draftJobBtn) {
+      if (cancelTaskBtn) {
+        cancelTaskBtn.closest("[data-planner-task-dialog]").close();
+      } else if (scheduledJobBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        var scheduledJobId = scheduledJobBtn.getAttribute("data-planner-open-scheduled-job");
+        var scheduledProjectId = scheduledJobBtn.getAttribute("data-planner-scheduled-project") || state.selectedProjectId;
+        openPlannerJob(scheduledJobId, scheduledProjectId).catch(function (error) {
+          if (window.UOS.toast) window.UOS.toast(error.message || "Could not open Scheduler Job.", "error");
+        });
+      } else if (editTaskBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        openTaskEditor(editTaskBtn.getAttribute("data-planner-edit-task"));
+      } else if (draftJobBtn) {
         event.preventDefault(); event.stopPropagation();
         applyPlannerModel("createDraftJob", draftJobBtn.getAttribute("data-planner-draft-job"));
       } else if (operationalBtn) {
@@ -789,8 +1064,15 @@
           });
         }
       } else if (addBtn) {
-        createPlannerTask();
+        openTaskEditor(null);
       }
+    });
+
+    document.addEventListener("submit", function (event) {
+      var form = event.target.closest && event.target.closest("[data-planner-task-form]");
+      if (!form) return;
+      event.preventDefault();
+      savePlannerTask(form);
     });
 
     document.addEventListener("input", function (event) {

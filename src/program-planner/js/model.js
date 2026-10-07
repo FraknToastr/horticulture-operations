@@ -346,8 +346,8 @@
       context: { financialYear: "", selectedOwner: "", locale: "en-AU", timeZone: "Australia/Adelaide" },
       referenceData: referenceData,
       workspace: {
-        destination: "dashboard", selectedEntityId: null, activeRecordTab: "overview", calendarCursor: "",
-        scheduler: { mode: "week", sort: "date", filters: { ownership: [], status: [], crew: [] } },
+        destination: "register", selectedEntityId: null, activeRecordTab: "overview", calendarCursor: "",
+        scheduler: { mode: "week", calendarScope: "application", sort: "date", filters: { ownership: [], status: [], crew: [] } },
         map: {
           scopeMode: "register", ownerMode: "", selectedRegisterId: "", selectedProjectId: "",
           selectedLocationId: "", selectedGeometryId: "", inspectorMode: "register"
@@ -447,6 +447,7 @@
     }
 
     if (collection === "jobs") {
+        item.updatesApplicationStatus = item.updatesApplicationStatus === true;
       var sourceKind = text(item.sourceKind).toLowerCase().replace(/[\s_]+/g, "-");
       item.sourceKind = ["calculator", "space-map", "planner", "manual"].indexOf(sourceKind) >= 0 ? sourceKind : (item.sourceGeometryId || item.geometryId ? "space-map" : "manual");
       item.sourceEntityId = text(item.sourceEntityId || item.sourceGeometryId || item.geometryId) || null;
@@ -608,7 +609,13 @@
       item.schedulerJobId = text(item.schedulerJobId) || null;
       item.suppressed = item.suppressed === true || item.deleted === true;
       delete item.deleted;
-      item.paymentAllocationId = text(item.paymentAllocationId) || null;
+ item.paymentAllocationId = text(item.paymentAllocationId) || null;
+ if (!object(item.plannerResetBaseline)) {
+ item.plannerResetBaseline = {};
+ ["title", "description", "section", "status", "operational", "assigneeId", "dueDate", "notes", "sortOrder", "suppressed"].forEach(function (field) {
+ if (item[field] !== undefined) item.plannerResetBaseline[field] = clone(item[field]);
+ });
+ }
     }
     if (collection === "paymentAllocations") {
       item.projectId = text(item.projectId) || null;
@@ -644,6 +651,7 @@ return target;
   function canonicalizeRates(result) {
     var aliases = {}, canonical = {}, items = [];
     result.entities.rateItems.forEach(function (item) {
+      if (typeof item.schedulerEnabled !== "boolean") item.schedulerEnabled = ["Labour", "Contractors"].indexOf(item.kind || item.category) >= 0;
       var oldId = text(item._legacyRateId || item.id);
       var baseId = text(item.id);
       var signature = JSON.stringify([text(item.category), text(item.description || item.title), text(item.unit), amount(item.unitRate), item.active !== false]);
@@ -1022,6 +1030,7 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
       delete result.context.roadClosures;
     }
     result.workspace = mergeDefaults(object(result.workspace) ? result.workspace : {}, defaults.workspace);
+    result.workspace.scheduler.calendarScope = result.workspace.scheduler.calendarScope === "all" ? "all" : "application";
     result.migration = mergeDefaults(object(result.migration) ? result.migration : {}, defaults.migration);
     if (!Array.isArray(result.migration.legacyBudgetEntryIds)) {
       if (result.migration.budgetGovernanceVersion === 1) throw new Error("Governed budget legacy-entry baseline is missing.");
@@ -1398,7 +1407,6 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
       reference(item, "jobId", ["jobs"], true); reference(item, "projectId", ["projects"], true); reference(item, "eventId", ["events"], true);
       reference(item, "rateItemId", ["rateItems"], false); reference(item, "sourceGeometryId", ["geometries"], true);
       reference(item, "catalogId", ["catalogs"], false);
-      if (!text(item.jobId)) errors.push(item.id + " requires jobId.");
       if (!text(item.projectId)) errors.push(item.id + " requires projectId.");
       if (text(item.jobId) && ids[item.jobId] && text(item.projectId) && ids[item.jobId].item.projectId !== item.projectId) {
         errors.push(item.id + " projectId must match its Job projectId.");
@@ -1435,7 +1443,6 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
       if (text(item.quoteId) && ids[item.quoteId] && item.quoteAuditNumber !== ids[item.quoteId].item.auditNumber) errors.push(item.id + " quoteAuditNumber must match its Quote.");
       if (item.sourceKind === "costingLine") {
         if (!text(item.costingLineId)) errors.push(item.id + " inherited lines require costingLineId.");
-        if (!text(item.jobId)) errors.push(item.id + " inherited lines require jobId.");
         if (text(item.costingLineId) && ids[item.costingLineId] && item.jobId !== ids[item.costingLineId].item.jobId) errors.push(item.id + " jobId must match its Costing Line jobId.");
       }
     });
@@ -1490,6 +1497,32 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
     if (UOS.ProgramBudget && typeof UOS.ProgramBudget.validationErrors === "function") {
       UOS.ProgramBudget.validationErrors(workspace).forEach(function (error) { errors.push(error); });
     }
+    var workIdentities = {};
+    workspace.entities.costingLines.forEach(function (line) {
+      if (line.workCommandVersion !== 1) return;
+      var key = line.owner + ":" + line.projectId + ":" + line.sourceIdentity;
+      if (!text(line.sourceIdentity) || workIdentities[key]) errors.push(line.id + " requires a unique stable work identity.");
+      workIdentities[key] = true;
+      if (["calculator", "space-map"].indexOf(line.sourceKind) < 0) errors.push(line.id + " canonical costing commands cannot own Planner work.");
+      if (line.sourceKind === "calculator" && (line.sourceGeometryId || !text(line.operationId) || line.sourceIdentity !== "operation:" + line.operationId)) errors.push(line.id + " requires its exact Calculator operation identity.");
+      if (line.sourceKind === "space-map") {
+        var geometryRef = ids[line.sourceGeometryId], geometry = geometryRef && geometryRef.collection === "geometries" && geometryRef.item;
+        if (!geometry || geometry.owner !== line.owner || geometry.projectId !== line.projectId || geometry.workRemoved || line.sourceIdentity !== "geometry:" + geometry.id + ":" + (Number(geometry.workLineageRevision) || 0)) errors.push(line.id + " requires its exact active geometry lineage in the same Project and owner.");
+      }
+      var projectRef = ids[line.projectId];
+      if (projectRef && projectRef.item.owner !== line.owner) errors.push(line.id + " owner must match its Project.");
+      if (line.jobId) {
+        var jobRef = ids[line.jobId], job = jobRef && jobRef.item;
+        if (!job || job.workCommandVersion !== 1 || job.sourceCostingLineId !== line.id || job.sourceIdentity !== line.sourceIdentity || job.owner !== line.owner || job.projectId !== line.projectId || job.sourceKind !== line.sourceKind || text(job.sourceGeometryId) !== text(line.sourceGeometryId) || job.sourceEntityId !== (line.sourceGeometryId || line.id)) errors.push(line.id + " requires exact reciprocal work Job links.");
+        if (line.jobCreationSuspended) errors.push(line.id + " cannot link a suspended Job.");
+      }
+    });
+    workspace.entities.jobs.forEach(function (job) {
+      if (job.workCommandVersion !== 1) return;
+      var source = ids[job.sourceCostingLineId], line = source && source.collection === "costingLines" && source.item;
+      if (!line || line.jobId !== job.id || line.workCommandVersion !== 1 || line.sourceIdentity !== job.sourceIdentity || line.owner !== job.owner || line.projectId !== job.projectId) errors.push(job.id + " requires exactly one reciprocal source Costing Line.");
+      if (text(job.status).toLowerCase() === "draft" && (text(job.startDate) || text(job.endDate))) errors.push(job.id + " Draft work Jobs must be unscheduled.");
+    });
     return errors;
   }
   function assertValid(workspace) {
@@ -1788,14 +1821,17 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
     return { workspace: normalize(workspace), impact: impact };
   }
 
-  function deleteJob(input, jobId) {
+  function deleteJob(input, jobId, options) {
+    options = options || {};
     var workspace = normalize(input);
     var id = text(jobId);
     var job = workspace.entities.jobs.find(function (item) { return item.id === id; });
     if (!job) throw new Error('Job "' + id + '" was not found.');
+    if (job.workCommandVersion === 1) return UOS.ProgramCosting.deleteWorkJob(input, jobId, options);
     if ((workspace.entities.budgetCharges || []).some(function (item) { return item.jobId === id; })) throw new Error("Jobs with recorded Budget charges cannot be deleted.");
     var costingIds = {};
     workspace.entities.costingLines.forEach(function (line) { if (line.jobId === id) costingIds[line.id] = true; });
+    if (job.actualCost != null || workspace.entities.costingLines.some(function (line) { return costingIds[line.id] && line.actualCost != null; })) throw new Error("Recorded actual financial history protects this work.");
     var immutableQuotes = {};
     (workspace.entities.quotes || []).forEach(function (q) {
       if (["Issued", "Accepted", "Declined", "Superseded"].indexOf(text(q.status)) >= 0) {
@@ -1804,13 +1840,48 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
     });
     var immutableReference = workspace.entities.quoteLines.find(function (line) { return immutableQuotes[line.quoteId] && (line.jobId === id || costingIds[line.costingLineId]); });
     if (immutableReference) throw new Error("Jobs referenced by issued or resolved Quote history cannot be deleted.");
+    var relatedQuoteIds = {};
+    workspace.entities.quoteLines.forEach(function (line) { if (line.jobId === id || costingIds[line.costingLineId]) relatedQuoteIds[line.id] = true; });
+    if (workspace.entities.paymentAllocations.some(function (allocation) { return relatedQuoteIds[allocation.quoteLineId]; })) throw new Error("Payment allocations protect this work.");
     workspace.entities.jobs = workspace.entities.jobs.filter(function (item) { return item.id !== id; });
     workspace.entities.tasks.forEach(function (item) { if (item.jobId === id || item.schedulerJobId === id) { item.jobId = null; item.schedulerJobId = null; } });
-    workspace.entities.costingLines = workspace.entities.costingLines.filter(function (item) { return !costingIds[item.id]; });
+if (!options.deletePlannerTask && job.sourceKind === "planner") {
+var retainedPlannerTask = workspace.entities.tasks.find(function (item) { return item.id === job.sourceEntityId; });
+if (retainedPlannerTask) {
+retainedPlannerTask.operational = true;
+retainedPlannerTask.updatedAt = timestamp();
+}
+}
+if (options.deletePlannerTask && job.sourceKind === "planner") {
+      var task = workspace.entities.tasks.find(function (item) { return item.id === job.sourceEntityId; });
+      if (task && task.templateKey) task.suppressed = true;
+      else if (task) {
+        workspace.entities.tasks = workspace.entities.tasks.filter(function (item) { return item.id !== task.id; });
+        ["statusEvents", "statusRecommendations"].forEach(function (collection) {
+          workspace.entities[collection] = (workspace.entities[collection] || []).filter(function (item) { return item.entityId !== task.id; });
+        });
+      }
+    }
+    workspace.entities.costingLines = workspace.entities.costingLines.filter(function (item) {
+      if (!costingIds[item.id]) return true;
+      if (options.deleteCostingLine) {
+        var geometry = workspace.entities.geometries.find(function (geometry) { return geometry.id === item.sourceGeometryId; });
+        if (geometry) geometry.workRemoved = true;
+        return false;
+      }
+      item.jobId = null;
+      item.jobCreationSuspended = true;
+      item.assignmentState = "Unassigned";
+      return true;
+    });
+    if (options.deleteCostingLine) ["statusEvents", "statusRecommendations"].forEach(function (collection) {
+      workspace.entities[collection] = (workspace.entities[collection] || []).filter(function (item) { return !costingIds[item.entityId]; });
+    });
     var removedQuoteLines = {};
     workspace.entities.quoteLines = workspace.entities.quoteLines.filter(function (item) {
       if (immutableQuotes[item.quoteId]) return true;
-      var remove = item.jobId === id || costingIds[item.costingLineId];
+      var remove = options.deleteCostingLine && (item.jobId === id || costingIds[item.costingLineId]);
+      if (!remove && item.jobId === id) item.jobId = null;
       if (remove) removedQuoteLines[item.id] = true;
       return !remove;
     });
@@ -1845,9 +1916,17 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
     ];
     var canonicalIds = {};
     sourceIds.forEach(function (sourceId) { canonicalIds[stableId("NSA", "project", sourceId)] = true; });
+    var applicationIds = {};
+    (workspace.entities.applications || []).forEach(function (application) {
+      applicationIds[text(application && application.id)] = true;
+    });
     function authoritative(project) {
       var provenanceSource = project && project.provenance && text(project.provenance.sourceId);
-      return project && project.owner === "NSA" && (sourceIds.indexOf(provenanceSource) >= 0 || canonicalIds[project.id]);
+      return project && project.owner === "NSA" && (
+        sourceIds.indexOf(provenanceSource) >= 0 ||
+        canonicalIds[project.id] ||
+        applicationIds[text(project.applicationId)]
+      );
     }
     var removed = { projects: {}, jobs: {}, tasks: {}, costingLines: {}, geometries: {}, quotes: {}, quoteLines: {}, payments: {} };
     (workspace.entities.projects || []).forEach(function (project) {
@@ -1860,7 +1939,9 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
         if (!removed.jobs[job.id] && (removed.projects[job.projectId] || removed.jobs[job.parentJobId])) { removed.jobs[job.id] = true; changed = true; }
       });
     }
-    (workspace.entities.tasks || []).forEach(function (task) { if (removed.jobs[task.jobId]) removed.tasks[task.id] = true; });
+    (workspace.entities.tasks || []).forEach(function (task) {
+      if (removed.projects[task.projectId] || removed.jobs[task.jobId]) removed.tasks[task.id] = true;
+    });
     (workspace.entities.costingLines || []).forEach(function (line) { if (removed.projects[line.projectId] || removed.jobs[line.jobId]) removed.costingLines[line.id] = true; });
     (workspace.entities.geometries || []).forEach(function (geometry) { if (removed.projects[geometry.projectId] || removed.jobs[geometry.jobId]) removed.geometries[geometry.id] = true; });
     (workspace.entities.quotes || []).forEach(function (quote) { if (removed.projects[quote.projectId]) removed.quotes[quote.id] = true; });

@@ -1,0 +1,13 @@
+'use strict';
+const fs = require('node:fs');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+const { repoRoot } = require('./local-test-environment.cjs');
+const root = repoRoot();
+const cli = fs.realpathSync(path.join(root, 'node_modules', 'playwright', 'cli.js'));
+if (!cli.startsWith(root + path.sep)) throw new Error('Playwright CLI must belong to this Overtime folder.');
+const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: path.join(root, '.cache', 'ms-playwright') };
+delete env.NODE_PATH;
+const result = spawnSync(process.execPath, [cli, 'install', 'chromium'], { cwd: root, env, stdio: 'inherit' });
+if (result.error) console.error(result.error.message);
+process.exitCode = result.status === null ? 1 : result.status;

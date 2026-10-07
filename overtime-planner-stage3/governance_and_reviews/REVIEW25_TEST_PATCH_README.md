@@ -1,0 +1,3 @@
+# Review 25 reviewer test patch
+
+Place `scripts/review25_evidence_claim_consistency.cjs` under the repository's `scripts/` directory. Run `node scripts/review25_evidence_claim_consistency.cjs` from the repository root. The test invokes `scripts/run_all_release_gates.cjs` and compares its final summary with the full-review briefing. On the submitted Review 25 package it is deliberately RED because the briefing still says `Entire test suite 100% PASS` while the runner reports 5 pass, 3 fail, 1 blocked. Correct the briefing and rerun; do not change production code to satisfy a documentation-only check.

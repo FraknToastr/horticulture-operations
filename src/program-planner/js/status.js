@@ -127,9 +127,10 @@
     var at = timestamp(command.at), id = eventId(found.record.owner, found.record.id, from, to, at, source);
     workspace.entities.statusEvents = Array.isArray(workspace.entities.statusEvents) ? workspace.entities.statusEvents : [];
     if (workspace.entities.statusEvents.some(function (item) { return item.id === id; })) return workspace;
-    found.record.status = to;
+ found.record.status = to;
+ if (found.domain === "task" && text(command.reason)) found.record.plannerHistoryVisible = true;
     found.record.updatedAt = at;
-    workspace.entities.statusEvents.push({ id: id, owner: found.record.owner, type: "statusEvent", entityId: found.record.id, entityType: found.record.type, domain: found.domain, fromStatus: from, toStatus: to, action: text(command.action) || (labelFor(found.domain, from) + " to " + labelFor(found.domain, to)), reason: text(command.reason), actor: actor, timestamp: at, source: source, initiatingOperator: automatic ? text(command.initiatingOperator || workspace.statusControl && workspace.statusControl.operatorName) : "" });
+    workspace.entities.statusEvents.push(Object.assign({ id: id, owner: found.record.owner, type: "statusEvent", entityId: found.record.id, entityType: found.record.type, domain: found.domain, fromStatus: from, toStatus: to, action: text(command.action) || (labelFor(found.domain, from) + " to " + labelFor(found.domain, to)), reason: text(command.reason), actor: actor, timestamp: at, source: source, initiatingOperator: automatic ? text(command.initiatingOperator || workspace.statusControl && workspace.statusControl.operatorName) : "" }, found.domain === "task" ? { taskTitle: text(found.record.title) } : {}));
     return workspace;
   }
   function addRecommendation(workspace, values) {
@@ -174,23 +175,31 @@
     return workspace;
   }
   function automationEnabled(workspace, record) { return Boolean(workspace.statusControl && workspace.statusControl.automationEnabled && !(record && record.statusAutomationPaused)); }
+  function validJobSchedule(job) {
+    function date(value) { return /^\d{4}-\d{2}-\d{2}$/.test(text(value)) && !Number.isNaN(Date.parse(value + "T00:00:00Z")) && new Date(value + "T00:00:00Z").toISOString().slice(0, 10) === value; }
+    function time(value) { return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(text(value)); }
+    if (!date(job.startDate) || !date(job.endDate) || job.endDate < job.startDate) return false;
+    return job.allDay === true || (time(job.startTime) && time(job.endTime) && job.startDate + "T" + job.startTime < job.endDate + "T" + job.endTime);
+  }
   function runAutomatic(input, options) {
     var workspace = clone(input), before = options && options.before || null, at = options && options.at;
     if (!workspace.statusControl || !workspace.statusControl.automationEnabled) return evaluate(workspace, options);
     var priorQuotes = {}, priorJobs = {};
-    if (before && before.entities) { (before.entities.quotes || []).forEach(function (item) { priorQuotes[item.id] = item.status; }); (before.entities.jobs || []).forEach(function (item) { priorJobs[item.id] = item.status; }); }
+    if (before && before.entities) { (before.entities.quotes || []).forEach(function (item) { priorQuotes[item.id] = item.status; }); (before.entities.jobs || []).forEach(function (item) { priorJobs[item.id] = item; }); }
     (workspace.entities.quotes || []).forEach(function (quote) {
       if (text(quote.status).toLowerCase() !== "issued" || text(priorQuotes[quote.id]).toLowerCase() === "issued") return;
       var project = (workspace.entities.projects || []).find(function (item) { return item.id === quote.projectId; }), register = project && linkedRegister(workspace, project);
       if (register && quoteSignalEligible(workspace, register.record, quote.id) && automationEnabled(workspace, register.record) && codeFor(register.domain, register.record.status) !== "quoted") workspace = transition(workspace, { entityId: register.record.id, entityType: register.record.type, to: "quoted", source: "automatic", signalQuoteId: quote.id, at: at, action: "Quote issued", initiatingOperator: options && options.initiatingOperator });
     });
     (workspace.entities.jobs || []).forEach(function (job) {
-      var current = codeFor("job", job.status), prior = codeFor("job", priorJobs[job.id]);
-      if (current === prior) return;
+      var existing = priorJobs[job.id], current = codeFor("job", job.status), prior = codeFor("job", existing && existing.status);
+      if (!before || job.updatesApplicationStatus !== true || !automationEnabled(workspace, job) || !validJobSchedule(job)) return;
+      if (current === prior && existing && existing.updatesApplicationStatus === true) return;
       var project = (workspace.entities.projects || []).find(function (item) { return item.id === job.projectId; }), register = project && linkedRegister(workspace, project);
-      if (!register || !automationEnabled(workspace, register.record)) return;
+      if (!register || ["register_nsa", "register_evt"].indexOf(register.domain) < 0 || job.owner !== project.owner || project.owner !== register.record.owner || !automationEnabled(workspace, register.record)) return;
       var target = current === "scheduled" ? "scheduled" : (current === "in_progress" && register.domain === "register_nsa" ? "in_progress" : "");
-      if (target && codeFor(register.domain, register.record.status) !== target) workspace = transition(workspace, { entityId: register.record.id, entityType: register.record.type, to: target, source: "automatic", at: at, action: current === "scheduled" ? "First active Job scheduled" : "NSA Job started", initiatingOperator: options && options.initiatingOperator });
+      var from = codeFor(register.domain, register.record.status);
+      if (target && rank(register.domain, from) >= 0 && rank(register.domain, target) > rank(register.domain, from) && DEFINITIONS[register.domain].terminal.indexOf(from) < 0) workspace = transition(workspace, { entityId: register.record.id, entityType: register.record.type, to: target, source: "automatic", at: at, action: "Nominated Job " + job.id + (current === "scheduled" ? " scheduled" : " started"), initiatingOperator: options && options.initiatingOperator });
     });
     return evaluate(workspace, options);
   }
@@ -207,7 +216,7 @@
           delete record.statusHistory; if (record.payload && typeof record.payload === "object") delete record.payload.statusHistory;
           workspace.entities.statusEvents = Array.isArray(workspace.entities.statusEvents) ? workspace.entities.statusEvents : [];
           var establishedAt = timestamp(settings.at || record.createdAt || record.updatedAt), establishedId = eventId(record.owner, record.id, "", record.status, establishedAt, "automatic");
-          if (!workspace.entities.statusEvents.some(function (item) { return item.id === establishedId; })) workspace.entities.statusEvents.push({ id: establishedId, owner: record.owner, type: "statusEvent", entityId: record.id, entityType: record.type, domain: domain, fromStatus: "", toStatus: record.status, action: collection === "applications" || collection === "events" ? "Register received" : "Initial status established", reason: "", actor: ENGINE_ACTOR, timestamp: establishedAt, source: "automatic", initiatingOperator: text(settings.actor) });
+          if (!workspace.entities.statusEvents.some(function (item) { return item.id === establishedId; })) workspace.entities.statusEvents.push(Object.assign({ id: establishedId, owner: record.owner, type: "statusEvent", entityId: record.id, entityType: record.type, domain: domain, fromStatus: "", toStatus: record.status, action: collection === "applications" || collection === "events" ? "Register received" : "Initial status established", reason: "", actor: ENGINE_ACTOR, timestamp: establishedAt, source: "automatic", initiatingOperator: text(settings.actor) }, domain === "task" ? { taskTitle: text(record.title) } : {}));
           return;
         }
         var from = codeFor(domain, existing.status), to = codeFor(domain, record.status);
@@ -225,6 +234,7 @@
     workspace.entities.statusRecommendations = Array.isArray(workspace.entities.statusRecommendations) ? workspace.entities.statusRecommendations : [];
     Object.keys(COLLECTION_DOMAIN).forEach(function (collection) {
       (workspace.entities[collection] || []).forEach(function (record) {
+        if (collection === "jobs") record.updatesApplicationStatus = record.updatesApplicationStatus === true;
         var domain = COLLECTION_DOMAIN[collection], raw = text(record.status), fallback = collection === "applications" || collection === "events" ? "received" : collection === "projects" || collection === "jobs" ? "draft" : "not_started", code = codeFor(domain, raw, { defaultCode: fallback });
         if (code === REVIEW && raw) { record.legacyStatus = raw; record.statusReviewRequired = true; }
         record.status = code;

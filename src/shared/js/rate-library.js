@@ -5,7 +5,7 @@
   var OWNERS = { NSA: "Nature Strip", EVT: "Remediation" };
   var QUANTITY_KINDS = ["direct", "area", "length", "volume", "mass", "hours"];
   var REQUIRED_CSV_COLUMNS = ["id", "owner", "category", "description", "unit", "unitRate", "active", "quantityKind"];
-  var CSV_COLUMNS = REQUIRED_CSV_COLUMNS.concat(["kind", "libraryCategory", "catalogSection", "addPath", "sourceFileName", "sourceImportedAt", "sourceRow", "sourceId", "sourceApp", "sourceVersion", "legacyId"]);
+  var CSV_COLUMNS = REQUIRED_CSV_COLUMNS.concat(["kind", "libraryCategory", "catalogSection", "addPath", "sourceFileName", "sourceImportedAt", "sourceRow", "sourceId", "sourceApp", "sourceVersion", "legacyId", "schedulerEnabled"]);
   var MAX_ITEMS = 10000;
 
   function object(value) { return value && typeof value === "object" && !Array.isArray(value); }
@@ -65,6 +65,7 @@
       unit: text(input.unit),
       unitRate: money(unitRate),
       active: input.active !== false,
+      schedulerEnabled: typeof input.schedulerEnabled === "boolean" ? input.schedulerEnabled : ["Labour", "Contractors"].indexOf(input.kind || category) >= 0,
       quantityKind: quantityKind(input.quantityKind || input.mode),
       kind: text(input.kind || input.libraryCategory),
       libraryCategory: text(input.libraryCategory || input.kind),
@@ -232,9 +233,11 @@
       if (["true", "1", "yes", "active"].indexOf(active) >= 0) active = true;
       else if (["false", "0", "no", "inactive"].indexOf(active) >= 0) active = false;
       else throw new Error("Rate library CSV row " + (offset + 2) + " has an invalid active value.");
+      var schedulerFlag = text(get("schedulerEnabled")).toLowerCase();
+      if (schedulerFlag && ["true", "false", "1", "0", "yes", "no"].indexOf(schedulerFlag) < 0) throw new Error("Rate library CSV row " + (offset + 2) + " has an invalid schedulerEnabled value.");
       return {
         id: get("id"), owner: get("owner"), category: get("category"), description: get("description"),
-        unit: get("unit"), unitRate: get("unitRate"), active: active, quantityKind: get("quantityKind"),
+        unit: get("unit"), unitRate: get("unitRate"), active: active, quantityKind: get("quantityKind"), schedulerEnabled: schedulerFlag ? ["true", "1", "yes"].indexOf(schedulerFlag) >= 0 : undefined,
         kind: get("kind"), libraryCategory: get("libraryCategory"), catalogSection: get("catalogSection"), addPath: get("addPath"),
         sourceFileName: get("sourceFileName"), sourceImportedAt: get("sourceImportedAt"), sourceRow: get("sourceRow"),
         sourceId: get("sourceId"), sourceApp: get("sourceApp"), sourceVersion: get("sourceVersion"), legacyId: get("legacyId")
@@ -244,7 +247,7 @@
 
   function toUnifiedRateItem(input) {
     var item = normalizeItem(input);
-    return { id: item.id, owner: "", type: "rateItem", title: item.description, status: item.active ? "Active" : "Inactive", category: item.category, description: item.description, unit: item.unit, unitRate: item.unitRate, active: item.active, quantityKind: item.quantityKind, kind: item.kind, libraryCategory: item.libraryCategory, catalogSection: item.catalogSection, addPath: item.addPath, source: clone(item.source), sourceApp: item.sourceApp, sourceVersion: item.sourceVersion, legacyId: item.legacyId, payload: clone(item), provenance: { owner: "GLOBAL", ownerName: "Universal catalog", legacyId: item.legacyId || "", sourceApp: item.sourceApp || "uos.rate-library", sourceVersion: item.sourceVersion || 1, sourceId: item.source && item.source.id || "" } };
+    return { id: item.id, owner: "", type: "rateItem", title: item.description, status: item.active ? "Active" : "Inactive", category: item.category, description: item.description, unit: item.unit, unitRate: item.unitRate, active: item.active, schedulerEnabled: item.schedulerEnabled, quantityKind: item.quantityKind, kind: item.kind, libraryCategory: item.libraryCategory, catalogSection: item.catalogSection, addPath: item.addPath, source: clone(item.source), sourceApp: item.sourceApp, sourceVersion: item.sourceVersion, legacyId: item.legacyId, payload: clone(item), provenance: { owner: "GLOBAL", ownerName: "Universal catalog", legacyId: item.legacyId || "", sourceApp: item.sourceApp || "uos.rate-library", sourceVersion: item.sourceVersion || 1, sourceId: item.source && item.source.id || "" } };
   }
 
   UOS.rateLibrary = {

@@ -1,0 +1,97 @@
+/* Budget workspace layout overrides. Loaded after the embedded module rules. */
+.program-header-budget-card {
+  justify-content: flex-start;
+  gap: 6px;
+  min-width: 154px;
+  height: 38px;
+  margin-left: 14px;
+  padding: 0 12px;
+  border: 2px solid var(--program-owner-border, var(--uos-border, #d5dcdf));
+  border-radius: var(--uos-radius-control, 6px);
+  background: var(--uos-surface, #fff);
+  box-shadow: -8px 0 0 -6px var(--uos-border, #d5dcdf);
+  font-size: 10.5px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.program-header-budget-card strong {
+  font-size: 18px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.program-budget__approvals {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.program-budget__approvals > [data-budget-year-state] {
+  min-height: 0;
+}
+
+.program-budget__records {
+  display: grid;
+  grid-template-rows: minmax(145px, 3fr) minmax(105px, 2fr);
+  gap: 14px;
+  min-height: 0;
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.program-budget__records .program-budget__allocations,
+.program-budget__records .program-budget__pending {
+  display: flex;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--uos-border, #d5dcdf);
+  border-radius: var(--uos-radius-control, 6px);
+  flex: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.program-budget__records .program-budget__section-head {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--uos-border, #d5dcdf);
+}
+
+.program-budget__records .program-budget__table-wrap,
+.program-budget__records .program-budget__history {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.program-budget__records .program-budget__table-wrap table {
+  min-width: 760px;
+}
+
+.program-budget__records .program-budget__history {
+  padding: 0 12px;
+}
+
+@media (max-width: 900px) {
+  .program-header-budget-card {
+    min-width: 138px;
+    margin-left: 8px;
+    padding-inline: 8px;
+  }
+
+  .program-budget__approvals {
+    display: flex;
+    overflow: visible;
+  }
+
+  .program-budget__records {
+    grid-template-rows: minmax(220px, auto) minmax(160px, auto);
+    overflow: visible;
+  }
+}

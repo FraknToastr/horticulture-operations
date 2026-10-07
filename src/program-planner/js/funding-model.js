@@ -19,7 +19,7 @@
     var jobIds = {}, seen = {};
     workspaceValue.entities.jobs.forEach(function (job) { if (activeJob(job, projectId)) jobIds[job.id] = true; });
     return money(workspaceValue.entities.costingLines.reduce(function (sum, line) {
-      if (line.projectId !== projectId || !jobIds[line.jobId] || seen[line.id]) return sum;
+      if (line.projectId !== projectId || (line.jobId && !jobIds[line.jobId]) || seen[line.id]) return sum;
       seen[line.id] = true;
       return sum + Math.max(0, money(line.estimatedTotal));
     }, 0));
@@ -34,8 +34,9 @@
   }
   function quoteContribution(quote, isCandidate) {
     if (!quote || text(quote.supersededByQuoteId)) return 0;
+    if (quote.fundingMode && isCandidate && text(quote.status) !== "Superseded") return UOS.ProgramQuotes.customerAmounts(quote).contribution;
     if (quoteRank(quote) > 0 || (isCandidate && text(quote.status) === "Draft")) {
-      return Math.max(0, money(Number(quote.grandTotal) - Number(quote.gst)));
+      return UOS.ProgramQuotes.customerAmounts(quote).contribution;
     }
     return 0;
   }
@@ -44,12 +45,12 @@
     return money((workspaceValue.entities.payments || []).reduce(function (sum, payment) { return payment.quoteId === quoteId && text(payment.status).toLowerCase() !== "reversed" ? sum + Math.max(0, Number(payment.amount) || 0) : sum; }, 0));
   }
   function receivablesFor(workspaceValue, quote) {
-    var grandTotal = quote ? Math.max(0, money(quote.grandTotal)) : 0;
+    var grandTotal = quote ? UOS.ProgramQuotes.customerAmounts(quote).payable : 0;
     var paid = quote ? activePayments(workspaceValue, quote.id) : 0;
     var depositPaid = quote ? money((workspaceValue.entities.payments || []).reduce(function (sum, payment) {
       return payment.quoteId === quote.id && payment.method === "Paid with Deposit" && text(payment.status).toLowerCase() !== "reversed" ? sum + Math.max(0, Number(payment.amount) || 0) : sum;
     }, 0)) : 0;
-    return { quoteId: quote ? quote.id : null, customerGrandTotal: grandTotal, paymentsPaid: paid, depositPaid: depositPaid, customerOutstanding: Math.max(0, money(grandTotal - paid)) };
+    return { quoteId: quote ? quote.id : null, customerGrandTotal: grandTotal, paymentsPaid: paid, depositPaid: depositPaid, customerOutstanding: quote && quote.fundingMode === "city" ? 0 : Math.max(0, money(grandTotal - paid)) };
   }
   function position(inputWorkspace, projectId, options) {
     var result = workspace(inputWorkspace);
@@ -59,17 +60,22 @@
     var isCandidate = Boolean(supplied);
     var quote = supplied || applicableQuoteFor(result, project.id);
     var delivery = deliveryCostFor(result, project.id);
-    var council = operationalAmount(project, result);
+    var availableCouncil = operationalAmount(project, result);
+    var council = quote && quote.fundingMode === "customer" ? 0 : availableCouncil;
     var customer = quoteContribution(quote, isCandidate);
     var total = money(customer + council);
     var signedPosition = money(total - delivery);
     var receivables = receivablesFor(result, quote);
     return {
       projectId: project.id, basis: "ex-GST", calculatedDeliveryCost: delivery, operationalAmount: council,
+      availableCityAllocation: availableCouncil, fundingMode: quote ? quote.fundingMode || null : null,
+      customerAgreementStatus: UOS.ProgramQuotes ? UOS.ProgramQuotes.agreementStatus(quote) : "No customer agreement",
+      confirmedCustomerFunding: quote && quote.status === "Accepted" && !text(quote.supersededByQuoteId) ? customer : 0,
       customerQuote: customer, customerQuoteId: quote && (quoteRank(quote) > 0 || isCandidate) ? quote.id : null, customerQuoteStatus: quote && (quoteRank(quote) > 0 || isCandidate) ? quote.status : null,
       totalFunding: total, fundingPosition: signedPosition, fundingGap: Math.max(0, money(-signedPosition)), fundingSurplus: Math.max(0, signedPosition),
       fundingStatus: signedPosition < 0 ? "gap" : signedPosition > 0 ? "surplus" : "balanced", label: signedPosition < 0 ? "Funding Gap" : signedPosition > 0 ? "Funding Surplus" : "Balanced",
-      customerGrandTotal: receivables.customerGrandTotal, paymentsPaid: receivables.paymentsPaid, depositPaid: receivables.depositPaid, customerOutstanding: receivables.customerOutstanding
+      customerGrandTotal: receivables.customerGrandTotal, paymentsPaid: receivables.paymentsPaid, depositPaid: receivables.depositPaid, customerOutstanding: receivables.customerOutstanding,
+      customerGst: quote ? UOS.ProgramQuotes.customerAmounts(quote).gst : 0
     };
   }
   function setOperationalAmount(inputWorkspace, projectId, value) {

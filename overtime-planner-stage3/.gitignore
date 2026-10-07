@@ -1,0 +1,25 @@
+# Child-owned dependencies, browser runtimes and execution outputs.
+node_modules/
+.cache/
+test-results/
+playwright-report/
+test_reports/
+history/
+
+# Local packages and historical checksum inventories never belong in transport.
+*.zip
+*.sha256
+*.sha512
+SHA256SUMS*
+SHA512SUMS*
+# Historical inventories and one-off peer-package generators remain local.
+*.sha256.txt
+*.sha512.txt
+/DETACHED_BRANCH_FILELIST.txt
+/DETACHED_BRANCH_MANIFEST.txt
+/MANIFEST.txt
+*.log
+/scripts/package_*.py
+/scripts/extract_staged_crew.cjs
+/offline_release_gates_verified.png
+/offline_stage3_release_verified.png

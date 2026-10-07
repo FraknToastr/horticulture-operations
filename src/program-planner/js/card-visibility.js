@@ -54,6 +54,8 @@
 
   function isFirstInScroller(card, scroller) {
     if (!card) return false;
+    // Quote editor rows are fields within a document, not a list to reset.
+    if (card.matches && card.matches(".program-quote-builder-table tbody tr")) return false;
     if (card.previousElementSibling === null) return true;
     if (card.previousElementSibling && card.previousElementSibling.classList && card.previousElementSibling.classList.contains("program-virtual-spacer") && !card.previousElementSibling.previousElementSibling) return true;
     if (scroller && typeof scroller.querySelector === "function") {
@@ -69,6 +71,8 @@
 
   function ensureVisible(card, options) {
     if (!card || card.isConnected === false || typeof card.getBoundingClientRect !== "function") return false;
+    // Selecting a job in the sidebar must not move the 24-hour calendar viewport.
+    if (card.matches && card.matches(".program-calendar-job") && card.closest(".program-calendar--week")) return false;
     var scroller = options && options.scroller || nearestScroller(card);
     if (!scroller || typeof scroller.getBoundingClientRect !== "function") return false;
 
@@ -172,6 +176,8 @@
 
   function focusedCard(target) {
     if (!target || typeof target.closest !== "function") return null;
+    // Native focus handles document fields; list alignment would move the editor.
+    if (target.closest(".program-quote-builder-table")) return null;
     return target.closest(CARD_SELECTOR) || target.closest(".is-selected, [data-register-record], [data-event-card-id], [data-shape-card-id], [data-planner-project-id], [data-costing-project-id], [data-scheduler-project], [data-scheduler-job]");
   }
 

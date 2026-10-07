@@ -55,10 +55,12 @@ An active-project Job selected from the Job row-table or calendar opens Schedule
 
 **Reason:** the drawer floor is the user's persistent visual boundary for the expanded record. Losing it makes the drawer appear clipped or structurally unfinished and can place terminal controls off-screen.
 
-## ADR-012 — Register drawers grow intrinsically before internal scrolling
+## ADR-012 — Register drawers grow intrinsically before internal scrolling (superseded by ADR-016)
 **Accepted — v1.4a.** Register drawers use content-driven height while content fits. As Notes or other content grow, the drawer may descend until its floor reaches the usable viewport bottom. At that point the outer drawer stops growing and excess content becomes internally scrollable.
 
 **Reason:** short Register records should not create unnecessarily empty full-height drawers, while long records must remain fully usable without violating the always-visible floor contract.
+
+**Superseded:** ADR-016 replaces the Register-specific intrinsic-height exception. This paragraph is historical, not an active UI rule.
 
 ## ADR-013 — Annual budget authority is owner/year scoped
 **Accepted — 2026-09-28.** A July–June year has at most one Annual Budget for each of NSA and EVT. Register allocations retain their own year and owner, so one Register can receive allocations in successive years. Net allocations may not exceed net approved budget. Budget, allocations, commitments, actual spend and forecast remain separate. Legacy `project.funding.operationalAmount` and `approvedBudget` are migration inputs or compatibility projections only; neither is annual authority.
@@ -75,6 +77,40 @@ An active-project Job selected from the Job row-table or calendar opens Schedule
 
 **Reason:** Draft delivery intent, scheduled commitment, priced work and customer-facing commercial inclusion are separate decisions. Existing records and issued Quote history remain protected; migration of mixed or unknown legacy origins requires review. Gate Q is the acceptance proof.
 
+## ADR-016 — One Register-row viewport floor and scroll owner
+
+**Accepted — 2026-09-30; supersedes ADR-012.** Native Register and every mounted module use the same full-height drawer, with a 4px floor 4px above the usable viewport bottom. Opening a row positions its header beneath the sticky column headings and locks the outer Register table; internal sections retain their own scrolling. Closing the last row restores the prior table position. Budget remains full-page with a hard floor. No Register-only height or scroll exceptions are permitted.
+
+**Reason:** separate Register and module sizing/scroll paths repeatedly hid sibling rows and displaced the hard floor. A single scroll owner and geometry rule is observable and testable across modules.
+
 ## Amendment record for ADR-013 through ADR-015
 
 **Old rule:** no annual budget/financial-year authority contract; PC-020 allowed Task classification to cause Costing and Quote projection, and WF-002 connected Task scheduling directly to Job creation. **New rule:** T-015 through T-019, PC-021 through PC-028, revised PC-020 and WF-002. **Compatibility/migration:** retain legacy Project funding as labeled historical data; stage diagnostic mapping to owner, year and Register; quarantine ambiguous or conflicting values. Existing Task/Job/Costing/Quote lineage is preserved, with no automatic historical rewrite. **Release proof:** Gates O–Q plus existing persistence, owner isolation, Costing and Quote gates. **Effective governance version/date:** v1.5-draft, 2026-09-28. **Approval authority:** these decisions record the agreed product rule; named approval of individual financial transactions is separately required by PC-024.
+
+## ADR-017 — Register shortcut readiness and saved usage
+
+**Accepted — 2026-09-30.** Inactive shortcuts cannot navigate. A linked Project enables Planner, Calculator, Scheduler and Quotes even before their respective work exists; Space Map is independently available. Active shortcuts remain clickable when selected, and Register is always active-in-use. Current saved work determines in-use styling without persistent first-use markers; untouched generated Planner templates do not qualify. This supersedes current-module disabling, Job-required Scheduler access, and Project existence being treated as Planner/Quote usage. Shared drawer geometry and scrolling remain unchanged.
+
+
+## D-2026-10-01 — Canonical Calculator/Map work commands
+
+Accepted: ProgramCosting owns createWork, recreateWorkJob and deleteWorkJob.
+Stable operationId / geometry lineage and atomic persistence replace UI-owned
+creation. Costing Lines are Project-owned with optional Job links. Existing
+aggregate and assigned data remain unchanged. The PC-026 / PC-028 amendment
+in PRODUCT_CONSTITUTION.md supersedes mandatory-Job and aggregate Calculator
+creation rules. Rate flags affect future work only. Explicit removal prevents
+automatic recreation; deliberate recreation creates one Draft. PC-014 /
+PC-018 / PC-024 govern icon rails, topmost-modal Escape and persistent Budget
+form/action row. Release proof is required for retries, failure atomicity,
+cross-module costing, both owners, modal isolation and Budget states.
+
+
+## D — Quote funding choices and agreement (2026-10-01)
+
+Accepted: explicit City/customer/co-funded arrangements; proposed coverage permits Issue before acceptance. Customer agreement, estimated costs, customer payable and received payments remain separate. Existing history is preserved; editable legacy Quotes require selection. See the Quote funding arrangements and customer agreement contract.
+
+
+## Explicit Planner calendar creation — 2026-10-01
+
+**Accepted.** Supersedes the 2026-09-28 rule that Operational Task creation/promotion automatically creates or resolves a Draft Job. Task Purpose (Reminder Task / Add to Scheduler) controls eligibility only. Ordinary saves never create or recreate Jobs; the task calendar is the explicit Planner UI creation/open action. Save & Open Scheduler is removed. Existing Jobs, source identity, financial protections and audit history are preserved. Current task values and existing Jobs determine Planner shortcut usage, so reverting all substantive template edits restores unused styling when no other work remains.

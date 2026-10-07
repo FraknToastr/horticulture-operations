@@ -97,6 +97,19 @@ test("creating a Project from a newly added Register mounts Planner in that Regi
   })).toBe(0);
   await expect(frame.locator(`[data-register-drawer-record="${newId}"] [data-program-view="planner"]`)).toHaveCount(1);
   await expect(frame.locator('[data-register-drawer-record="NSA-APP-A3330"] [data-program-view="planner"]')).toHaveCount(0);
+
+  const linkedProjectId = await child.evaluate(() => window.UOS.ProgramApp.workspace().workspace.selectedProjectId);
+  await page.reload();
+  const reloaded = page.frames().find((candidate) => candidate !== page.mainFrame());
+  await reloaded.waitForFunction(() => window.UOS?.ProgramApp?.snapshot().phase === "ready");
+  await expect.poll(() => reloaded.evaluate(({ recordId, projectId }) => {
+    const workspace = window.UOS.ProgramApp.workspace();
+    return {
+      record: workspace.entities.applications.some((item) => item.id === recordId),
+      project: workspace.entities.projects.some((item) => item.id === projectId && item.applicationId === recordId),
+      tasks: workspace.entities.tasks.some((task) => task.projectId === projectId)
+    };
+  }, { recordId: newId, projectId: linkedProjectId })).toEqual({ record: true, project: true, tasks: true });
 });
 
 test("Register row shortcut remains usable while Planner is active", async ({ page }) => {
@@ -138,5 +151,8 @@ test("Register row shortcut remains usable while Planner is active", async ({ pa
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().workspace.selectedEntityId)).toBe(recordId);
   await expect(registerButton).toHaveClass(/is-current-module/);
   await expect(registerButton).toHaveAttribute("aria-current", "page");
-  await expect(registerButton).toBeDisabled();
+  await expect(registerButton).toBeEnabled();
+  await registerButton.click();
+  await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().workspace.destination)).toBe("register");
+  await expect(frame.locator(`[data-disclosure-toggle][data-disclosure-key="register:${recordId}"]`)).toHaveAttribute("aria-expanded", "true");
 });

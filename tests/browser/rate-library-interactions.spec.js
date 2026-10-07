@@ -67,7 +67,10 @@ test("Rate Item headers sort full values accessibly and retain state through fil
 
   const editRow = frame.locator('[data-rate-item-row="RATE-SORT-003"]');
   await editRow.locator('[data-costing-edit-rate="RATE-SORT-003"]').click();
+  await expect(frame.locator('[data-costing-rate-dialog]')).toBeVisible();
   await expect(frame.locator('[data-costing-rate-form] [name="description"]')).toHaveValue("Sort target Alpha");
+  // These two rows share a description; the price confirms the selected rate.
+  await expect(frame.locator('[data-costing-rate-form] [name="unitRate"]')).toHaveValue("30");
   await frame.locator("[data-costing-rate-cancel]").first().click();
   await editRow.locator('[data-costing-add-rate="RATE-SORT-003"]').click();
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.some((line) => line.rateItemId === "RATE-SORT-003"))).toBe(true);
@@ -162,6 +165,7 @@ test("Rate Library tools disclose accessibly and icon menu aligns with Calculato
  const frame = page.frameLocator("iframe");
  await frame.locator('[data-program-destination="costing"]').click();
  await expect(frame.locator('.program-cost-table')).toBeVisible();
+ expect(await frame.locator('[data-costing-edit-rate]').first().locator('svg').evaluate(element => element.innerHTML)).toBe('<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"></path><path d="m13.5 6.5 4 4"></path>');
  const toggle = frame.locator("[data-costing-tools-toggle]");
  const drawer = frame.locator("[data-costing-tools]");
  await expect(drawer).toBeHidden();
@@ -171,7 +175,8 @@ test("Rate Library tools disclose accessibly and icon menu aligns with Calculato
  await expect(drawer).toBeVisible();
  await expect(toggle).toHaveAttribute("aria-expanded", "true");
  const menuAfter = await frame.locator(".program-cost-tabs").boundingBox();
- expect(menuAfter.y).toBeGreaterThan(menuBefore.y);
+  // Kind choices remain in the top header when the Tools drawer opens.
+  expect(Math.abs(menuAfter.y - menuBefore.y)).toBeLessThan(1);
  await expect(frame.locator("[data-costing-search]")).toBeFocused();
  await frame.locator("[data-costing-search]").press("Escape");
  await expect(drawer).toBeHidden();
@@ -216,7 +221,8 @@ test("Rate Library tools disclose accessibly and icon menu aligns with Calculato
  expect(layout.matchesHeader).toBe(true);
  expect(layout.pillOutlinesClosed, JSON.stringify(layout.pillBounds)).toBe(true);
  expect(layout.ellipsisInsidePill, JSON.stringify(layout.pillDiagnostic)).toBe(true);
-  expect(Math.abs(layout.menuHeight - layout.headingHeight)).toBeLessThanOrEqual(1);
+  const standardRowHeight = await child.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.program-calculator-table')).getPropertyValue('--commercial-frame-height')) + 13);
+  expect(layout.headingHeight).toBe(standardRowHeight);
 });
 
 test("drawer actions remain available for every Kind and Add saves to the active Kind", async ({ page }) => {

@@ -64,7 +64,7 @@ test("automatic quote and job signals advance registers, but pause does not repl
   const repeated = Status.runAutomatic(quoted, { before: quoted, at: "2026-09-12T03:01:00.000Z" });
   assert.equal(repeated.entities.statusEvents.length, quoted.entities.statusEvents.length, "the same Quote signal is not replayed");
   quoted.entities.applications[0].statusAutomationPaused = true;
-  quoted.entities.jobs.push({ id: "NSA-JOB-1", owner: "NSA", type: "job", projectId: "NSA-PROJ-1", status: "scheduled" });
+  quoted.entities.jobs.push({ id: "NSA-JOB-1", owner: "NSA", type: "job", projectId: "NSA-PROJ-1", status: "scheduled", updatesApplicationStatus: true, startDate: "2026-09-12", endDate: "2026-09-12", allDay: true });
   const prior = structuredClone(quoted); prior.entities.jobs[0].status = "draft";
   const paused = Status.runAutomatic(quoted, { before: prior });
   assert.equal(paused.entities.applications[0].status, "quoted");

@@ -1,0 +1,102 @@
+/* PC-018/PC-019: one floor and one outer-scroll rule for every Register drawer. */
+body[data-register-drawer-open] .program-register-main-pane > .program-table-wrap {
+  overflow-y: hidden !important;
+  overscroll-behavior: none;
+}
+
+body[data-register-drawer-open] .program-register-drawer-row:not([hidden]) > td {
+  padding: 0 !important;
+  border-bottom: 0 !important;
+}
+
+body[data-register-drawer-open] .program-register-drawer-row:not([hidden]) .program-register-drawer.has-viewport-floor,
+body[data-register-drawer-open] .program-register-drawer-row:not([hidden]) .program-register-drawer.has-viewport-floor.is-module-workspace {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: var(--program-drawer-max-height) !important;
+  min-height: 0 !important;
+  max-height: var(--program-drawer-max-height) !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-bottom: 4px solid var(--program-owner-accent, var(--uos-brand, #15803d)) !important;
+  border-radius: 0 !important;
+}
+
+body[data-register-drawer-open] .program-register-drawer.has-viewport-floor:not(.is-module-workspace) {
+  padding: 16px 18px 0 !important;
+}
+
+body[data-register-drawer-open] .program-register-drawer.has-viewport-floor.is-module-workspace {
+  padding: 0 !important;
+}
+
+body[data-register-drawer-open] .program-register-drawer.has-viewport-floor > .program-register-detail__layout:not([hidden]),
+body[data-register-drawer-open] .program-register-drawer.has-viewport-floor > .program-register-module-host:not([hidden]) {
+  flex: 1 1 auto;
+  width: 100%;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+body[data-register-drawer-open] .program-register-drawer.has-viewport-floor > .program-register-module-host:not([hidden]) {
+  overflow: hidden;
+}
+
+body[data-register-drawer-open] .program-register-module-host > .program-drawer-module {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+/* The drawer frame, not a rounded inner card, is the Planner checklist edge. */
+.program-register-module-host .program-planner-main-pane {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.program-register-module-host .planner-checklist-wrap,
+.program-register-module-host .planner-table-wrap,
+.program-register-module-host .planner-table {
+  width: 100% !important;
+  min-width: 0;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+.program-register-module-host .planner-checklist-wrap {
+  padding: 0 !important;
+  scrollbar-gutter: stable;
+}
+
+/* Match the Calculator's 4px green sidebar divider. */
+.program-map-workspace > .program-map-sidebar,
+.program-scheduler-layout > .program-scheduler-inspector,
+.program-register-module-host .program-map-workspace > .program-map-sidebar,
+.program-register-module-host .program-scheduler-layout > .program-scheduler-inspector {
+  border-right: 4px solid var(--uos-brand-text) !important;
+}
+
+/* Budget remains full-page, with the same hard floor and internal table scroll. */
+.program-budget:not([hidden]) {
+  min-height: 0 !important;
+  height: var(--program-budget-viewport-height, calc(100dvh - 68px)) !important;
+  overflow: hidden !important;
+}
+
+.program-budget__workspace {
+  box-sizing: border-box;
+  height: 100% !important;
+  min-height: 0 !important;
+  border-bottom: 4px solid var(--uos-brand-text) !important;
+  overflow: hidden !important;
+}
+
+.program-budget__table-wrap,
+.program-budget__pending {
+  min-height: 0;
+  overscroll-behavior: contain;
+}

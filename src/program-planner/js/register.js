@@ -99,7 +99,7 @@
     var summary = model && typeof model.recordSummary === "function" ? model.recordSummary(item) : null;
     var rawStatus = summary && summary.status || first(item, ["status", "applicationStatus", "state"]) || (item && item.details && text(item.details.status)) || (item && item.payload && item.payload.details && text(item.payload.details.status));
     var normStatus = normalizeStatus(rawStatus, owner);
-    var appDate = first(item, ["endDate", "end_date", "applicationDate", "date", "eventDate", "startDate", "submittedDate", "createdAt"]);
+    var appDate = first(item, ["dateReceived", "receivedDate", "endDate", "end_date", "applicationDate", "date", "eventDate", "startDate", "submittedDate", "createdAt"]);
     var defaultFy = getFinancialYearForDate(appDate);
     var rawHist = Array.isArray(item.statusHistory) ? item.statusHistory :
                   (item.payload && Array.isArray(item.payload.statusHistory) ? item.payload.statusHistory : []);
@@ -112,7 +112,7 @@
         var applicant = first(item, ["customerName", "applicantName", "contactName", "clientName", "contactPerson"]);
         return displayed && applicant && text(displayed) === text(applicant) ? "applicantName" : "";
       }()),
-      date: summary && summary.startDate || first(item, ["date", "eventDate", "startDate", "submittedDate", "createdAt"]),
+      date: summary && summary.startDate || first(item, ["dateReceived", "receivedDate", "date", "eventDate", "startDate", "submittedDate", "createdAt"]),
       priority: summary && summary.priority || first(item, ["priority"]) || "Normal",
       status: normStatus,
       crew: summary && summary.crewId || first(item, ["crew", "crewName", "crewId"]) || "Unassigned",
@@ -254,7 +254,7 @@
       label: "Project Planner",
       tooltip: "Send to Project Planner",
       dest: "planner",
-      iconSvg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+      iconSvg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="1"/><circle cx="6" cy="12" r="1"/><circle cx="6" cy="17" r="1"/><path d="M10 7h8M10 12h8M10 17h8"/></svg>'
     },
     {
       key: "map",
@@ -286,147 +286,65 @@
     }
   ];
 
-  function hasMapLocationsOrPolygons(rec, workspace) {
-    if (!rec) return false;
-    var id = rec.id;
-    var sourceRecord = rec.raw || rec;
-    var linkedProj = buildLinkedProject(workspace, rec);
-    var projId = sourceRecord.projectId || rec.projectId || (linkedProj ? linkedProj.id : "");
 
-    function hasCoordinate(item) {
-      if (!item) return false;
-      if (Array.isArray(item.locations) && item.locations.some(function (location) {
-        return location && Array.isArray(location.coordinate) && location.coordinate.length >= 2 && typeof location.coordinate[0] === "number" && typeof location.coordinate[1] === "number";
-      })) return true;
-      var coord = item.location && Array.isArray(item.location.coordinate) && item.location.coordinate.length >= 2
-        ? item.location.coordinate
-        : (Array.isArray(item.coordinate) ? item.coordinate : null);
-      if (coord && typeof coord[0] === "number" && typeof coord[1] === "number") return true;
-      return false;
-    }
-
-    if (hasCoordinate(sourceRecord) || (linkedProj && hasCoordinate(linkedProj))) {
-      return true;
-    }
-
-    if (Array.isArray(sourceRecord.polygons) && sourceRecord.polygons.length > 0) return true;
-    if (linkedProj && Array.isArray(linkedProj.polygons) && linkedProj.polygons.length > 0) return true;
-
-    var geometries = workspace && workspace.entities && Array.isArray(workspace.entities.geometries) ? workspace.entities.geometries : [];
-    var shapeCount = geometries.filter(function (g) {
-      if (!g) return false;
-      var matchesId = g.eventId === id || g.applicationId === id || (projId && g.projectId === projId);
-      var payload = g.payload || {};
-      var matchesPayload = payload.eventId === id || payload.applicationId === id || (projId && payload.projectId === projId);
-      return matchesId || matchesPayload;
-    }).length;
-
-    return shapeCount > 0;
+  function shortcutState(token, rec, context) {
+    var app = window.UOS.ProgramApp;
+    context = context || app.shortcutContextForWorkspace("", state.workspace, rec && rec.id);
+    return app.evaluateShortcutRule(token.key, context).usage;
   }
 
-  function hasRelatedJobs(rec, workspace) {
-    if (!rec || !workspace || !workspace.entities) return false;
-    var project = buildLinkedProject(workspace, rec);
-    return (workspace.entities.jobs || []).some(function (job) {
-      return job.projectId === (project && project.id) || job.applicationId === rec.id || job.eventId === rec.id || job.sourceEntityId === rec.id;
-    });
+  function budgetAmountForRecord(record) {
+    var api = window.UOS && window.UOS.ProgramBudget;
+    var entities = state.workspace && state.workspace.entities || {};
+    if (!record || !api || typeof api.allocationBalance !== "function") return 0;
+    var budgets = {};
+    (entities.annualBudgets || []).forEach(function (budget) { budgets[budget.id] = budget; });
+    return (entities.registerAllocations || []).filter(function (allocation) {
+      var budget = budgets[allocation.budgetId];
+      return allocation.registerId === record.id && budget && budget.owner === record.owner;
+    }).reduce(function (total, allocation) {
+      var balance = api.allocationBalance(state.workspace, allocation.id);
+      return total + Number(balance && balance.allocated || 0);
+    }, 0);
   }
-
-  function hasCostedJobs(rec, workspace) {
-    if (!rec || !workspace || !workspace.entities) return false;
-    var project = buildLinkedProject(workspace, rec);
-    var projId = project ? project.id : (rec.projectId || "");
-    var jobs = (workspace.entities.jobs || []).filter(function (job) {
-      return (projId && job.projectId === projId) || job.applicationId === rec.id || job.eventId === rec.id || job.sourceEntityId === rec.id;
-    });
-    if (!jobs.length) return false;
-    var jobIds = {};
-    jobs.forEach(function (j) { jobIds[j.id] = true; });
-    return (workspace.entities.costingLines || []).some(function (cl) {
-      return (projId && cl.projectId === projId) || jobIds[cl.jobId];
-    });
+  function budgetAmountLabel(record) {
+    return Number(budgetAmountForRecord(record)).toLocaleString("en-AU", { style: "currency", currency: "AUD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-
-  function actionLinkState(token, hasProject, hasMap, hasJobs, hasCosted) {
-    if (token.key === "planner") return hasProject;
-    if (token.key === "costing") return hasProject && hasJobs;
-    if (token.key === "map") return hasMap;
-    if (token.key === "scheduler") return hasJobs;
-    if (token.key === "quotes") return hasProject;
-    return false;
-  }
-
   function buildMiniToolbarHtml(recordId, recordObj) {
     var recordAttr = recordId ? ' data-register-record="' + esc(recordId) + '"' : '';
     var rec = recordObj || (recordId ? state.records.find(function (r) { return r.id === recordId; }) : null);
-    var hasProject = rec ? Boolean(buildLinkedProject(state.workspace, rec)) : false;
-    var hasLocationOrPoly = rec ? hasMapLocationsOrPolygons(rec, state.workspace) : false;
-    var hasJobs = rec ? hasRelatedJobs(rec, state.workspace) : false;
-    var hasCosted = rec ? hasCostedJobs(rec, state.workspace) : false;
-    var linkedProject = rec ? buildLinkedProject(state.workspace, rec) : null;
+    var shortcutContext = window.UOS.ProgramApp.shortcutContextForWorkspace("", state.workspace, rec && rec.id);
 
  var html = '<nav class="program-register-mini-toolbar" data-owner="' + esc(rec && rec.owner === "EVT" ? "EVT" : "NSA") + '" aria-label="Send to module">';
     MODULE_ACTION_TOKENS.forEach(function (tok) {
-      var isDisabled = false;
-      var tooltip = tok.tooltip;
-      var ariaLabel = tok.label;
-      var isLinked = actionLinkState(tok, hasProject, hasLocationOrPoly, hasJobs, hasCosted);
-
-      if ((tok.key === "planner" || tok.key === "quotes") && !hasProject) {
-        isDisabled = true;
-        tooltip = tok.key === "quotes"
-          ? "Create a linked delivery project first to open in Quote Builder"
-          : "Create a linked project first to open in Project Planner";
-        ariaLabel = tooltip;
-      } else if (tok.key === "scheduler" && !hasJobs) {
-        isDisabled = true;
-        tooltip = "Create at least one Job before opening this record in Scheduler";
-        ariaLabel = "Scheduler (Disabled: This record has no Jobs)";
-      } else if (tok.key === "map" && !hasLocationOrPoly) {
-        tooltip = "Open Space Map to add a location or polygons";
-        ariaLabel = "Space Map (No mapped location or polygons yet)";
-      } else if (tok.key === "costing") {
-        if (!hasProject) {
-          isDisabled = true;
-          tooltip = "Create a linked delivery project first to open in Cost Calculator";
-        } else if (hasJobs) {
-          isLinked = true;
-          tooltip = "Open in Cost Calculator";
-        } else {
-          tooltip = "Open Cost Calculator — this Project has no Jobs yet";
-        }
-        ariaLabel = tooltip;
-      }
-
-      if (tok.key === "planner" && linkedProject) {
-        isLinked = true;
-        isDisabled = false;
-        tooltip = "Open linked Project: " + (linkedProject.title || linkedProject.name || linkedProject.id);
-        ariaLabel = tooltip;
-      }
-      if (isLinked) {
-        isDisabled = false;
-      }
+      var usage = shortcutState(tok, rec, shortcutContext);
+      var isDisabled = usage === "inactive";
+      var isLinked = usage === "in-use";
+      var tooltip = isDisabled
+        ? "Create a linked delivery project first to open " + tok.label
+        : "Open " + tok.label + (usage === "unused" ? " — no saved work yet" : "");
+      var ariaLabel = tooltip;
 
     var activeDestination = text(state.workspace && state.workspace.workspace && state.workspace.workspace.destination) || "register";
     var isCurrent = tok.key === activeDestination;
     if (tok.key === "register") {
-      tooltip = isCurrent ? "Currently in Register" : "Open owning Register";
+      tooltip = "Open owning Register";
       ariaLabel = tooltip;
     }
  var currentClass = isCurrent ? ' is-current-module' : '';
- var availableClass = !isCurrent && !isDisabled ? ' is-available-module' : '';
-      var disabledAttr = isCurrent ? ' disabled aria-current="page"' : (isDisabled ? ' disabled aria-disabled="true"' : '');
-      var linkedClass = isLinked && !isDisabled && !isCurrent ? ' program-register-action--linked' : '';
+ var availableClass = !isDisabled ? ' is-available-module' : '';
+      var disabledAttr = (isCurrent ? ' aria-current="page"' : '') + (isDisabled ? ' disabled aria-disabled="true"' : '');
+      var linkedClass = isLinked ? ' program-register-action--linked' : '';
  html += '<button class="uos-button uos-button--secondary uos-button--sm' + currentClass + availableClass + linkedClass + '" type="button" data-register-action="' + tok.key + '"' + recordAttr +
-        (isLinked && !isDisabled && !isCurrent ? ' data-linked-entity="true"' : '') +
+        ' data-shortcut-state="' + usage + '"' +
+        (isLinked ? ' data-linked-entity="true"' : '') +
         disabledAttr +
         ' data-uos-tooltip="' + esc(tooltip) + '" title="' + esc(tooltip) + '" aria-label="' + esc(ariaLabel) + '">' +
         tok.iconSvg +
         '</button>';
     });
     html += '<button class="uos-button uos-button--secondary uos-button--sm program-register-delete-btn" type="button" data-register-delete-id="' + esc(recordId) + '" data-uos-tooltip="Delete record" title="Delete record" aria-label="Delete record">' +
-      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M9 7l1-3h4l1 3M6 7l1 14h10l1-14"/></svg>' +
       '</button>';
     html += '</nav>';
     return html;
@@ -499,16 +417,6 @@
 
   var virtualScrollCleanup = null;
 
-  function syncRegisterScrollRunway() {
-    var runway = one("[data-register-scroll-runway]");
-    var scroller = runway && runway.closest(".program-table-wrap");
-    var header = scroller && scroller.querySelector(".program-register-table thead");
-    var summary = scroller && scroller.querySelector(".program-register-summary-row");
-    var cell = runway && runway.firstElementChild;
-    if (!cell || !scroller || !header || !summary) return;
-    var available = scroller.clientHeight - header.getBoundingClientRect().height - summary.getBoundingClientRect().height;
-    cell.style.height = Math.max(0, Math.round(available)) + "px";
-  }
 
   function renderTable() {
   /* A direct redraw supersedes the deferred list redraw.  Leaving that timer
@@ -518,14 +426,14 @@
    clearTimeout(renderTableDebounceTimer);
    renderTableDebounceTimer = null;
   }
+    if (UOS.ProgramDrawerWorkspace) UOS.ProgramDrawerWorkspace.captureQuotePosition();
+    if (UOS.ProgramDrawerWorkspace) UOS.ProgramDrawerWorkspace.captureCostingPosition();
     var tbody = one("[data-register-table-body]"); if (!tbody) return;
     var tableScroller = tbody.closest(".program-table-wrap");
-  var preserveModuleScroll = Boolean(tableScroller && (document.body.hasAttribute("data-drawer-module") || Array.prototype.some.call(tbody.querySelectorAll(".program-register-drawer-row"), function (drawerRow) { return !drawerRow.hidden; })));
-    var priorTableScrollTop = preserveModuleScroll ? tableScroller.scrollTop : 0;
-    var priorTableScrollLeft = preserveModuleScroll ? tableScroller.scrollLeft : 0;
-    /* Workspace mutations rebuild the Register rows. Preserve the measured
-       viewport cap across that replacement so mounted modules cannot fall
-       back to their legacy minimum height between renders. */
+  var preserveTableScroll = Boolean(tableScroller && (document.body.hasAttribute("data-register-drawer-open") || Array.prototype.some.call(tbody.querySelectorAll(".program-register-drawer-row"), function (drawerRow) { return !drawerRow.hidden; })));
+    var priorTableScrollTop = preserveTableScroll ? tableScroller.scrollTop : 0;
+    var priorTableScrollLeft = preserveTableScroll ? tableScroller.scrollLeft : 0;
+    /* Preserve the shared measured floor while Register rows are rebuilt. */
     var priorDrawerFloors = Object.create(null);
     tbody.querySelectorAll("[data-register-drawer-record].has-viewport-floor").forEach(function (existingDrawer) {
       var existingId = existingDrawer.getAttribute("data-register-drawer-record");
@@ -555,7 +463,7 @@
       if (virtualScrollCleanup) { virtualScrollCleanup(); virtualScrollCleanup = null; }
       clear(tbody);
       var emptyRow = document.createElement("tr");
-      emptyRow.innerHTML = '<td colspan="8" class="program-map-empty">No applications or events match current filters.</td>';
+      emptyRow.innerHTML = '<td colspan="9" class="program-map-empty">No applications or events match current filters.</td>';
       tbody.appendChild(emptyRow);
       return;
     }
@@ -591,12 +499,13 @@
             '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>' +
           '</button>' +
         '</td>' +
-        '<td class="program-register-table__title-cell"><strong>' + esc(displayName) + '</strong><span>' + esc(record.id) + '</span></td>' +
-        '<td class="program-register-table__location-cell">' + esc(record.location) + '</td>' +
-        '<td class="program-register-table__reference-cell">' + esc(refVal) + '</td>' +
-        '<td class="program-register-table__project-cell"><span class="program-register-project-state ' + (linkedProject ? 'is-created' : 'is-not-created') + '">' + projectState + '</span></td>' +
-        '<td class="program-register-table__status-cell">' + statusPillHtml(record.status) + '</td>' +
-        '<td class="program-register-table__received-cell">' + esc(formattedDate) + '</td>' +
+      '<td class="program-register-table__title-cell"><strong>' + esc(displayName) + '</strong><span>' + esc(record.id) + '</span></td>' +
+      '<td class="program-register-table__location-cell">' + esc(record.location) + '</td>' +
+      '<td class="program-register-table__status-cell">' + statusPillHtml(record.status) + '</td>' +
+      '<td class="program-register-table__received-cell">' + esc(formattedDate) + '</td>' +
+      '<td class="program-register-table__reference-cell">' + esc(refVal) + '</td>' +
+      '<td class="program-register-table__project-cell"><span class="program-register-project-state ' + (linkedProject ? 'is-created' : 'is-not-created') + '">' + projectState + '</span></td>' +
+      '<td class="program-register-table__budget-cell">' + esc(budgetAmountLabel(record)) + '</td>' +
         '<td class="program-register-table__actions-cell">' + buildMiniToolbarHtml(record.id, record) + '</td>';
 
       var drawerRow = document.createElement("tr");
@@ -613,7 +522,7 @@
       drawerRow.hidden = true;
 
       var drawerCell = document.createElement("td");
-      drawerCell.colSpan = 8;
+      drawerCell.colSpan = 9;
       var drawerHost = document.createElement("div");
       drawerHost.className = "program-register-drawer";
       drawerHost.setAttribute("data-register-drawer-record", record.id);
@@ -645,25 +554,11 @@
       if (disclosureApi && disclosureApi.isOpen(key)) renderDetail(record, drawerHost);
     });
 
-    var scrollRunway = document.createElement("tr");
-    scrollRunway.className = "program-register-scroll-runway";
-    scrollRunway.setAttribute("data-register-scroll-runway", "");
-    scrollRunway.setAttribute("aria-hidden", "true");
-    scrollRunway.innerHTML = '<td colspan="8"></td>';
-    fragment.appendChild(scrollRunway);
-
   tbody.appendChild(fragment);
-  if (preserveModuleScroll) {
-    var restoreModuleScroll = function (remainingFrames) {
-      if (!tableScroller.isConnected) return;
-      tableScroller.scrollTop = priorTableScrollTop;
-      tableScroller.scrollLeft = priorTableScrollLeft;
-      if (remainingFrames > 0 && typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(function () { restoreModuleScroll(remainingFrames - 1); });
-    };
-    restoreModuleScroll(4);
+  if (preserveTableScroll) {
+    tableScroller.scrollTop = priorTableScrollTop;
+    tableScroller.scrollLeft = priorTableScrollLeft;
   }
-    syncRegisterScrollRunway();
-    if (typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(syncRegisterScrollRunway);
     if (disclosureApi) disclosureApi.sync();
     var drawerWorkspace = window.UOS && window.UOS.ProgramDrawerWorkspace;
     if (drawerWorkspace && typeof drawerWorkspace.requestSync === "function") {
@@ -1007,7 +902,8 @@
       editButton.className = "program-register-protected-edit__button";
       editButton.setAttribute("data-register-unlock-edit", "");
       editButton.setAttribute("aria-label", "Edit " + label);
-      editButton.textContent = "Edit";
+      editButton.classList.add("program-register-protected-edit__button--icon");
+      editButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"></path><path d="m13.5 6.5 4 4"></path></svg>';
 
       var saveButton = document.createElement("button");
       saveButton.type = "button";
@@ -1488,12 +1384,12 @@
     var actionRow = document.createElement("div");
     actionRow.className = "program-register-nsa-project-fact program-register-budget-action-row";
     actionRow.setAttribute("data-register-budget-row", "action");
-    actionRow.innerHTML = '<span>Budget</span><button type="button" class="uos-button uos-button--secondary uos-button--sm" data-register-action="allocate-budget" data-register-record="' + esc(record.id) + '">Allocate/Adjust</button>';
+ actionRow.innerHTML = '<span>Budget</span><button type="button" class="uos-button uos-button--' + (allocations.length ? "primary" : "secondary") + ' uos-button--sm" data-register-action="allocate-budget" data-register-record="' + esc(record.id) + '">' + (budgetAmountForRecord(record) > 0 ? "Adjust" : "Allocate") + '</button>';
     projectFact.insertAdjacentElement("afterend", actionRow);
     var allocationTableRow = document.createElement("div");
     allocationTableRow.className = "program-register-nsa-project-fact program-register-budget-allocation-table-row";
     allocationTableRow.setAttribute("data-register-budget-row", "allocation-table");
-    allocationTableRow.innerHTML = '<span>Council Operations Allocated</span><div class="program-register-allocation-table" data-register-allocation-table><div class="program-register-allocation-table__header" data-register-allocation-header><span>Financial FY</span><span>Allocated</span></div></div>';
+      allocationTableRow.innerHTML = '<span>Council Operations Allocated</span><div class="program-register-allocation-table" data-register-allocation-table><div class="program-register-allocation-table__header" data-register-allocation-header><span>Financial Year</span><span>Allocated</span></div></div>';
     actionRow.insertAdjacentElement("afterend", allocationTableRow);
     var allocationTable = one("[data-register-allocation-table]", allocationTableRow);
     var rows = allocations.length ? allocations : [{ id: "", budgetId: "" }];
@@ -1840,10 +1736,10 @@
         relatedQuotes.forEach(function (quote) {
           var quoteRow = document.createElement("div");
           quoteRow.className = "program-register-quote-row";
-          var quoteTotal = Number(quote.grandTotal || 0);
+          var quoteTotal = UOS.ProgramQuotes.customerAmounts(quote).payable;
           quoteRow.innerHTML = '<div><strong>' + esc(quote.quoteNumber || quote.auditNumber || quote.id) + '</strong><span>Revision ' + esc(quote.revision || 1) + '</span></div>' +
             statusPillHtml(quote.status || "Draft") +
-            '<strong>' + (quoteTotal ? quoteTotal.toLocaleString("en-AU", { style: "currency", currency: "AUD" }) : "—") + '</strong>';
+            '<strong>' + quoteTotal.toLocaleString("en-AU", { style: "currency", currency: "AUD" }) + '</strong>';
           quoteList.appendChild(quoteRow);
         });
       }
@@ -2494,11 +2390,17 @@
         var recordId = actionBtn.getAttribute("data-register-record") || state.selectedId;
         if (!recordId) return;
         var token = MODULE_ACTION_TOKENS.find(function (tok) { return tok.key === actionKey; });
-        var targetDest = token ? token.dest : actionKey;
-        var recordObj = state.records.find(function (r) { return r.id === recordId; });
+    var targetDest = token ? token.dest : actionKey;
+    var recordObj = state.records.find(function (r) { return r.id === recordId; });
         var linkedProject = buildLinkedProject(state.workspace, recordObj);
-        var contextEntityId = recordId;
-        state.selectedId = recordId;
+        if (token && shortcutState(token, recordObj) === "inactive") return;
+        event.preventDefault();
+        event.stopPropagation();
+    var contextEntityId = recordId;
+    if (targetDest && targetDest !== "register") {
+      document.body.setAttribute("data-register-module-navigation-pending", targetDest);
+    }
+    state.selectedId = recordId;
         state.mode = "detail";
         renderMode();
         renderTable();
@@ -2537,6 +2439,7 @@
           }).then(function () {
             if (typeof window.UOS.ProgramApp.navigate === "function") {
               window.UOS.ProgramApp.navigate(targetDest);
+              if (window.UOS.ProgramDisclosureRows) window.UOS.ProgramDisclosureRows.open("register:" + recordId);
             }
           });
         }

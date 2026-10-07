@@ -6,6 +6,7 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 const stages = [
+ { name: "Canonical Calculator and Map governance", script: "test:canonical-work-governance" },
  { name: "Node suite", script: "test" },
  { name: "Browser suite", script: "test:browser" },
  { name: "Budget Gates O and P", script: "test:budget-gates" },

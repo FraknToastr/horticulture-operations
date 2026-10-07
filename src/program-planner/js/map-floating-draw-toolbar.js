@@ -9,6 +9,7 @@
     toolbar.dataset.dragReady = "true";
 
     var drag = null;
+    var userPositioned = false;
 
     function bounds(left, top) {
       var maxLeft = Math.max(0, viewport.clientWidth - toolbar.offsetWidth);
@@ -53,6 +54,7 @@
       if (!drag || (event && drag.pointerId !== event.pointerId)) return;
       if (handle.hasPointerCapture(drag.pointerId)) handle.releasePointerCapture(drag.pointerId);
       drag = null;
+      userPositioned = true;
       handle.removeAttribute("aria-pressed");
       toolbar.classList.remove("is-dragging");
     }
@@ -73,9 +75,15 @@
     });
 
     new ResizeObserver(function () {
-      place(toolbar.offsetLeft - viewport.offsetLeft, toolbar.offsetTop - viewport.offsetTop);
+      if (!userPositioned) {
+        place(20, 20);
+        return;
+      }
+      var viewportRect = viewport.getBoundingClientRect();
+      var toolbarRect = toolbar.getBoundingClientRect();
+      place(toolbarRect.left - viewportRect.left, toolbarRect.top - viewportRect.top);
     }).observe(viewport);
-    place(12, 12);
+    place(20, 20);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialise);

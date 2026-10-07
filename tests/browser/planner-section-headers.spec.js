@@ -23,6 +23,22 @@ test("Project Planner merges section and column headers and collapses sections",
  await frame.locator('[data-program-destination="planner"]').click();
   const table = frame.locator(".planner-table");
   await expect(table).toBeVisible();
+  const checklistEdges = await frame.locator(".program-register-module-host .program-planner-main-pane").evaluate((pane) => {
+    const drawer = pane.closest("[data-register-drawer-record]");
+    const table = pane.querySelector(".planner-table");
+    return {
+      border: getComputedStyle(pane).borderLeftWidth,
+      radius: getComputedStyle(pane).borderTopLeftRadius,
+      leftGap: pane.getBoundingClientRect().left - drawer.getBoundingClientRect().left,
+      rightGap: drawer.getBoundingClientRect().right - table.getBoundingClientRect().right
+    };
+  });
+  expect(checklistEdges.border).toBe("0px");
+  expect(checklistEdges.radius).toBe("0px");
+  expect(checklistEdges.leftGap).toBeLessThanOrEqual(1);
+  expect(checklistEdges.rightGap).toBeGreaterThanOrEqual(0);
+  expect(checklistEdges.rightGap).toBeLessThanOrEqual(20);
+  await expect(table).toBeVisible();
   await frame.locator('[data-program-view="planner"]').screenshot({ path: "test-results/planner-section-headers.png" });
   const section = table.locator(".planner-cat-header-row").first();
   await expect(section.locator("th")).toHaveCount(6);
@@ -35,12 +51,12 @@ test("Project Planner merges section and column headers and collapses sections",
  expect(registerControl).toEqual(plannerControl);
  expect(plannerControl.width).toBe(30);
  expect(plannerControl.height).toBe(30);
-  await expect(section.locator(".planner-section-toggle")).toHaveAttribute("aria-expanded", "true");
-  const sectionRows = table.locator('[data-planner-section-row]');
-  await expect(sectionRows.first()).toBeVisible();
-  await section.locator(".planner-section-toggle").click();
   await expect(section.locator(".planner-section-toggle")).toHaveAttribute("aria-expanded", "false");
+  const sectionRows = table.locator('[data-planner-section-item]');
   await expect(sectionRows.first()).toBeHidden();
+  await section.locator(".planner-section-toggle").click();
+  await expect(section.locator(".planner-section-toggle")).toHaveAttribute("aria-expanded", "true");
+  await expect(sectionRows.first()).toBeVisible();
   await section.locator(".planner-section-toggle").focus();
   await expect(section.locator(".planner-section-toggle")).toBeFocused();
 });

@@ -28,6 +28,7 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
   function statusPillHtml(value) { return '<span class="program-status-pill status--' + statusSlug(value) + '">' + esc(value || "Draft") + '</span>'; }
   function active(rate) { return rate.active !== false && text(rate.status).toLowerCase() !== "inactive"; }
   function rateSection(rate) {
+    if (model() && model().rateKind) return model().rateKind(rate);
     if (rate && rate.kindSource === "user" && ["Labour", "Equipment", "Material", "Contractors", "Sundry"].indexOf(text(rate.kind)) >= 0) return text(rate.kind);
     var classifier = root.UOS && root.UOS.ProgramModel && root.UOS.ProgramModel.classifyRateKind;
  if (typeof classifier === "function") return classifier(rate && rate.category, rate && (rate.description || rate.title), rate && rate.kind);
@@ -40,33 +41,49 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
  return (hash >>> 0) % 8;
  }
   function categoryPillLabel(value) { var label = text(value) || "Uncategorised", limit = "Plant Hire/Contractors".length; return label.length > limit ? label.slice(0, limit) + "..." : label; }
- function sizeCategoryColumn(rates) {
- var table = one(".program-cost-table"), column = one(".program-cost-col-category");
- if (!table || !column) return;
- var canvas = root.document.createElement("canvas"), context = canvas.getContext && canvas.getContext("2d");
- if (context && root.getComputedStyle) context.font = "700 11px " + root.getComputedStyle(table).fontFamily;
- var labels = (rates || []).map(function (rate) { return categoryPillLabel(rate.category); });
- var widest = labels.reduce(function (width, label) {
- return Math.max(width, context ? context.measureText(label).width : label.length * 7);
- }, 0);
- var columnWidth = Math.ceil(widest + 46);
- column.style.width = columnWidth + "px";
- column.style.minWidth = columnWidth + "px";
- table.style.minWidth = Math.max(920, columnWidth + 740) + "px";
- }
+  function sizeCategoryColumn() {
+    var table = one(".program-cost-table");
+    if (!table) return;
+    var canvas = root.document.createElement("canvas"), context = canvas.getContext && canvas.getContext("2d");
+    var widest = Array.prototype.reduce.call(table.querySelectorAll(".program-category-pill"), function (width, pill) {
+      var style = root.getComputedStyle(pill);
+      if (context) context.font = style.font || "700 11px " + style.fontFamily;
+      var measured = (context ? context.measureText(pill.textContent).width : pill.textContent.length * 7)
+        + (parseFloat(style.letterSpacing) || 0) * pill.textContent.length
+        + (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0)
+        + 2; // Category frames use 1px borders; avoid zoom-dependent border rounding.
+      return Math.max(width, measured);
+    }, 0);
+    var heading = table.querySelector('[data-rate-sort="category"]');
+    var headingWidth = heading ? Array.prototype.reduce.call(heading.children, function (width, child) {
+      if (context) context.font = root.getComputedStyle(child).font || "800 10px " + root.getComputedStyle(table).fontFamily;
+      return width + (child.offsetWidth || (context ? context.measureText(child.textContent).width : child.textContent.length * 7));
+    }, 8) : 0;
+    var columnWidth = Math.ceil(Math.max(widest, headingWidth) + 16);
+    table.style.setProperty("--commercial-category-width", columnWidth + "px");
+    if (context) context.font = "800 11px " + root.getComputedStyle(table).fontFamily;
+    var stateWidth = Math.ceil((context ? context.measureText("INACTIVE").width : 56) + 4 + 20 + 8);
+    table.style.setProperty("--commercial-state-width", stateWidth + "px");
+    table.style.minWidth = "calc(" + (columnWidth + stateWidth + 364) + "px + 4 * var(--commercial-frame-height, 34px) + 32px)";
+  }
   function currentJob() { return entities("jobs").find(function (job) { return job.id === state.jobId; }) || null; }
-  function showError(error) { var node = one("[data-costing-error]"); if (!node) return; node.textContent = error ? (error.message || String(error)) : ""; node.hidden = !error; }
+  function showError(error) { state.error = error ? (error.message || String(error)) : ""; var node = one("[data-costing-error]"); if (!node) return; node.textContent = state.error; node.hidden = !state.error; }
   function svg(kind) {
     var namespace = ["http:", "", "www.w3.org", "2000", "svg"].join("/"), node = root.document.createElementNS(namespace, "svg");
     var paths = kind === "trash" ? ["M3 6h18", "M8 6V4h8v2", "M19 6l-1 15H6L5 6", "M10 11v6", "M14 11v6"]
-      : kind === "edit" ? ["M12 20h9", "M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"]
+      : kind === "edit" ? ["M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z", "m13.5 6.5 4 4"]
       : kind === "map" ? ["M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z", "M9 3v15", "M15 6v15"]
       : ["M12 5v14", "M5 12h14"];
     node.setAttribute("viewBox", "0 0 24 24"); node.setAttribute("aria-hidden", "true");
     paths.forEach(function (data) { var path = root.document.createElementNS(namespace, "path"); path.setAttribute("d", data); node.appendChild(path); });
     return node;
   }
-  function button(label, kind, attribute, value) { var node = root.document.createElement("button"); node.type = "button"; node.className = "uos-button uos-button--secondary uos-button--icon"; node.setAttribute("aria-label", label); node.setAttribute(attribute, value); node.appendChild(svg(kind)); return node; }
+  function button(label, kind, attribute, value) { var node = root.document.createElement("button"); node.type = "button"; node.className = "uos-button uos-button--secondary uos-button--icon"; node.setAttribute("aria-label", label); node.setAttribute(attribute, value); if (kind === "calendar" || kind === "calendar-tick") {
+      var icon = root.document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("viewBox", "0 0 24 24"); icon.setAttribute("aria-hidden", "true");
+      icon.innerHTML = '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18' + (kind === "calendar-tick" ? 'M8 16l2.5 2.5L16.5 13' : '') + '"/>';
+      node.appendChild(icon);
+    } else node.appendChild(svg(kind)); return node; }
 
   function isPolygonRate(rate) {
     if (!rate || !rate.id) return false;
@@ -174,7 +191,7 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     if (select) { clear(select); select.hidden = true; select.disabled = true; if (select.closest("label")) select.closest("label").hidden = true; }
     var createInput = one("[data-costing-new-catalog-fy]"); if (createInput) { createInput.hidden = true; if (createInput.closest("label")) createInput.closest("label").hidden = true; }
     var createButton = one("[data-costing-new-catalog]"); if (createButton) createButton.hidden = true;
-    var heading = one("#cost-catalog-title"); if (heading) { heading.textContent = "Rate Items"; var eyebrow = heading.parentNode && heading.parentNode.querySelector(".uos-eyebrow"); if (eyebrow) eyebrow.textContent = "Global cost library"; }
+    var heading = one("#cost-catalog-title"); if (heading) { heading.textContent = "Rate Items"; var eyebrow = heading.parentNode && heading.parentNode.querySelector(".uos-eyebrow"); if (eyebrow) eyebrow.textContent = "Cost Library"; }
     var drawer = one('[data-filter-drawer="costing-catalog"]');
     var drawerToggle = drawer && drawer.querySelector("[data-filter-drawer-toggle]");
     if (drawerToggle) { drawerToggle.setAttribute("aria-label", "Toggle global Rate Item library information"); var lead = drawerToggle.querySelector(".program-filter-drawer-toggle__lead span"); if (lead) lead.textContent = "Rate Item Library"; }
@@ -214,9 +231,9 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
  control.setAttribute("aria-label", "Sort by " + key + (active ? ", currently " + state.rateSortDirection : ""));
  });
  }
- function renderCatalog() {
- var body = one("[data-costing-catalog-body]"), rawValues = rateValues(), job = currentJob(); clear(body);
- sizeCategoryColumn(rawValues);
+  function renderCatalog() {
+    var body = one("[data-costing-catalog-body]"), rawValues = rateValues(), job = currentJob(); clear(body);
+    if (!body) return;
     var selectedProject = getCostingProjects(state.mode === "events" ? "EVT" : "NSA").find(function (p) { return p.id === state.selectedProjectId; }) || entities("projects").find(function (p) { return p.id === state.selectedProjectId; }) || null;
     var mappedIds = root.UOS && root.UOS.WorkAreaService && typeof root.UOS.WorkAreaService.mappedRateIds === "function"
       ? root.UOS.WorkAreaService.mappedRateIds(state.workspace)
@@ -249,12 +266,12 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
  row.setAttribute("data-rate-item-row", rate.id);
       var rateTitle = title(rate) || "Untitled rate";
       var description = root.document.createElement("td"), strong = root.document.createElement("strong");
- strong.textContent = rateTitle; strong.setAttribute("data-uos-tooltip", rateTitle); strong.setAttribute("title", rateTitle); strong.setAttribute("aria-label", rateTitle); strong.setAttribute("data-rate-description", rate.id); strong.tabIndex = 0; description.appendChild(strong);
+ strong.textContent = rateTitle.replace(/[\r\n]+/g, " "); strong.setAttribute("data-uos-tooltip", rateTitle); strong.setAttribute("title", rateTitle); strong.setAttribute("aria-label", rateTitle); strong.setAttribute("data-rate-description", rate.id); strong.tabIndex = 0; strong.classList.add("program-cost-value"); description.appendChild(strong);
       var categoryCell = root.document.createElement("td"), category = root.document.createElement("span");
       var categoryLabel = text(rate.category) || "Uncategorised";
  category.className = "program-category-pill"; category.setAttribute("data-category-colour", String(categoryColour(categoryLabel))); category.setAttribute("data-category-full-label", categoryLabel); category.setAttribute("data-rate-category", rate.id); category.textContent = categoryPillLabel(categoryLabel); category.setAttribute("data-uos-tooltip", categoryLabel); category.setAttribute("title", categoryLabel); category.setAttribute("aria-label", "Category: " + categoryLabel); categoryCell.appendChild(category);
-      var unit = root.document.createElement("td"); unit.textContent = formatUnitType(rate.unit, rate.quantityKind || rate.quantityMode || (rate.payload && (rate.payload.quantityKind || rate.payload.quantityMode)));
-      var amount = root.document.createElement("td"); amount.textContent = money(rate.unitRate);
+      var unit = root.document.createElement("td"); var unitValue = root.document.createElement("span"); unitValue.className = "program-cost-value"; unitValue.textContent = formatUnitType(rate.unit, rate.quantityKind || rate.quantityMode || (rate.payload && (rate.payload.quantityKind || rate.payload.quantityMode))); unit.appendChild(unitValue);
+      var amount = root.document.createElement("td"); var rateValue = root.document.createElement("span"); rateValue.className = "program-cost-value"; rateValue.textContent = money(rate.unitRate); amount.appendChild(rateValue);
       var statusCell = root.document.createElement("td"), status = root.document.createElement("span"), statusLabel = active(rate) ? "Active" : "Inactive"; status.className = "program-rate-state" + (active(rate) ? " program-rate-state--active" : " program-rate-state--inactive"); status.textContent = statusLabel; status.setAttribute("data-uos-tooltip", statusLabel); status.setAttribute("title", statusLabel); status.setAttribute("aria-label", "State: " + statusLabel); statusCell.appendChild(status);
 
       var isPolygonWork = isPolygonRate(rate);
@@ -280,6 +297,23 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
       var edit = button("Edit " + rateTitle, "edit", "data-costing-edit-rate", rate.id);
       var remove = button("Delete " + rateTitle, "trash", "data-costing-delete-rate", rate.id);
       actions.className = "program-rate-actions";
+      if (model().schedulerEnabled(rate)) {
+        var help = "Future additions of " + rateTitle + " create draft Scheduler jobs. Change this in Rate Item settings.";
+        var calendar = button(help, "calendar", "data-costing-scheduler-info", rate.id);
+        var info = root.document.createElement("span");
+        info.className = "program-rate-scheduler-info uos-button uos-button--secondary uos-button--icon";
+        info.tabIndex = 0;
+        info.setAttribute("role", "img");
+        info.setAttribute("aria-label", help);
+        info.setAttribute("data-costing-scheduler-info", rate.id);
+        info.setAttribute("data-uos-tooltip", help);
+        info.setAttribute("data-uos-tooltip-pos", "top");
+        info.title = help;
+        info.appendChild(calendar.firstChild);
+        actions.appendChild(info);
+      } else {
+        var slot = root.document.createElement("span"); slot.className = "program-rate-empty-slot"; slot.setAttribute("aria-hidden", "true"); actions.appendChild(slot);
+      }
       actions.appendChild(add);
       actions.appendChild(edit);
       actions.appendChild(remove);
@@ -287,6 +321,7 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
       [categoryCell, description, unit, amount, statusCell, action].forEach(function (cell) { row.appendChild(cell); });
       body.appendChild(row);
     });
+    sizeCategoryColumn();
     var empty = one("[data-costing-catalog-empty]"); if (empty) empty.hidden = values.length !== 0;
     var catalogCount = one("[data-costing-catalog-summary]");
     if (catalogCount) {
@@ -540,20 +575,17 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     var submit = form.querySelector("button[type='submit']"); if (submit) { submit.disabled = !rateSelect.options.length; submit.title = rateSelect.options.length ? "" : "No compatible active rates are available for this polygon."; }
   }
   function renderCalculator() {
+    var drawerUI = root.UOS.ProgramDrawerWorkspace, position = drawerUI && drawerUI.captureCostingPosition();
+    var rootNode = one('[data-program-view="costing"]');
+    if (rootNode) rootNode.setAttribute("data-costing-position-context", state.selectedProjectId);
     var selectedProject = getCostingProjects(state.mode === "events" ? "EVT" : "NSA").find(function (p) { return p.id === state.selectedProjectId; }) || entities("projects").find(function (p) { return p.id === state.selectedProjectId; }) || null;
     var projectJobs = selectedProject ? findProjectJobs(selectedProject) : [];
     var job = currentJob();
     if (job && (!selectedProject || job.projectId !== selectedProject.id)) job = null;
 
-    var lines = [];
-    if (job) {
-      lines = entities("costingLines").filter(function (line) { return line.jobId === job.id; });
-    } else if (selectedProject) {
-      var projectJobIds = projectJobs.map(function (projectJob) { return projectJob.id; });
-      lines = entities("costingLines").filter(function (line) { return line && (line.projectId === selectedProject.id || projectJobIds.indexOf(line.jobId) >= 0); });
-    }
+    var lines = selectedProject ? entities("costingLines").filter(function (line) { return line.projectId === selectedProject.id; }) : [];
 
-    var body = one("[data-costing-lines]"); clear(body);
+    var body = one("[data-costing-lines]"); if (!body) return; clear(body);
     var calcTitle = job ? jobLabel(job) : (selectedProject ? title(selectedProject) : "Select a job");
     setText("#costing-title", "Assigned Rate Items");
     var lineCount = one("[data-costing-lines-count]");
@@ -569,25 +601,25 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     lines.sort(function (a, b) { var ar = entities("rateItems").find(function (item) { return item.id === a.rateItemId; }); var br = entities("rateItems").find(function (item) { return item.id === b.rateItemId; }); return rateSection(ar).localeCompare(rateSection(br)); });
     var currentKind = "";
     lines.forEach(function (line) {
-      var lineRate = entities("rateItems").find(function (item) { return item.id === line.rateItemId; }); var lineKind = rateSection(lineRate);
+      var lineRate = entities("rateItems").find(function (item) { return item.id === line.rateItemId; }); var lineKind = model().lineKind(state.workspace, line);
       if (lineKind !== currentKind) { currentKind = lineKind; var groupRow = root.document.createElement("tr"); groupRow.className = "program-costing-line-group"; groupRow.setAttribute("data-costing-line-group", lineKind); var groupCell = root.document.createElement("th"); groupCell.scope = "rowgroup"; groupCell.colSpan = 7; groupCell.textContent = lineKind.toUpperCase(); groupRow.appendChild(groupCell); body.appendChild(groupRow); }
-      var row = root.document.createElement("tr"), name = root.document.createElement("td"), strong = root.document.createElement("strong"); strong.textContent = title(line); name.appendChild(strong);
+      var row = root.document.createElement("tr"), name = root.document.createElement("td"), strong = root.document.createElement("strong"); strong.textContent = title(line).replace(/[\r\n]+/g, " "); strong.setAttribute("title", title(line)); strong.setAttribute("data-uos-tooltip", title(line)); strong.classList.add("program-cost-value"); name.appendChild(strong);
       name.className = "program-calculator-line-item";
       var source = root.document.createElement("td"), sourceIcon = root.document.createElementNS("http://www.w3.org/2000/svg", "svg");
       var mappedSource = Boolean(line.sourceGeometryId);
       source.className = "program-cost-source";
-     source.title = mappedSource ? "Derived from polygon — manage in Space Map" : "Calculator entry";
+      source.title = mappedSource ? "Space Map" : line.sourceKind === "planner" ? "Planner" : line.rateItemId ? "Cost Library" : "Resource Calculator";
       source.setAttribute("aria-label", source.title);
       sourceIcon.setAttribute("viewBox", "0 0 24 24");
       sourceIcon.setAttribute("aria-hidden", "true");
       sourceIcon.innerHTML = mappedSource
 ? '<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'
-        : '<path d="M4 3h16v18H4zM8 7h8M8 11h8M8 15h3M15 15h1"/>';
-      source.appendChild(sourceIcon);
-     var quantity = root.document.createElement("td"), quantityInput = root.document.createElement("input"); quantityInput.type = "number"; quantityInput.min = "0"; quantityInput.step = "any"; quantityInput.value = line.quantity; quantityInput.setAttribute("aria-label", "Quantity for " + title(line)); quantityInput.setAttribute("data-costing-line-quantity", line.id); if (mappedSource) { quantityInput.disabled = true; quantityInput.title = "Derived from polygon — manage in Space Map"; } quantity.appendChild(quantityInput);
+        : line.sourceKind === "planner" ? '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="m7 8 1 1 2-2M12 8h5m-10 5 1 1 2-2M12 13h5m-10 5 1 1 2-2M12 18h5"/>' : '<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/>';
+      var sourceFrame = root.document.createElement("span"); sourceFrame.className = "program-cost-source-frame"; sourceFrame.appendChild(sourceIcon); source.appendChild(sourceFrame);
+     var quantity = root.document.createElement("td"), quantityInput = root.document.createElement("input"); quantityInput.className = "uos-input"; quantityInput.type = "number"; quantityInput.min = "0"; quantityInput.step = "any"; quantityInput.value = line.quantity; quantityInput.setAttribute("aria-label", "Quantity for " + title(line)); quantityInput.setAttribute("data-costing-line-quantity", line.id); if (mappedSource) { quantityInput.disabled = true; quantityInput.title = "Derived from polygon — manage in Space Map"; } quantity.appendChild(quantityInput);
       var unitTd = root.document.createElement("td");
       var unitSelect = root.document.createElement("select");
-      unitSelect.className = "uos-select uos-select--sm";
+      unitSelect.className = "uos-select";
       unitSelect.setAttribute("aria-label", "Unit for " + title(line));
       unitSelect.setAttribute("data-costing-line-unit", line.id);
       var currentLineUnit = text(line.unit).toLowerCase() || "each";
@@ -604,20 +636,32 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
       });
      if (mappedSource) { unitSelect.disabled = true; unitSelect.title = "Derived from polygon — manage in Space Map"; }
      unitTd.appendChild(unitSelect);
-     var rate = root.document.createElement("td"), rateInput = root.document.createElement("input"); rateInput.type = "number"; rateInput.min = "0"; rateInput.step = "0.01"; rateInput.value = line.unitRate; rateInput.setAttribute("aria-label", "Unit rate for " + title(line)); rateInput.setAttribute("data-costing-line-rate", line.id); if (mappedSource) { rateInput.disabled = true; rateInput.title = "Derived from polygon — manage in Space Map"; var derivedNote = root.document.createElement("span"); derivedNote.className = "program-costing-derived-note"; derivedNote.setAttribute("data-costing-spatial-derived", line.id); derivedNote.textContent = "Derived from polygon — manage in Space Map"; name.appendChild(derivedNote); } rate.appendChild(rateInput);
-      var total = root.document.createElement("td"); total.textContent = money(line.estimatedTotal); total.setAttribute("data-costing-line-total", line.id);
-      var action = root.document.createElement("td"); action.appendChild(button("Remove " + title(line), "trash", "data-costing-remove", line.id));
+     var rate = root.document.createElement("td"), rateInput = root.document.createElement("input"); rateInput.className = "uos-input"; rateInput.type = "number"; rateInput.min = "0"; rateInput.step = "0.01"; rateInput.value = line.unitRate; rateInput.setAttribute("aria-label", "Unit rate for " + title(line)); rateInput.setAttribute("data-costing-line-rate", line.id); if (mappedSource) { rateInput.disabled = true; rateInput.title = "Derived from polygon — manage in Space Map"; var derivedNote = root.document.createElement("span"); derivedNote.className = "program-costing-derived-note"; derivedNote.setAttribute("data-costing-spatial-derived", line.id); derivedNote.textContent = "Derived from polygon — manage in Space Map"; name.appendChild(derivedNote); } rate.appendChild(rateInput);
+      var total = root.document.createElement("td"); var totalValue = root.document.createElement("span"); totalValue.className = "program-cost-value program-cost-value--total"; totalValue.textContent = money(line.estimatedTotal); totalValue.setAttribute("data-costing-line-total", line.id); total.appendChild(totalValue);
+      var action = root.document.createElement("td"); action.className = "program-calculator-actions";
+      var rail = root.document.createElement("span"); rail.className = "program-calculator-action-rail";
+      if (line.jobId || line.jobCreationSuspended) {
+        var linkedJob = entities("jobs").find(function (item) { return item.id === line.jobId; });
+        var calendar = button(linkedJob ? "Open Scheduler job for " + title(line) : "Recreate draft job for " + title(line), linkedJob && text(linkedJob.status).toLowerCase() !== "draft" && linkedJob.startDate ? "calendar-tick" : "calendar", "data-costing-line-calendar", line.id);
+        calendar.title = calendar.getAttribute("aria-label");
+        calendar.setAttribute("data-costing-calendar-state", linkedJob ? (linkedJob.startDate && text(linkedJob.status).toLowerCase() !== "draft" ? "scheduled" : "draft") : "suspended");
+        calendar.classList.add("program-calculator-calendar");
+        rail.appendChild(calendar);
+      }
+      rail.appendChild(button("Remove " + title(line), "trash", "data-costing-remove", line.id));
+      action.appendChild(rail);
       [name, source, quantity, unitTd, rate, total, action].forEach(function (cell) { row.appendChild(cell); }); body.appendChild(row);
     });
     var empty = one("[data-costing-lines-empty]"); if (empty) empty.hidden = lines.length !== 0;
- var result = job && typeof model().jobCalculator === "function" ? model().jobCalculator(state.workspace, job.id).totals : model().totals(lines, { preliminariesPercent: state.preliminaries, marginPercent: state.margin });
+ var result = model().totals(lines, { preliminariesPercent: state.preliminaries, marginPercent: state.margin });
  setText('[data-costing-total="subtotal"]', money(result.subtotal));
  setText('[data-costing-total-label="preliminaries"]', "Preliminaries (" + percentage(result.preliminariesPercent) + ")");
  setText('[data-costing-total="preliminaries"]', money(result.preliminaries));
  setText('[data-costing-total-label="margin"]', "Margin (" + percentage(result.marginPercent) + ")");
  setText('[data-costing-total="margin"]', money(result.margin));
  setText('[data-costing-total="gst"]', money(result.gst));
- setText('[data-costing-total="grand"]', money(result.grandTotal));
+    setText('[data-costing-total="grand"]', money(result.grandTotal));
+    if (position) drawerUI.restoreCostingPosition(position);
   }
   function renderCategories() {
     var select = one("[data-costing-category]"); if (!select) return; var retained = state.category; while (select.options.length > 1) select.remove(1);
@@ -626,6 +670,7 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
   }
   function render() {
     if (!state.workspace || !model() || !root.document) return;
+    var drawerUI = root.UOS.ProgramDrawerWorkspace, position = drawerUI && drawerUI.captureCostingPosition();
     renderProjects();
     renderCatalogControls();
     renderCategories();
@@ -633,82 +678,27 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     decorateCatalogAccessibility();
     renderMapped();
     renderCalculator();
+    renderCalculatorTools();
     updatePillPicker();
     all("[data-costing-section]").forEach(function (tab) { tab.setAttribute("aria-selected", String(tab.getAttribute("data-costing-section") === state.section)); });
     var preliminaries = one("[data-costing-preliminaries]"), margin = one("[data-costing-margin]");
     if (preliminaries) preliminaries.value = state.preliminaries;
     if (margin) margin.value = state.margin;
-    showError(null);
+    showError(state.error ? new Error(state.error) : null);
+    if (position) drawerUI.restoreCostingPosition(position);
   }
   function persist(mutator) { var app = root.UOS && root.UOS.ProgramApp; if (!app || !app.updateWorkspace) return Promise.resolve(null); return app.updateWorkspace(mutator); }
-  function mutate(operation) { if (!state.workspace) return Promise.resolve(null); showError(null); return persist(function (workspace) { return operation(model(), workspace); }).catch(function (error) { showError(error); return null; }); }
+  function mutate(operation) { if (!state.workspace) return Promise.resolve(null); showError(null); return persist(function (workspace) { return operation(model(), workspace); }).then(function (saved) { if (saved) root.setTimeout(function () { update(root.UOS.ProgramApp.workspace()); }, 0); return saved; }).catch(function (error) { showError(error); return null; }); }
   function addRate(id) {
-    var rate = entities("rateItems").find(function (item) { return item.id === id; });
-    if (!rate || !active(rate)) return;
     var project = entities("projects").find(function (item) { return item.id === state.selectedProjectId; });
-    if (!project) {
-      showError(new Error("Select an existing Delivery Project before adding a rate item."));
-      return;
-    }
-
-  return mutate(function (api, workspace) {
-    var baseRevision = workspace.workspaceRevision;
-    var canonicalProject = workspace.entities.projects.find(function (item) { return item.id === project.id; });
-      if (!canonicalProject) throw new Error("Selected Delivery Project no longer exists.");
-      var projectJobs = workspace.entities.jobs.filter(function (job) { return job.projectId === canonicalProject.id; });
-
-      function isNormalJob(j) {
-        return !j.sourceGeometryId && !j.geometryId && text(j.sourceKind).toLowerCase() !== "spacemap" && !(j.provenance && j.provenance.sourceApp === "uos.work-area-service");
-      }
-
-      var calculatorSourceId = canonicalProject.id + ":resource-calculator";
-      var selectedJob = projectJobs.find(function (job) { return job.id === state.jobId; });
-      var targetJob = (selectedJob && isNormalJob(selectedJob)) ? selectedJob : projectJobs.find(function (job) { return text(job.sourceKind).toLowerCase() === "calculator" && job.sourceEntityId === calculatorSourceId; }) || projectJobs.find(isNormalJob);
-      if (!targetJob) {
-        workspace = api.createJob(workspace, canonicalProject.id, {
-          title: (canonicalProject.title || canonicalProject.name || canonicalProject.id) + " - Job 1",
-          status: "Draft", sourceKind: "calculator", sourceEntityId: calculatorSourceId,
-          provenance: { owner: canonicalProject.owner, sourceApp: "uos.job-calculator", sourceVersion: 4, sourceId: calculatorSourceId }
-        });
-        targetJob = workspace.entities.jobs.filter(function (job) { return job.projectId === canonicalProject.id && isNormalJob(job); }).pop();
-      }
-      if (!targetJob) throw new Error("Could not initialize a Job for this Delivery Project.");
-      targetJob.sourceKind = "calculator";
-      targetJob.sourceEntityId = targetJob.sourceEntityId || calculatorSourceId;
-      state.jobId = targetJob.id;
-      var initialQuantity = { quantity: 1, areaSqM: 1, lengthM: 1, volumeM3: 1, massKg: 1, hours: 1, workers: 1 };
-    var result = api.createLine(workspace, id, initialQuantity, {
-      owner: targetJob.owner,
-      jobId: targetJob.id
-    });
-    /* Persist calculator context so the subsequent program-ready render keeps
-       the newly created Job and its line visible. */
-    result.workspace = result.workspace || {};
-    result.workspace.costing = {
-      jobId: targetJob.id,
-      section: state.section,
-      mode: state.mode,
-      selectedProjectId: canonicalProject.id
-    };
-    result.workspace.selectedProjectId = canonicalProject.id;
-    result.workspace.selectedEntityId = canonicalProject.applicationId || canonicalProject.eventId || canonicalProject.id;
-    result.workspace.ownerMode = canonicalProject.owner;
-    result.workspaceRevision = baseRevision;
+    if (!project) { showError(new Error("Select an existing Delivery Project before adding a rate item.")); return; }
+    var operationId = root.crypto && root.crypto.randomUUID ? root.crypto.randomUUID() : String(Date.now()) + ":" + Math.random();
+    return mutate(function (api, workspace) {
+      var result = api.createWork(workspace, project.id, id, { quantity: 1, areaSqM: 1, lengthM: 1, volumeM3: 1, massKg: 1, hours: 1, workers: 1 }, { operationId: operationId });
+      result.workspace.costing = Object.assign({}, result.workspace.costing, { selectedProjectId: project.id, section: state.section, mode: state.mode });
       return result;
     }).then(function (saved) {
-      /* The mutation promise can resolve to persistence metadata rather than
-         the canonical workspace. Reconcile from ProgramApp's live workspace
-         so this same interaction renders the new costing line. */
-      var reconcile = function () {
-        var app = root.UOS && root.UOS.ProgramApp;
-        var liveWorkspace = app && typeof app.workspace === "function" ? app.workspace() : null;
-        if (liveWorkspace) update(liveWorkspace);
-        else if (saved) update(saved);
-      };
-      /* Let the mutation queue finish its shell reconciliation before writing
-         the calculator rows. */
-      if (typeof root.setTimeout === "function") root.setTimeout(reconcile, 0);
-      else reconcile();
+      if (saved) root.setTimeout(function () { update(root.UOS.ProgramApp.workspace()); }, 0);
       return saved;
     });
   }
@@ -749,7 +739,64 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     setText('[data-costing-total="gst"]', money(gst));
     setText('[data-costing-total="grand"]', money(subtotal + preliminaries + margin + gst));
   }
-function removeCalculatorLine(lineId) {
+  function renderCalculatorTools() {
+    var busy = state.bulkDeleteBusy || root.UOS.ProgramApp && root.UOS.ProgramApp.snapshot().busy;
+    var lines = entities("costingLines").filter(function (line) { return line.projectId === state.selectedProjectId; });
+    all("[data-calculator-delete-kind]").forEach(function (button) {
+      var kind = button.getAttribute("data-calculator-delete-kind");
+      button.disabled = Boolean(busy) || !lines.some(function (line) { return kind === "All" || model().lineKind(state.workspace, line) === kind; });
+    });
+    bulkResult(state.bulkMessages && state.bulkMessages[state.selectedProjectId] || "");
+  }
+  function bulkResult(message) {
+    state.bulkMessages = state.bulkMessages || {};
+    if (state.selectedProjectId) state.bulkMessages[state.selectedProjectId] = message || "";
+    var node = one("[data-calculator-delete-result]");
+    if (node) { node.textContent = message || ""; node.hidden = !message; }
+  }
+  function deletionSummary(result) {
+    var reasons = result.retained.map(function (item) { return item.description + ": " + item.reason; });
+    return result.deletedIds.length + " items eligible for deletion. " + result.retained.length + " protected items will be retained. " + result.affectedJobIds.length + " linked jobs will be deleted. " + result.affectedGeometryIds.length + " mapped work items will be affected." + (reasons.length ? "\n" + reasons.join("\n") : "");
+  }
+  function bulkDelete(kind) {
+    if (state.bulkDeleteBusy) return Promise.resolve(null);
+    var app = root.UOS.ProgramApp, projectId = state.selectedProjectId, opener = root.document.activeElement;
+    if (!projectId) return Promise.resolve(null);
+    state.bulkDeleteBusy = true;
+    showError(null); bulkResult(""); renderCalculatorTools();
+    function review() {
+      var live = app.workspace();
+      if (state.selectedProjectId !== projectId || text(live.workspace.selectedProjectId) !== projectId) throw new Error("Project changed. Choose a deletion action for the current Project.");
+      var fingerprint = JSON.stringify(live.entities), preview = model().removeLines(live, projectId, kind);
+      if (!preview.deletedIds.length) { bulkResult(deletionSummary(preview)); return Promise.resolve(null); }
+      if (!root.UOS.dialogs || !root.UOS.dialogs.confirm) throw new Error("Confirmation dialog is unavailable. No items were deleted.");
+      return root.UOS.dialogs.confirm({ title: kind === "All" ? "Delete all Calculator items?" : "Delete " + kind + " Calculator items?", message: deletionSummary(preview), confirmLabel: "Delete " + preview.deletedIds.length + " items", danger: true }).then(function (confirmed) {
+        if (!confirmed) return null;
+        if (state.selectedProjectId !== projectId || text(app.workspace().workspace.selectedProjectId) !== projectId) throw new Error("Project changed. No items were deleted.");
+        if (JSON.stringify(app.workspace().entities) !== fingerprint) return review();
+        var applied;
+        return persist(function (workspace) {
+          if (text(workspace.workspace.selectedProjectId) !== projectId || JSON.stringify(workspace.entities) !== fingerprint) { var changed = new Error("Deletion scope changed."); changed.scopeChanged = true; throw changed; }
+          applied = model().removeLines(workspace, projectId, kind);
+          return applied.workspace;
+        }).then(function (saved) {
+          if (!saved) throw new Error("Deletion was not saved.");
+          update(app.workspace());
+          bulkResult("Deleted " + applied.deletedIds.length + " items. Retained " + applied.retained.length + " protected items." + (applied.retained.length ? "\n" + applied.retained.map(function (item) { return item.description + ": " + item.reason; }).join("\n") : ""));
+          return saved;
+        }).catch(function (error) { if (error.scopeChanged) return review(); throw error; });
+      });
+    }
+    return Promise.resolve().then(review).catch(function (error) { showError(error); bulkResult("No bulk deletion was saved. " + error.message); return null; }).finally(function () {
+      state.bulkDeleteBusy = false; renderCalculatorTools();
+      if (state.selectedProjectId === projectId && root.document.activeElement === root.document.body && !all('[role="dialog"],dialog[open]').some(function (dialog) { return dialog.getClientRects().length; })) {
+        var target = opener && opener.isConnected && !opener.disabled ? opener : one("[data-calculator-tools-toggle]");
+        if (target && target.getClientRects().length) target.focus({ preventScroll: true });
+      }
+    });
+  }
+
+  function removeCalculatorLine(lineId) {
     var app = root.UOS && root.UOS.ProgramApp;
     var liveWorkspace = app && typeof app.workspace === "function" ? app.workspace() : null;
     var localLine = (state.workspace && state.workspace.entities && state.workspace.entities.costingLines || []).find(function (item) { return item.id === lineId; });
@@ -779,7 +826,9 @@ function removeCalculatorLine(lineId) {
       if (!line) return workspace;
       var sourceGeometryId = text(line.sourceGeometryId);
       var result;
-      if (sourceGeometryId) {
+      if (api.removeCalculatorLine) {
+        result = api.removeCalculatorLine(workspace, lineId);
+      } else if (sourceGeometryId) {
         if (!root.UOS.WorkAreaService || typeof root.UOS.WorkAreaService.removeGeometry !== "function") throw new Error("WorkAreaService is unavailable.");
         if (state.jobId === line.jobId) state.jobId = "";
         result = root.UOS.WorkAreaService.removeGeometry(workspace, sourceGeometryId);
@@ -848,13 +897,18 @@ function removeCalculatorLine(lineId) {
  function openRateEditor(id) {
  var dialog = one("[data-costing-rate-dialog]"), form = one("[data-costing-rate-form]"), rate = entities("rateItems").find(function (item) { return item.id === id; }); if (!dialog || !form) return;
  state.editorOpener = root.document.activeElement;
+    form.querySelectorAll("[data-rate-guide-icon]").forEach(function (node) {
+      var icon = button("", node.getAttribute("data-rate-guide-icon"), "data-rate-guide-illustration", "").firstChild;
+      icon.setAttribute("focusable", "false");
+      node.replaceChildren(icon);
+    });
     populateSpatialWorkTypes(form); preserveRateCategoryOption(form, rate);
- state.editRateId = rate ? rate.id : ""; form.reset(); form.elements.description.value = rate ? title(rate) : ""; form.elements.kind.value = rate ? rateSection(rate) : (["Labour", "Equipment", "Material", "Contractors", "Sundry"].indexOf(state.section) >= 0 ? state.section : "Labour"); form.elements.category.value = rate && Array.prototype.some.call(form.elements.category.options, function (option) { return option.value === text(rate.category); }) ? text(rate.category) : (state.section === "Sundry" ? "Sundry" : "Preparation"); form.elements.unit.value = rate ? text(rate.unit) || "each" : "each"; form.elements.unitRate.value = rate ? Number(rate.unitRate) || 0 : ""; form.elements.quantityMode.value = rate ? text(rate.quantityMode || rate.payload && rate.payload.quantityMode || "direct") : "direct"; form.elements.active.checked = rate ? active(rate) : true;
+ state.editRateId = rate ? rate.id : ""; form.reset(); form.elements.description.value = rate ? title(rate) : ""; form.elements.kind.value = rate ? rateSection(rate) : (["Labour", "Equipment", "Material", "Contractors", "Sundry"].indexOf(state.section) >= 0 ? state.section : "Labour"); form.elements.category.value = rate && Array.prototype.some.call(form.elements.category.options, function (option) { return option.value === text(rate.category); }) ? text(rate.category) : (state.section === "Sundry" ? "Sundry" : "Preparation"); form.elements.unit.value = rate ? text(rate.unit) || "each" : "each"; form.elements.unitRate.value = rate ? Number(rate.unitRate) || 0 : ""; form.elements.quantityMode.value = rate ? text(rate.quantityMode || rate.payload && rate.payload.quantityMode || "direct") : "direct"; form.elements.active.checked = rate ? active(rate) : true; form.elements.schedulerEnabled.checked = rate ? model().schedulerEnabled(rate) : ["Labour", "Contractors"].indexOf(form.elements.kind.value) >= 0;
     var workTypeKey = rate ? mappedWorkTypeForRate(rate.id) : ""; form.elements.spatialEnabled.checked = Boolean(workTypeKey); form.elements.workTypeKey.value = workTypeKey; if (workTypeKey && form.elements.quantityMode.value === "direct") form.elements.quantityMode.value = "m2"; updateSpatialRateFields(form);
     setText("[data-costing-rate-dialog-title]", rate ? "Edit rate" : "Add rate"); setText("[data-costing-rate-submit]", rate ? "Update rate" : "Save rate"); var error = one("[data-costing-rate-error]"); if (error) error.hidden = true; dialog.showModal();
   }
   function saveRate(event) {
-    event.preventDefault(); var form = event.target, input = { id: state.editRateId || undefined, owner: "", kind: form.elements.kind.value, kindSource: "user", description: form.elements.description.value, title: form.elements.description.value, category: form.elements.category.value, unit: form.elements.unit.value, unitRate: form.elements.unitRate.value, quantityMode: form.elements.quantityMode.value, active: form.elements.active.checked };
+    event.preventDefault(); var form = event.target, input = { id: state.editRateId || undefined, owner: "", kind: form.elements.kind.value, kindSource: "user", description: form.elements.description.value, title: form.elements.description.value, category: form.elements.category.value, unit: form.elements.unit.value, unitRate: form.elements.unitRate.value, quantityMode: form.elements.quantityMode.value, schedulerEnabled: form.elements.schedulerEnabled.checked, active: form.elements.active.checked };
     if (!form.reportValidity()) return; var errorNode = one("[data-costing-rate-error]"); if (errorNode) errorNode.hidden = true;
     var mapping = { enabled: form.elements.spatialEnabled.checked, workTypeKey: form.elements.workTypeKey.value };
     persist(function (workspace) { return model().upsertRateItemWithWorkType(workspace, input, mapping); }).then(function (saved) {
@@ -964,6 +1018,11 @@ function saveAdjustments(source) {
 }
 function bind() {
  if (state.bound || !root.document) return; state.bound = true;
+ if (root.MutationObserver) new root.MutationObserver(sizeCategoryColumn).observe(root.document.documentElement, { attributes: true, attributeFilter: ["data-suite-font"] });
+ if (root.document.fonts) {
+   root.document.fonts.ready.then(sizeCategoryColumn);
+   root.document.fonts.addEventListener("loadingdone", sizeCategoryColumn);
+ }
  var toolsToggle = one("[data-costing-tools-toggle]"), toolsDrawer = one("[data-costing-tools]");
  if (toolsToggle && toolsDrawer) {
  toolsToggle.addEventListener("click", function () {
@@ -982,15 +1041,34 @@ function bind() {
  toolsToggle.focus();
  });
  }
- var categoryTabs = one(".program-cost-tabs");
- var calculator = one(".program-job-calculator");
- if (categoryTabs && calculator) {
- var syncMenuHeight = function () {
- var height = categoryTabs.getBoundingClientRect().height;
- if (height > 0) calculator.style.setProperty("--costing-menu-row-height", Math.ceil(height) + "px");
- };
- syncMenuHeight();
- if (root.ResizeObserver) new root.ResizeObserver(syncMenuHeight).observe(categoryTabs);
+     var calculatorToolsToggle = one("[data-calculator-tools-toggle]"), calculatorToolsDrawer = one("[data-calculator-tools]");
+    if (calculatorToolsToggle && calculatorToolsDrawer) {
+      function closeCalculatorTools() { calculatorToolsDrawer.hidden = true; calculatorToolsToggle.setAttribute("aria-expanded", "false"); calculatorToolsToggle.setAttribute("aria-label", "Show Resource Calculator tools"); calculatorToolsToggle.focus({ preventScroll: true }); }
+      calculatorToolsToggle.addEventListener("click", function () {
+        var opening = calculatorToolsDrawer.hidden;
+        calculatorToolsDrawer.hidden = !opening;
+        calculatorToolsToggle.setAttribute("aria-expanded", String(opening));
+        calculatorToolsToggle.setAttribute("aria-label", (opening ? "Hide" : "Show") + " Resource Calculator tools");
+        if (opening) { var first = calculatorToolsDrawer.querySelector("button:not(:disabled)"); if (first) first.focus({ preventScroll: true }); }
+      });
+      calculatorToolsDrawer.addEventListener("keydown", function (event) { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); closeCalculatorTools(); } });
+      calculatorToolsDrawer.addEventListener("click", function (event) { var button = event.target.closest("[data-calculator-delete-kind]"); if (button && !button.disabled) bulkDelete(button.getAttribute("data-calculator-delete-kind")); });
+    }
+
+    var categoryTabs = one(".program-cost-tabs");
+ var headerContent = one(".program-costing-head-content"), costingWorkspace = one(".program-costing-workspace");
+ if (headerContent && costingWorkspace) {
+   var syncHeaderHeight = function () {
+     var title = headerContent.querySelector(".program-costing-title"), tools = headerContent.querySelector("[data-costing-tools-toggle]");
+     var menuWidth = Array.prototype.reduce.call(categoryTabs.children, function (width, button) { return width + button.offsetWidth; }, 20);
+     var compact = headerContent.clientWidth < title.offsetWidth + tools.offsetWidth + menuWidth + 24;
+     headerContent.classList.toggle("is-compact", compact);
+     costingWorkspace.style.setProperty("--calculator-panel-header-height", Math.max(52, headerContent.offsetHeight + 1) + "px");
+   };
+   syncHeaderHeight();
+   if (root.ResizeObserver) new root.ResizeObserver(syncHeaderHeight).observe(headerContent);
+   root.addEventListener("resize", syncHeaderHeight);
+   if (root.document.fonts) root.document.fonts.ready.then(syncHeaderHeight);
  }
  if (categoryTabs) categoryTabs.addEventListener("keydown", function (event) {
  var tabs = all("[data-costing-section]"), current = event.target.closest("[data-costing-section]");
@@ -1030,7 +1108,23 @@ function bind() {
   else if (event.target.matches("[data-costing-preliminaries],[data-costing-margin]")) { state.preliminaries = Math.max(0, Number(one("[data-costing-preliminaries]").value) || 0); state.margin = Math.max(0, Number(one("[data-costing-margin]").value) || 0); if (state.jobId && typeof model().updateJobAdjustments === "function") mutate(function (api, workspace) { var result = api.updateJobAdjustments(workspace, state.jobId, { preliminariesPercent: state.preliminaries, marginPercent: state.margin }); var selectedProject = (result.entities.projects || []).find(function (project) { return project.id === state.selectedProjectId; }); result.workspace.costing = { jobId: state.jobId, section: state.section, mode: state.mode, selectedProjectId: state.selectedProjectId }; result.workspace.selectedProjectId = state.selectedProjectId; result.workspace.selectedEntityId = selectedProject ? (selectedProject.applicationId || selectedProject.eventId || selectedProject.id) : ""; if (selectedProject) result.workspace.ownerMode = selectedProject.owner; return result; }); else renderCalculator(); }
       else if (event.target.matches("[data-costing-line-quantity],[data-costing-line-rate],[data-costing-line-unit]")) updateLine(event.target.getAttribute("data-costing-line-quantity") || event.target.getAttribute("data-costing-line-rate") || event.target.getAttribute("data-costing-line-unit"));
     });
- root.document.addEventListener("click", function (event) {
+     root.document.addEventListener("click", function (event) {
+      var calendar = event.target.closest("[data-costing-line-calendar]");
+      if (calendar) {
+        var lineId = calendar.getAttribute("data-costing-line-calendar");
+        var line = entities("costingLines").find(function (item) { return item.id === lineId; });
+        var ready = line.jobId ? Promise.resolve(state.workspace) : mutate(function (api, workspace) { return api.recreateWorkJob(workspace, lineId); });
+        ready.then(function (saved) {
+          if (!saved) return;
+          var exact = saved.entities.costingLines.find(function (item) { return item.id === lineId; });
+          var app = root.UOS.ProgramApp;
+          return app.navigateWithContext("scheduler", exact.jobId).then(function () {
+            return root.UOS.ProgramSchedulerUI.focusCalendarJob(exact.jobId);
+          });
+        }).catch(showError);
+      }
+    });
+root.document.addEventListener("click", function (event) {
  var sortControl = event.target.closest("[data-rate-sort]");
  if (sortControl) {
  var sortKey = sortControl.getAttribute("data-rate-sort");
@@ -1171,9 +1265,7 @@ function bind() {
       workspace = app && typeof app.workspace === "function" ? app.workspace() : null;
     }
     if (!workspace || !workspace.workspace) return;
-    var currentDest = workspace.workspace.destination;
-    var isCostingActive = currentDest === "costing" || (root.document && root.document.querySelector('[data-program-view="costing"]:not([hidden])'));
-    if (!isCostingActive) return;
+    // Keep linked Job indicators current even while Scheduler is the active view.
     update(workspace);
   });
   }

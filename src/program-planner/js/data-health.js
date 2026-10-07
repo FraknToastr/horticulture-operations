@@ -171,7 +171,7 @@
     });
     byCollection.costingLines.forEach(function (item) {
       var job = ids[text(item.jobId)], project = ids[text(item.projectId)];
-      if (!job || job.collection !== "jobs") issue("COST_JOB_MISSING", "error", "costingLines", item, "jobId", [text(item.jobId)], "Costing Line has no existing Job.");
+      if (item.jobId && (!job || job.collection !== "jobs")) issue("COST_JOB_MISSING", "error", "costingLines", item, "jobId", [text(item.jobId)], "Costing Line has no existing Job.");
       if (!project || project.collection !== "projects" || job && job.item.projectId !== item.projectId) issue("COST_PROJECT_MISMATCH", "error", "costingLines", item, "projectId", [text(item.projectId)], "Costing Line Project does not match its Job.");
       if (text(item.rateItemId) && (!ids[item.rateItemId] || ids[item.rateItemId].collection !== "rateItems")) issue("RATE_UNKNOWN", "error", "costingLines", item, "rateItemId", [text(item.rateItemId)], "Costing Line references an unknown Rate Item.");
       if (!text(item.description || item.title) || !text(item.category) || !text(item.unit) || !Number.isFinite(Number(item.unitRate)) || !Number.isFinite(Number(item.quantity)) || !Number.isFinite(Number(item.estimatedTotal))) issue("COST_SNAPSHOT_INCOMPLETE", "error", "costingLines", item, "description/category/unit/unitRate/quantity/estimatedTotal", [], "Costing Line commercial snapshot is incomplete.");
@@ -203,12 +203,12 @@
       var lines = (geometryLines[geometry.id] || []).slice().sort(function (left, right) { return text(left.id).localeCompare(text(right.id)); });
       var operational = text(geometry.syncState && geometry.syncState.code) === "synced" || jobs.length || lines.length;
       if (jobs.length > 1) issue("WORK_LINEAGE_JOB_DUPLICATE", "error", "jobs", jobs[0], "sourceGeometryId", jobs.map(function (item) { return text(item.id); }), "Work Geometry has multiple canonical map Jobs.");
-      if (operational && !jobs.length) issue("WORK_LINEAGE_JOB_MISSING", "error", "geometries", geometry, "id", [], "Operational Work Geometry has no canonical map Job.");
+      if (operational && !jobs.length && !geometry.workRemoved && !(lines.length === 1 && lines[0].workCommandVersion === 1)) issue("WORK_LINEAGE_JOB_MISSING", "error", "geometries", geometry, "id", [], "Operational Work Geometry has no canonical map Job or canonical costing-only line.");
       if (lines.length > 1) issue("WORK_LINEAGE_COSTING_DUPLICATE", "error", "costingLines", lines[0], "sourceGeometryId", lines.map(function (item) { return text(item.id); }), "Work Geometry has multiple canonical CostingLines.");
       if (operational && jobs.length === 1 && !lines.length) issue("WORK_LINEAGE_COSTING_MISSING", "error", "jobs", jobs[0], "sourceGeometryId", [], "Canonical map Job has no canonical CostingLine.");
       lines.forEach(function (line) {
         var job = jobs.find(function (item) { return item.id === line.jobId; });
-      if (!job || line.projectId !== geometry.projectId || line.owner !== geometry.owner) issue("WORK_LINEAGE_COSTING_PROJECT_MISMATCH", "error", "costingLines", line, "projectId/jobId", [text(line.jobId), text(geometry.projectId)].filter(Boolean).sort(), "CostingLine ownership or Project does not match its Work Geometry and Job.");
+      if (line.jobId && !job || line.projectId !== geometry.projectId || line.owner !== geometry.owner) issue("WORK_LINEAGE_COSTING_PROJECT_MISMATCH", "error", "costingLines", line, "projectId/jobId", [text(line.jobId), text(geometry.projectId)].filter(Boolean).sort(), "CostingLine ownership or Project does not match its Work Geometry and Job.");
       if (Number.isFinite(Number(line.sourceAreaSqM)) && UOS.ProgramModel && typeof UOS.ProgramModel.spatialQuantityForRate === "function") {
        var expectedQuantity = null;
        try { expectedQuantity = UOS.ProgramModel.spatialQuantityForRate({ unit: line.unit, quantityMode: "m2", quantityKind: "area", active: true }, Number(line.sourceAreaSqM)); } catch (error) { expectedQuantity = null; }

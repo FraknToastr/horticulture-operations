@@ -55,6 +55,8 @@
   --uos-rail-collapsed: 64px;
   --uos-inspector-width: 450px;
   --uos-focus-width: 2px;
+  --uos-focus-offset: 2px;
+  --uos-focus-clearance: max(8px, calc(var(--uos-focus-width) + var(--uos-focus-offset)));
   --uos-motion-fast: 100ms;
   --uos-motion-standard: 160ms;
   --uos-motion-panel: 220ms;

@@ -750,11 +750,20 @@
       if (map.getSource("uos-basemap")) map.removeSource("uos-basemap");
     }
 
+    /* The coordinate grid is a deliberate offline-map aid.  It must not sit
+       over a raster provider: its pale one-pixel lines resemble tile seams
+       and GeoForge intentionally has no equivalent overlay. */
+    function setOfflineGridVisible(visible) {
+      if (!map || !ready || !map.getLayer("uos-grid-lines")) return;
+      map.setLayoutProperty("uos-grid-lines", "visibility", visible ? "visible" : "none");
+    }
+
     function failProvider(id, detail) {
       if (providerFailureShown || activeProviderId === "offline") return;
       providerFailureShown = true;
       clearProviderLoadTimer();
       removeBasemap();
+      setOfflineGridVisible(true);
       activeProviderId = "offline";
       pendingProviderId = "offline";
       if (map) map.setGlyphs(typeof config.glyphs === "string" && config.glyphs ? config.glyphs : null);
@@ -776,6 +785,7 @@
       clearProviderLoadTimer();
       providerFailureShown = false;
       if (id === "offline") {
+        setOfflineGridVisible(true);
         activeProviderId = "offline";
         map.setGlyphs(typeof config.glyphs === "string" && config.glyphs ? config.glyphs : null);
         if (typeof options.onProviderChange === "function") options.onProviderChange("offline");
@@ -788,6 +798,7 @@
         return;
       }
       try {
+        setOfflineGridVisible(false);
         map.setGlyphs(typeof provider.glyphs === "string" && provider.glyphs ? provider.glyphs : (typeof config.glyphs === "string" && config.glyphs ? config.glyphs : null));
         map.addSource("uos-basemap", {
           type: "raster",
@@ -797,7 +808,18 @@
           maxzoom: Number.isFinite(Number(provider.maxzoom)) ? Number(provider.maxzoom) : 22,
           attribution: String(provider.attribution || "")
         });
-        map.addLayer({ id: "uos-basemap", type: "raster", source: "uos-basemap" }, "uos-grid-lines");
+        /* MetroMap uses adjacent WMTS raster tiles. Disabling the tile fade
+           prevents the canvas background showing through tile edges while the
+           dynamic source is settling, without degrading image interpolation. */
+        map.addLayer({
+          id: "uos-basemap",
+          type: "raster",
+          source: "uos-basemap",
+          paint: {
+            "raster-fade-duration": 0,
+            "raster-resampling": "linear"
+          }
+        }, "uos-grid-lines");
         activeProviderId = id;
         pendingProviderId = null;
         if (typeof options.onProviderChange === "function") options.onProviderChange(id);

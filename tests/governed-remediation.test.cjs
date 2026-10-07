@@ -34,7 +34,7 @@ test("PC-013 blocks an unfunded Quote and snapshots readiness at Issue", () => {
   const UOS = load();
   let ws = readyWorkspace(UOS);
   let quote = ws.entities.quotes[0];
-  // With quote at $100 ex-GST and operationalAmount at $100, project has surplus funding ($200 vs $100)
+  // New customer-funded Quotes exclude the available City allocation: exact coverage.
   assert.equal(UOS.ProgramQuotes.evaluateReadiness(ws, quote.id).ready, true);
 
   // Introduce an underfunded position (delivery cost $150, quote $100 ex-GST, operationalAmount $0 -> funding gap $50)
@@ -58,6 +58,7 @@ test("PC-013 blocks an unfunded Quote and snapshots readiness at Issue", () => {
 
   // Resolve the funding gap via operational amount ($50 council + $100 customer = $150)
   ws.entities.projects[0].funding.operationalAmount = 50;
+  ws = UOS.ProgramQuotes.saveDraft(ws, { id: quote.id, projectId: quote.projectId, fundingMode: "mixed", proposedCustomerContribution: 100 });
   assert.equal(UOS.ProgramQuotes.evaluateReadiness(ws, quote.id).ready, true);
   ws = UOS.ProgramQuotes.issue(ws, quote.id);
   quote = ws.entities.quotes.find((item) => item.id === quote.id);
@@ -225,7 +226,7 @@ test("PC-013 navigation rules allow Quote Builder entry when Project exists with
   vm.createContext(context);
   vm.runInContext(fs.readFileSync("src/program-planner/js/app.js", "utf8"), context);
 
-  // Project exists, 0 jobs, 0 costed jobs -> Quote Builder must be enabled & linked
+  // Project exists without saved Quotes: available, but not yet in use.
   const ruleWithProject = context.UOS.ProgramApp.evaluateShortcutRule("quotes", {
     hasProject: true,
     hasJobs: false,
@@ -233,8 +234,9 @@ test("PC-013 navigation rules allow Quote Builder entry when Project exists with
     currentModule: "register"
   });
   assert.equal(ruleWithProject.isDisabled, false);
-  assert.equal(ruleWithProject.isLinked, true);
-  assert.equal(ruleWithProject.tooltip, "Create or open Quote in Quote Builder");
+  assert.equal(ruleWithProject.isLinked, false);
+  assert.equal(ruleWithProject.usage, "unused");
+  assert.equal(ruleWithProject.tooltip, "Open Quote Builder — no saved work yet");
 
   // No project -> Quote Builder must be disabled
   const ruleWithoutProject = context.UOS.ProgramApp.evaluateShortcutRule("quotes", {
@@ -245,7 +247,7 @@ test("PC-013 navigation rules allow Quote Builder entry when Project exists with
   });
   assert.equal(ruleWithoutProject.isDisabled, true);
   assert.equal(ruleWithoutProject.isLinked, false);
-  assert.equal(ruleWithoutProject.tooltip, "Create a linked delivery project first to open in Quote Builder");
+  assert.equal(ruleWithoutProject.tooltip, "Create a linked delivery project first to open Quote Builder");
 });
 function loadMapSuite() {
   const context = {
@@ -299,7 +301,7 @@ function setupCanonicalProject(UOS, ws) {
     status: "planning",
     provenance: {}
   });
-  return ws;
+  return UOS.ProgramStatus.migrate(UOS.ProgramModel.normalize(ws));
 }
 
 const squarePolygonCoords = [
@@ -355,7 +357,7 @@ test("PC-005 C3: Fresh workspace contains canonical referenceData turfing -> RAT
   assert.equal(turfRate.unit, "m²");
 });
 
-test("PC-005 C3: Supported turfing polygon deterministically resolves to RATE-TURFING and promotes to Job & Costing Line", () => {
+test("PC-005 C3: Supported turfing polygon deterministically resolves to RATE-TURFING and explicitly promotes to Job & Costing Line", () => {
   const { UOS } = loadMapSuite();
   let ws = setupCanonicalProject(UOS, UOS.ProgramModel.blank("2026-09-18T00:00:00.000Z"));
   ws = UOS.WorkAreaService.createGeometry(ws, "NSA-PROJ-CANONICAL", {
@@ -365,7 +367,7 @@ test("PC-005 C3: Supported turfing polygon deterministically resolves to RATE-TU
     payload: { type: "turfing", workTypeKey: "turfing", visible: true, valid: true }
   });
   const geom = ws.entities.geometries[0];
-  const synced = UOS.WorkAreaService.syncGeometry(ws, geom.id);
+  const synced = UOS.WorkAreaService.syncGeometry(ws, geom.id, { explicit: true });
   const updatedGeom = synced.entities.geometries.find((g) => g.id === geom.id);
   assert.equal(updatedGeom.syncState.code, "synced");
   assert.equal(updatedGeom.rateItemId, "RATE-TURFING");
@@ -375,7 +377,7 @@ test("PC-005 C3: Supported turfing polygon deterministically resolves to RATE-TU
   assert.equal(job.sourceKind, "space-map");
   assert.equal(job.sourceGeometryId, geom.id);
   assert.equal(job.projectId, "NSA-PROJ-CANONICAL");
-  assert.match(job.title, /^Turfing - Canonical Turf Project/);
+  assert.equal(job.title, "Turfing");
 
   const line = synced.entities.costingLines.find((l) => l.sourceGeometryId === geom.id);
   assert.ok(line, "Mapped CostingLine must exist");
@@ -450,10 +452,10 @@ test("C6-01: Turfing canonical mapping remains valid in the singular authority",
 test("C6-02: Aeration maps exactly to RATE-AERATION and creates spatial lineage", () => {
   const { UOS } = loadMapSuite();
   let ws = setupCanonicalProject(UOS, UOS.ProgramModel.blank("2026-09-22T00:00:00.000Z"));
-  assert.deepEqual(ws.referenceData.shared.workTypeRateItems.aerate.eligibleRateItemIds, ["RATE-AERATION"]);
+  assert.deepEqual(Array.from(ws.referenceData.shared.workTypeRateItems.aerate.eligibleRateItemIds), ["RATE-AERATION"]);
   ws = addCanonicalPolygon(UOS, ws, "aerate", "NSA-GEO-AERATION-V2");
   const geometry = ws.entities.geometries[0];
-  ws = UOS.WorkAreaService.syncGeometry(ws, geometry.id);
+  ws = UOS.WorkAreaService.syncGeometry(ws, geometry.id, { explicit: true });
   const job = ws.entities.jobs.find((item) => item.sourceGeometryId === geometry.id);
   const line = ws.entities.costingLines.find((item) => item.sourceGeometryId === geometry.id);
   assert.equal(job.sourceKind, "space-map");
@@ -641,7 +643,7 @@ test("C4-WA-01: scheduled Planned mapped Job and lifecycle evidence are protecte
   payload: { type: "turfing", workTypeKey: "turfing", visible: true, valid: true }
  });
  const geometryId = ws.entities.geometries[0].id;
- ws = UOS.WorkAreaService.syncGeometry(ws, geometryId);
+ ws = UOS.WorkAreaService.syncGeometry(ws, geometryId, { explicit: true });
  const jobId = ws.entities.jobs[0].id;
  const lineId = ws.entities.costingLines[0].id;
  ws.entities.statusEvents.push({ id: "NSA-SEVT-C4-WA-01", owner: "NSA", type: "statusEvent", entityId: jobId, entityType: "job", domain: "job", fromStatus: "", toStatus: "draft", action: "Initial status established", source: "automatic" });
@@ -655,7 +657,7 @@ test("C4-WA-01: scheduled Planned mapped Job and lifecycle evidence are protecte
   location: "Park"
  }, "2026-09-21T01:00:00.000Z");
  const scheduledJob = ws.entities.jobs.find((item) => item.id === jobId);
- assert.equal(scheduledJob.status, "Planned");
+  assert.equal(scheduledJob.status, "scheduled");
  assert.throws(() => UOS.WorkAreaService.removeGeometryWork(ws, geometryId), (error) => error.code === "WORK_LINEAGE_SCHEDULE_DEPENDENCY");
  assert.ok(ws.entities.geometries.some((item) => item.id === geometryId));
  assert.ok(ws.entities.jobs.some((item) => item.id === jobId && item.crewId === "CREW-1" && item.durationMinutes === 1440));
@@ -673,10 +675,11 @@ test("C4-WA-02: completed mapped Job and lifecycle evidence are protected", () =
   payload: { type: "turfing", workTypeKey: "turfing", visible: true, valid: true }
  });
  const geometryId = ws.entities.geometries[0].id;
- ws = UOS.WorkAreaService.syncGeometry(ws, geometryId);
+ ws = UOS.WorkAreaService.syncGeometry(ws, geometryId, { explicit: true });
  const jobId = ws.entities.jobs[0].id;
  const lineId = ws.entities.costingLines[0].id;
- ws = UOS.ProgramStatus.transition(ws, { entityId: jobId, to: "in_progress", actor: "C4 Test Operator", at: "2026-09-22T01:00:00.000Z" });
+  ws = UOS.ProgramSchedulerModel.scheduleJob(ws, jobId, { startDate: "2026-09-22", endDate: "2026-09-22", allDay: true, durationMinutes: 1440 }, "2026-09-22T00:00:00.000Z");
+  ws = UOS.ProgramStatus.transition(ws, { entityId: jobId, to: "in_progress", actor: "C4 Test Operator", at: "2026-09-22T01:00:00.000Z" });
  ws = UOS.ProgramStatus.transition(ws, { entityId: jobId, to: "completed", actor: "C4 Test Operator", at: "2026-09-22T02:00:00.000Z" });
  assert.equal(ws.entities.jobs.find((item) => item.id === jobId).status, "completed");
  const completionEvents = ws.entities.statusEvents.filter((item) => item.entityId === jobId);
@@ -698,7 +701,7 @@ test("C4-WA-03: genuinely disposable mapped lineage deletes atomically", () => {
     payload: { type: "turfing", workTypeKey: "turfing", visible: true, valid: true }
   });
   const geom = ws.entities.geometries[0];
-  ws = UOS.WorkAreaService.syncGeometry(ws, geom.id);
+  ws = UOS.WorkAreaService.syncGeometry(ws, geom.id, { explicit: true });
   assert.equal(ws.entities.geometries.length, 1);
   assert.equal(ws.entities.costingLines.length, 1);
  assert.equal(ws.entities.jobs.length, 1);

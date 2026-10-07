@@ -2,7 +2,7 @@
   "use strict";
 
   var UOS = window.UOS = window.UOS || {};
-  var state = { workspace: null, owner: "", year: "", dialog: null, trigger: null, busy: false };
+  var state = { workspace: null, owner: "", year: "", dialog: null, trigger: null, busy: false, approvalDrafts: {} };
   var currency = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" });
 
   function text(value) { return String(value == null ? "" : value).trim(); }
@@ -18,6 +18,20 @@
   function recordTitle(record) { return text(record && (record.name || record.title || record.eventName || record.applicantName || record.id)) || "Register record"; }
   function budgetFor(owner, year) { return entities("annualBudgets").find(function (item) { return item.owner === owner && item.financialYear === year; }); }
   function selectedBudget() { return budgetFor(state.owner, state.year); }
+  function approvalDraftKey() { return state.owner + ":" + state.year; }
+  function approvalDraft() {
+    var key = approvalDraftKey();
+    if (!state.approvalDrafts[key]) state.approvalDrafts[key] = { amount: "", actor: "", approver: "", reason: "", evidence: "", date: new Date().toISOString().slice(0, 10) };
+    return state.approvalDrafts[key];
+  }
+  function rememberApprovalDraft(form) {
+    if (!form || !form.matches("[data-budget-inline-approve]")) return;
+    var data = new FormData(form), key = approvalDraftKey();
+    state.approvalDrafts[key] = { amount: text(data.get("amount")), actor: text(data.get("actor")), approver: text(data.get("approver")), reason: text(data.get("reason")), evidence: text(data.get("evidence")), date: text(data.get("date")) };
+  }
+  function approvalEntry(budgetId) {
+    return entities("budgetEntries").find(function (entry) { return entry.budgetId === budgetId && entry.kind === "approval"; });
+  }
   function reopenAuthorisation(budgetId) {
     var requests = entities("budgetChangeRequests");
     return entities("budgetDecisions").find(function (decision) {
@@ -51,48 +65,24 @@
     var yearSelect = view.querySelector("[data-budget-year]");
     if (yearSelect) { yearSelect.innerHTML = years.map(function (year) { return '<option value="' + escapeHtml(year) + '">' + escapeHtml(yearLabel(year)) + '</option>'; }).join(""); yearSelect.value = state.year; }
     var budget = selectedBudget();
-    var create = view.querySelector('[data-budget-action="create"]');
-    if (create) { create.disabled = !!budget; create.hidden = !!budget; }
+    var statusSlot = view.querySelector("[data-budget-status-slot]");
+    if (statusSlot) {
+      var status = budget ? (budget.reviewRequired ? "review required" : budget.status) : "";
+      statusSlot.innerHTML = status ? '<span class="program-budget__status" data-state="' + escapeHtml(status) + '">' + escapeHtml(status) + '</span>' : "";
+      statusSlot.hidden = !status;
+    }
     var allocate = view.querySelector('[data-budget-action="allocate"]');
     if (allocate) allocate.hidden = true;
     var stateNode = view.querySelector("[data-budget-year-state]");
-    if (stateNode) stateNode.innerHTML = budget
-      ? '<span class="program-budget__status" data-state="' + escapeHtml(budget.reviewRequired ? "review required" : budget.status) + '">' + escapeHtml(budget.reviewRequired ? "review required" : budget.status) + '</span><span class="program-budget__owner">' + escapeHtml(owner) + '</span><span class="program-budget__owner">Manage annual budget</span>' +
-        (budget.status === "draft" ? button("approve", "Approve budget", false) : "") +
-        (budget.reviewRequired ? button("reconcile", "Reconcile year", false) : "") +
-        (budget.status === "open" ? button("adjust", "Adjust budget", !!budget.reviewRequired) + button("transfer", "Transfer allocation", !!budget.reviewRequired) + button("close", "Close year", !!budget.reviewRequired) : "") +
-        (budget.status === "closed" ? (reopenAuthorisation(budget.id) ? button("apply-reopen", "Apply reopen", false) : button("reopen", "Record reopen decision", !!budget.reviewRequired)) : "")
-      : '<span class="program-budget__muted">No annual budget for ' + escapeHtml(owner + " " + yearLabel(state.year)) + '.</span>';
+ renderTables(view, budget);
+    if (stateNode) stateNode.innerHTML = budget ? inlineBudgetPanel(budget) : newBudgetPanel();
     var metrics = view.querySelector("[data-budget-metrics]");
     var balance = budget ? budgetApi().budgetBalance(state.workspace, budget.id) : null;
     if (metrics) metrics.innerHTML = [
       ["Approved", balance ? balance.approved : 0], ["Allocated", balance ? balance.allocated : 0], ["Unallocated", balance ? balance.unallocated : 0]
-    ].map(function (metric) { return '<div class="program-budget__metric program-island"><span>' + metric[0] + '</span><strong>' + amount(metric[1]) + '</strong></div>'; }).join("");
-    var body = view.querySelector("[data-budget-allocations]");
-    if (body) {
-      var allocations = budget ? entities("registerAllocations").filter(function (item) { return item.budgetId === budget.id; }) : [];
-      body.innerHTML = allocations.length ? allocations.map(function (allocation) {
-        var record = recordFor(allocation.registerId), value = budgetApi().allocationBalance(state.workspace, allocation.id);
-        return '<tr><th scope="row"><span class="program-budget__record">' + escapeHtml(recordTitle(record)) + '</span><small>' + escapeHtml(allocation.registerId) + '</small></th>' +
-          '<td>' + amount(value.allocated) + '</td><td>' + amount(value.openCommitment) + '</td><td>' + amount(value.actual) + '</td><td>' + amount(value.available) + '</td><td><div class="program-budget__row-actions">' +
-          button("allocation-detail", "Details", false, ' data-budget-allocation="' + escapeHtml(allocation.id) + '"') +
-          button("carry", "Year-end review", budget.status !== "closed", ' data-budget-allocation="' + escapeHtml(allocation.id) + '"') +
-          '</div></td></tr>';
-      }).join("") : '<tr><td colspan="6" class="program-budget__empty">' + (budget ? "No Register allocations yet." : "Create an annual budget to begin.") + '</td></tr>';
-    }
-    var history = view.querySelector("[data-budget-history]");
-    if (history) {
-      var entries = budget ? entities("budgetEntries").concat(entities("allocationEntries"), entities("budgetCharges")).filter(function (item) {
-        return item.budgetId === budget.id || (item.allocationId && entities("registerAllocations").some(function (allocation) { return allocation.id === item.allocationId && allocation.budgetId === budget.id; }));
-      }).sort(function (a, b) { return text(b.createdAt).localeCompare(text(a.createdAt)); }) : [];
-      history.innerHTML = entries.length ? entries.map(function (entry) {
-        var label = entry.kind === "increase" ? "Allocation increase" : entry.kind === "decrease" ? "Allocation reduction" : entry.kind === "actual" ? "Actual Job charge" : entry.kind === "commitment" ? "Job commitment" : entry.kind === "release" ? "Commitment release" : entry.kind === "carryForward" ? "Carry-forward" : entry.kind.charAt(0).toUpperCase() + entry.kind.slice(1);
-        var historyAmount = entry.kind === "approval" && !entry.amountCents ? budget.approvedAmount : entry.amount;
-        return '<li><div><strong>' + escapeHtml(label) + '</strong><span>' + amount(historyAmount) + '</span></div><small>' + escapeHtml(entry.effectiveDate || text(entry.createdAt).slice(0, 10)) + ' · ' + escapeHtml(entry.actor) +
-          (entry.registerId ? ' · ' + escapeHtml(entry.registerId) + ' · ' + escapeHtml(entry.referenceNumber || entry.referenceNumberStatus || "Reference unavailable") : "") +
-          '</small><p>' + escapeHtml(entry.reason) + '</p></li>';
-      }).join("") : '<li class="program-budget__empty">No history for this year.</li>';
-    }
+      ].map(function (metric) { return '<div class="program-budget__metric program-island"><span>' + metric[0] + '</span><strong>' + amount(metric[1]) + '</strong></div>'; }).join("");
+    var headerAmount = document.querySelector("[data-budget-header-amount]");
+    if (headerAmount) headerAmount.textContent = amount(balance ? balance.unallocated : 0);
     var pending = view.querySelector("[data-budget-pending]");
     if (pending) {
       var requests = budget ? entities("budgetChangeRequests").filter(function (item) { return item.budgetId === budget.id && !entities("budgetDecisions").some(function (decision) { return decision.requestId === item.id; }); }) : [];
@@ -103,7 +93,18 @@
     }
   }
 
-  function field(label, name, type, value, extra) {
+ function renderTables(view, budget) {
+ var body = view.querySelector("[data-budget-allocations]");
+ var pending = view.querySelector("[data-budget-pending]");
+ var allocations = budget ? entities("registerAllocations").filter(function (item) { return item.budgetId === budget.id; }) : [];
+ if (body) body.innerHTML = allocations.length ? allocations.map(function (allocation) {
+ var record = recordFor(allocation.registerId), value = budgetApi().allocationBalance(state.workspace, allocation.id);
+ return '<tr><th scope="row"><span class="program-budget__record">' + escapeHtml(recordTitle(record)) + '</span><small>' + escapeHtml(allocation.registerId) + '</small></th><td>' + amount(value.allocated) + '</td><td>' + amount(value.openCommitment) + '</td><td>' + amount(value.actual) + '</td><td>' + amount(value.available) + '</td><td><div class="program-budget__row-actions">' + button("allocation-detail", "Details", false, ' data-budget-allocation="' + escapeHtml(allocation.id) + '"') + button("carry", "Year-end review", budget.status !== "closed", ' data-budget-allocation="' + escapeHtml(allocation.id) + '"') + '</div></td></tr>';
+ }).join("") : '<tr><td colspan="6" class="program-budget__empty">' + (budget ? "No Register allocations yet." : "Create an annual budget to begin.") + "</td></tr>";
+ var requests = budget ? entities("budgetRequests").filter(function (item) { return item.budgetId === budget.id && !entities("budgetDecisions").some(function (decision) { return decision.requestId === item.id; }); }) : [];
+ if (pending) { pending.hidden = false; pending.innerHTML = requests.length ? requests.map(function (item) { return '<li><strong>' + escapeHtml(item.kind) + '</strong> · ' + amount(item.amountCents / 100) + '<p>' + escapeHtml(item.reason) + '</p>' + button("decide", "Approve or reject", false, ' data-budget-request="' + escapeHtml(item.id) + '"') + '</li>'; }).join("") : '<li class="program-budget__empty">No pending changes.</li>'; }
+ }
+ function field(label, name, type, value, extra) {
     return '<label class="program-budget__field"><span>' + label + '</span><input class="uos-input" name="' + name + '" type="' + type + '" value="' + escapeHtml(value || "") + '"' + (extra || "") + ' required></label>';
   }
   function select(label, name, options) {
@@ -111,6 +112,33 @@
   }
   function authorityFields() { return field("Recording officer", "actor", "text", "", ' autocomplete="name"') + '<label class="program-budget__field"><span>Named approver</span><input class="uos-input" name="approver" autocomplete="name"></label>' + field("Reason", "reason", "text", "") + field("Evidence", "evidence", "text", "") + field("Effective date", "date", "date", new Date().toISOString().slice(0, 10)); }
   function moneyField(value) { return field("Amount (AUD)", "amount", "number", value || "", ' min="0.01" step="0.01" inputmode="decimal"'); }
+  function inlineAuthorityFields(values) {
+    return field("Recording officer", "actor", "text", values.actor, ' autocomplete="name"') +
+      '<label class="program-budget__field"><span>Named approver</span><input class="uos-input" name="approver" value="' + escapeHtml(values.approver) + '" autocomplete="name" required></label>' +
+      field("Reason", "reason", "text", values.reason) + field("Evidence", "evidence", "text", values.evidence);
+  }
+  function detail(label, value) { return '<div><dt>' + escapeHtml(label) + '</dt><dd>' + escapeHtml(value || "Not recorded") + '</dd></div>'; }
+  function budgetActionRow(budget) {
+   var open = budget && budget.status === "open", closed = budget && budget.status === "closed";
+   var review = budget && budget.reviewRequired, authorised = closed && reopenAuthorisation(budget.id);
+   return '<div class="program-budget__persistent-actions" data-budget-persistent-actions>' +
+     '<button type="submit" class="uos-button uos-button--primary"' + (budget && budget.status !== "draft" ? ' disabled' : '') + '>Approve budget</button>' +
+     button("allocate", "Allocate", !open || !!review) + button("reconcile", "Reconcile year", !review) +
+     button("adjust", "Adjust budget", !open || !!review) + button("transfer", "Transfer allocation", !open || !!review) +
+     button("close", "Close year", !open || !!review) + button("reopen", "Record reopen decision", !closed || !!review || !!authorised) +
+     button("apply-reopen", "Apply reopen", !authorised || !!review) + '</div>';
+ }
+ function persistentBudgetPanel(budget) {
+   var approved = budget && budget.status !== "draft", entry = approved ? approvalEntry(budget.id) || {} : {};
+   var values = approved ? { amount: budget.approvedAmount, date: entry.effectiveDate || text(entry.createdAt).slice(0, 10), actor: entry.actor || "", approver: entry.approver || budget.approvedBy || "", reason: entry.reason || "", evidence: entry.evidence || "" } : approvalDraft();
+   var fields = moneyField(values.amount) + field("Effective date", "date", "date", values.date) + inlineAuthorityFields(values);
+   if (approved) fields = fields.replace(/<input /g, '<input readonly aria-readonly="true" ');
+   return '<form class="program-budget__approval-form" data-budget-form="' + (budget ? "approve" : "create-and-approve") + '" data-budget-inline-approve' + (budget ? ' data-budget-context="' + escapeHtml(JSON.stringify({ budgetId: budget.id })) + '"' : '') + '>' +
+     '<div class="program-budget__approval-fields">' + fields + '</div>' +
+     '<p class="program-budget__dialog-error" data-budget-dialog-error role="alert" hidden></p>' + budgetActionRow(budget) + '</form>';
+ }
+ function newBudgetPanel() { return persistentBudgetPanel(null); }
+ function inlineBudgetPanel(budget) { return persistentBudgetPanel(budget); }
   function closeDialog() { if (state.dialog && state.dialog.open) state.dialog.close(); }
   function showDialog(title, description, content, operation, context) {
     if (!state.dialog) {
@@ -228,7 +256,6 @@
     if (!budget) return;
     if (action === "reconcile") return showDialog("Reconcile annual authority", "Record evidence for this legacy year's existing amount before new financial changes.", authorityFields(), "reconcile", { budgetId: budgetId });
     if (action === "apply-reopen") return showDialog("Apply recorded reopen", "The approved reopen decision is already recorded. Applying it opens this year for governed changes.", "", "apply-reopen", { budgetId: budgetId, decisionId: reopenAuthorisation(budgetId).id });
-    if (action === "approve") return showDialog("Approve annual budget", "Approval opens this financial year for allocations.", moneyField("") + authorityFields(), "approve", { budgetId: budgetId });
     if (action === "adjust") return showDialog("Adjust annual budget", "A supplement adds funds. A reduction can only use unallocated funds.", select("Change", "kind", [{ value: "supplement", label: "Supplement" }, { value: "reduction", label: "Reduction" }]) + moneyField("") + authorityFields(), "adjust", { budgetId: budgetId });
     if (action === "transfer") {
       var sourceAllocations = entities("registerAllocations").filter(function (item) { return item.budgetId === budgetId; });
@@ -254,15 +281,20 @@
   function submit(event) {
     event.preventDefault();
     if (state.busy) return;
-    var form = event.target, operation = form.getAttribute("data-budget-form"), data = new FormData(form), context = JSON.parse(state.dialog.dataset.context || "{}"), actor = text(data.get("actor")), reason = text(data.get("reason")), date = text(data.get("date")), value = Number(data.get("amount"));
+    var form = event.target, operation = form.getAttribute("data-budget-form"), data = new FormData(form), context = JSON.parse(form.dataset.budgetContext || (state.dialog && state.dialog.dataset.context) || "{}"), actor = text(data.get("actor")), reason = text(data.get("reason")), date = text(data.get("date")), value = Number(data.get("amount"));
     var decision = event.submitter && event.submitter.value === "draft" ? "draft" : "approved";
     var options = { actor: actor, approver: text(data.get("approver")), reason: reason, evidence: text(data.get("evidence")), date: date, amount: value, decision: decision, saveDraft: decision === "draft" }, api = budgetApi();
     var errorNode = form.querySelector("[data-budget-dialog-error]");
     var confirm = form.querySelector('[type="submit"]');
     if (operation !== "create" && operation !== "decide" && operation !== "apply-reopen" && (!actor || !reason || !date || !options.evidence || (decision === "approved" && operation !== "carry-review" && !options.approver))) { errorNode.textContent = "Enter a recording officer, approver, reason, evidence and effective date."; errorNode.hidden = false; return; }
-    if (["approve", "adjust", "allocate", "charge", "carry", "transfer"].indexOf(operation) >= 0 && (!Number.isFinite(value) || value < 0 || (operation !== "approve" && value === 0))) { errorNode.textContent = "Enter a valid amount."; errorNode.hidden = false; return; }
+    if (["create-and-approve", "approve", "adjust", "allocate", "charge", "carry", "transfer"].indexOf(operation) >= 0 && (!Number.isFinite(value) || value < 0 || (["approve", "create-and-approve"].indexOf(operation) < 0 && value === 0))) { errorNode.textContent = "Enter a valid amount."; errorNode.hidden = false; return; }
     state.busy = true; confirm.disabled = true; errorNode.hidden = true;
     app().updateWorkspace(function (workspace) {
+      if (operation === "create-and-approve") {
+        var created = api.createAnnualBudget(workspace, { owner: state.owner, financialYear: state.year });
+        var createdBudget = created.entities.annualBudgets.find(function (item) { return item.owner === state.owner && item.financialYear === state.year; });
+        return api.approveAnnualBudget(created, createdBudget.id, options);
+      }
       if (operation === "create") return api.createAnnualBudget(workspace, { owner: state.owner, financialYear: text(data.get("financialYear")) });
       if (operation === "decide") return api.decideRequest(workspace, context.requestId, { decision: text(data.get("decision")), approver: text(data.get("approver")), evidence: text(data.get("evidence")) });
       if (operation === "reconcile") return api.reconcileYear(workspace, context.budgetId, options);
@@ -291,6 +323,7 @@
       return workspace;
     }, { command: "budget." + operation }).then(function () {
       if (operation === "create") state.year = text(data.get("financialYear"));
+      if (operation === "approve" && form.matches("[data-budget-inline-approve]")) delete state.approvalDrafts[approvalDraftKey()];
       closeDialog(); notice("Budget change saved.", false);
     }).catch(function (error) { errorNode.textContent = error && error.message || "Budget change could not be saved."; errorNode.hidden = false; }).finally(function () { state.busy = false; confirm.disabled = false; });
   }
@@ -306,7 +339,10 @@
       if (event.target.matches("[data-budget-year]")) { state.year = event.target.value; notice(""); render(); }
       if (event.target.closest('[data-budget-form="allocate"]')) refreshAllocationContext();
     });
-    document.addEventListener("input", function (event) { if (event.target.closest('[data-budget-form="allocate"]')) refreshAllocationContext(); });
+    document.addEventListener("input", function (event) {
+      if (event.target.closest("[data-budget-inline-approve]")) rememberApprovalDraft(event.target.closest("[data-budget-inline-approve]"));
+      if (event.target.closest('[data-budget-form="allocate"]')) refreshAllocationContext();
+    });
     document.addEventListener("uos:program-ready", function (event) { if (event.detail && event.detail.workspace) { state.workspace = event.detail.workspace; render(); } });
     if (app() && typeof app().workspace === "function") { state.workspace = app().workspace(); render(); }
   }

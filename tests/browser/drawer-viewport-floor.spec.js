@@ -35,13 +35,13 @@ async function floorGeometry(child, id) {
     const drawer = document.querySelector('[data-register-drawer-record="' + CSS.escape(recordId) + '"]');
     const cell = drawer.closest("td");
     const host = drawer.querySelector("[data-register-module-host]");
-    const floorStyle = getComputedStyle(cell);
+    const floorStyle = getComputedStyle(drawer);
     const drawerStyle = getComputedStyle(drawer);
     const drawerRect = drawer.getBoundingClientRect();
     const cellRect = cell.getBoundingClientRect();
     return {
       viewportBottom: innerHeight,
-      floorBottom: cellRect.bottom,
+      floorBottom: drawerRect.bottom,
       drawerBottom: drawerRect.bottom,
       floorWidth: floorStyle.borderBottomWidth,
       floorStyle: floorStyle.borderBottomStyle,
@@ -55,7 +55,7 @@ async function floorGeometry(child, id) {
 
 for (const fixture of [
   { owner: "NSA", shell: "/src/program-planner/nsa.html", colour: /rgb\((4, 120, 87|21, 128, 61)\)/ },
-  { owner: "EVT", shell: "/src/program-planner/events.html", colour: /rgb\(23, 105, 242\)/ }
+    { owner: "EVT", shell: "/src/program-planner/events.html", colour: /rgb\((23, 105, 242|29, 78, 216)\)/ }
 ]) {
   test(fixture.owner + " Register and Calculator keep their owner floor inside the viewport", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 720 });
@@ -66,6 +66,7 @@ for (const fixture of [
     expect(register.floorStyle).toBe("solid");
     expect(register.floorColor).toMatch(fixture.colour);
     expect(register.floorBottom).toBeLessThanOrEqual(register.viewportBottom);
+    expect(register.floorBottom).toBeGreaterThanOrEqual(register.viewportBottom - 8);
 
     await child.evaluate((recordId) => window.UOS.ProgramApp.navigateWithContext("costing", recordId), id);
     await child.waitForFunction(() => document.body.getAttribute("data-drawer-module") === "costing");
@@ -76,13 +77,19 @@ for (const fixture of [
     expect(calculator.floorStyle).toBe("solid");
     expect(calculator.floorColor).toMatch(fixture.colour);
     expect(calculator.floorBottom).toBeLessThanOrEqual(calculator.viewportBottom);
+    expect(calculator.floorBottom).toBeGreaterThanOrEqual(calculator.viewportBottom - 8);
     expect(calculator.drawerBottom).toBeLessThan(calculator.viewportBottom);
     expect(calculator.drawerHeight).toBeLessThanOrEqual(calculator.drawerMaxHeight + 0.5);
     expect(calculator.hostHeight).toBeLessThanOrEqual(calculator.drawerHeight + 0.5);
 
     const frame = page.frameLocator("iframe");
+    // This test explicitly exercises Job-level allowances; ordinary Calculator
+    // additions may be costing-only and do not imply a selected Scheduler Job.
+    await child.evaluate(async () => {
+      await window.UOS.ProgramApp.updateWorkspace((workspace) => window.UOS.ProgramCosting.upsertRateItem(workspace, { id: 'RATE-FLOOR-LABOUR', kind: 'Labour', kindSource: 'user', category: 'Labour', description: 'A drawer floor labour rate', unit: 'hour', unitRate: 10, active: true, schedulerEnabled: true }));
+    });
     for (let index = 1; index <= 8; index += 1) {
-      const add = frame.locator('[data-costing-add-rate]:not([disabled])').first();
+      const add = frame.locator('[data-costing-add-rate="RATE-FLOOR-LABOUR"]');
       await expect(add).toHaveCount(1);
       await add.evaluate((button) => button.click());
       await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(index);
@@ -99,16 +106,24 @@ for (const fixture of [
       const tableScroller = drawer.closest(".program-table-wrap");
       const catalogScroller = drawer.querySelector(".program-cost-table-wrap");
       const calculatorScroller = drawer.querySelector(".program-calculator-table-wrap");
-      tableScroller.scrollTop = Math.min(40, tableScroller.scrollHeight - tableScroller.clientHeight);
+      // The outer Register scroll position is locked while its drawer is open.
       catalogScroller.scrollTop = Math.min(30, catalogScroller.scrollHeight - catalogScroller.clientHeight);
+      calculatorScroller.scrollTop = Math.min(80, calculatorScroller.scrollHeight - calculatorScroller.clientHeight);
       return {
         floor: drawer.style.getPropertyValue("--program-drawer-max-height"),
         drawerHeight: drawer.getBoundingClientRect().height,
         tableScrollTop: tableScroller.scrollTop,
         catalogScrollTop: catalogScroller.scrollTop,
+        calculatorScrollTop: calculatorScroller.scrollTop,
       };
     }, id);
 
+    await child.evaluate(async () => {
+      await window.UOS.ProgramApp.updateWorkspace((workspace) => {
+        workspace.workspace.costing = Object.assign({}, workspace.workspace.costing, { selectedProjectId: workspace.workspace.selectedProjectId, jobId: workspace.entities.jobs[0].id });
+        return workspace;
+      });
+    });
     const costingContext = await child.evaluate(() => {
       const workspace = window.UOS.ProgramApp.workspace();
       const controller = window.UOS.ProgramCostingController.snapshot();
@@ -121,7 +136,7 @@ for (const fixture of [
     expect(costingContext.controllerJobId).toBeTruthy();
     expect(costingContext.controllerJobExists).toBe(true);
 
-  for (const values of []) {
+    for (const values of [[10, 5], [0, 0]]) {
     await frame.locator("[data-costing-preliminaries]").evaluate((input, value) => {
       input.value = String(value);
       input.dispatchEvent(new Event("change", { bubbles: true }));
@@ -156,6 +171,7 @@ for (const fixture of [
           drawerHeight: drawer.getBoundingClientRect().height,
           tableScrollTop: tableScroller.scrollTop,
           catalogScrollTop: catalogScroller.scrollTop,
+          calculatorScrollTop: calculatorScroller.scrollTop,
           footerVisible: footer.getBoundingClientRect().top >= drawer.getBoundingClientRect().top && footer.getBoundingClientRect().bottom <= drawer.getBoundingClientRect().bottom + 1,
           catalogVisible: catalog.getBoundingClientRect().top < catalog.getBoundingClientRect().bottom,
           calculatorVisible: calculator.getBoundingClientRect().top < calculator.getBoundingClientRect().bottom
@@ -166,6 +182,7 @@ for (const fixture of [
       expect(stable.floorState).toBe("stable");
       expect(stable.tableScrollTop).toBe(baseline.tableScrollTop);
       expect(stable.catalogScrollTop).toBe(baseline.catalogScrollTop);
+      expect(stable.calculatorScrollTop).toBe(baseline.calculatorScrollTop);
       expect(stable.footerVisible).toBe(true);
       expect(stable.catalogVisible).toBe(true);
       expect(stable.calculatorVisible).toBe(true);
@@ -178,8 +195,8 @@ for (const fixture of [
   await expect(frame.locator('[data-costing-total-label="margin"]')).toHaveText("Margin (0%)");
     const expectedTotals = await child.evaluate(() => {
       const ws = window.UOS.ProgramApp.workspace();
-      const jobId = window.UOS.ProgramCostingController.snapshot().jobId;
-      const totals = window.UOS.ProgramCosting.jobCalculator(ws, jobId).totals;
+      const controller = window.UOS.ProgramCostingController.snapshot();
+      const totals = window.UOS.ProgramCosting.totals(ws.entities.costingLines.filter((line) => line.projectId === controller.selectedProjectId), { preliminariesPercent: controller.preliminaries, marginPercent: controller.margin });
       const money = (value) => new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(value);
       return {
         subtotal: money(totals.subtotal),
@@ -189,7 +206,7 @@ for (const fixture of [
         grand: money(totals.grandTotal)
       };
     });
-  for (const [key, amount] of Object.entries({})) {
+    for (const [key, amount] of Object.entries(expectedTotals)) {
       await expect(frame.locator(`[data-costing-total="${key}"]`)).toHaveText(amount);
     }
   });
