@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { suppressBackupModalForFunctionalTest } = require('./test-helper.cjs');
 const { execFileSync } = require('node:child_process');
-async function verifyPdf(page, child, owner, mode, expected) {
+async function verifyPdf(page, child, owner, mode, expected, absent = []) {
   const path = test.info().outputPath(`${owner}-${mode}-quote.pdf`);
   // Exercise the actual hosted print action first. Chromium's PDF API targets
   // the top document, so render its complete live DOM snapshot for PDF proof.
@@ -22,6 +22,7 @@ async function verifyPdf(page, child, owner, mode, expected) {
   await printPage.pdf({ path, format: 'A4', printBackground: true });
   const text = execFileSync('pdftotext', ['-layout', path, '-'], { encoding: 'utf8' }).replace(/\s+/g, ' ');
   for (const phrase of expected) expect(text).toContain(phrase);
+  for (const phrase of absent) expect(text).not.toContain(phrase);
   await printPage.close();
   await child.evaluate(() => window.dispatchEvent(new Event('afterprint')));
 }
@@ -72,6 +73,34 @@ for (const owner of ['NSA', 'EVT']) {
     await expect(frame.locator('[data-preview-contribution]')).toHaveText('$80.00');
     await expect(frame.locator('[data-preview-customer-gst]')).toHaveText('$8.00');
     await expect(frame.locator('.uos-quote-sheet__grand-total-val')).toHaveText('$88.00');
+    const suppressCouncilDisclosure = frame.locator('[data-quote-suppress-council-disclosure]');
+    const fundingStatement = frame.locator('[data-preview-funding-statement]');
+    await expect(suppressCouncilDisclosure).toBeVisible();
+    await expect(suppressCouncilDisclosure).not.toBeChecked();
+    await expect(frame.locator('[data-quote-section-3-heading]')).toHaveText('3. Scope and Terms');
+    await expect(frame.locator('[data-quote-terms-label]')).toHaveText('Terms & Conditions');
+    await expect(fundingStatement).toContainText('Co-funded by City of Adelaide and customer.');
+    await suppressCouncilDisclosure.check();
+    await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.quotes[0]?.suppressCouncilDisclosure)).toBe(true);
+    await expect(fundingStatement).toHaveText('Proposed customer contribution: $80.00 ex GST.');
+    await expect(fundingStatement).not.toContainText('City of Adelaide');
+    await verifyPdf(page, child, owner, 'mixed-suppressed', ['Proposed customer contribution: $80.00 ex GST.'], ['Co-funded by City of Adelaide and customer.']);
+    await suppressCouncilDisclosure.uncheck();
+    await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.quotes[0]?.suppressCouncilDisclosure)).toBe(false);
+    const allocationInput = frame.locator('[data-operational-amount]');
+    await allocationInput.fill('0');
+    await allocationInput.press('Tab');
+    await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.projects[0]?.funding?.operationalAmount)).toBe(0);
+    await expect(fundingStatement).toHaveText('Proposed customer contribution: $80.00 ex GST.');
+    await allocationInput.fill('40');
+    await allocationInput.press('Tab');
+    await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.projects[0]?.funding?.operationalAmount)).toBe(40);
+    await expect(fundingStatement).toContainText('Co-funded by City of Adelaide and customer.');
+    await expect(frame.locator('.uos-quote-sheet__table thead')).not.toContainText('Total (AUD)');
+    await expect(frame.locator('.uos-quote-sheet__table tbody')).not.toContainText('$100.00');
+    await frame.locator('[data-quote-view-mode="summary"]').click();
+    await expect(frame.locator('.uos-quote-sheet__table thead')).not.toContainText('Total (AUD)');
+    await expect(frame.locator('.uos-quote-sheet__table tbody')).not.toContainText('$100.00');
     await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.quotes[0]?.proposedCustomerContribution)).toBe(80);
     await verifyPdf(page, child, owner, 'mixed', ['Co-funded by City of Adelaide and customer.', 'Proposed customer contribution', '$80.00', '$8.00', '$88.00']);
     await page.reload();
@@ -111,10 +140,17 @@ for (const owner of ['NSA', 'EVT']) {
     await expect(frame.locator('[data-deposit-record]')).toBeDisabled();
     await expect(frame.locator('[data-payment-record]')).toBeDisabled();
     await expect(frame.locator('[data-payment-status]')).toHaveText('No customer payment required');
-    await expect(frame.locator('.uos-quote-sheet__grand-total-val')).toHaveText('$0.00');
-    await expect(frame.locator('[data-preview-customer-gst]')).toHaveText('$0.00');
-    await expect(frame.locator('[data-preview-funding-statement]')).toHaveText('Fully funded by City of Adelaide — no customer payment required.');
-    await verifyPdf(page, reloaded, owner, 'city', ['Fully funded by City of Adelaide', 'no customer payment required.', 'Customer amount payable', '$0.00']);
+    await expect(frame.locator('[data-quote-section-3-link]')).toHaveText('3 Notes');
+    await expect(frame.locator('[data-quote-section-3-heading]')).toHaveText('3. Internal Notes');
+    await expect(frame.locator('[data-quote-terms-label]')).toHaveText('Internal Notes');
+    await expect(frame.locator('.uos-quote-sheet__title')).toHaveText('WORKS ESTIMATE');
+    await expect(frame.locator('[data-preview-customer-gst]')).toHaveCount(0);
+    await expect(frame.locator('[data-preview-funding-statement]')).toHaveCount(0);
+    await expect(frame.locator('.uos-quote-sheet__party').first()).toContainText('Site');
+    await expect(frame.locator('[data-quote-preview-sheet]')).not.toContainText('Customer amount payable');
+    await expect(frame.locator('[data-quote-preview-sheet]')).not.toContainText('no customer payment required');
+    await expect(frame.locator('[data-quote-preview-sheet]')).not.toContainText('OFFICIAL QUOTATION');
+    await verifyPdf(page, reloaded, owner, 'city', ['WORKS ESTIMATE', 'Estimated work cost (ex GST)', 'INTERNAL NOTES'], ['OFFICIAL QUOTATION', 'Customer amount payable', 'no customer payment required']);
     if (owner === 'NSA') await frame.locator('.program-quote-section--funding').screenshot({ path: '/tmp/quote-city-funding.png' });
     await page.setViewportSize({ width: 900, height: 900 });
     await expect(radio('city')).toBeVisible();

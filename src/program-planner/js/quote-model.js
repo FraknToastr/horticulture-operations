@@ -159,7 +159,11 @@ function valueOrExisting(input, name, existing) {
   fundingMode = fundingMode || null;
   var proposed = valueOrExisting(input, "proposedCustomerContribution", existing);
   if (proposed != null && proposed !== "" && (!Number.isFinite(Number(proposed)) || Number(proposed) < 0)) throw new Error("Proposed customer contribution must be a non-negative number.");
-  if (financialLock && (fundingMode !== (existing.fundingMode || null) || (input.proposedCustomerContribution !== undefined && money(proposed) !== money(existing.proposedCustomerContribution)))) throw new Error("Reverse active payments and payment allocations before changing the funding arrangement or proposed customer contribution.");
+  var suppressCouncilDisclosure = input.suppressCouncilDisclosure === undefined
+    ? Boolean(existing && existing.suppressCouncilDisclosure)
+    : input.suppressCouncilDisclosure === true;
+  if (fundingMode !== "mixed") suppressCouncilDisclosure = false;
+  if (financialLock && (fundingMode !== (existing.fundingMode || null) || (input.proposedCustomerContribution !== undefined && money(proposed) !== money(existing.proposedCustomerContribution)) || suppressCouncilDisclosure !== Boolean(existing && existing.suppressCouncilDisclosure))) throw new Error("Reverse active payments and payment allocations before changing the funding arrangement, customer contribution or Council PDF disclosure.");
   var lines;
   if (financialLock) lines = [];
   else if (!existing || input.refreshCosts === true) {
@@ -186,7 +190,7 @@ function valueOrExisting(input, name, existing) {
     quoteDate: text(valueOrExisting(input, "quoteDate", existing)), expiryDate: text(valueOrExisting(input, "expiryDate", existing)), discountRate: calculated.discountRate, discountAmount: calculated.discount,
     contingencyRate: Math.max(0, Number(valueOrExisting(input, "contingencyRate", existing)) || 0), scopeNotes: text(valueOrExisting(input, "scopeNotes", existing)), terms: text(valueOrExisting(input, "terms", existing)),
       status: "Draft", subtotal: calculated.subtotal, gst: calculated.gst, grandTotal: calculated.grandTotal,
-      fundingMode: fundingMode, proposedCustomerContribution: proposed == null || proposed === "" ? null : money(proposed),
+      fundingMode: fundingMode, proposedCustomerContribution: proposed == null || proposed === "" ? null : money(proposed), suppressCouncilDisclosure: suppressCouncilDisclosure,
       updatedAt: new Date().toISOString(), provenance: { owner: project.owner, sourceApp: "uos.quote-builder", sourceVersion: 1, sourceId: quoteId }
     };
     if (financialLock) {
@@ -244,6 +248,7 @@ function valueOrExisting(input, name, existing) {
     if (quote.fundingMode) {
       projection.quote.fundingMode = quote.fundingMode;
       projection.quote.proposedCustomerContribution = quote.proposedCustomerContribution;
+      if (quote.suppressCouncilDisclosure !== undefined) projection.quote.suppressCouncilDisclosure = quote.suppressCouncilDisclosure === true;
       if (quote.cityFundingAmount !== undefined) projection.quote.cityFundingAmount = quote.cityFundingAmount;
       if (quote.estimatedDeliveryCost !== undefined) projection.quote.estimatedDeliveryCost = quote.estimatedDeliveryCost;
     }
@@ -348,7 +353,8 @@ function valueOrExisting(input, name, existing) {
       clientName: source.clientName, address: source.address, phone: source.phone, email: source.email, preparedBy: source.preparedBy,
       quoteDate: new Date().toISOString().slice(0, 10), expiryDate: source.expiryDate,
       discountRate: source.discountRate, discountAmount: source.discountAmount, contingencyRate: source.contingencyRate, scopeNotes: source.scopeNotes, terms: source.terms, customLines: adjustments,
-      fundingMode: source.fundingMode || null, proposedCustomerContribution: source.proposedCustomerContribution
+      fundingMode: source.fundingMode || null, proposedCustomerContribution: source.proposedCustomerContribution,
+      suppressCouncilDisclosure: source.suppressCouncilDisclosure === true
     });
   }
 

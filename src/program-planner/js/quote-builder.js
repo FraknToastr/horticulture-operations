@@ -31,6 +31,7 @@
     operationalAmount: 0,
     fundingMode: "customer",
     proposedCustomerContribution: null,
+    suppressCouncilDisclosure: false,
     scopeNotes: "",
     terms: "",
     viewMode: "itemised",
@@ -257,6 +258,13 @@ function hasLifecycleAction(actions, names) {
     if (allocationNote) allocationNote.textContent = state.fundingMode === "customer" ? "Available — excluded from this Quote" : "Allocation is managed separately in Budget.";
     var field = rootNode.querySelector("[data-mixed-contribution-field]");
     if (field) field.hidden = state.fundingMode !== "mixed";
+    var disclosureField = rootNode.querySelector("[data-council-disclosure-field]");
+    if (disclosureField) disclosureField.hidden = state.fundingMode !== "mixed";
+    var disclosureInput = rootNode.querySelector("[data-quote-suppress-council-disclosure]");
+    if (disclosureInput) {
+      disclosureInput.checked = state.suppressCouncilDisclosure === true;
+      disclosureInput.disabled = locked || !state.selectedEntityId || state.fundingMode !== "mixed";
+    }
     var input = rootNode.querySelector("[data-quote-customer-contribution]");
     if (input) {
       input.disabled = locked || !state.selectedEntityId;
@@ -347,6 +355,16 @@ function hasLifecycleAction(actions, names) {
     if (contInput && document.activeElement !== contInput) contInput.value = state.contingencyRate;
     if (scopeInput && document.activeElement !== scopeInput) scopeInput.value = state.scopeNotes;
     if (termsInput && document.activeElement !== termsInput) termsInput.value = state.terms;
+    var internalNotes = state.fundingMode === "city";
+    var section3Link = rootNode.querySelector("[data-quote-section-3-link]");
+    if (section3Link) {
+      section3Link.textContent = internalNotes ? "3 Notes" : "3 Terms";
+      section3Link.setAttribute("aria-label", internalNotes ? "Section 3: Internal Notes" : "Section 3: Scope and Terms");
+    }
+    var section3Heading = rootNode.querySelector("[data-quote-section-3-heading]");
+    if (section3Heading) section3Heading.textContent = internalNotes ? "3. Internal Notes" : "3. Scope and Terms";
+    var termsLabel = rootNode.querySelector("[data-quote-terms-label]");
+    if (termsLabel) termsLabel.textContent = internalNotes ? "Internal Notes" : "Terms & Conditions";
     if (operationalInput) {
       operationalInput.readOnly = state.fundingMode === "customer" || Boolean(window.UOS.ProgramBudget && workspaceSnapshot().entities.annualBudgets.length);
       operationalInput.title = operationalInput.readOnly ? "Allocated to the Register record in Annual Budget" : "Legacy Project amount; reconcile in Annual Budget";
@@ -492,7 +510,93 @@ function hasLifecycleAction(actions, names) {
     if (position) drawerUI.restoreQuotePosition(position);
   }
 
-  function renderPreview() {
+  function quoteDocumentMode() {
+    return state.fundingMode === "city" ? "city" : state.fundingMode === "mixed" ? "mixed" : "customer";
+  }
+
+  function setQuoteDocumentTotals(list, rows) {
+    if (!list) return;
+    list.innerHTML = rows.map(function (row) {
+      return '<dt' + (row.labelClass ? ' class="' + row.labelClass + '"' : '') + '>' + esc(row.label) + '</dt>' +
+        '<dd' + (row.valueClass ? ' class="' + row.valueClass + '"' : '') + (row.dataAttribute ? ' ' + row.dataAttribute : '') + '>' + money(row.value) + '</dd>';
+    }).join("");
+  }
+
+  function applyFundingDocumentPresentation(previewContainer, totals, customer, cityFunding) {
+    var mode = quoteDocumentMode();
+    if (mode === "customer") return;
+    var pages = Array.prototype.slice.call(previewContainer.querySelectorAll(".uos-quote-sheet-page"));
+    var isCity = mode === "city";
+    var suppressCouncilDisclosure = mode === "mixed" && (state.suppressCouncilDisclosure === true || Math.abs(num(cityFunding)) < 0.005);
+    previewContainer.classList.toggle("is-city-funded-estimate", isCity);
+    previewContainer.classList.toggle("is-mixed-funded-quote", mode === "mixed");
+
+    pages.forEach(function (page) {
+      var table = page.querySelector(".uos-quote-sheet__table");
+      if (mode === "mixed" && table) {
+        var priceHeader = table.querySelector("thead th:last-child");
+        if (priceHeader) priceHeader.remove();
+        Array.prototype.forEach.call(table.querySelectorAll("tbody tr"), function (row) {
+          var cells = row.querySelectorAll(":scope > td");
+          if (cells.length >= 3) cells[cells.length - 1].remove();
+        });
+        Array.prototype.forEach.call(table.querySelectorAll("[colspan]"), function (cell) { cell.colSpan = 2; });
+      }
+      if (isCity && table) {
+        var totalHeader = table.querySelector("thead th:last-child");
+        if (totalHeader) totalHeader.textContent = "Estimated cost (AUD)";
+        Array.prototype.forEach.call(table.querySelectorAll("tbody td"), function (cell) {
+          if (/quotation/i.test(cell.textContent)) cell.textContent = "No items included in this works estimate.";
+        });
+      }
+    });
+
+    if (mode === "mixed") {
+      Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__totals-list"), function (list) {
+        setQuoteDocumentTotals(list, [
+          { label: "Customer contribution (ex GST)", value: customer.contribution, dataAttribute: "data-preview-contribution" },
+          { label: "GST (10%)", value: customer.gst, dataAttribute: "data-preview-customer-gst" },
+          { label: "Customer amount payable (inc GST)", value: customer.payable, labelClass: "uos-quote-sheet__grand-total-label", valueClass: "uos-quote-sheet__grand-total-val" }
+        ]);
+      });
+      if (suppressCouncilDisclosure) {
+        Array.prototype.forEach.call(previewContainer.querySelectorAll("[data-preview-funding-statement]"), function (statement) {
+          statement.textContent = "Proposed customer contribution: " + money(customer.contribution) + " ex GST.";
+        });
+      }
+      return;
+    }
+
+    Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__title"), function (title) { title.textContent = "WORKS ESTIMATE"; });
+    Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__title-note"), function (note) { note.textContent = "(INTERNAL PLANNING DOCUMENT)"; });
+    Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__brand"), function (brand) {
+      brand.textContent = brand.textContent.replace("QUOTATION", "WORKS ESTIMATE");
+    });
+    Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__subbrand"), function (subbrand) {
+      subbrand.textContent = subbrand.textContent.replace("Quote ID:", "Estimate ID:");
+    });
+    Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__meta strong"), function (label) {
+      if (label.textContent === "Quote ID:") label.textContent = "Estimate ID:";
+    });
+    Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__party:first-child"), function (party) {
+      party.innerHTML = "<h4>Site</h4><strong>" + esc(privacyDisplay(state.address, "address")) + "</strong>";
+    });
+    Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__totals-list"), function (list) {
+      setQuoteDocumentTotals(list, [
+        { label: "Estimated work cost (ex GST)", value: totals.subtotalExGst },
+        { label: "GST (10%)", value: totals.gstAmount },
+        { label: "Estimated work cost (inc GST)", value: totals.grandTotal, labelClass: "uos-quote-sheet__grand-total-label", valueClass: "uos-quote-sheet__grand-total-val" }
+      ]);
+    });
+    Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__terms"), function (terms) {
+      terms.innerHTML = "<h4>Internal notes</h4><p>" + esc(state.terms) + "</p>";
+    });
+    Array.prototype.forEach.call(previewContainer.querySelectorAll(".uos-quote-sheet__print-meta > span:first-child"), function (footer) {
+      footer.textContent = "Works Estimate · City of Adelaide Horticulture Operations";
+    });
+  }
+
+function renderPreview() {
     if (!rootNode) return;
     var previewContainer = rootNode.querySelector("[data-quote-preview-sheet]");
     if (!previewContainer) return;
@@ -695,6 +799,7 @@ function hasLifecycleAction(actions, names) {
     }
 
     previewContainer.innerHTML = '<div class="uos-quote-sheet-inner">' + pagesHtml.join("") + '</div>';
+    applyFundingDocumentPresentation(previewContainer, totals, customer, cityFunding);
   }
 
   function prepareQuotePrint() {
@@ -854,6 +959,7 @@ function hasLifecycleAction(actions, names) {
     state.contingencyRate = quote ? Number(quote.contingencyRate) || 0 : 0;
     state.fundingMode = quote ? quote.fundingMode || null : "customer";
     state.proposedCustomerContribution = quote && quote.proposedCustomerContribution != null ? Number(quote.proposedCustomerContribution) : null;
+    state.suppressCouncilDisclosure = Boolean(quote && quote.suppressCouncilDisclosure);
     state.scopeNotes = quote ? quote.scopeNotes || "" : "";
     state.terms = quote ? quote.terms || "" : "";
     var viewModel = quote && typeof window.UOS.ProgramQuotes.quoteViewModel === "function" ? window.UOS.ProgramQuotes.quoteViewModel(ws, quote.id) : null;
@@ -942,8 +1048,9 @@ function hasLifecycleAction(actions, names) {
         id: state.quoteId || undefined, projectId: state.selectedEntityId, quoteNumber: state.quoteNumber, revision: state.revision,
         clientName: state.clientName, address: state.address, email: state.email, preparedBy: state.preparedBy,
         quoteDate: state.quoteDate, expiryDate: state.expiryDate, discountRate: state.discountRate, contingencyRate: state.contingencyRate,
-        scopeNotes: state.scopeNotes, terms: state.terms, customLines: custom,
-        fundingMode: state.fundingMode, proposedCustomerContribution: state.proposedCustomerContribution
+      scopeNotes: state.scopeNotes, terms: state.terms, customLines: custom,
+      fundingMode: state.fundingMode, proposedCustomerContribution: state.proposedCustomerContribution,
+      suppressCouncilDisclosure: state.suppressCouncilDisclosure
     }));
     pendingDraftSaves += 1;
     return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
@@ -991,11 +1098,16 @@ function hasLifecycleAction(actions, names) {
       if (["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0 || state.quoteId && UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return;
       state.fundingMode = target.value;
       if (state.fundingMode === "mixed" && state.proposedCustomerContribution == null) state.proposedCustomerContribution = suggestedCustomerAmount();
+      if (state.fundingMode !== "mixed") state.suppressCouncilDisclosure = false;
     }
     else if (target.matches("[data-quote-customer-contribution]")) {
       if (!target.validity.valid || target.value === "") return;
       if (["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0 || state.quoteId && UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return;
       state.proposedCustomerContribution = Math.round(Number(target.value) * 100) / 100;
+    }
+    else if (target.matches("[data-quote-suppress-council-disclosure]")) {
+      if (["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0 || state.quoteId && UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return;
+      state.suppressCouncilDisclosure = state.fundingMode === "mixed" && target.checked === true;
     }
     else if (target.matches("[data-quote-discount]")) state.discountRate = num(target.value);
     else if (target.matches("[data-quote-contingency]")) state.contingencyRate = num(target.value);
@@ -1572,6 +1684,7 @@ function hasLifecycleAction(actions, names) {
     state.operationalAmount = 0;
     state.fundingMode = "customer";
     state.proposedCustomerContribution = null;
+    state.suppressCouncilDisclosure = false;
     state.lines = [];
     state.payments = [];
   }

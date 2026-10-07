@@ -477,8 +477,8 @@ function displayDate(value) {
 
     var tableHeadHtml = '<thead>' +
       '<tr>' +
-        '<th class="planner-col-task"></th>' +
-        '<th class="planner-col-status">Status</th>' +
+        '<th class="planner-col-task">Task</th>' +
+        '<th class="planner-col-status">Progress</th>' +
         '<th class="planner-col-owner">Owner</th>' +
         '<th class="planner-col-due">Due</th>' +
         '<th class="planner-col-notes">Notes</th>' +
@@ -488,12 +488,11 @@ function displayDate(value) {
 
     var tableBodyHtml = '<tbody>' + categories.map(function (catName) {
       var catItems = activeItemsForProject.filter(function (it) { return it.category === catName; });
-      var catHeaderRow = '<tr class="planner-cat-header-row"><td colspan="6"><strong>' + esc(catName.toUpperCase()) + ' · ' + catItems.length + ' ITEMS</strong></td></tr>';
+      var catHeaderRow = '<tr class="planner-cat-header-row"><td colspan="6"><strong>' + esc(catName.toUpperCase()) + '</strong></td></tr>';
 
       var rowsHtml = catItems.map(function (it) {
         var itemSaved = chkData[it.id] || { status: "Not Started", owner: "Not assigned", due: "", notes: "" };
         var isDone = itemSaved.status === "Complete";
-        var isExpanded = Boolean(state.expandedItems[it.id]);
         var statusSlug = text(itemSaved.status).toLowerCase().replace(/[^a-z0-9]+/g, "-");
         var taskEntityId = itemSaved.id || it.canonicalId || "";
         var plannerModel = window.UOS && window.UOS.ProgramPlannerModel;
@@ -503,43 +502,84 @@ function displayDate(value) {
         var customTask = Boolean(taskEntityId && !itemSaved.templateKey && !itemSaved.schedulable);
         var duplicateSelected = String(state.selectedChecklistItemId) === String(it.id);
 
-        var dotColorClass = itemSaved.status === "Complete" ? "dot--complete" : itemSaved.status === "In Progress" ? "dot--inprogress" : itemSaved.status === "On Hold" ? "dot--onhold" : "dot--notstarted";
-
-        var statusOptionsHtml = STATUS_OPTIONS.map(function (opt) {
-          return '<option value="' + esc(opt) + '"' + (itemSaved.status === opt ? " selected" : "") + '>' + esc(opt) + '</option>';
-        }).join("");
-
-        var ownerOptionsHtml = ownerOptions.map(function (opt) {
-          return '<option value="' + esc(opt) + '"' + (itemSaved.owner === opt ? " selected" : "") + '>' + esc(opt) + '</option>';
-        }).join("");
-
-        var descRowHtml = isExpanded ? '<tr class="planner-desc-row" data-status-slug="' + esc(statusSlug) + '"><td colspan="6"><div class="planner-desc-content" role="note"><svg class="planner-desc-info-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/></svg><span>' + esc(it.desc) + '</span></div></td></tr>' : '';
-
         return '<tr class="planner-item-row' + (isDone ? " is-complete" : "") + (duplicateSelected ? " is-duplicate-selected" : "") + '" data-status-slug="' + esc(statusSlug) + '" data-checklist-item-id="' + it.id + '" data-task-entity-id="' + esc(taskEntityId) + '" data-planner-selectable tabindex="0" aria-selected="' + String(duplicateSelected) + '">' +
-          '<td class="planner-col-task">' +
-            '<div class="planner-task-cell">' +
-              '<span>' + esc(it.title) + '</span>' +
-              '<button type="button" class="planner-chevron-btn" data-toggle-expand="' + it.id + '" title="Toggle description"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
-            '</div>' +
-          '</td>' +
-            '<td class="planner-col-status"><span class="planner-status-summary"><span class="planner-status-dot ' + dotColorClass + '"></span>' + esc(itemSaved.status) + '</span></td>' +
-            '<td class="planner-col-owner">' + esc(itemSaved.owner || "Not assigned") + '</td>' +
-            '<td class="planner-col-due">' + esc(itemSaved.due || "—") + '</td>' +
-            '<td class="planner-col-notes"><span class="planner-notes-summary">' + esc(itemSaved.notes || "—") + '</span></td>' +
-          '<td class="planner-col-action">' +
+          '<td class="planner-col-task"><span class="commercial-value-frame planner-value-frame planner-value-frame--task">' + esc(it.title) + '</span></td>' +
+          '<td class="planner-col-status"><span class="commercial-value-frame planner-progress-frame planner-progress-frame--' + esc(statusSlug) + '">' + esc(itemSaved.status) + '</span></td>' +
+          '<td class="planner-col-owner"><span class="commercial-value-frame planner-value-frame">' + esc(itemSaved.owner || "Not assigned") + '</span></td>' +
+          '<td class="planner-col-due"><span class="commercial-value-frame planner-value-frame">' + esc(itemSaved.due || "—") + '</span></td>' +
+          '<td class="planner-col-notes"><span class="commercial-value-frame planner-value-frame planner-value-frame--notes">' + esc(itemSaved.notes || "") + '</span></td>' +
+          '<td class="planner-col-action"><div class="planner-action-rail">' +
+            '<button type="button" class="planner-info-button" data-planner-task-info="' + esc(it.id) + '" aria-label="View task information" title="View task information"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6m0-10v.1"></path></svg></button>' +
           (schedulable ? (scheduled
             ? '<button type="button" class="planner-task-path is-scheduled" data-planner-open-scheduled-job="' + esc(itemSaved.schedulerJobId) + '" data-planner-scheduled-project="' + esc(pId) + '">Scheduled Job</button>'
 : (linkedJob ? '<button type="button" class="planner-task-path is-linked-job" data-planner-open-scheduled-job="' + esc(itemSaved.jobId) + '" data-planner-scheduled-project="' + esc(pId) + '">Draft Planner Job</button>' : '<button type="button" class="planner-task-path" data-planner-draft-job="' + esc(taskEntityId) + '" data-planner-scheduled-project="' + esc(pId) + '">Operational</button>')) : '<span class="planner-task-path">Inert</span>') +
             (taskEntityId ? '<button type="button" class="planner-schedule-btn" data-planner-edit-task="' + esc(taskEntityId) + '">Edit</button>' : '') +
             '<button type="button" class="planner-delete-btn" data-delete-item="' + it.id + '" title="Delete item">×</button>' +
-          '</td>' +
-        '</tr>' + descRowHtml;
+          '</div></td>' +
+        '</tr>';
       }).join("");
 
       return catHeaderRow + rowsHtml;
     }).join("") + '</tbody>';
 
-    container.innerHTML = topNavHtml + '<div class="planner-table-wrap"><table class="planner-table">' + tableHeadHtml + tableBodyHtml + '</table></div>';
+    container.innerHTML = topNavHtml + '<div class="planner-table-wrap"><table class="planner-table commercial-table-shell">' + tableHeadHtml + tableBodyHtml + '</table></div>';
+    measurePlannerColumns(container);
+  }
+
+  function measurePlannerColumns(container) {
+    var table = container && container.querySelector(".planner-table");
+    if (!table || !window.getComputedStyle) return;
+    function widest(selector, minimum, maximum) {
+      var width = minimum;
+      Array.prototype.forEach.call(table.querySelectorAll(selector), function (node) {
+        var probe = node.cloneNode(true);
+        probe.removeAttribute("id");
+        probe.style.position = "fixed";
+        probe.style.left = "-10000px";
+        probe.style.top = "0";
+        probe.style.display = "inline-flex";
+        probe.style.width = "max-content";
+        probe.style.minWidth = "0";
+        probe.style.maxWidth = "none";
+        probe.style.visibility = "hidden";
+        container.appendChild(probe);
+        width = Math.max(width, Math.ceil(probe.getBoundingClientRect().width));
+        probe.remove();
+      });
+      return Math.min(width, maximum);
+    }
+    var task = widest(".planner-value-frame--task", 180, Number.POSITIVE_INFINITY);
+    var status = widest(".planner-progress-frame", 96, 170);
+    var owner = widest(".planner-col-owner .planner-value-frame", 96, 220);
+    var due = widest(".planner-col-due .planner-value-frame", 54, 150);
+    var actionCount = 3;
+    Array.prototype.forEach.call(table.querySelectorAll(".planner-action-rail"), function (rail) {
+      actionCount = Math.max(actionCount, rail.querySelectorAll("button,.planner-task-path").length);
+    });
+    var actions = actionCount * 34 + (actionCount - 1) * 8;
+    var notes = widest(".planner-value-frame--notes", 34, 360);
+    table.style.setProperty("--planner-task-width", task + "px");
+    table.style.setProperty("--planner-status-width", status + "px");
+    table.style.setProperty("--planner-owner-width", owner + "px");
+    table.style.setProperty("--planner-due-width", due + "px");
+    table.style.setProperty("--planner-action-width", actions + "px");
+    Array.prototype.forEach.call(table.querySelectorAll(".planner-value-frame--task"), function (node) {
+      task = Math.max(task, node.scrollWidth + 2);
+    });
+    table.style.setProperty("--planner-task-width", task + "px");
+    table.style.setProperty("--planner-notes-min-width", notes + "px");
+    table.style.setProperty("--planner-table-min-width", (task + status + owner + due + actions + notes + 40) + "px");
+    window.requestAnimationFrame(function () {
+      if (!table.isConnected) return;
+      var currentTask = parseFloat(table.style.getPropertyValue("--planner-task-width")) || task;
+      var renderedTask = currentTask;
+      Array.prototype.forEach.call(table.querySelectorAll(".planner-value-frame--task"), function (node) {
+        renderedTask = Math.max(renderedTask, node.scrollWidth + 2);
+      });
+      if (renderedTask <= currentTask) return;
+      table.style.setProperty("--planner-task-width", renderedTask + "px");
+      table.style.setProperty("--planner-table-min-width", (parseFloat(table.style.getPropertyValue("--planner-table-min-width")) + renderedTask - currentTask) + "px");
+    });
   }
 
   function renderUI() {
@@ -768,7 +808,47 @@ function displayDate(value) {
  dialog.addEventListener("close", no);
  });
  }
- function ensureTaskEditor() {
+  function ensureTaskInfoDialog() {
+    var dialog = one("[data-planner-task-info-dialog]");
+    if (dialog) return dialog;
+    dialog = document.createElement("dialog");
+    dialog.className = "program-dialog planner-task-dialog planner-task-info-dialog";
+    dialog.setAttribute("data-planner-task-info-dialog", "");
+    dialog.innerHTML = '<div class="planner-task-editor planner-task-info-editor">' +
+      '<header class="planner-task-editor__head"><div><p class="uos-eyebrow">Planner task</p><h2 data-planner-task-info-dialog-title>Task information</h2></div>' +
+      '<div class="planner-task-editor__head-actions"><button type="button" class="program-dialog__close" data-planner-task-info-close aria-label="Close task information">×</button></div></header>' +
+      '<div class="planner-task-editor__body">' +
+      '<section class="planner-task-info-content planner-task-editor__wide" aria-labelledby="planner-task-info-summary-title"><h3 id="planner-task-info-summary-title">Task information</h3><h4 data-planner-task-info-title></h4><p data-planner-task-info-description></p></section>' +
+      '<section class="planner-task-editor__job planner-task-editor__wide" aria-label="Scheduler calendar guide">' + calendarGuide() + '</section>' +
+      '</div><footer class="planner-task-editor__actions"><button type="button" class="uos-button uos-button--secondary" data-planner-task-info-close>Close</button></footer>' +
+      '</div>';
+    document.body.appendChild(dialog);
+    dialog.addEventListener("cancel", function (event) { event.preventDefault(); dialog.close(); });
+    dialog.addEventListener("close", function () {
+      var opener = dialog._plannerInfoOpener;
+      dialog._plannerInfoOpener = null;
+      if (opener && opener.isConnected && opener.focus) opener.focus();
+    });
+    return dialog;
+  }
+
+  function openTaskInfo(checklistItemId, opener) {
+    var item = getActiveChecklistItems(state.selectedProjectId).find(function (candidate) {
+      return String(candidate.id) === String(checklistItemId);
+    });
+    if (!item) return;
+    var dialog = ensureTaskInfoDialog();
+    dialog._plannerInfoOpener = opener || null;
+    dialog.querySelector("[data-planner-task-info-title]").textContent = item.title || "Untitled task";
+    dialog.querySelector("[data-planner-task-info-description]").textContent = item.desc || "No task information has been recorded.";
+    if (!dialog.open) dialog.showModal();
+    window.requestAnimationFrame(function () {
+      var close = dialog.querySelector("[data-planner-task-info-close]");
+      if (close) close.focus();
+    });
+  }
+
+  function ensureTaskEditor() {
     var dialog = one("[data-planner-task-dialog]");
     if (dialog) return dialog;
     dialog = document.createElement("dialog");
@@ -811,7 +891,10 @@ function displayDate(value) {
     });
     dialog.addEventListener("close", function () {
       var opener = dialog._plannerOpener;
+      var editedRow = dialog._plannerEditedRow;
       dialog._plannerOpener = null;
+      dialog._plannerEditedRow = null;
+      if (editedRow && editedRow.isConnected) editedRow.classList.remove("is-being-edited");
       if (opener && opener.isConnected && typeof opener.focus === "function") opener.focus();
     });
     return dialog;
@@ -854,6 +937,11 @@ function displayDate(value) {
     form.elements.notes.value = task ? task.notes || "" : "";
     dialog.querySelector("[data-planner-task-dialog-title]").textContent = task ? "Edit task" : "Add task";
     dialog.querySelector("[data-planner-task-error]").hidden = true;
+    document.querySelectorAll(".planner-item-row.is-being-edited").forEach(function (row) { row.classList.remove("is-being-edited"); });
+    dialog._plannerEditedRow = taskId ? Array.prototype.find.call(document.querySelectorAll(".planner-item-row[data-task-entity-id]"), function (row) {
+      return row.getAttribute("data-task-entity-id") === String(taskId);
+    }) : null;
+    if (dialog._plannerEditedRow) dialog._plannerEditedRow.classList.add("is-being-edited");
     dialog._plannerOpener = document.activeElement;
     dialog.showModal();
     form.elements.title.focus();
@@ -938,7 +1026,8 @@ function displayDate(value) {
       var paneBtn = event.target.closest("[data-planner-pane-mode]");
       var card = event.target.closest("[data-planner-project-id]");
       var tabBtn = event.target.closest("[data-planner-tab]");
-      var expandBtn = event.target.closest("[data-toggle-expand]");
+      var taskInfoBtn = event.target.closest("[data-planner-task-info]");
+      var taskInfoCloseBtn = event.target.closest("[data-planner-task-info-close]");
       var deleteBtn = event.target.closest("[data-delete-item]");
       var addBtn = event.target.closest(".planner-btn-add-item");
       var duplicateBtn = event.target.closest("[data-planner-duplicate]");
@@ -964,7 +1053,13 @@ function displayDate(value) {
         return;
       }
 
-      if (cancelTaskBtn) {
+      if (taskInfoCloseBtn) {
+        taskInfoCloseBtn.closest("[data-planner-task-info-dialog]").close();
+      } else if (taskInfoBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        openTaskInfo(taskInfoBtn.getAttribute("data-planner-task-info"), taskInfoBtn);
+      } else if (cancelTaskBtn) {
         cancelTaskBtn.closest("[data-planner-task-dialog]").close();
       } else if (scheduledJobBtn) {
         event.preventDefault();
@@ -1047,10 +1142,6 @@ function displayDate(value) {
         persist();
       } else if (tabBtn) {
         state.activeTab = tabBtn.getAttribute("data-planner-tab");
-        renderUI();
-      } else if (expandBtn) {
-        var itemId = expandBtn.getAttribute("data-toggle-expand");
-        state.expandedItems[itemId] = !state.expandedItems[itemId];
         renderUI();
       } else if (deleteBtn) {
         var itemId = deleteBtn.getAttribute("data-delete-item");
