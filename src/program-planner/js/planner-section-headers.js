@@ -1,19 +1,129 @@
 (function () {
   "use strict";
+
   var processing = false;
-  var labels = ["Status", "Owner", "Due", "Notes"];
+  var labels = ["Progress", "Owner", "Due", "Notes"];
+
   function app() { return window.UOS && window.UOS.ProgramApp; }
-  function currentProjectId() { var workspace = app() && app().workspace && app().workspace(); var planner = workspace && workspace.workspace && workspace.workspace.planner || {}; return planner.selectedProjectId || workspace && workspace.workspace && workspace.workspace.selectedProjectId || "inbox"; }
-  function sectionState(projectId) { var workspace = app() && app().workspace && app().workspace(); var planner = workspace && workspace.workspace && workspace.workspace.planner || {}; return planner.sectionExpansionByProject && planner.sectionExpansionByProject[projectId] || {}; }
+
+  function currentProjectId() {
+    var workspace = app() && app().workspace && app().workspace();
+    var planner = workspace && workspace.workspace && workspace.workspace.planner || {};
+    return planner.selectedProjectId || workspace && workspace.workspace && workspace.workspace.selectedProjectId || "inbox";
+  }
+
+  function sectionState(projectId) {
+    var workspace = app() && app().workspace && app().workspace();
+    var planner = workspace && workspace.workspace && workspace.workspace.planner || {};
+    return planner.sectionExpansionByProject && planner.sectionExpansionByProject[projectId] || {};
+  }
+
   function expanded(section) { return sectionState(currentProjectId())[section] === true; }
   function sectionId(section) { return "planner-section-" + section.toLowerCase().replace(/[^a-z0-9]+/g, "-"); }
-  function createToggle(section) { var toggle = document.createElement("button"); var icon = document.createElementNS("http://www.w3.org/2000/svg", "svg"); var path = document.createElementNS("http://www.w3.org/2000/svg", "path"); toggle.type = "button"; toggle.className = "planner-section-toggle"; toggle.setAttribute("data-planner-section-toggle", section); toggle.setAttribute("aria-controls", sectionId(section)); icon.setAttribute("class", "planner-section-toggle__icon"); icon.setAttribute("viewBox", "0 0 24 24"); icon.setAttribute("aria-hidden", "true"); icon.setAttribute("focusable", "false"); path.setAttribute("d", "M6 9l6 6 6-6"); icon.appendChild(path); toggle.appendChild(icon); return toggle; }
-  function setExpandedState(row, section) { var isExpanded = expanded(section); var button = row.querySelector("[data-planner-section-toggle]"); row.setAttribute("aria-expanded", String(isExpanded)); if (!button) return; button.setAttribute("aria-expanded", String(isExpanded)); button.setAttribute("aria-label", (isExpanded ? "Collapse " : "Expand ") + section + " section"); }
-  function mergeHeader(row, section, headerText) { var count = headerText.indexOf(" · ") >= 0 ? headerText.slice(headerText.indexOf(" · ")) : ""; var first = document.createElement("th"); var actions = document.createElement("th"); row.innerHTML = ""; first.scope = "col"; first.className = "planner-section-heading"; first.textContent = section.toUpperCase() + count; row.appendChild(first); labels.forEach(function (label) { var cell = document.createElement("th"); cell.scope = "col"; cell.textContent = label; row.appendChild(cell); }); actions.scope = "col"; actions.className = "planner-section-actions"; actions.appendChild(createToggle(section)); row.appendChild(actions); row.setAttribute("data-planner-merged", ""); }
-  function applySections() { if (processing) return; processing = true; document.querySelectorAll(".planner-table").forEach(function (table) { var activeSection = ""; Array.prototype.slice.call(table.querySelectorAll("tbody tr")).forEach(function (row) { if (row.classList.contains("planner-cat-header-row")) { var headerText = (row.textContent || "").trim(); activeSection = row.getAttribute("data-planner-section") || headerText.split(" · ")[0] || headerText; row.setAttribute("data-planner-section", activeSection); if (!row.hasAttribute("data-planner-merged")) mergeHeader(row, activeSection, headerText); row.setAttribute("data-planner-section-row", ""); setExpandedState(row, activeSection); return; } if (activeSection) { row.hidden = !expanded(activeSection); row.setAttribute("data-planner-section-item", activeSection); } }); }); processing = false; }
-  function persist(section, isExpanded) { var projectId = currentProjectId(); if (!app() || typeof app().updateWorkspace !== "function") return; app().updateWorkspace(function (candidate) { candidate.workspace = candidate.workspace || {}; candidate.workspace.planner = candidate.workspace.planner || {}; candidate.workspace.planner.sectionExpansionByProject = candidate.workspace.planner.sectionExpansionByProject || {}; candidate.workspace.planner.sectionExpansionByProject[projectId] = candidate.workspace.planner.sectionExpansionByProject[projectId] || {}; candidate.workspace.planner.sectionExpansionByProject[projectId][section] = isExpanded; return candidate; }, { command: "Planner.persistSectionExpansion" }).catch(function () { if (window.UOS && window.UOS.toast) window.UOS.toast("Could not save Planner section preference.", "error"); }); }
-  document.addEventListener("click", function (event) { var toggle = event.target.closest && event.target.closest("[data-planner-section-toggle]"); if (!toggle) return; var section = toggle.getAttribute("data-planner-section-toggle"); var next = !expanded(section); event.preventDefault(); persist(section, next); applySections(); });
-  function observe() { var host = document.querySelector('[data-program-view="planner"]'); if (!host || !window.MutationObserver) return; new MutationObserver(applySections).observe(host, { childList: true, subtree: true }); }
+
+  function createToggle(section) {
+    var toggle = document.createElement("button");
+    var icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    toggle.type = "button";
+    toggle.className = "planner-section-toggle";
+    toggle.setAttribute("data-planner-section-toggle", section);
+    toggle.setAttribute("aria-controls", sectionId(section));
+    icon.setAttribute("class", "planner-section-toggle__icon");
+    icon.setAttribute("viewBox", "0 0 24 24");
+    icon.setAttribute("aria-hidden", "true");
+    icon.setAttribute("focusable", "false");
+    path.setAttribute("d", "M6 9l6 6 6-6");
+    icon.appendChild(path);
+    toggle.appendChild(icon);
+    return toggle;
+  }
+
+  function setExpandedState(row, section) {
+    var isExpanded = expanded(section);
+    var button = row.querySelector("[data-planner-section-toggle]");
+    row.setAttribute("aria-expanded", String(isExpanded));
+    if (!button) return;
+    button.setAttribute("aria-expanded", String(isExpanded));
+    button.setAttribute("aria-label", (isExpanded ? "Collapse " : "Expand ") + section + " section");
+  }
+
+  function mergeHeader(row, section) {
+    var first = document.createElement("th");
+    var actions = document.createElement("th");
+    row.innerHTML = "";
+    first.scope = "col";
+    first.className = "planner-section-heading";
+    first.textContent = section.toUpperCase();
+    row.appendChild(first);
+    labels.forEach(function (label) {
+      var cell = document.createElement("th");
+      cell.scope = "col";
+      cell.textContent = label;
+      row.appendChild(cell);
+    });
+    actions.scope = "col";
+    actions.className = "planner-section-actions";
+    actions.appendChild(createToggle(section));
+    row.appendChild(actions);
+    row.setAttribute("data-planner-merged", "");
+  }
+
+  function applySections() {
+    if (processing) return;
+    processing = true;
+    document.querySelectorAll(".planner-table").forEach(function (table) {
+      var activeSection = "";
+      Array.prototype.slice.call(table.querySelectorAll("tbody tr")).forEach(function (row) {
+        if (row.classList.contains("planner-cat-header-row")) {
+          var headerText = (row.textContent || "").trim();
+          activeSection = row.getAttribute("data-planner-section") || headerText;
+          row.setAttribute("data-planner-section", activeSection);
+          if (!row.hasAttribute("data-planner-merged")) mergeHeader(row, activeSection);
+          row.setAttribute("data-planner-section-row", "");
+          setExpandedState(row, activeSection);
+          return;
+        }
+        if (activeSection) {
+          row.hidden = !expanded(activeSection);
+          row.setAttribute("data-planner-section-item", activeSection);
+        }
+      });
+    });
+    processing = false;
+  }
+
+  function persist(section, isExpanded) {
+    var projectId = currentProjectId();
+    if (!app() || typeof app().updateWorkspace !== "function") return Promise.resolve();
+    return app().updateWorkspace(function (candidate) {
+      candidate.workspace = candidate.workspace || {};
+      candidate.workspace.planner = candidate.workspace.planner || {};
+      candidate.workspace.planner.sectionExpansionByProject = candidate.workspace.planner.sectionExpansionByProject || {};
+      candidate.workspace.planner.sectionExpansionByProject[projectId] = candidate.workspace.planner.sectionExpansionByProject[projectId] || {};
+      candidate.workspace.planner.sectionExpansionByProject[projectId][section] = isExpanded;
+      return candidate;
+    }, { command: "Planner.persistSectionExpansion" }).catch(function () {
+      if (window.UOS && window.UOS.toast) window.UOS.toast("Could not save Planner section preference.", "error");
+    });
+  }
+
+  document.addEventListener("click", function (event) {
+    var toggle = event.target.closest && event.target.closest("[data-planner-section-toggle]");
+    if (!toggle) return;
+    var section = toggle.getAttribute("data-planner-section-toggle");
+    var next = !expanded(section);
+    event.preventDefault();
+    persist(section, next).then(applySections);
+  });
+
+  function observe() {
+    var host = document.querySelector('[data-program-view="planner"]');
+    if (!host || !window.MutationObserver) return;
+    new MutationObserver(applySections).observe(host, { childList: true, subtree: true });
+  }
+
   document.addEventListener("uos:program-ready", applySections);
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", observe, { once: true }); else observe();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", observe, { once: true });
+  else observe();
 }());

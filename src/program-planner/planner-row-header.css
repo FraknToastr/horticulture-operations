@@ -65,18 +65,19 @@
   padding-inline-end: 8px !important;
 }
 #program-app .planner-table .planner-task-type-group {
-  margin: 0 8px 0 0 !important;
-  padding-right: 8px !important;
-  border-right: 1px solid var(--uos-border, #dbe3ea);
+  display: flex;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0;
 }
-#program-app .planner-table .planner-task-maintenance-actions { margin-left: 0 !important; gap: 8px; }
+#program-app .planner-table .planner-task-maintenance-actions { display: flex; margin-left: 0 !important; gap: 8px; }
 #program-app .planner-table .planner-task-type-group .planner-task-path,
 #program-app .planner-table .planner-maintenance-icon {
   box-sizing: border-box;
-  width: 30px !important;
-  min-width: 30px !important;
-  height: 30px !important;
-  min-height: 30px !important;
+  width: var(--commercial-frame-height, var(--uos-control-height, 34px)) !important;
+  min-width: var(--commercial-frame-height, var(--uos-control-height, 34px)) !important;
+  height: var(--commercial-frame-height, var(--uos-control-height, 34px)) !important;
+  min-height: var(--commercial-frame-height, var(--uos-control-height, 34px)) !important;
 }
 
 /* Only the Scheduler deletion dialog uses the compact one-row action layout. */
@@ -105,3 +106,138 @@
   .uos-modal--scheduler-delete .uos-modal__body { padding-bottom: 4px; }
   .uos-modal--scheduler-delete .uos-modal__foot { padding-top: 4px; }
 }
+
+/* Planner checklist: framed values match Cost Library and Resource Calculator. */
+#program-app .planner-table-wrap {
+  --planner-frame-height: var(--commercial-frame-height, var(--uos-control-height, 34px));
+  --planner-frame-gap: var(--commercial-frame-gap, 8px);
+  overflow: auto;
+  padding: 0;
+}
+
+#program-app .planner-table {
+  width: 100%;
+  min-width: var(--planner-table-min-width, 1020px);
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+}
+
+#program-app .planner-table > thead > tr,
+#program-app .planner-table > tbody > .planner-item-row,
+#program-app .planner-table > tbody > .planner-cat-header-row {
+  display: grid;
+  grid-template-columns: var(--planner-task-width, 220px) var(--planner-status-width, 140px) var(--planner-owner-width, 160px) var(--planner-due-width, 130px) minmax(var(--planner-notes-min-width, 96px), 1fr) var(--planner-action-width, 160px);
+  column-gap: var(--planner-frame-gap);
+  align-items: center;
+  min-width: var(--planner-table-min-width, 1020px);
+}
+
+#program-app .planner-table > thead > tr { margin-bottom: var(--planner-frame-gap); }
+#program-app .planner-table > thead th,
+#program-app .planner-table > tbody > .planner-item-row > td {
+  display: flex;
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  align-items: center;
+}
+
+#program-app .planner-table > thead th {
+  height: 24px;
+  color: var(--uos-text-muted, #52627a);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+#program-app .planner-table > tbody > .planner-item-row {
+  min-height: var(--planner-frame-height);
+  margin-bottom: var(--planner-frame-gap);
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+#program-app .planner-table > tbody > .planner-item-row:hover,
+#program-app .planner-table > tbody > .planner-item-row.is-complete,
+#program-app .planner-table > tbody > .planner-item-row[data-status-slug] {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+#program-app .planner-value-frame,
+#program-app .planner-progress-frame { font-variant-numeric: tabular-nums; }
+#program-app .planner-value-frame--task { font-weight: 750; }
+#program-app .planner-value-frame--notes { color: var(--uos-text-muted, #52627a); }
+#program-app .planner-progress-frame { justify-content: center; font-weight: 800; }
+#program-app .planner-progress-frame--complete { color: #047857; border-color: #34d399; background: #ecfdf5; }
+#program-app .planner-progress-frame--in-progress { color: #1d4ed8; border-color: #60a5fa; background: #eff6ff; }
+#program-app .planner-progress-frame--on-hold { color: #a16207; border-color: #fbbf24; background: #fffbeb; }
+#program-app .planner-progress-frame--not-started { color: #475569; border-color: #94a3b8; background: #f8fafc; }
+#program-app .planner-progress-frame--not-required { color: #475569; border-color: #94a3b8; background: #f8fafc; }
+
+#program-app .planner-item-row:is(:hover,:focus-visible,.is-duplicate-selected,.is-being-edited,[aria-selected="true"]) .commercial-value-frame {
+  border-color: var(--program-owner-border, #6ee7b7);
+  box-shadow: 0 0 0 1px var(--program-owner-border, #6ee7b7);
+}
+
+#program-app .planner-table > tbody > .planner-cat-header-row {
+  min-height: 46px;
+  margin: 14px 0 var(--planner-frame-gap);
+  background: var(--planner-action-background, #047857);
+}
+#program-app .planner-table > tbody > .planner-cat-header-row > td,
+#program-app .planner-table > tbody > .planner-cat-header-row > th {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 10px !important;
+  border: 0 !important;
+  background: var(--planner-action-background, #047857) !important;
+  color: #fff !important;
+}
+#program-app .planner-table > tbody > .planner-cat-header-row > td:first-child { grid-column: 1 / -1; }
+#program-app .planner-table > tbody > .planner-cat-header-row .planner-section-heading {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .045em;
+}
+#program-app .planner-table > tbody > .planner-cat-header-row .planner-section-actions { justify-content: flex-end; }
+
+#program-app .planner-action-rail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--planner-frame-gap);
+  width: 100%;
+  min-height: var(--planner-frame-height);
+  white-space: nowrap;
+}
+#program-app .planner-action-rail .commercial-icon-button:hover { color: var(--program-owner-strong, #047857)!important; border-color: currentColor!important; }
+#program-app .planner-action-rail .planner-task-path[data-planner-job-state="draft"],
+#program-app .planner-action-rail .planner-task-path[data-planner-job-state="scheduled"] {
+  color: var(--program-owner-strong, #047857)!important;
+  border-color: var(--program-owner-strong, #047857)!important;
+  border-width: 2px!important;
+  background: var(--program-owner-soft, #ecfdf5)!important;
+}
+
+#program-app .planner-task-info-content {
+  box-sizing: border-box;
+  padding: 14px;
+  border: 1px solid var(--uos-border, #cbd5e1);
+  border-radius: 8px;
+  background: var(--uos-surface-subtle, #f8fafc);
+}
+#program-app .planner-task-info-content h3 { margin: 0 0 8px; font-size: 13px; }
+#program-app .planner-task-info-content h4 { margin: 0 0 6px; font-size: 15px; }
+#program-app .planner-task-info-content p { margin: 0; color: var(--uos-text-muted, #52627a); white-space: pre-wrap; }

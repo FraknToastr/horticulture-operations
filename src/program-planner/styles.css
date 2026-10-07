@@ -6733,10 +6733,10 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
 
 .planner-item-row[data-planner-selectable] { cursor: pointer; }
 .planner-item-row.is-duplicate-selected,
-.planner-item-row[aria-selected="true"] { outline: 2px solid var(--program-owner-accent, #2563eb); outline-offset: -2px; }
+.planner-item-row[aria-selected="true"] { outline: 0; }
 .planner-item-row.is-duplicate-selected td,
 .planner-item-row[aria-selected="true"] td { border-inline: 0; outline: 0; }
-.planner-item-row[data-planner-selectable]:focus-visible td { outline: 2px solid var(--program-owner-accent, #2563eb); outline-offset: -2px; }
+.planner-item-row[data-planner-selectable]:focus-visible { outline: 0; }
 .planner-item-row.is-duplicate-selected:focus-visible td,
 .planner-item-row[aria-selected="true"]:focus-visible td { outline: 0; }
 .planner-duplicate-action { display: inline-flex; }
@@ -11365,7 +11365,11 @@ html .program-scheduler-detail > .program-scheduler-inspector__head {border-bott
 .program-cost-col-state {width:84px;}
 
 /* One frame height and one gap for Quote, Cost Library and Calculator rows. */
-:is(.program-quote-builder-table,.program-cost-table,.program-calculator-table) {--commercial-frame-height:var(--uos-control-height,34px);--commercial-frame-gap:8px;}
+:is(.program-quote-builder-table,.program-cost-table,.program-calculator-table),.commercial-table-shell {--commercial-frame-height:var(--uos-control-height,34px);--commercial-frame-gap:8px;}
+.commercial-value-frame {box-sizing:border-box;display:flex;align-items:center;width:100%;min-width:0;height:var(--commercial-frame-height,var(--uos-control-height,34px));min-height:var(--commercial-frame-height,var(--uos-control-height,34px));max-height:var(--commercial-frame-height,var(--uos-control-height,34px));padding:0 9px;overflow:hidden;border:1px solid var(--uos-border-strong,var(--uos-border,#cbd5e1));border-radius:var(--uos-radius-control,6px);background:var(--uos-surface,#fff);color:var(--uos-text,#172033);line-height:calc(var(--commercial-frame-height,var(--uos-control-height,34px)) - 2px);text-overflow:ellipsis;white-space:nowrap;}
+.commercial-action-rail {display:flex;align-items:center;justify-content:flex-end;gap:var(--commercial-frame-gap,8px);width:100%;min-width:0;}
+.commercial-icon-button {box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 var(--commercial-frame-height,var(--uos-control-height,34px))!important;width:var(--commercial-frame-height,var(--uos-control-height,34px))!important;min-width:var(--commercial-frame-height,var(--uos-control-height,34px))!important;max-width:var(--commercial-frame-height,var(--uos-control-height,34px))!important;height:var(--commercial-frame-height,var(--uos-control-height,34px))!important;min-height:var(--commercial-frame-height,var(--uos-control-height,34px))!important;max-height:var(--commercial-frame-height,var(--uos-control-height,34px))!important;margin:0!important;padding:0!important;border:1px solid var(--uos-border-strong,var(--uos-border,#cbd5e1))!important;border-radius:var(--uos-radius-control,6px)!important;background:var(--uos-surface,#fff)!important;}
+.commercial-icon-button svg {width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 :is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>tbody>tr>td:not([colspan]) {padding:6px var(--commercial-frame-gap) 6px 0!important;vertical-align:middle;}
 :is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>tbody>tr>td:first-child {padding-left:8px!important;}
 :is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>thead>tr>th {padding-inline:0 var(--commercial-frame-gap)!important;text-align:left;}

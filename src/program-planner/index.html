@@ -22,9 +22,9 @@
   <link rel="stylesheet" href="../shared/css/accessibility.css?v=20261001-modal-focus-v1">
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
-<link rel="stylesheet" href="styles.css?v=20261005-cost-library-focus-v8">
+<link rel="stylesheet" href="styles.css?v=20261007-commercial-frame-components-v9">
 <link rel="stylesheet" href="scheduler-week.css?v=20261005-selected-hourly-slot-v2">
-<link rel="stylesheet" href="planner-row-header.css?v=20261005-planner-section-colour-v6">
+<link rel="stylesheet" href="planner-row-header.css?v=20261007-planner-table-repair-v8">
   <link rel="stylesheet" href="status-v5.css?v=20260913-status-history-review-v1">
   <link rel="stylesheet" href="reports.css">
 </head>
@@ -785,7 +785,7 @@
                   <nav class="program-quote-section-rail" aria-label="Quote sections">
                   <button type="button" class="program-quote-section-link" data-quote-section-link="1" aria-controls="quote-section-1" aria-label="Section 1: Customer &amp; Quote Metadata">1 Customer</button>
                   <button type="button" class="program-quote-section-link" data-quote-section-link="2" aria-controls="quote-section-2" aria-label="Section 2: Itemized Quotation Lines">2 Lines</button>
-                  <button type="button" class="program-quote-section-link" data-quote-section-link="3" aria-controls="quote-section-3" aria-label="Section 3: Scope and Terms">3 Terms</button>
+<button type="button" class="program-quote-section-link" data-quote-section-link="3" data-quote-section-3-link aria-controls="quote-section-3" aria-label="Section 3: Scope and Terms">3 Terms</button>
                   <button type="button" class="program-quote-section-link" data-quote-section-link="4" aria-controls="quote-section-4" aria-label="Section 4: Project Funding Position (ex GST)">4 Funding</button>
                   <button type="button" class="program-quote-section-link" data-quote-section-link="5" aria-controls="quote-section-5" aria-label="Section 5: Payment Ledger">5 Payments</button>
                   <button type="button" class="program-quote-section-link" data-quote-section-link="6" aria-controls="quote-section-6" aria-label="Section 6: Position">6 Position</button>
@@ -885,7 +885,7 @@
                   <!-- Section 3: Scope and Terms -->
                   <div class="program-quote-card program-quote-section--terms">
                     <div class="program-quote-card__head">
-                    <h4 id="quote-section-3">3. Scope and Terms</h4>
+<h4 id="quote-section-3" data-quote-section-3-heading>3. Scope and Terms</h4>
                     </div>
                     <div class="program-quote-form-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
                       <div class="uos-field" style="grid-column: span 2;">
@@ -897,7 +897,7 @@
                         <textarea id="quote-scope" class="uos-textarea uos-textarea--sm" rows="3" data-quote-scope></textarea>
                       </div>
                       <div class="uos-field" style="grid-column: span 2;">
-                        <label for="quote-terms">Terms &amp; Conditions</label>
+<label for="quote-terms" data-quote-terms-label>Terms &amp; Conditions</label>
                         <textarea id="quote-terms" class="uos-textarea uos-textarea--sm" rows="3" data-quote-terms></textarea>
                       </div>
                     </div>
@@ -915,7 +915,8 @@
                     </fieldset>
                     <div class="program-quote-form-grid">
               <div class="uos-field"><label for="quote-city-allocation">City of Adelaide allocation (ex GST)</label><input id="quote-city-allocation" type="number" min="0" step="0.01" class="uos-input uos-input--sm" data-operational-amount value="0"><small data-city-allocation-note></small><button class="uos-button uos-button--secondary uos-button--sm" type="button" data-open-destination="budget">Manage allocation in Budget</button></div>
-                      <div class="uos-field" data-mixed-contribution-field hidden><label for="quote-customer-contribution">Proposed customer contribution (ex GST)</label><input id="quote-customer-contribution" type="number" min="0" step="0.01" class="uos-input uos-input--sm" data-quote-customer-contribution><small data-customer-suggestion></small><button type="button" class="uos-button uos-button--secondary uos-button--sm" data-use-suggested-contribution hidden>Use suggested amount</button></div>
+<div class="uos-field" data-mixed-contribution-field hidden><label for="quote-customer-contribution">Proposed customer contribution (ex GST)</label><input id="quote-customer-contribution" type="number" min="0" step="0.01" class="uos-input uos-input--sm" data-quote-customer-contribution><small data-customer-suggestion></small><button type="button" class="uos-button uos-button--secondary uos-button--sm" data-use-suggested-contribution hidden>Use suggested amount</button></div>
+<div class="uos-field" data-council-disclosure-field hidden><label class="program-rate-active"><input type="checkbox" data-quote-suppress-council-disclosure><span>Hide Council funding details in customer PDF</span></label><small class="uos-field-hint">Customer contribution, GST and payable amount remain visible.</small></div>
                       <div class="uos-field"><label for="quote-contingency">Contingency Allowance (%)</label><input id="quote-contingency" type="number" step="0.5" min="0" max="50" class="uos-input uos-input--sm" data-quote-contingency value="0"></div>
                       <div class="uos-field"><label for="quote-discount">Discount Rate (%)</label><input id="quote-discount" type="number" step="0.5" min="0" max="50" class="uos-input uos-input--sm" data-quote-discount value="0"></div>
                       <div class="program-funding-summary">
@@ -1210,7 +1211,7 @@
   <script defer src="js/reports.js?v=20261001-quote-funding-v1"></script>
   <script defer src="js/card-visibility.js?v=20261005-hourly-scroll-v14"></script>
  <script defer src="js/disclosure-rows.js?v=20261002-error-remediation-v12"></script>
- <link rel="stylesheet" href="planner-editor.css?v=20261005-named-task-history-v1">
+<link rel="stylesheet" href="planner-editor.css?v=20261007-info-dialog-surface-v2">
  <style>
  .planner-item-row[aria-selected="true"] td+td{border-left-color:transparent!important}.planner-col-action{display:flex;align-items:center;justify-content:flex-end}.planner-task-type-group{display:inline-flex;align-items:center;margin-right:16px;padding-right:14px;border-right:1px solid var(--uos-border,#dbe3ea)}.planner-task-type-group .planner-task-path{width:30px;height:30px;padding:0;justify-content:center}.planner-task-path svg,.planner-maintenance-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.planner-task-maintenance-actions{display:inline-flex;align-items:center;gap:8px}.planner-maintenance-icon{display:inline-grid!important;place-items:center;width:30px;min-width:30px;height:30px;min-height:30px;margin:0!important;padding:0!important;border:1px solid var(--uos-border,#cbd5e1)!important;border-radius:var(--uos-radius-control,6px)!important;background:#fff!important;color:var(--uos-text,#0f172a)!important}.program-register-allocation-table{border:2px solid var(--register-owner-primary-dark,#047857)!important;border-radius:var(--uos-radius-control,6px)!important;overflow:hidden}.program-budget:not([hidden]){height:calc(100dvh - var(--program-header-height,82px));min-height:620px;padding:0;overflow:hidden}.program-budget__workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:100%;min-height:0;border:2px solid var(--program-owner-strong,var(--uos-text,#0f172a));border-radius:0;background:var(--uos-surface,#fff);overflow:hidden}.program-budget__approvals{display:flex;min-height:0;flex-direction:column;padding:22px 24px;border-right:1px solid var(--uos-border,#dbe3ea)}.program-budget__fixed-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex:0 0 auto}.program-budget__fixed-head h2{margin:2px 0 14px}.program-budget__year-field{width:min(220px,100%);margin:0 0 14px}.program-budget__approvals>[data-budget-year-state]{flex:0 0 auto}.program-budget__allocations,.program-budget__pending{display:flex;min-height:0;flex:1 1 0;flex-direction:column;margin-top:16px}.program-budget__table-wrap,.program-budget__history{min-height:0;max-height:25dvh;overflow:auto}.program-budget__table-wrap thead{position:sticky;top:0;z-index:1;background:var(--uos-surface,#fff)}.program-budget__dashboard{min-height:0;padding:22px 24px}.program-budget__metrics{display:grid;grid-template-columns:1fr;gap:12px}.program-budget__metric{display:flex;align-items:center;justify-content:space-between;min-height:76px;padding:16px;border:1px solid var(--uos-border,#dbe3ea);border-radius:var(--uos-radius-control,6px);background:var(--uos-surface,#fff)}.program-budget__metric strong{font-size:22px}@media(max-width:900px){.program-budget:not([hidden]){height:auto;overflow:visible}.program-budget__workspace{grid-template-columns:1fr;height:auto;overflow:visible}.program-budget__approvals{border-right:0;border-bottom:1px solid var(--uos-border,#dbe3ea)}.program-budget__table-wrap,.program-budget__history{max-height:360px}}
  </style>
@@ -1231,10 +1232,10 @@
     <script defer src="../remediation-planner/js/map.js?v=20260930-seamless-raster-v2"></script>
   <script defer src="js/program-map.js?v=20260913-active-location-v2"></script>
   <script defer src="js/map-floating-draw-toolbar.js?v=20260930-inset-v3"></script>
- <script defer src="js/planner.js?v=20261005-named-task-history-v1"></script>
- <script defer src="js/planner-section-headers.js?v=20260930-persistent-default-collapsed"></script>
-  <script defer src="js/planner-presentation.js?v=20261001-planner-editor-v3"></script>
- <script defer src="js/quote-builder.js?v=20261005-quote-agreement-line-v7"></script>
+<script defer src="js/planner.js?v=20261007-planner-responsive-table-v6"></script>
+ <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>
+  <script defer src="js/planner-presentation.js?v=20261007-commercial-action-rail-v5"></script>
+ <script defer src="js/quote-builder.js?v=20261007-council-disclosure-v9"></script>
 <script defer src="js/app.js?v=20261001-planner-editor-v3"></script>
   <script defer src="js/status-app.js?v=20260912-schema-v5"></script>
   <script defer src="js/status-ui.js?v=20261002-scheduler-costing-v2"></script>

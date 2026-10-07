@@ -112,7 +112,7 @@ test("Planner rows are summaries and Edit reopens every governed field", async (
       workspace.entities.applications.push(record);
       const promoted = window.UOS.ProgramModel.promoteRegisterRecord(workspace, record.id);
       const canonical = window.UOS.ProgramStatus.migrate(promoted.workspace);
-      const saved = window.UOS.ProgramPlannerModel.saveTask(canonical, promoted.project.id, null, { title: "Governed task", description: "Governed description", section: "Planning and Approval", operational: false, status: "Not Started", assigneeId: "Admin", dueDate: "2026-10-15", notes: "Governed notes", sortOrder: 50 }, {});
+      const saved = window.UOS.ProgramPlannerModel.saveTask(canonical, promoted.project.id, null, { title: "Check SRZ / TPZ with Arboriculture", description: "Governed description", section: "Planning and Approval", operational: false, status: "Not Started", assigneeId: "Admin", dueDate: "2026-10-15", notes: "Governed notes", sortOrder: 50 }, {});
       window.__plannerEditorTaskId = saved.task.id;
       saved.workspace.workspace.selectedProjectId = promoted.project.id;
       return saved.workspace;
@@ -125,9 +125,20 @@ test("Planner rows are summaries and Edit reopens every governed field", async (
   const row = frame.locator(`.planner-item-row[data-task-entity-id="${taskId}"]`);
   await expect(row.locator("select,input")).toHaveCount(0);
   await expect(row.locator(".planner-col-due")).toHaveText("15/10/2026");
+  await expect.poll(() => row.locator(".planner-value-frame--task").evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+  const normalFrame = await row.locator(".planner-value-frame--task").evaluate((element) => getComputedStyle(element).borderColor);
+  await row.hover();
+  const hoverFrame = await row.locator(".planner-value-frame--task").evaluate((element) => getComputedStyle(element).borderColor);
+  expect(hoverFrame).not.toBe(normalFrame);
+  await row.click();
+  await expect(row).toHaveAttribute("aria-selected", "true");
+  await page.mouse.move(0, 0);
+  await expect.poll(() => row.locator(".planner-value-frame--task").evaluate((element) => getComputedStyle(element).borderColor)).toBe(hoverFrame);
   await row.locator("[data-planner-edit-task]").click();
+  await expect(row).toHaveClass(/is-being-edited/);
   const dialog = frame.locator("[data-planner-task-dialog]");
-  await expect(dialog.locator('[name="title"]')).toHaveValue("Governed task");
+  const editorBackground = await dialog.evaluate((element) => getComputedStyle(element).backgroundColor);
+  await expect(dialog.locator('[name="title"]')).toHaveValue("Check SRZ / TPZ with Arboriculture");
   await expect(dialog.locator('[name="description"]')).toHaveValue("Governed description");
   await expect(dialog.locator('[name="section"]')).toHaveValue("Planning and Approval");
   await expect(dialog.locator('[name="dueDate"]')).toHaveValue("2026-10-15");
@@ -136,6 +147,7 @@ test("Planner rows are summaries and Edit reopens every governed field", async (
   await dialog.locator('[name="operator"]').fill("Planner status officer");
   await dialog.locator('button[value="save"]').click();
   await expect(dialog).toBeHidden();
+  await expect(row).not.toHaveClass(/is-being-edited/);
   await expect.poll(() => child.evaluate(() => {
     const workspace = window.UOS.ProgramApp.workspace();
     return workspace.entities.statusEvents.some((event) => event.actor === "Planner status officer");
@@ -143,4 +155,14 @@ test("Planner rows are summaries and Edit reopens every governed field", async (
   await expect.poll(() => child.evaluate((id) => window.UOS.ProgramApp.workspace().entities.tasks.find((task) => task.id === id).status, taskId)).toBe("in_progress");
   await expect(row).toHaveAttribute("data-status-slug", "in-progress");
   await expect(row.locator(".planner-col-status")).toContainText("In Progress");
+  await expect(row.locator(".planner-progress-frame")).toHaveClass(/planner-progress-frame--in-progress/);
+  await row.locator("[data-planner-task-info]").click();
+  const infoDialog = frame.locator("[data-planner-task-info-dialog]");
+  await expect(infoDialog).toBeVisible();
+  await expect.poll(() => infoDialog.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(editorBackground);
+  await expect(infoDialog.locator("[data-planner-task-info-title]")).toHaveText("Check SRZ / TPZ with Arboriculture");
+  await expect(infoDialog.locator("[data-planner-task-info-description]")).toHaveText("Governed description");
+  await expect(infoDialog.locator(".planner-guide-column")).toHaveCount(2);
+  await infoDialog.locator("[data-planner-task-info-close]").first().click();
+  await expect(infoDialog).toBeHidden();
 });

@@ -39,7 +39,6 @@ test("Project Planner merges section and column headers and collapses sections",
   expect(checklistEdges.rightGap).toBeGreaterThanOrEqual(0);
   expect(checklistEdges.rightGap).toBeLessThanOrEqual(20);
   await expect(table).toBeVisible();
-  await frame.locator('[data-program-view="planner"]').screenshot({ path: "test-results/planner-section-headers.png" });
   const section = table.locator(".planner-cat-header-row").first();
   await expect(section.locator("th")).toHaveCount(6);
  await expect(section.locator(".planner-section-toggle")).toBeVisible();
@@ -57,6 +56,30 @@ test("Project Planner merges section and column headers and collapses sections",
   await section.locator(".planner-section-toggle").click();
   await expect(section.locator(".planner-section-toggle")).toHaveAttribute("aria-expanded", "true");
   await expect(sectionRows.first()).toBeVisible();
+  await expect(table.locator(".planner-item-row:visible").first()).toBeVisible();
+  const plannerLayout = await table.evaluate((element) => {
+    const wrap = element.closest(".planner-table-wrap");
+    const sectionRow = element.querySelector(".planner-cat-header-row");
+    const row = Array.from(element.querySelectorAll(".planner-item-row")).find((candidate) => candidate.getBoundingClientRect().height > 0);
+    const frames = Array.from(row.querySelectorAll(".commercial-value-frame")).map((frame) => frame.getBoundingClientRect());
+    const actions = Array.from(row.querySelectorAll(".planner-action-rail .commercial-icon-button"));
+    return {
+      sectionBackground: getComputedStyle(sectionRow).backgroundColor,
+      sectionText: getComputedStyle(sectionRow.querySelector("th")).color,
+      horizontalOverflow: wrap.scrollWidth - wrap.clientWidth,
+      gaps: frames.slice(1).map((frame, index) => Math.round(frame.left - frames[index].right)),
+      actionLabels: actions.map((button) => button.getAttribute("aria-label")),
+      railRightGap: Math.round(row.getBoundingClientRect().right - row.querySelector(".planner-action-rail").getBoundingClientRect().right)
+    };
+  });
+  expect(plannerLayout.sectionBackground).not.toBe("rgba(0, 0, 0, 0)");
+  expect(plannerLayout.sectionText).toBe("rgb(255, 255, 255)");
+  expect(plannerLayout.horizontalOverflow, JSON.stringify(plannerLayout)).toBeLessThanOrEqual(1);
+  expect(plannerLayout.gaps, JSON.stringify(plannerLayout)).toEqual([8, 8, 8, 8]);
+  expect(plannerLayout.actionLabels).toContain("View task information");
+  expect(plannerLayout.actionLabels).toContain("Delete task");
+  expect(plannerLayout.railRightGap).toBe(0);
+  await frame.locator('[data-program-view="planner"]').screenshot({ path: "test-results/planner-section-headers.png" });
   await section.locator(".planner-section-toggle").focus();
   await expect(section.locator(".planner-section-toggle")).toBeFocused();
 });
