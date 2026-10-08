@@ -24,12 +24,35 @@ async function setup(page, owner = 'NSA') {
 }
 
 
-for (const owner of ['NSA', 'EVT']) for (const width of [1440, 390]) test(`${owner} quote section navigation aligns headings and keeps headers fixed at ${width}`, async ({ page }, testInfo) => {
+for (const owner of ['NSA', 'EVT']) for (const width of [1440, 1024, 390]) test(`${owner} quote section navigation aligns headings and keeps headers fixed at ${width}`, async ({ page }, testInfo) => {
   const { frame } = await setup(page, owner);
   await page.setViewportSize({ width, height: 1000 });
   const rail = frame.getByRole('navigation', { name: 'Quote sections', exact: true });
   const body = frame.locator('.program-quote-pane-body');
   await expect(rail.getByRole('button')).toHaveCount(6);
+  const layout = await rail.evaluate(el => {
+    const railBounds = el.getBoundingClientRect();
+    return {
+      width: railBounds.width,
+      height: railBounds.height,
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+      buttons: [...el.querySelectorAll('[data-quote-section-link]')].map(button => {
+        const bounds = button.getBoundingClientRect();
+        return { width: bounds.width, height: bounds.height, top: bounds.top - railBounds.top, left: bounds.left - railBounds.left, accent: getComputedStyle(button, '::before').content, fontSize: getComputedStyle(button).fontSize, scrollWidth: button.scrollWidth, clientWidth: button.clientWidth };
+      })
+    };
+  });
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth);
+  layout.buttons.forEach((button, index) => {
+    expect(button.width).toBeCloseTo(layout.width / 6, 0);
+    expect(button.height).toBeCloseTo(layout.height, 0);
+    expect(button.fontSize).toBe('14px');
+    expect(button.top).toBeCloseTo(0, 0);
+    expect(button.left).toBeCloseTo(index * layout.width / 6, 0);
+    expect(['none', 'normal']).toContain(button.accent);
+    expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth);
+  });
   await expect(rail.locator('[aria-current="location"]')).toHaveText('1 Customer');
   const fixedPositions = () => frame.evaluate(() => ['.program-quote-pane-head', '.program-quote-section-navigation'].map(selector => document.querySelector(selector).getBoundingClientRect().top));
   await expect.poll(() => frame.evaluate(async () => {
@@ -90,7 +113,7 @@ test('rail reveals the active item after narrowing and stays readable in both th
   await rail.evaluate(el => { el.style.width = '180px'; });
   await expect.poll(() => rail.evaluate(el => {
     const r = el.getBoundingClientRect(), active = el.querySelector('[aria-current]').getBoundingClientRect();
-    return active.left >= r.left + 5 && active.right <= r.right - 5;
+    return active.left >= r.left - 0.5 && active.right <= r.right + 0.5 && el.scrollWidth <= el.clientWidth;
   })).toBe(true);
   const rows = await rail.getByRole('button').evaluateAll(buttons => buttons.map(button => button.getBoundingClientRect().top));
   expect(new Set(rows).size).toBe(1);

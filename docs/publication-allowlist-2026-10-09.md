@@ -8,6 +8,19 @@ Customer backups, recovered workspaces, conversion reports, backup-dependent rec
 
 ## Reviewed source transport set
 
+### Subsequent Quote navigation update
+
+The subsequent Quote-only commit uses this explicit allowlist:
+
+- `src/program-planner/index.html`
+- `src/program-planner/styles.css`
+- `tests/browser/quote-section-navigation.spec.js`
+- `docs/publication-allowlist-2026-10-09.md`
+
+This update removes the divider accents, fills the rail with six equal-width/full-height buttons, and increases labels to 14px. The complete tree and reachable history were rechecked; no new Overtime files, operator data or test outputs are transported. Destination remains `origin/overtime-stage3`; other branches and previously noted legacy evidence remain unchanged.
+
+### Initial NSA/EVT update
+
 - `docs/nsa-evt-delete-audit.md`
 - `docs/publication-allowlist-2026-10-09.md`
 - `src/program-planner/index.html`
