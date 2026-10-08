@@ -1036,12 +1036,29 @@ function renderPreview() {
 
   function removeLineItem(lineId) {
     if (state.quoteId && window.UOS.ProgramQuotes && window.UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return ledgerError(new Error("Financial line items are locked while this Draft has active payments."));
-    state.lines = state.lines.filter(function (l) { return l.id !== lineId || l.readOnly; });
-    renderBuilder();
-    saveToWorkspace();
+    var line = state.lines.find(function (item) { return item.id === lineId && !item.readOnly; });
+    if (!line) return Promise.resolve(null);
+    var projectId = state.selectedEntityId, quoteId = state.quoteId;
+    var linesBefore = JSON.stringify(state.lines);
+    return window.UOS.ProgramDeleteSafety.confirm({
+      title: "Remove Quote adjustment?", confirmLabel: "Remove adjustment",
+      message: 'Remove "' + (line.description || "Quote adjustment") + '"? The editable Draft quote and its totals will be updated. Calculator source items remain unchanged.',
+      validate: function () { return state.selectedEntityId === projectId && state.quoteId === quoteId; },
+      apply: function (guard) {
+        if (JSON.stringify(state.lines) !== linesBefore) throw new Error("The Quote adjustment changed. Review it and try again.");
+        if (state.quoteId && window.UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) throw new Error("Financial line items are locked while Draft has active payments.");
+        state.lines = state.lines.filter(function (item) { return item.id !== lineId || item.readOnly; });
+        renderBuilder();
+        return saveToWorkspace(guard).catch(function (error) {
+          if (state.selectedEntityId === projectId) state.lines = JSON.parse(linesBefore);
+          renderBuilder();
+          throw error;
+        });
+      }
+    });
   }
 
-  function saveToWorkspace() {
+  function saveToWorkspace(guard) {
     if (!state.selectedEntityId || !window.UOS || !window.UOS.ProgramQuotes || !window.UOS.ProgramApp || typeof window.UOS.ProgramApp.updateWorkspace !== "function") return Promise.resolve(null);
     var custom = state.lines.filter(function (line) { return line.sourceKind === "custom" && !line.readOnly; });
     var draftInput = JSON.parse(JSON.stringify({
@@ -1054,6 +1071,7 @@ function renderPreview() {
     }));
     pendingDraftSaves += 1;
     return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
+      if (guard) guard(workspace);
       // Capture the user's offer before asynchronous persistence re-renders the form.
       if (!draftInput.id && state.selectedEntityId === draftInput.projectId) draftInput.id = state.quoteId || undefined;
       return window.UOS.ProgramQuotes.saveDraft(workspace, draftInput);

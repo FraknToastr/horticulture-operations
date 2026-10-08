@@ -12,6 +12,8 @@
   var selectedVertexIndex = null;
   var activeDrawMode = "polygon";
   var pendingDeleteShapeId = null;
+  var pendingDeleteGuard = null;
+  var pendingVertexEditGuard = null;
   var mapToggles = { Length: false, Area: true, Angles: false, Edges: true, Index: true, ActiveOnly: false, SelectedOnly: false };
   var activeProviderId = root.UOS_REMEDIATION_MAP_CONFIG && root.UOS_REMEDIATION_MAP_CONFIG.defaultProvider || "esri-world-imagery";
   var initialized = false;
@@ -101,9 +103,13 @@ function setMapCanvasCursor(cursor) {
   }
 
   function confirmPinRemoval(registerId, locationId) {
-    function remove() {
+    var workspace = getWorkspace();
+    var record = (workspace.entities.applications || []).concat(workspace.entities.events || []).find(function (item) { return item.id === registerId; });
+    var location = recordLocations(record, workspace).find(function (item) { return item.id === locationId; });
+    function remove(guard) {
       if (!root.UOS.ProgramApp) return Promise.resolve(null);
       return root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+        guard(candidate);
         var state = canonicalMapState(candidate);
         var updated = root.UOS.ProgramModel.removeLocationFromRegister(candidate, registerId, locationId);
         return state.selectedLocationId === locationId
@@ -115,16 +121,13 @@ function setMapCanvasCursor(cursor) {
         if (root.UOS.toast) root.UOS.toast(error.message || "The location pin could not be removed.", "error");
       });
     }
-    if (root.UOS.dialogs && typeof root.UOS.dialogs.confirm === "function") {
-      return root.UOS.dialogs.confirm({
+    return root.UOS.ProgramDeleteSafety.confirm({
         title: "Remove location pin?",
-        message: "This removes the selected location from the Register record.",
+        message: 'Remove location pin "' + (location && (location.name || location.address) || locationId) + '" from Register record "' + (record && (record.title || record.eventName || record.name) || registerId) + '"? Other locations and mapped work remain unchanged.',
         confirmLabel: "Remove pin",
         cancelLabel: "Keep pin",
-        danger: true
-      }).then(function (confirmed) { return confirmed ? remove() : null; });
-    }
-    return remove();
+        apply: remove
+    });
   }
 
   function getWorkspace() {
@@ -861,7 +864,7 @@ function setMapCanvasCursor(cursor) {
           '<button type="button" class="uos-button uos-button--sm ' + (editing ? "uos-button--primary is-active" : "uos-button--secondary") + '" data-shape-action="edit" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="' + (editing ? "Finish editing and save vertex positions" : "Edit polygon corner points and shape vertices on map") + '" title="' + (editing ? "Finish editing and save vertex positions" : "Edit polygon corner points and shape vertices on map") + '" aria-label="' + (editing ? "Done editing vertices for polygon " + shapeNum : "Edit vertices for polygon " + shapeNum) + '" aria-pressed="' + (editing ? "true" : "false") + '"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span>' + (editing ? "Done editing" : "Edit vertices") + '</span></button>' +
           '<button type="button" class="uos-button uos-button--secondary uos-button--icon" data-shape-action="duplicate" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Duplicate polygon ' + shapeNum + '" title="Duplicate polygon ' + shapeNum + '" aria-label="Duplicate polygon ' + shapeNum + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>' +
           '<button type="button" class="uos-button uos-button--secondary uos-button--icon" data-shape-action="export" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Export polygon ' + shapeNum + ' as GeoJSON" title="Export polygon ' + shapeNum + ' as GeoJSON" aria-label="Export polygon ' + shapeNum + ' as GeoJSON"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg></button>' +
-          '<button type="button" class="uos-button uos-button--secondary uos-button--icon" data-shape-action="delete" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Delete polygon ' + shapeNum + ' and linked costing" title="Delete polygon ' + shapeNum + ' and linked costing" aria-label="Delete polygon ' + shapeNum + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
+          '<button type="button" class="uos-button uos-button--secondary uos-button--icon program-delete-action" data-shape-action="delete" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Delete polygon ' + shapeNum + ' and linked costing" title="Delete polygon ' + shapeNum + ' and linked costing" aria-label="Delete polygon ' + shapeNum + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
         '</div>' +
         '<div class="program-shape-card__job-row">' +
           '<button type="button" class="uos-button uos-button--sm program-create-job-btn' + (jobCreated ? " is-created" : "") + '" data-create-shape-job="' + esc(shape.id) + '"' + (jobBtnDisabled ? " disabled" : "") + ' data-uos-tooltip="' + esc(jobTooltip) + '" title="' + esc(jobTooltip) + '" aria-label="' + esc(jobLabel + " for polygon " + shapeNum + ": " + jobTooltip) + '">' +
@@ -1764,7 +1767,10 @@ var selectedSpatialFilter = null;
 
         onShapeEdited: function (editedShape) {
           if (!editedShape || !editedShape.id || !root.UOS.ProgramApp) return;
+          var vertexEditGuard = pendingVertexEditGuard;
+          pendingVertexEditGuard = null;
           root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+            if (vertexEditGuard) vertexEditGuard(candidate);
             var isLine = editedShape.geometryType === "line";
             if (!root.UOS.WorkAreaService || typeof root.UOS.WorkAreaService.updateGeometry !== "function") throw new Error("WorkAreaService is unavailable.");
             var updated = root.UOS.WorkAreaService.updateGeometry(candidate, editedShape.id, {
@@ -1772,7 +1778,7 @@ var selectedSpatialFilter = null;
               geometry: { type: isLine ? "LineString" : "Polygon", coordinates: isLine ? editedShape.coordinates : [editedShape.coordinates] }
             });
             return syncExistingGeometryWork(updated, editedShape.id);
-          }).then(render);
+          }).then(render).catch(function (error) { showError(error.message); render(); });
         }
       });
       if (mapController && typeof mapController.setEvent === "function") {
@@ -1889,6 +1895,8 @@ var selectedSpatialFilter = null;
   }
 
   function openDeleteDialog(shapeId) {
+    try { pendingDeleteGuard = root.UOS.ProgramDeleteSafety.captureGuard(); }
+    catch (error) { showError(error.message); return; }
     pendingDeleteShapeId = shapeId;
     var dialog = one("#deleteShapeDialog");
     if (!dialog) return;
@@ -1898,6 +1906,7 @@ var selectedSpatialFilter = null;
 
   function closeDeleteDialog() {
     pendingDeleteShapeId = null;
+    pendingDeleteGuard = null;
     var dialog = one("#deleteShapeDialog");
     if (!dialog) return;
     if (typeof dialog.close === "function") dialog.close();
@@ -2360,9 +2369,14 @@ var selectedSpatialFilter = null;
       } else if (cancelDeleteBtn) {
         closeDeleteDialog();
       } else if (confirmDeleteBtn) {
+        var polygonWarning = one("#deleteShapeDialog");
+        if (!polygonWarning || !polygonWarning.open) return;
         if (pendingDeleteShapeId && root.UOS.ProgramApp) {
-          var deletingShapeId = pendingDeleteShapeId;
-          root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+        var deletingShapeId = pendingDeleteShapeId;
+        var deleteGuard = pendingDeleteGuard;
+        root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+          if (!deleteGuard) throw new Error("Open the deletion warning before deleting a polygon.");
+          deleteGuard(candidate);
             var updated = root.UOS.WorkAreaService.removeGeometry(candidate, deletingShapeId);
             var state = canonicalMapState(candidate);
             return state.selectedGeometryId === deletingShapeId
@@ -2370,7 +2384,7 @@ var selectedSpatialFilter = null;
               : updated;
           }).then(function () {
             closeDeleteDialog();
-          });
+          }).catch(function (error) { showError(error.message); closeDeleteDialog(); });
         }
       } else if (toggleBtn) {
         var id = toggleBtn.id;
@@ -2428,12 +2442,20 @@ var selectedSpatialFilter = null;
         var delBtn = event.target.closest("[data-delete-vertex]");
         var vIdx = Number(delBtn.getAttribute("data-delete-vertex"));
         if (!editingShapeId || !Number.isInteger(vIdx) || !mapController) return;
-        var res = mapController.removeVertex(editingShapeId, vIdx);
-        if (res && !res.success) {
-          showError(res.reason || "Vertex removal failed.");
-        } else {
-          renderShapeCards();
-        }
+        var vertexShapeId = editingShapeId;
+        root.UOS.ProgramDeleteSafety.confirm({
+          title: "Remove map vertex?", confirmLabel: "Remove vertex",
+          message: "Remove vertex " + (vIdx + 1) + " from this shape? Its dimensions and any linked mapped costing will be recalculated.",
+          validate: function () { return editingShapeId === vertexShapeId; },
+          apply: function (guard) {
+            pendingVertexEditGuard = guard;
+            var res = mapController.removeVertex(vertexShapeId, vIdx);
+            pendingVertexEditGuard = null;
+            if (res && !res.success) throw new Error(res.reason || "Vertex removal failed.");
+            renderShapeCards();
+            return res;
+          }
+        });
       } else if (shapeCard) {
         if (event.target.closest("select, input, option, label, button, .uos-field")) {
           return;

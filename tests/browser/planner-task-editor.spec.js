@@ -163,6 +163,13 @@ test("Planner rows are summaries and Edit reopens every governed field", async (
   await expect(infoDialog.locator("[data-planner-task-info-title]")).toHaveText("Check SRZ / TPZ with Arboriculture");
   await expect(infoDialog.locator("[data-planner-task-info-description]")).toHaveText("Governed description");
   await expect(infoDialog.locator(".planner-guide-column")).toHaveCount(2);
+  const cards = await infoDialog.locator(".planner-task-editor__job").evaluateAll(elements => elements.map(element => {
+    const style = getComputedStyle(element);
+    return { background: style.backgroundColor, accent: style.borderLeftColor, width: style.borderLeftWidth, padding: style.padding, radius: style.borderRadius };
+  }));
+  expect(cards).toHaveLength(2);
+  expect(cards[0]).toEqual(cards[1]);
+  expect(cards[0].width).toBe("4px");
   await infoDialog.locator("[data-planner-task-info-close]").first().click();
   await expect(infoDialog).toBeHidden();
 });

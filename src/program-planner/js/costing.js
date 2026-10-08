@@ -78,12 +78,12 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     paths.forEach(function (data) { var path = root.document.createElementNS(namespace, "path"); path.setAttribute("d", data); node.appendChild(path); });
     return node;
   }
-  function button(label, kind, attribute, value) { var node = root.document.createElement("button"); node.type = "button"; node.className = "uos-button uos-button--secondary uos-button--icon"; node.setAttribute("aria-label", label); node.setAttribute(attribute, value); if (kind === "calendar" || kind === "calendar-tick") {
+function button(label, kind, attribute, value) { var node = root.document.createElement("button"); node.type = "button"; node.className = "uos-button uos-button--secondary uos-button--icon"; node.setAttribute("aria-label", label); node.setAttribute(attribute, value); if (kind === "calendar" || kind === "calendar-tick") {
       var icon = root.document.createElementNS("http://www.w3.org/2000/svg", "svg");
       icon.setAttribute("viewBox", "0 0 24 24"); icon.setAttribute("aria-hidden", "true");
       icon.innerHTML = '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18' + (kind === "calendar-tick" ? 'M8 16l2.5 2.5L16.5 13' : '') + '"/>';
       node.appendChild(icon);
-    } else node.appendChild(svg(kind)); return node; }
+} else node.appendChild(svg(kind)); if (kind === "trash") node.classList.add("program-delete-action"); return node; }
 
   function isPolygonRate(rate) {
     if (!rate || !rate.id) return false;
@@ -602,7 +602,24 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     var currentKind = "";
     lines.forEach(function (line) {
       var lineRate = entities("rateItems").find(function (item) { return item.id === line.rateItemId; }); var lineKind = model().lineKind(state.workspace, line);
-      if (lineKind !== currentKind) { currentKind = lineKind; var groupRow = root.document.createElement("tr"); groupRow.className = "program-costing-line-group"; groupRow.setAttribute("data-costing-line-group", lineKind); var groupCell = root.document.createElement("th"); groupCell.scope = "rowgroup"; groupCell.colSpan = 7; groupCell.textContent = lineKind.toUpperCase(); groupRow.appendChild(groupCell); body.appendChild(groupRow); }
+ if (lineKind !== currentKind) {
+   currentKind = lineKind;
+   var groupRow = root.document.createElement("tr");
+   groupRow.className = "program-costing-line-group";
+   groupRow.setAttribute("data-costing-line-group", lineKind);
+   var groupCell = root.document.createElement("th"), groupLabel = root.document.createElement("span");
+   groupCell.scope = "rowgroup";
+   groupCell.colSpan = 7;
+   groupLabel.className = "program-costing-line-group__label";
+   var sectionIcon = one('[data-costing-section="' + lineKind + '"] svg');
+   if (sectionIcon) groupLabel.appendChild(sectionIcon.cloneNode(true));
+   var labelText = root.document.createElement("span");
+   labelText.textContent = lineKind.toUpperCase();
+   groupLabel.appendChild(labelText);
+   groupCell.appendChild(groupLabel);
+   groupRow.appendChild(groupCell);
+   body.appendChild(groupRow);
+ }
       var row = root.document.createElement("tr"), name = root.document.createElement("td"), strong = root.document.createElement("strong"); strong.textContent = title(line).replace(/[\r\n]+/g, " "); strong.setAttribute("title", title(line)); strong.setAttribute("data-uos-tooltip", title(line)); strong.classList.add("program-cost-value"); name.appendChild(strong);
       name.className = "program-calculator-line-item";
       var source = root.document.createElement("td"), sourceIcon = root.document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -796,7 +813,26 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     });
   }
 
-  function removeCalculatorLine(lineId) {
+function confirmCalculatorLineRemoval(lineId) {
+ var app = root.UOS.ProgramApp, workspace = app.workspace();
+ var line = (workspace.entities.costingLines || []).find(function (item) { return item.id === lineId; });
+ if (!line) return removeCalculatorLine(lineId);
+ var preview;
+ try { preview = model().removeCalculatorLine(workspace, lineId); }
+ catch (error) { showError(error); return Promise.resolve(null); }
+ var labels = { costingLines: "costing line(s)", geometries: "map geometry record(s)", jobs: "linked Job(s)", quoteLines: "Draft quote line(s)" };
+ var effects = Object.keys(labels).map(function (key) {
+   var count = (workspace.entities[key] || []).length - (preview.entities[key] || []).length;
+   return count > 0 ? count + " " + labels[key] : "";
+ }).filter(Boolean);
+ var retainedGeometry = line.sourceGeometryId && (preview.entities.geometries || []).some(function (geometry) { return geometry.id === line.sourceGeometryId; });
+ return root.UOS.ProgramDeleteSafety.confirm({
+   title: "Delete Calculator item?", confirmLabel: "Delete item",
+   message: 'Delete "' + title(line) + '"? This removes ' + effects.join(", ") + '. ' + (retainedGeometry ? 'The mapped geometry remains with its linked work removed. ' : '') + 'Editable linked Draft quote totals will be refreshed. Protected financial history cannot be deleted.',
+   apply: function (guard) { return removeCalculatorLine(lineId, guard); }
+ });
+}
+function removeCalculatorLine(lineId, guard) {
     var app = root.UOS && root.UOS.ProgramApp;
     var liveWorkspace = app && typeof app.workspace === "function" ? app.workspace() : null;
     var localLine = (state.workspace && state.workspace.entities && state.workspace.entities.costingLines || []).find(function (item) { return item.id === lineId; });
@@ -821,8 +857,9 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     return Promise.resolve(null);
   }
 
-    return mutate(function (api, workspace) {
-      var line = (workspace.entities.costingLines || []).find(function (item) { return item.id === lineId; });
+ return mutate(function (api, workspace) {
+ if (guard) guard(workspace);
+ var line = (workspace.entities.costingLines || []).find(function (item) { return item.id === lineId; });
       if (!line) return workspace;
       var sourceGeometryId = text(line.sourceGeometryId);
       var result;
@@ -924,10 +961,13 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
       if (typeof root.setTimeout === "function") root.setTimeout(reconcile, 0); else reconcile();
     }).catch(function (error) { if (errorNode) { errorNode.textContent = error.message || String(error); errorNode.hidden = false; } });
   }
-  function deleteRate(id) {
-    function apply() { mutate(function (api, workspace) { return api.removeRateItem(workspace, id); }); }
-    if (root.UOS && root.UOS.dialogs && typeof root.UOS.dialogs.confirm === "function") root.UOS.dialogs.confirm({ title: "Delete rate item?", message: "This removes the Rate Item from the global library. Referenced rates cannot be deleted.", confirmLabel: "Delete", danger: true }).then(function (confirmed) { if (confirmed) apply(); }); else apply();
-  }
+ function deleteRate(id) {
+ var rate = entities("rateItems").find(function (item) { return item.id === id; });
+ if (!rate) return Promise.resolve(null);
+ return root.UOS.ProgramDeleteSafety.confirm({ title: "Delete rate item?", message: "Delete " + title(rate) + " from the global library? Referenced rates cannot be deleted.", confirmLabel: "Delete rate item",
+   apply: function (guard) { return mutate(function (api, workspace) { guard(workspace); return api.removeRateItem(workspace, id); }); }
+ });
+ }
   function createMappedLine(event) {
     event.preventDefault(); var form = event.target, geometry = entities("geometries").find(function (item) { return item.id === form.elements.geometryId.value; }), rate = entities("rateItems").find(function (item) { return item.id === form.elements.rateId.value; }); if (!geometry || !rate || !root.UOS.mapCosting) return;
     var project = entities("projects").find(function (item) { return item.id === state.selectedProjectId; });
@@ -1223,7 +1263,7 @@ root.document.addEventListener("click", function (event) {
       else if (remove && !remove.disabled && remove.getAttribute("aria-disabled") !== "true") {
         remove.disabled = true;
         remove.setAttribute("aria-disabled", "true");
-        var removePromise = removeCalculatorLine(remove.getAttribute("data-costing-remove"));
+ var removePromise = confirmCalculatorLineRemoval(remove.getAttribute("data-costing-remove"));
         if (removePromise && typeof removePromise.finally === "function") {
           removePromise.finally(function () {
             if (remove) {

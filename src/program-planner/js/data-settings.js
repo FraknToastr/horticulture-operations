@@ -187,8 +187,11 @@
       });
     }
     var pendingClearType = null;
+    var pendingClearGuard = null;
 
     function openClearConfirmation(clearType) {
+      try { pendingClearGuard = UOS.ProgramDeleteSafety.captureGuard(); }
+      catch (error) { set("[data-program-data-status]", error.message); return; }
       pendingClearType = clearType;
       var labels = {
         users: "Clear Users",
@@ -209,6 +212,7 @@
 
     function closeClearConfirmation() {
       pendingClearType = null;
+      pendingClearGuard = null;
       var dialog = one("[data-program-clear-dialog]");
       if (dialog && typeof dialog.close === "function") dialog.close();
     }
@@ -216,6 +220,8 @@
     function confirmClear() {
       if (!pendingClearType) return;
       var clearType = pendingClearType;
+      try { pendingClearGuard(UOS.ProgramApp.workspace()); }
+      catch (error) { closeClearConfirmation(); set("[data-program-data-status]", error.message); return; }
       closeClearConfirmation();
       if (UOS.ProgramApp && typeof UOS.ProgramApp.clearInMemory === "function") {
         UOS.ProgramApp.clearInMemory(clearType);

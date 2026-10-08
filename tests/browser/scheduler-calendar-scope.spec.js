@@ -61,11 +61,9 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1440, 390]) test(`${own
   await expect(scope('application')).toHaveAttribute('aria-pressed', 'true');
   await expect(frame.locator('.program-scheduler-head [aria-label="Toggle schedule filters"]')).toHaveCount(0);
   await expect(frame.locator('.program-scheduler-header__left')).toHaveCount(0);
-  await expect.poll(() => frame.evaluate(() => {
-    const calendar = document.querySelector('.program-scheduler-head').getBoundingClientRect();
-    const sidebar = document.querySelector('.program-scheduler-job-register__header').getBoundingClientRect();
-    return Math.abs(calendar.height - sidebar.height);
-  })).toBeLessThanOrEqual(1);
+  await expect(frame.locator('[data-scheduler-mini-toolbar]')).toHaveCount(0);
+  await expect(frame.locator('[data-scheduler-toolbar-jump]')).toHaveCount(0);
+  await expect(frame.locator('.program-scheduler-job-register__header')).toHaveCount(0);
   await expect(scope('application')).toHaveText(owner === 'NSA' ? 'This application' : 'This event');
   for (const id of Object.values(ids.scheduled.A)) await expect(card(id)).toBeVisible();
   for (const id of Object.values(ids.scheduled.B)) await expect(card(id)).toHaveCount(0);

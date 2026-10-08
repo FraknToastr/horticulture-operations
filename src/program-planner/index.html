@@ -22,9 +22,10 @@
   <link rel="stylesheet" href="../shared/css/accessibility.css?v=20261001-modal-focus-v1">
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
-<link rel="stylesheet" href="styles.css?v=20261007-commercial-frame-components-v9">
+<link rel="stylesheet" href="styles.css?v=20261008-red-delete-icons-v16">
 <link rel="stylesheet" href="scheduler-week.css?v=20261005-selected-hourly-slot-v2">
-<link rel="stylesheet" href="planner-row-header.css?v=20261007-planner-table-repair-v8">
+  <link rel="stylesheet" href="planner-row-header.css?v=20261008-ready-frame-row-buffers-v13">
+  <link rel="stylesheet" href="register-row-header.css?v=20261008-saved-work-only-v8">
   <link rel="stylesheet" href="status-v5.css?v=20260913-status-history-review-v1">
   <link rel="stylesheet" href="reports.css">
 </head>
@@ -258,15 +259,28 @@
               </div>
 
               <div class="program-table-wrap program-scroll-region">
-                <table class="uos-table program-register-table">
+      <table class="uos-table program-register-table commercial-table-shell">
+        <colgroup>
+          <col class="program-register-table__toggle-col">
+          <col class="program-register-table__reference-col">
+          <col class="program-register-table__app-id-col">
+          <col class="program-register-table__title-col">
+          <col class="program-register-table__location-col">
+          <col class="program-register-table__status-col">
+          <col class="program-register-table__received-col">
+          <col class="program-register-table__project-col">
+          <col class="program-register-table__budget-col">
+          <col class="program-register-table__actions-col">
+        </colgroup>
                   <thead>
                     <tr>
-                      <th scope="col" class="program-register-table__toggle-col"><span class="uos-sr-only">Expand</span></th>
+                      <th scope="col" class="program-register-table__toggle-col"><span class="uos-sr-only">Expand / Collapse</span></th>
+            <th scope="col" class="program-register-table__reference-col" data-register-sort-header="receipt"><button type="button" class="program-register-table__sort" data-register-table-sort="receipt"><span data-register-sort-label="receipt">Ref / Receipt</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" class="program-register-table__app-id-col">App Id</th>
                       <th scope="col">Title / Name</th>
                       <th scope="col">Location</th>
                     <th scope="col" class="program-register-table__status-col">Status</th>
                     <th scope="col" class="program-register-table__received-col" data-register-sort-header="date"><button type="button" class="program-register-table__sort" data-register-table-sort="date"><span>Received</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
-                    <th scope="col" class="program-register-table__reference-col" data-register-sort-header="receipt"><button type="button" class="program-register-table__sort" data-register-table-sort="receipt"><span data-register-sort-label="receipt">Ref / Receipt</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>
                     <th scope="col" class="program-register-table__project-col">Project</th>
                     <th scope="col" class="program-register-table__budget-col">Budget</th>
                       <th scope="col" class="program-register-table__actions-col"><span class="program-register-actions-label">Actions</span></th>
@@ -520,15 +534,6 @@
             <aside class="program-scheduler-inspector program-island" aria-label="Scheduled jobs">
               <section data-scheduler-list-mode aria-label="Job list">
                 <header class="program-scheduler-inspector__head"><div><p class="uos-eyebrow">Schedule</p><h3>Delivery Projects</h3></div></header>
-                <!-- Inline Cross-Module Quick Actions Icon-Only Toolbar -->
-                <nav class="program-register-mini-toolbar" data-scheduler-mini-toolbar aria-label="Scheduler quick actions">
-                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="register" data-uos-tooltip="View in Register" title="View in Register" aria-label="View in Register"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></button>
-                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="planner" data-uos-tooltip="Open in Project Planner" title="Open in Project Planner" aria-label="Open in Project Planner"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>
-                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="map" data-uos-tooltip="Inspect on Space Map" title="Inspect on Space Map" aria-label="Inspect on Space Map"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></button>
-                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="costing" data-uos-tooltip="View in Cost Calculator" title="View in Cost Calculator" aria-label="View in Cost Calculator"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg></button>
-                  <button class="uos-button uos-button--secondary uos-button--sm is-current-module" type="button" data-scheduler-toolbar-jump="scheduler" data-uos-tooltip="Currently in Job Scheduler" title="Currently in Job Scheduler" aria-label="Currently in Job Scheduler" aria-current="page" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></button>
-                  <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-scheduler-toolbar-jump="quotes" data-uos-tooltip="Open in Quote Builder" title="Open in Quote Builder" aria-label="Open in Quote Builder"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></button>
-                </nav>
                 <div class="program-filter-drawer" data-filter-drawer="scheduler-sidebar">
                   <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="schedulerSidebarFilterDrawerBody" aria-label="Toggle search and status filters">
                     <span class="program-filter-drawer-toggle__lead">
@@ -581,7 +586,7 @@
                       <p id="scheduler-application-status-help">When scheduled, this job can mark the application Scheduled. For Nature Strip works, starting this job can also mark the application In Progress.</p>
                     </div>
                     <p class="program-scheduler-form__error" id="scheduler-form-error" data-scheduler-form-error role="alert" hidden></p>
-                    <div class="program-scheduler-form__actions"><button class="uos-button uos-button--primary" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span>Save schedule</span></button><button class="uos-button uos-button--secondary" type="button" data-scheduler-status aria-haspopup="dialog" aria-controls="statusLifecycleDialog"><span>Job status</span></button><button class="uos-button uos-button--danger" type="button" data-scheduler-delete-job><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Delete job</span></button></div>
+                    <div class="program-scheduler-form__actions"><button class="uos-button uos-button--primary" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span>Save schedule</span></button><button class="uos-button uos-button--secondary" type="button" data-scheduler-status aria-haspopup="dialog" aria-controls="statusLifecycleDialog"><span>Job status</span></button><button class="uos-button uos-button--danger program-delete-action" type="button" data-scheduler-delete-job><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Delete job</span></button></div>
                   <div class="program-scheduler-export-action"><button class="uos-button uos-button--secondary" type="button" data-scheduler-outlook aria-haspopup="dialog">Create Outlook file</button></div>
                   </form>
                 </div>
@@ -1183,7 +1188,7 @@
   <script defer src="../shared/js/imports.js"></script>
   <script defer src="../shared/js/unified-workspace.js"></script>
   <script defer src="../shared/js/smart-import.js"></script>
-  <script defer src="../shared/js/import-targets.js"></script>
+  <script defer src="../shared/js/import-targets.js?v=20261009-schema-v5-import"></script>
   <script defer src="../shared/js/xlsx-reader.js"></script>
   <script defer src="../shared/js/rate-library.js?v=20260928-rate-library-schema-v2"></script>
   <script defer src="../shared/js/map-costing.js"></script>
@@ -1205,7 +1210,7 @@
   <script defer src="js/migration.js"></script>
   <script defer src="js/storage.js?v=20260829-audit-remediation-v1"></script>
   <script defer src="js/data-workspace.js?v=20260913-pdf-preview-delta-v1"></script>
-  <script defer src="js/data-settings.js?v=20261001-startup-recovery-v1"></script>
+  <script defer src="js/data-settings.js?v=20261008-clear-warning-guard-v2"></script>
   <script defer src="js/dashboard.js?v=20260821-performance-hotfix"></script>
   <script defer src="js/reports-model.js?v=20261001-quote-funding-v1"></script>
   <script defer src="js/reports.js?v=20261001-quote-funding-v1"></script>
@@ -1217,25 +1222,26 @@
  </style>
  <link rel="stylesheet" href="budget-layout.css?v=20260930-budget-workspace-v2">
  <link rel="stylesheet" href="drawer-floor.css?v=20260930-unified-floor-v1">
-  <script defer src="js/register.js?v=20261002-error-remediation-v12"></script>
+  <script defer src="js/delete-safety.js?v=20261008-delete-warning-v1"></script>
+  <script defer src="js/register.js?v=20261008-delete-warning-guard-v16"></script>
   <script defer src="js/budget.js?v=20260930-budget-workspace-v3"></script>
   <script defer src="js/register-open-project-fix.js?v=20260922-open-project"></script>
- <script defer src="js/drawer-workspace.js?v=20261002-error-remediation-v12"></script>
+  <script defer src="js/drawer-workspace.js?v=20261008-framed-register-floor-v13"></script>
   <script defer src="js/scheduler-model.js?v=20261002-job-nomination-v1"></script>
  <script defer src="js/planner-model.js?v=20261005-named-task-history-v1"></script>
  <script defer src="js/scheduler-calendar-tools.js?v=20261005-hourly-outlook-v1"></script>
-  <script defer src="js/scheduler.js?v=20261005-hourly-outlook-v1"></script>
-  <script defer src="js/costing.js?v=20261002-error-remediation-v12"></script>
+  <script defer src="js/scheduler.js?v=20261008-delete-warning-guard-v3"></script>
+  <script defer src="js/costing.js?v=20261008-calculator-delete-warning-v14"></script>
   <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
   <script defer src="../shared/vendor/maplibre/maplibre-gl.js"></script>
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
     <script defer src="../remediation-planner/js/map.js?v=20260930-seamless-raster-v2"></script>
-  <script defer src="js/program-map.js?v=20260913-active-location-v2"></script>
+  <script defer src="js/program-map.js?v=20261008-map-delete-warnings-v3"></script>
   <script defer src="js/map-floating-draw-toolbar.js?v=20260930-inset-v3"></script>
-<script defer src="js/planner.js?v=20261007-planner-responsive-table-v6"></script>
+<script defer src="js/planner.js?v=20261008-task-delete-warning-v11"></script>
  <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>
-  <script defer src="js/planner-presentation.js?v=20261007-commercial-action-rail-v5"></script>
- <script defer src="js/quote-builder.js?v=20261007-council-disclosure-v9"></script>
+  <script defer src="js/planner-presentation.js?v=20261008-red-delete-icon-v8"></script>
+ <script defer src="js/quote-builder.js?v=20261008-adjustment-delete-warning-v10"></script>
 <script defer src="js/app.js?v=20261001-planner-editor-v3"></script>
   <script defer src="js/status-app.js?v=20260912-schema-v5"></script>
   <script defer src="js/status-ui.js?v=20261002-scheduler-costing-v2"></script>

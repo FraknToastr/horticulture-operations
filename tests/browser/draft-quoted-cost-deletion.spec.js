@@ -45,6 +45,7 @@ for (const owner of ['NSA', 'EVT']) {
     expect(checks.originalLines).toBe(1);
     await child.locator('[data-program-destination="costing"]').click();
     await child.locator(`[data-costing-remove="${owner}-COST-DRAFT-DELETE"]`).click();
+    await child.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
     await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(0);
     await expect(child.locator('[data-costing-error]')).toBeHidden();
     await child.evaluate(async owner => {
