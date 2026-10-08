@@ -1,0 +1,111 @@
+/* Register summary layout; value and button appearance belongs to shared commercial classes. */
+.program-register-layout--disclosure .program-register-table {
+  width: var(--register-table-width, 100%);
+  min-width: 0;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+.program-register-table__reference-col { width: calc(var(--register-reference-width, 96px) + 8px); }
+.program-register-table__toggle-col { width: calc(var(--commercial-frame-height) + 16px); }
+.program-register-table__app-id-col { width: calc(var(--register-app-id-width, 140px) + 8px); }
+.program-register-table__title-col,
+.program-register-table__location-col { width: calc(var(--register-flex-width, 96px) + 8px); }
+.program-register-table__status-col { width: calc(var(--register-status-width, 96px) + 8px); }
+.program-register-table__received-col { width: calc(var(--register-received-width, 96px) + 8px); }
+.program-register-table__project-col { width: calc(var(--register-project-width, 96px) + 8px); }
+.program-register-table__budget-col { width: calc(var(--register-budget-width, 96px) + 8px); }
+.program-register-table__actions-col { width: var(--register-action-width, 280px); }
+.program-register-table > thead > tr > th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  box-sizing: border-box;
+  height: 42px;
+  min-height: 42px;
+  padding: 0 8px 0 0;
+  border: 0;
+  background: var(--program-section-header-background, #047857);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: left;
+  white-space: nowrap;
+}
+.program-register-summary-row > td {
+  height: calc(var(--commercial-frame-height) + 16px);
+  padding: 8px 8px 8px 0;
+  border: 0;
+  background: transparent;
+  vertical-align: top;
+}
+.program-register-summary-row > .program-register-table__toggle-cell { padding-left: 8px; }
+.program-register-summary-row > td.program-register-table__actions-cell,
+.program-register-table > thead > tr > th.program-register-table__actions-col {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  padding-inline: 0;
+  background: var(--uos-surface, #fff);
+  border: 0;
+  box-shadow: none;
+}
+.program-register-table > thead > tr > th.program-register-table__actions-col {
+  z-index: 4;
+  text-align: left;
+  padding-inline: 8px;
+  background: var(--program-section-header-background, #047857);
+}
+.program-register-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.program-register-table__sort:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.program-register-table__sort-icon { color: inherit; font-size: 13px; font-weight: 900; }
+.program-register-summary-row > td .commercial-value-frame { font-size: 12px; }
+.program-register-summary-row > td .program-status-pill.commercial-value-frame,
+.program-register-summary-row > td .program-register-project-state.commercial-value-frame {
+  border-radius: var(--uos-radius-control, 6px);
+  justify-content: center;
+  font-weight: 800;
+  padding: 0 9px;
+  line-height: 1;
+}
+.program-register-table__budget-cell .commercial-value-frame { justify-content: flex-end; font-variant-numeric: tabular-nums; }
+.program-register-summary-row > td > .commercial-action-rail {
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+  height: var(--commercial-frame-height);
+  padding-inline: 8px;
+  background: var(--commercial-row-background, #f0fdf4);
+}
+.program-register-summary-row .commercial-icon-button { color: var(--uos-text-muted); box-shadow: none; }
+:is(.program-register-summary-row,.commercial-action-rail)[data-owner="NSA"] { --register-shortcut-owner: #15803d; --register-shortcut-owner-hover: #dcfce7; }
+:is(.program-register-summary-row,.commercial-action-rail)[data-owner="EVT"] { --register-shortcut-owner: #1d4ed8; --register-shortcut-owner-hover: #dbeafe; }
+.program-register-summary-row { --commercial-row-background: var(--register-shortcut-owner-hover); }
+.program-register-summary-row .commercial-icon-button.is-available-module,
+.program-register-summary-row .program-register-row-toggle { color: var(--register-shortcut-owner, var(--program-owner-strong)); }
+.program-register-summary-row .commercial-icon-button[data-shortcut-state="unused"] { border-color: var(--register-shortcut-owner) !important; }
+.program-register-summary-row .commercial-icon-button[data-shortcut-state="in-use"] {
+  border-color: var(--register-shortcut-owner) !important;
+  border-width: 2px !important;
+  background: var(--register-shortcut-owner-hover) !important;
+}
+.program-register-summary-row .commercial-icon-button:not(:disabled):hover { background: var(--register-shortcut-owner-hover) !important; }
+.program-register-summary-row .commercial-icon-button:disabled { opacity: .45; cursor: not-allowed; }
+.program-register-summary-row .program-register-delete-btn { color: var(--uos-danger, #dc2626); }
+.program-register-summary-row .commercial-icon-button:focus-visible { outline: 2px solid var(--program-owner-strong); outline-offset: 2px; }
+.program-register-summary-row.is-disclosure-open .program-register-row-toggle svg { transform: rotate(90deg); }
+.program-register-row-toggle svg { transition: transform 140ms ease; }
+@media (prefers-reduced-motion: reduce) { .program-register-row-toggle svg { transition: none; } }

@@ -23,6 +23,36 @@ async function setup(page, owner, destination) {
 }
 
 for (const owner of ['NSA', 'EVT']) {
+  test(`${owner}: Calculator section headings reuse matching resource icons`, async ({ page }) => {
+    const child = await setup(page, owner, 'costing');
+    await child.evaluate(async owner => {
+      await window.UOS.ProgramApp.updateWorkspace(ws => {
+        ['Labour', 'Equipment', 'Material', 'Sundry'].forEach(kind => {
+          ws.entities.costingLines.push({
+            id: `${owner}-COST-SECTION-ICON-${kind}`, owner, type: 'costingLine',
+            projectId: ws.workspace.selectedProjectId, jobId: null,
+            description: `${kind} resource`, kind, quantity: 1, unitRate: 10, estimatedTotal: 10
+          });
+        });
+        return ws;
+      });
+    }, owner);
+    await expect(child.locator('[data-costing-line-group]')).toHaveCount(5);
+    const headings = await child.locator('[data-costing-line-group]').evaluateAll(rows => rows.map(row => {
+      const kind = row.dataset.costingLineGroup;
+      const label = row.querySelector('.program-costing-line-group__label');
+      const icon = label.querySelector('svg');
+      const original = document.querySelector(`[data-costing-section="${kind}"] svg`);
+      return { kind, first: label.firstElementChild.tagName.toLowerCase(),
+        matches: icon?.outerHTML === original?.outerHTML,
+        hidden: icon?.getAttribute('aria-hidden'), label: label.textContent,
+        gap: getComputedStyle(label).gap };
+    }));
+    for (const heading of headings) {
+      expect(heading).toEqual({ kind: heading.kind, first: 'svg', matches: true,
+        hidden: 'true', label: heading.kind.toUpperCase(), gap: '8px' });
+    }
+  });
   test(`${owner}: Calculator headers align, wrap Kind menu and keep table headings separate`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 2400, height: 1000 });
     const child = await setup(page, owner, 'costing');

@@ -14,7 +14,7 @@
     return {
       predicate: function (value) {
         var version = Number(value && value.schemaVersion);
-        var canonical = value && value.app === appId && version === 4 && (value.exportAppId === appId || !value.exportAppId);
+        var canonical = value && value.app === appId && (version === 4 || version === 5) && (value.exportAppId === appId || !value.exportAppId);
         var legacyIsolated = value && value.app === "uos.horticulture" && value.exportAppId === appId && (!version || version === 2 || version === 3);
         return Boolean(canonical || legacyIsolated) && String(value.workspaceKind || "").toUpperCase() === workspaceKind;
       },

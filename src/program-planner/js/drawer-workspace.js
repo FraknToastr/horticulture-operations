@@ -216,6 +216,13 @@
     });
   }
 
+  function drawerLayoutTop(drawer) {
+    // The drawer animates with translateY on disclosure. Its zero-padding
+    // table cell is the stable layout anchor, unaffected by that animation.
+    var cell = drawer.closest("td");
+    return cell ? cell.getBoundingClientRect().top : drawer.getBoundingClientRect().top;
+  }
+
   // One viewport floor applies to native Register details and every mounted module.
   function applyViewportFloor(target) {
     var drawers = target ? [target] : Array.prototype.slice.call(document.querySelectorAll("[data-register-drawer-record]"));
@@ -223,7 +230,7 @@
       var row = drawer.closest("tr");
       if (!row || row.hidden) return;
       drawer.classList.add("has-viewport-floor");
-      var available = Math.max(180, Math.floor(global.innerHeight - drawer.getBoundingClientRect().top - 4));
+      var available = Math.max(180, Math.floor(global.innerHeight - drawerLayoutTop(drawer) - 4));
       drawer.style.setProperty("--program-drawer-max-height", available + "px");
       drawer.setAttribute("data-program-drawer-floor", "stable");
     });
@@ -263,7 +270,7 @@
     var drawer = row.nextElementSibling && row.nextElementSibling.querySelector("[data-register-drawer-record]");
     if (drawer) {
       var rowRect = row.getBoundingClientRect();
-      var gap = Math.max(0, drawer.getBoundingClientRect().top - rowRect.bottom);
+      var gap = Math.max(0, drawerLayoutTop(drawer) - rowRect.bottom);
       var targetHeight = remeasureFloor === false && lockedFloorHeight !== null
         ? lockedFloorHeight
         : Math.max(180, Math.floor(global.innerHeight - header.getBoundingClientRect().bottom - rowRect.height - gap - 4));

@@ -97,8 +97,17 @@ for (const owner of ['NSA', 'EVT']) {
     for (const name of ['planner', 'costing', 'scheduler', 'quotes', 'map', 'register']) {
       await button(name).click();
       await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().workspace.destination)).toBe(name);
-      const surface = name === 'register' ? '[data-register-detail-content]' : `[data-program-view="${name}"]`;
-      await expect(child.locator(`[data-register-drawer-record="${id}"] ${surface}`)).toBeVisible();
+    const surface = name === 'register' ? '[data-register-detail-content]' : `[data-program-view="${name}"]`;
+    await expect(child.locator(`[data-register-drawer-record="${id}"] ${surface}`)).toBeVisible();
+    if (name !== 'register') {
+      await expect(button(name)).toHaveAttribute('aria-current', 'page');
+      await expect(button(name)).toHaveAttribute('data-shortcut-state', 'unused');
+      await page.mouse.move(0, 0);
+      await expect.poll(() => button(name).evaluate(element => ({
+        border: getComputedStyle(element).borderTopWidth,
+        background: getComputedStyle(element).backgroundColor
+      }))).toEqual({ border: '1px', background: 'rgb(255, 255, 255)' });
+    }
       await button(name).click();
       await expect(child.locator(`[data-disclosure-key="register:${id}"][data-disclosure-toggle]`)).toHaveAttribute('aria-expanded', 'true');
       await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().workspace.selectedEntityId)).toBe(id);
@@ -116,20 +125,21 @@ for (const owner of ['NSA', 'EVT']) {
       const actionLabel = table.querySelector('.program-register-actions-label');
       const panelBounds = panel.getBoundingClientRect();
       return {
-        budgetAlignment: getComputedStyle(budget).textAlign,
+        budgetAlignment: getComputedStyle(budget.querySelector('.commercial-value-frame')).justifyContent,
         budgetEdge: Math.abs(budget.getBoundingClientRect().left - budgetHeader.getBoundingClientRect().left),
-        actionEdge: Math.abs(actionLabel.getBoundingClientRect().left + parseFloat(getComputedStyle(actionLabel).paddingLeft) - buttons[0].getBoundingClientRect().left),
+        actionEdge: Math.abs(actionLabel.getBoundingClientRect().left - buttons[0].getBoundingClientRect().left),
         width: panelBounds.width,
+        expectedWidth: buttons.reduce((sum, button) => sum + button.getBoundingClientRect().width, 0) + (buttons.length - 1) * 8 + 16,
         rightGap: row.querySelector('.program-register-table__actions-cell').getBoundingClientRect().right - panelBounds.right,
         firstInset: buttons[0].getBoundingClientRect().left - panelBounds.left,
         lastInset: panelBounds.right - buttons.at(-1).getBoundingClientRect().right,
         borders: Object.fromEntries(buttons.filter(button => button.dataset.registerAction).map(button => [button.dataset.registerAction, getComputedStyle(button).borderTopWidth]))
       };
     }, id);
-    expect(alignment.budgetAlignment).toBe('left');
+    expect(alignment.budgetAlignment).toBe('flex-end');
     expect(alignment.budgetEdge).toBeLessThanOrEqual(1);
     expect(alignment.actionEdge).toBeLessThanOrEqual(1);
-    expect(alignment.width).toBeLessThanOrEqual(280);
+    expect(alignment.width).toBeCloseTo(alignment.expectedWidth, 0);
     expect(alignment.rightGap).toBeLessThanOrEqual(10);
     expect(alignment.firstInset).toBeGreaterThanOrEqual(8);
     expect(alignment.lastInset).toBeGreaterThanOrEqual(8);

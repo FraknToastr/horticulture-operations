@@ -299,38 +299,6 @@
     jobs.forEach(function (job) { strip.appendChild(calendarJob(job, conflicts)); });
   }
   function renderList(conflicts) {
-    // Sync Job Scheduler mini toolbar prerequisites
-    var schedToolbar = one("[data-scheduler-mini-toolbar]");
-    if (schedToolbar && window.UOS && window.UOS.ProgramApp && typeof window.UOS.ProgramApp.syncToolbarPrerequisites === "function") {
-      var selectedPrj = (getProjectsForActiveOwner() || []).find(function (p) { return p.id === state.selectedProjectId; });
-      var ws = state.workspace;
-      var hasGeom = false;
-      var hasJb = false;
-      if (selectedPrj && ws && ws.entities) {
-        var projId = selectedPrj.id;
-        hasGeom = (ws.entities.geometries || []).some(function (g) { return g.projectId === projId || (g.payload && g.payload.projectId === projId); });
-        hasJb = (ws.entities.jobs || []).some(function (j) { return j.projectId === projId; });
-      }
-      var hasCosted = false;
-      if (selectedPrj && ws && ws.entities) {
-        var prjJobs = (ws.entities.jobs || []).filter(function (j) { return j.projectId === selectedPrj.id; });
-        if (prjJobs.length) {
-          var jIds = {};
-          prjJobs.forEach(function (j) { jIds[j.id] = true; });
-          hasCosted = (ws.entities.costingLines || []).some(function (cl) {
-            return cl.projectId === selectedPrj.id || jIds[cl.jobId];
-          });
-        }
-      }
-      window.UOS.ProgramApp.syncToolbarPrerequisites(schedToolbar, {
-        currentModule: "scheduler",
-        hasProject: Boolean(selectedPrj),
-        hasMap: hasGeom,
-        hasJobs: hasJb,
-        hasCostedJobs: hasCosted,
-        linkedProject: selectedPrj
-      });
-    }
     var list = one("[data-scheduler-list]"); if (!list) return;
     while (list.firstChild) list.removeChild(list.firstChild);
     var drawerMode = document.body.hasAttribute("data-drawer-module");
@@ -543,14 +511,6 @@
           backButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span>Back to Projects</span>';
           headerContainer.appendChild(backButton);
         }
-      }
-
-      if (drawerMode) {
-        var jobListHeader = document.createElement("div");
-        jobListHeader.className = "program-scheduler-job-register__header";
-        jobListHeader.setAttribute("aria-hidden", "true");
-        jobListHeader.innerHTML = "<span>Job</span><span>Schedule</span><span>Status</span>";
-        list.appendChild(jobListHeader);
       }
 
       projectJobs.forEach(function (job) {
@@ -958,20 +918,25 @@ function updatePillPicker() {
   function deleteSelectedJob() {
     var job = UOS.ProgramApp && (UOS.ProgramApp.workspace().entities.jobs || []).find(function (item) { return item.id === state.selectedId; });
     if (!job || !UOS.ProgramApp || !UOS.ProgramModel || typeof UOS.ProgramModel.deleteJob !== "function") return Promise.resolve(null);
-    function apply(deletePlannerTask, deleteCostingLine) {
-      try {
+ var deleteGuard;
+ try { deleteGuard = UOS.ProgramDeleteSafety.captureGuard(); }
+ catch (error) { if (UOS.toast) UOS.toast(error.message, "error"); return Promise.resolve(null); }
+ function apply(deletePlannerTask, deleteCostingLine) {
+ try {
+ deleteGuard(UOS.ProgramApp.workspace());
       UOS.ProgramModel.deleteJob(UOS.ProgramApp.workspace(), job.id, { deleteCostingLine: !!deleteCostingLine, deletePlannerTask: !!deletePlannerTask });
       } catch (error) {
         if (UOS.toast) UOS.toast(error.message, "error");
         return Promise.resolve(null);
       }
-      return UOS.ProgramApp.updateWorkspace(function (workspace) {
-        return UOS.ProgramModel.deleteJob(workspace, job.id, { deleteCostingLine: !!deleteCostingLine, deletePlannerTask: !!deletePlannerTask });
+ return UOS.ProgramApp.updateWorkspace(function (workspace) {
+ deleteGuard(workspace);
+ return UOS.ProgramModel.deleteJob(workspace, job.id, { deleteCostingLine: !!deleteCostingLine, deletePlannerTask: !!deletePlannerTask });
       }).then(function (saved) {
         state.selectedId = ""; state.detail = false; state.focusList = true; render();
         if (UOS.toast) UOS.toast("Job deleted.", "success");
         return saved;
-      });
+      }).catch(function (error) { if (UOS.toast) UOS.toast(error.message || "Job deletion failed.", "error"); return null; });
     }
     if (!UOS.dialogs || typeof UOS.dialogs.open !== "function") return Promise.resolve(null);
     var linkedTask = job.sourceKind === "planner" && (UOS.ProgramApp.workspace().entities.tasks || []).find(function (item) { return item.id === job.sourceEntityId; });
@@ -1042,9 +1007,9 @@ function updatePillPicker() {
       renderList(conflictMap());
       return;
     }
-    var schedulerJump = event.target.closest("[data-scheduler-toolbar-jump],[data-scheduler-jump]");
+    var schedulerJump = event.target.closest("[data-scheduler-jump]");
     if (schedulerJump && window.UOS && window.UOS.ProgramApp) {
-      var jumpDest = schedulerJump.getAttribute("data-scheduler-toolbar-jump") || schedulerJump.getAttribute("data-scheduler-jump");
+      var jumpDest = schedulerJump.getAttribute("data-scheduler-jump");
       var currentJob = state.jobs.find(function (item) { return item.id === state.selectedId; });
       var currentProject = getProjectsForActiveOwner().find(function (item) { return item.id === state.selectedProjectId; });
       var contextId = state.panelMode === "jobs" && currentJob ? currentJob.id : currentProject && currentProject.id;

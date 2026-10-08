@@ -310,12 +310,13 @@
   function budgetAmountLabel(record) {
     return Number(budgetAmountForRecord(record)).toLocaleString("en-AU", { style: "currency", currency: "AUD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-  function buildMiniToolbarHtml(recordId, recordObj) {
+  function buildMiniToolbarHtml(recordId, recordObj, framed) {
     var recordAttr = recordId ? ' data-register-record="' + esc(recordId) + '"' : '';
     var rec = recordObj || (recordId ? state.records.find(function (r) { return r.id === recordId; }) : null);
     var shortcutContext = window.UOS.ProgramApp.shortcutContextForWorkspace("", state.workspace, rec && rec.id);
 
- var html = '<nav class="program-register-mini-toolbar" data-owner="' + esc(rec && rec.owner === "EVT" ? "EVT" : "NSA") + '" aria-label="Send to module">';
+    var buttonClass = framed ? " commercial-icon-button" : "";
+ var html = '<nav class="program-register-mini-toolbar' + (framed ? ' commercial-action-rail' : '') + '" data-owner="' + esc(rec && rec.owner === "EVT" ? "EVT" : "NSA") + '" aria-label="' + (framed ? 'Record actions' : 'Send to module') + '">';
     MODULE_ACTION_TOKENS.forEach(function (tok) {
       var usage = shortcutState(tok, rec, shortcutContext);
       var isDisabled = usage === "inactive";
@@ -335,7 +336,7 @@
  var availableClass = !isDisabled ? ' is-available-module' : '';
       var disabledAttr = (isCurrent ? ' aria-current="page"' : '') + (isDisabled ? ' disabled aria-disabled="true"' : '');
       var linkedClass = isLinked ? ' program-register-action--linked' : '';
- html += '<button class="uos-button uos-button--secondary uos-button--sm' + currentClass + availableClass + linkedClass + '" type="button" data-register-action="' + tok.key + '"' + recordAttr +
+ html += '<button class="uos-button uos-button--secondary uos-button--sm' + buttonClass + currentClass + availableClass + linkedClass + '" type="button" data-register-action="' + tok.key + '"' + recordAttr +
         ' data-shortcut-state="' + usage + '"' +
         (isLinked ? ' data-linked-entity="true"' : '') +
         disabledAttr +
@@ -343,20 +344,20 @@
         tok.iconSvg +
         '</button>';
     });
-    html += '<button class="uos-button uos-button--secondary uos-button--sm program-register-delete-btn" type="button" data-register-delete-id="' + esc(recordId) + '" data-uos-tooltip="Delete record" title="Delete record" aria-label="Delete record">' +
+    html += '<button class="uos-button uos-button--secondary uos-button--sm program-register-delete-btn program-delete-action' + buttonClass + '" type="button" data-register-delete-id="' + esc(recordId) + '" data-uos-tooltip="Delete record" title="Delete record" aria-label="Delete record">' +
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M9 7l1-3h4l1 3M6 7l1 14h10l1-14"/></svg>' +
       '</button>';
     html += '</nav>';
     return html;
   }
 
-  function statusPillHtml(status) {
+  function statusPillHtml(status, framed) {
     var raw = text(status).trim();
     if (!raw || raw.toLowerCase() === "unspecified") {
       raw = "Received";
     }
     var slug = raw.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    return '<span class="program-status-pill status--' + esc(slug) + '" data-status="' + esc(raw) + '">' + esc(raw) + '</span>';
+    return '<span class="program-status-pill' + (framed ? ' commercial-value-frame' : '') + ' status--' + esc(slug) + '" data-status="' + esc(raw) + '">' + esc(raw) + '</span>';
   }
 
   function registerSummaryRow(recordId) {
@@ -369,22 +370,23 @@
     var row = record && registerSummaryRow(record.id);
     if (!row) return;
     var title = row.querySelector(".program-register-table__title-cell strong");
-    var location = row.querySelector(".program-register-table__location-cell");
-    var reference = row.querySelector(".program-register-table__reference-cell");
+    var location = row.querySelector(".program-register-table__location-cell .commercial-value-frame");
+    var reference = row.querySelector(".program-register-table__reference-cell .commercial-value-frame");
     var status = row.querySelector(".program-register-table__status-cell");
-    var received = row.querySelector(".program-register-table__received-cell");
+    var received = row.querySelector(".program-register-table__received-cell .commercial-value-frame");
     var toggle = row.querySelector("[data-disclosure-toggle]");
     var formattedDate = (window.UOS && window.UOS.imports && window.UOS.imports.formatDate) ? window.UOS.imports.formatDate(record.date) : (record.date || "—");
     var refVal = record.owner === "EVT"
       ? record.jobId || first(record.raw, ["jobId", "job_id", "jobNumber", "job_number", "job", "eventNumber"]) || "—"
       : record.receipt || first(record.raw, ["receipt", "receiptNumber"]) || "—";
-    var displayName = registerDisplayName(record);
-    if (title) title.textContent = displayName;
-    if (location) location.textContent = record.location;
-    if (reference) reference.textContent = refVal;
-    if (status) status.innerHTML = statusPillHtml(record.status);
-    if (received) received.textContent = formattedDate;
+    var displayName = registerDisplayName(record) === record.id ? "—" : registerDisplayName(record);
+    if (title) { title.textContent = displayName; title.title = displayName; }
+    if (location) { location.textContent = record.location || "—"; location.title = record.location || "—"; }
+    if (reference) { reference.textContent = refVal; reference.title = refVal; }
+    if (status) status.innerHTML = statusPillHtml(record.status, true);
+    if (received) { received.textContent = formattedDate; received.title = formattedDate; }
     if (toggle) toggle.setAttribute("aria-label", "Toggle details for " + displayName);
+    measureRegisterColumns(row.closest("table"));
   }
 
   function patchRegisterSelection(recordId) {
@@ -394,6 +396,45 @@
       row.classList.toggle("is-selected", selected);
       row.setAttribute("aria-selected", String(selected));
     });
+  }
+
+  function measureRegisterColumns(table) {
+    if (!table || !window.getComputedStyle) return;
+    var scroller = table.closest(".program-table-wrap");
+    var fields = ["reference", "app-id", "status", "received", "project", "budget"];
+    var widths = {};
+    fields.forEach(function (field) {
+      var width = 48;
+      var nodes = table.querySelectorAll(".program-register-table__" + field + "-cell .commercial-value-frame, th.program-register-table__" + field + "-col");
+      Array.prototype.forEach.call(nodes, function (node) {
+        var probe = node.cloneNode(true);
+        probe.removeAttribute("id");
+        Object.assign(probe.style, { position: "fixed", left: "-10000px", top: "0", display: "inline-flex", width: "max-content", minWidth: "0", maxWidth: "none", visibility: "hidden" });
+        scroller.appendChild(probe);
+        width = Math.max(width, Math.ceil(probe.getBoundingClientRect().width) + (node.tagName === "TH" ? 18 : 0));
+        probe.remove();
+      });
+      widths[field] = width;
+      table.style.setProperty("--register-" + field + "-width", width + "px");
+    });
+    var rails = table.querySelectorAll(".commercial-action-rail"), buttonCount = 0;
+    Array.prototype.forEach.call(rails, function (rail) { buttonCount = Math.max(buttonCount, rail.querySelectorAll("button").length); });
+    var button = table.querySelector(".commercial-icon-button");
+    var height = button ? button.getBoundingClientRect().height : 34;
+    var actions = buttonCount * height + Math.max(0, buttonCount - 1) * 8 + 16;
+    table.style.setProperty("--register-action-width", actions + "px");
+    table._registerCompactWidth = fields.reduce(function (total, field) { return total + widths[field]; }, 0) + actions + 8 * 8 + height + 16;
+    function fit() {
+      if (!table.isConnected) return;
+      var width = Math.max(scroller.clientWidth, table._registerCompactWidth + 192);
+      table.style.setProperty("--register-table-width", width + "px");
+      table.style.setProperty("--register-flex-width", (width - table._registerCompactWidth) / 2 + "px");
+    }
+    fit();
+    if (!table._registerSizeObserver && window.ResizeObserver) {
+      table._registerSizeObserver = new ResizeObserver(function () { window.requestAnimationFrame(fit); });
+      table._registerSizeObserver.observe(scroller);
+    }
   }
 
   function localEditRequiresRender(key) {
@@ -477,7 +518,7 @@
       var key = "register:" + record.id;
       var drawerId = "register-drawer-" + record.id.replace(/[^a-zA-Z0-9_-]+/g, "-");
       var summaryRow = document.createElement("tr");
-      summaryRow.className = "program-register-summary-row" + (record.id === state.selectedId ? " is-selected" : "");
+      summaryRow.className = "program-register-summary-row commercial-frame-row" + (record.id === state.selectedId ? " is-selected" : "");
       summaryRow.setAttribute("data-register-record", record.id);
       summaryRow.setAttribute("data-owner", record.owner || (state.filters.ownership === "EVT" ? "EVT" : "NSA"));
       summaryRow.setAttribute("data-disclosure-row", "");
@@ -491,22 +532,26 @@
         ? record.jobId || first(record.raw, ["jobId", "job_id", "jobNumber", "job_number", "job", "eventNumber"]) || "—"
         : record.receipt || first(record.raw, ["receipt", "receiptNumber"]) || "—";
 
-      var displayName = registerDisplayName(record);
+      var displayName = registerDisplayName(record) === record.id ? "—" : registerDisplayName(record);
       var linkedProject = buildLinkedProject(state.workspace, record);
       var projectState = linkedProject ? "Created" : "Not Created";
-      summaryRow.innerHTML = '<td class="program-register-table__toggle-cell">' +
-        '<button type="button" class="program-register-row-toggle" data-disclosure-toggle data-disclosure-key="' + esc(key) + '" data-disclosure-scope="register" aria-controls="' + esc(drawerId) + '" aria-label="Toggle details for ' + esc(displayName) + '">' +
-            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>' +
-          '</button>' +
-        '</td>' +
-      '<td class="program-register-table__title-cell"><strong>' + esc(displayName) + '</strong><span>' + esc(record.id) + '</span></td>' +
-      '<td class="program-register-table__location-cell">' + esc(record.location) + '</td>' +
-      '<td class="program-register-table__status-cell">' + statusPillHtml(record.status) + '</td>' +
-      '<td class="program-register-table__received-cell">' + esc(formattedDate) + '</td>' +
-      '<td class="program-register-table__reference-cell">' + esc(refVal) + '</td>' +
-      '<td class="program-register-table__project-cell"><span class="program-register-project-state ' + (linkedProject ? 'is-created' : 'is-not-created') + '">' + projectState + '</span></td>' +
-      '<td class="program-register-table__budget-cell">' + esc(budgetAmountLabel(record)) + '</td>' +
-        '<td class="program-register-table__actions-cell">' + buildMiniToolbarHtml(record.id, record) + '</td>';
+      var toggleHtml = '<button type="button" class="program-register-row-toggle commercial-icon-button" data-disclosure-toggle data-disclosure-key="' + esc(key) + '" data-disclosure-scope="register" aria-controls="' + esc(drawerId) + '" aria-label="Toggle details for ' + esc(displayName) + '" title="Toggle details">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>';
+      function valueFrame(value, tag) {
+        tag = tag || "span";
+        var label = text(value) || "—";
+        return '<' + tag + ' class="commercial-value-frame" title="' + esc(label) + '">' + esc(label) + '</' + tag + '>';
+      }
+      summaryRow.innerHTML = '<td class="program-register-table__toggle-cell">' + toggleHtml + '</td>' +
+        '<td class="program-register-table__reference-cell">' + valueFrame(refVal) + '</td>' +
+        '<td class="program-register-table__app-id-cell">' + valueFrame(record.id) + '</td>' +
+        '<td class="program-register-table__title-cell">' + valueFrame(displayName, "strong") + '</td>' +
+        '<td class="program-register-table__location-cell">' + valueFrame(record.location) + '</td>' +
+        '<td class="program-register-table__status-cell">' + statusPillHtml(record.status, true) + '</td>' +
+        '<td class="program-register-table__received-cell">' + valueFrame(formattedDate) + '</td>' +
+        '<td class="program-register-table__project-cell"><span class="commercial-value-frame program-register-project-state ' + (linkedProject ? 'is-created' : 'is-not-created') + '">' + projectState + '</span></td>' +
+        '<td class="program-register-table__budget-cell">' + valueFrame(budgetAmountLabel(record)) + '</td>' +
+        '<td class="program-register-table__actions-cell">' + buildMiniToolbarHtml(record.id, record, true) + '</td>';
 
       var drawerRow = document.createElement("tr");
       drawerRow.className = "program-register-drawer-row";
@@ -522,7 +567,7 @@
       drawerRow.hidden = true;
 
       var drawerCell = document.createElement("td");
-      drawerCell.colSpan = 9;
+      drawerCell.colSpan = 10;
       var drawerHost = document.createElement("div");
       drawerHost.className = "program-register-drawer";
       drawerHost.setAttribute("data-register-drawer-record", record.id);
@@ -555,6 +600,7 @@
     });
 
   tbody.appendChild(fragment);
+  measureRegisterColumns(tbody.closest("table"));
   if (preserveTableScroll) {
     tableScroller.scrollTop = priorTableScrollTop;
     tableScroller.scrollLeft = priorTableScrollLeft;
@@ -647,7 +693,7 @@
 
         var delBtn = document.createElement("button");
         delBtn.type = "button";
-        delBtn.className = "uos-button uos-button--secondary uos-button--sm program-register-delete-btn";
+        delBtn.className = "uos-button uos-button--secondary uos-button--sm program-register-delete-btn program-delete-action";
         delBtn.setAttribute("data-register-delete-id", record.id);
         delBtn.title = "Delete record " + record.id;
         delBtn.setAttribute("aria-label", "Delete record " + record.id);
@@ -1040,6 +1086,7 @@
   function closeDeleteDialog() {
     var dialog = one("#deleteRegisterDialog");
     state.pendingDeleteId = null;
+    state.pendingDeleteGuard = null;
     if (dialog && dialog.open && typeof dialog.close === "function") dialog.close();
     if (state.deleteTrigger && typeof state.deleteTrigger.focus === "function") state.deleteTrigger.focus();
     state.deleteTrigger = null;
@@ -1051,6 +1098,8 @@
     if (!model || typeof model.registerDeletionImpact !== "function" || !app || typeof app.workspace !== "function") return;
     var impact;
     try { impact = model.registerDeletionImpact(app.workspace(), recordId); }
+    catch (error) { if (window.UOS.toast) window.UOS.toast(error.message, "error"); return; }
+    try { state.pendingDeleteGuard = window.UOS.ProgramDeleteSafety.captureGuard(); }
     catch (error) { if (window.UOS.toast) window.UOS.toast(error.message, "error"); return; }
     state.pendingDeleteId = recordId;
     state.deleteTrigger = trigger || null;
@@ -1076,23 +1125,32 @@
   }
 
   function confirmDeleteRegisterRecord() {
+    var warning = one("#deleteRegisterDialog");
+    if (!warning || !warning.open) return;
     var recordId = state.pendingDeleteId;
     var app = typeof window !== "undefined" && window.UOS && window.UOS.ProgramApp;
     var model = typeof window !== "undefined" && window.UOS && window.UOS.ProgramModel;
     if (!recordId || !app || !model || typeof model.deleteRegisterRecord !== "function") return;
+    var deleteGuard = state.pendingDeleteGuard;
     var impact = null;
     app.updateWorkspace(function (candidate) {
-    var result = model.deleteRegisterRecord(candidate, recordId, { confirmed: true });
+      if (!deleteGuard) throw new Error("Open the deletion warning before deleting a record.");
+      deleteGuard(candidate);
+      var result = model.deleteRegisterRecord(candidate, recordId, { confirmed: true });
       impact = result.impact;
       return result.workspace;
     }).then(function (saved) {
       if (!saved) return;
       state.pendingDeleteId = null;
+      state.pendingDeleteGuard = null;
       var dialog = one("#deleteRegisterDialog");
       if (dialog && dialog.open && typeof dialog.close === "function") dialog.close();
       state.deleteTrigger = null;
       var related = impact ? Object.keys(impact.counts).reduce(function (sum, name) { return name === "registerRecords" ? sum : sum + (Number(impact.counts[name]) || 0); }, 0) : 0;
       if (window.UOS.toast) window.UOS.toast("Register record deleted with " + related + " related record" + (related === 1 ? "" : "s") + ".", "success");
+    }).catch(function (error) {
+      closeDeleteDialog();
+      if (window.UOS.toast) window.UOS.toast(error.message || "Register deletion failed.", "error");
     });
   }
 

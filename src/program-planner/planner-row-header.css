@@ -1,22 +1,9 @@
-/* Register summary row: compact factual columns, with an unbroken shortcut rail. */
+/* Preserve Register scroll anchoring and non-table module shortcut states. */
 .program-register-layout .program-table-wrap,
 .program-register-table,
 .program-register-table tbody { overflow-anchor: none; }
-.program-register-table th,
-.program-register-table td { padding-inline: 8px !important; }
-.program-register-table__status-col, .program-register-table__status-cell { width: 104px !important; max-width: 104px !important; }
-.program-register-table__received-col, .program-register-table__received-cell { width: 88px !important; max-width: 88px !important; white-space: nowrap; }
-.program-register-table__reference-col, .program-register-table__reference-cell { width: 92px !important; max-width: 92px !important; white-space: nowrap; }
-.program-register-table__project-col, .program-register-table__project-cell { width: 104px !important; max-width: 104px !important; }
-.program-register-table__budget-col, .program-register-table__budget-cell { width: 92px !important; max-width: 92px !important; text-align: left !important; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.program-register-table__actions-col, .program-register-table__actions-cell { width: 286px !important; min-width: 286px !important; padding: 6px 8px !important; overflow: visible !important; text-align: right; }
-.program-register-table__actions-cell .program-register-mini-toolbar { display: inline-flex !important; flex-wrap: nowrap !important; align-items: center; justify-content: flex-end; gap: 8px !important; width: max-content !important; min-width: 0 !important; height: 46px !important; min-height: 46px !important; max-height: none !important; margin-left: auto; box-sizing: border-box; padding: 8px 10px !important; overflow: visible !important; background: var(--uos-surface, #fff) !important; }
-.program-register-table__actions-cell .program-register-mini-toolbar > button { flex: 0 0 auto !important; }
-.program-register-table { --register-shortcut-panel-width: 278px; }
-.program-register-actions-label { display: block; width: var(--register-shortcut-panel-width); margin-left: auto; padding-left: 10px; box-sizing: border-box; text-align: left; }
-.program-register-table__actions-cell .program-register-mini-toolbar { width: var(--register-shortcut-panel-width) !important; }
-.program-register-table__actions-cell .program-register-mini-toolbar > button { width: 30px; min-width: 30px; height: 30px; }
-#program-app .program-register-mini-toolbar button[data-shortcut-state="inactive"] {
+
+#program-app .program-register-mini-toolbar:not(.commercial-action-rail) button[data-shortcut-state="inactive"] {
   opacity: .45 !important;
   background: #f8fafc !important;
   color: var(--uos-text-muted, #94a3b8) !important;
@@ -24,24 +11,24 @@
   box-shadow: none !important;
   cursor: not-allowed !important;
 }
-#program-app .program-register-mini-toolbar button[data-shortcut-state="unused"],
-#program-app .program-register-mini-toolbar button[data-shortcut-state="in-use"] {
+#program-app .program-register-mini-toolbar:not(.commercial-action-rail) button[data-shortcut-state="unused"],
+#program-app .program-register-mini-toolbar:not(.commercial-action-rail) button[data-shortcut-state="in-use"] {
   color: var(--register-shortcut-owner) !important;
   border: 1px solid var(--register-shortcut-owner) !important;
   border-radius: 4px;
   cursor: pointer !important;
   box-shadow: none !important;
 }
-#program-app .program-register-mini-toolbar button[data-shortcut-state="unused"] { background: #fff !important; }
-#program-app .program-register-mini-toolbar button[data-shortcut-state="in-use"] { background: var(--register-shortcut-owner-hover) !important; border-width: 2px !important; }
-#program-app .program-register-mini-toolbar button[data-shortcut-state]:not(:disabled):hover { background: var(--register-shortcut-owner-hover) !important; color: var(--register-shortcut-owner) !important; border-color: var(--register-shortcut-owner) !important; }
+#program-app .program-register-mini-toolbar:not(.commercial-action-rail) button[data-shortcut-state="unused"] { background: #fff !important; }
+#program-app .program-register-mini-toolbar:not(.commercial-action-rail) button[data-shortcut-state="in-use"] { background: var(--register-shortcut-owner-hover) !important; border-width: 2px !important; }
+#program-app .program-register-mini-toolbar:not(.commercial-action-rail) button[data-shortcut-state]:not(:disabled):hover { background: var(--register-shortcut-owner-hover) !important; color: var(--register-shortcut-owner) !important; border-color: var(--register-shortcut-owner) !important; }
 
-/* Match the Planner task rail to the 30px Register shortcuts and 46px panel. */
+/* Planner task rail uses shared commercial control dimensions. */
 .planner-table-wrap {
   box-sizing: border-box;
   padding-inline-end: 4px;
 }
-.planner-checklist-wrap { --planner-action-background: #047857; }
+.planner-checklist-wrap { --planner-action-background: var(--program-section-header-background, #047857); }
 .planner-checklist-wrap[data-owner="EVT"] { --planner-action-background: #0369a1; }
 #program-app .planner-btn-add-item {
   background: var(--planner-action-background, #047857) !important;
@@ -58,11 +45,6 @@
   font-weight: 900;
   border-top-color: transparent !important;
   border-bottom-color: transparent !important;
-}
-#program-app .planner-table td.planner-col-action {
-  justify-content: flex-end !important;
-  padding-block: 8px !important;
-  padding-inline-end: 8px !important;
 }
 #program-app .planner-table .planner-task-type-group {
   display: flex;
@@ -129,6 +111,8 @@
   display: grid;
   grid-template-columns: var(--planner-task-width, 220px) var(--planner-status-width, 140px) var(--planner-owner-width, 160px) var(--planner-due-width, 130px) minmax(var(--planner-notes-min-width, 96px), 1fr) var(--planner-action-width, 160px);
   column-gap: var(--planner-frame-gap);
+  box-sizing: border-box;
+  padding-inline: var(--planner-frame-gap);
   align-items: center;
   min-width: var(--planner-table-min-width, 1020px);
 }
@@ -142,11 +126,11 @@
   min-width: 0;
   padding: 0 !important;
   border: 0 !important;
-  background: transparent !important;
   align-items: center;
 }
 
 #program-app .planner-table > thead th {
+  background: transparent !important;
   height: 24px;
   color: var(--uos-text-muted, #52627a);
   font-size: 11px;
@@ -171,6 +155,10 @@
   border-color: transparent !important;
 }
 
+#program-app .planner-table > tbody > .planner-item-row > td {
+  background: transparent !important;
+}
+
 #program-app .planner-value-frame,
 #program-app .planner-progress-frame { font-variant-numeric: tabular-nums; }
 #program-app .planner-value-frame--task { font-weight: 750; }
@@ -181,11 +169,6 @@
 #program-app .planner-progress-frame--on-hold { color: #a16207; border-color: #fbbf24; background: #fffbeb; }
 #program-app .planner-progress-frame--not-started { color: #475569; border-color: #94a3b8; background: #f8fafc; }
 #program-app .planner-progress-frame--not-required { color: #475569; border-color: #94a3b8; background: #f8fafc; }
-
-#program-app .planner-item-row:is(:hover,:focus-visible,.is-duplicate-selected,.is-being-edited,[aria-selected="true"]) .commercial-value-frame {
-  border-color: var(--program-owner-border, #6ee7b7);
-  box-shadow: 0 0 0 1px var(--program-owner-border, #6ee7b7);
-}
 
 #program-app .planner-table > tbody > .planner-cat-header-row {
   min-height: 46px;
@@ -223,6 +206,11 @@
   white-space: nowrap;
 }
 #program-app .planner-action-rail .commercial-icon-button:hover { color: var(--program-owner-strong, #047857)!important; border-color: currentColor!important; }
+#program-app .planner-action-rail .planner-task-path[data-planner-job-state="operational"],
+.planner-calendar-guide__icon.is-scheduler-ready {
+  border-color: var(--uos-nature-green-text, #166534)!important;
+  border-width: 2px!important;
+}
 #program-app .planner-action-rail .planner-task-path[data-planner-job-state="draft"],
 #program-app .planner-action-rail .planner-task-path[data-planner-job-state="scheduled"] {
   color: var(--program-owner-strong, #047857)!important;
@@ -233,10 +221,6 @@
 
 #program-app .planner-task-info-content {
   box-sizing: border-box;
-  padding: 14px;
-  border: 1px solid var(--uos-border, #cbd5e1);
-  border-radius: 8px;
-  background: var(--uos-surface-subtle, #f8fafc);
 }
 #program-app .planner-task-info-content h3 { margin: 0 0 8px; font-size: 13px; }
 #program-app .planner-task-info-content h4 { margin: 0 0 6px; font-size: 15px; }

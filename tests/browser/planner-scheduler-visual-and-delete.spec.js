@@ -40,7 +40,7 @@ test('Planner controls match Register actions and Scheduler confirms and deletes
     const register = document.querySelector(`tr[data-register-record="${recordId}"] [data-register-action="planner"]`);
     const row = document.querySelector(`.planner-item-row[data-task-entity-id="${taskId}"]`);
     const section = row.closest('tbody').querySelector('.planner-cat-header-row');
-    const controls = ['.planner-task-type-group .planner-task-path', '[data-planner-task-info]', '[data-planner-edit-task]', '[data-delete-item]']
+    const controls = ['[data-planner-task-info]', '.planner-task-path', '[data-planner-edit-task]', '[data-delete-item]']
       .map((selector) => row.querySelector(selector).getBoundingClientRect());
     const reference = register.getBoundingClientRect();
     return {

@@ -36,11 +36,12 @@ test("NSA Planner shortcut retains every Register row header and dates use DD/MM
   await expect(manualRow).toBeVisible();
   await expect(pdfRow.locator(".program-register-table__received-cell")).toHaveText("22/03/1974");
   await expect(manualRow.locator(".program-register-table__received-cell")).toHaveText("23/03/1974");
-  await expect(frame.locator(".program-register-table thead th").nth(3)).toContainText("Status");
-  await expect(frame.locator(".program-register-table thead th").nth(4)).toContainText("Received");
-  await expect(frame.locator(".program-register-table thead th").nth(5)).toContainText("Receipt");
-  await expect(frame.locator(".program-register-table thead th").nth(6)).toContainText("Project");
-  await expect(frame.locator(".program-register-table thead th").nth(7)).toContainText("Budget");
+  await expect(frame.locator(".program-register-table thead th").nth(1)).toContainText("Receipt");
+  await expect(frame.locator(".program-register-table thead th").nth(2)).toContainText("App Id");
+  await expect(frame.locator(".program-register-table thead th").nth(5)).toContainText("Status");
+  await expect(frame.locator(".program-register-table thead th").nth(6)).toContainText("Received");
+  await expect(frame.locator(".program-register-table thead th").nth(7)).toContainText("Project");
+  await expect(frame.locator(".program-register-table thead th").nth(8)).toContainText("Budget");
   await expect(manualRow.locator(".program-register-table__budget-cell")).toHaveText("$0.00");
   await expect(manualRow.locator('[data-register-action="budget"]')).toHaveCount(0);
 
@@ -56,6 +57,7 @@ test("NSA Planner shortcut retains every Register row header and dates use DD/MM
     return {
       rightGap: cellBounds.right - toolbarBounds.right,
       toolbarWidth: toolbarBounds.width,
+      expectedToolbarWidth: buttons.reduce((sum, button) => sum + button.getBoundingClientRect().width, 0) + (buttons.length - 1) * 8 + 16,
       firstInset: buttons[0].getBoundingClientRect().left - toolbarBounds.left,
       lastInset: toolbarBounds.right - buttons[buttons.length - 1].getBoundingClientRect().right,
       plannerBorderWidth: plannerStyle.borderTopWidth,
@@ -63,11 +65,11 @@ test("NSA Planner shortcut retains every Register row header and dates use DD/MM
     };
   });
   expect(actionLayout.rightGap).toBeLessThanOrEqual(10);
-  expect(actionLayout.toolbarWidth).toBeLessThanOrEqual(280);
+  expect(actionLayout.toolbarWidth).toBeCloseTo(actionLayout.expectedToolbarWidth, 0);
   expect(actionLayout.firstInset).toBeGreaterThanOrEqual(8);
   expect(actionLayout.lastInset).toBeGreaterThanOrEqual(8);
   expect(actionLayout.plannerBorderWidth).toBe("1px");
-  expect(actionLayout.plannerRadius).toBe("4px");
+  expect(actionLayout.plannerRadius).toBe("6px");
   const before = await child.evaluate(() => {
     const outer = document.querySelector("[data-register-table-body]").closest(".program-table-wrap");
     const second = document.querySelector('tr[data-register-record="NSA-APP-SECOND-ROW"]');

@@ -502,7 +502,7 @@ function displayDate(value) {
         var customTask = Boolean(taskEntityId && !itemSaved.templateKey && !itemSaved.schedulable);
         var duplicateSelected = String(state.selectedChecklistItemId) === String(it.id);
 
-        return '<tr class="planner-item-row' + (isDone ? " is-complete" : "") + (duplicateSelected ? " is-duplicate-selected" : "") + '" data-status-slug="' + esc(statusSlug) + '" data-checklist-item-id="' + it.id + '" data-task-entity-id="' + esc(taskEntityId) + '" data-planner-selectable tabindex="0" aria-selected="' + String(duplicateSelected) + '">' +
+        return '<tr class="planner-item-row commercial-frame-row' + (isDone ? " is-complete" : "") + (duplicateSelected ? " is-duplicate-selected" : "") + '" data-status-slug="' + esc(statusSlug) + '" data-checklist-item-id="' + it.id + '" data-task-entity-id="' + esc(taskEntityId) + '" data-planner-selectable tabindex="0" aria-selected="' + String(duplicateSelected) + '">' +
           '<td class="planner-col-task"><span class="commercial-value-frame planner-value-frame planner-value-frame--task">' + esc(it.title) + '</span></td>' +
           '<td class="planner-col-status"><span class="commercial-value-frame planner-progress-frame planner-progress-frame--' + esc(statusSlug) + '">' + esc(itemSaved.status) + '</span></td>' +
           '<td class="planner-col-owner"><span class="commercial-value-frame planner-value-frame">' + esc(itemSaved.owner || "Not assigned") + '</span></td>' +
@@ -556,19 +556,19 @@ function displayDate(value) {
     Array.prototype.forEach.call(table.querySelectorAll(".planner-action-rail"), function (rail) {
       actionCount = Math.max(actionCount, rail.querySelectorAll("button,.planner-task-path").length);
     });
-    var actions = actionCount * 34 + (actionCount - 1) * 8;
+    var actionWidth = "calc(" + actionCount + " * var(--commercial-frame-height) + " + (actionCount - 1) + " * var(--commercial-frame-gap))";
     var notes = widest(".planner-value-frame--notes", 34, 360);
     table.style.setProperty("--planner-task-width", task + "px");
     table.style.setProperty("--planner-status-width", status + "px");
     table.style.setProperty("--planner-owner-width", owner + "px");
     table.style.setProperty("--planner-due-width", due + "px");
-    table.style.setProperty("--planner-action-width", actions + "px");
+    table.style.setProperty("--planner-action-width", actionWidth);
     Array.prototype.forEach.call(table.querySelectorAll(".planner-value-frame--task"), function (node) {
       task = Math.max(task, node.scrollWidth + 2);
     });
     table.style.setProperty("--planner-task-width", task + "px");
     table.style.setProperty("--planner-notes-min-width", notes + "px");
-    table.style.setProperty("--planner-table-min-width", (task + status + owner + due + actions + notes + 40) + "px");
+ table.style.setProperty("--planner-table-min-width", "calc(" + (task + status + owner + due + notes + 56) + "px + var(--planner-action-width))");
     window.requestAnimationFrame(function () {
       if (!table.isConnected) return;
       var currentTask = parseFloat(table.style.getPropertyValue("--planner-task-width")) || task;
@@ -578,7 +578,7 @@ function displayDate(value) {
       });
       if (renderedTask <= currentTask) return;
       table.style.setProperty("--planner-task-width", renderedTask + "px");
-      table.style.setProperty("--planner-table-min-width", (parseFloat(table.style.getPropertyValue("--planner-table-min-width")) + renderedTask - currentTask) + "px");
+ table.style.setProperty("--planner-table-min-width", "calc(" + (renderedTask + status + owner + due + notes + 56) + "px + var(--planner-action-width))");
     });
   }
 
@@ -730,7 +730,7 @@ function displayDate(value) {
     return '<div class="planner-guide-column"><h3>Edit task</h3>' +
       '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon planner-guide-edit" aria-hidden="true">' + edit + '</span><span>Edit task details, purpose and status.</span></div>' +
       '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" aria-hidden="true">' + reminder + '</span><span>Reminder task</span></div>' +
-      '<div class="planner-calendar-guide__row planner-guide-conversion"><span class="planner-guide-symbols" aria-hidden="true"><span class="planner-calendar-guide__icon">' + reminder + '</span><span class="planner-guide-arrow">→</span><span class="planner-calendar-guide__icon">' + icon(false) + '</span></span><span>Any Reminder task can have its purpose changed to “Add to Scheduler”, allowing it to be added to the job and calendar system.</span></div></div>' +
+      '<div class="planner-calendar-guide__row planner-guide-conversion"><span class="planner-guide-symbols" aria-hidden="true"><span class="planner-calendar-guide__icon">' + reminder + '</span><span class="planner-guide-arrow">→</span><span class="planner-calendar-guide__icon is-scheduler-ready">' + reminder + '</span></span><span>Changing a Reminder task to “Add to Scheduler” adds a dark green frame. The icon and background stay unchanged until you use the button to create a draft Job.</span></div></div>' +
       '<div class="planner-guide-column"><h3>Scheduler</h3>' +
       '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon" aria-hidden="true">' + icon(false) + '</span><span>Click to schedule a job</span></div>' +
       '<div class="planner-calendar-guide__row"><span class="planner-calendar-guide__icon is-linked-job" aria-hidden="true">' + icon(false) + '</span><span>Job Schedule not finalised</span></div>' +
@@ -818,7 +818,7 @@ function displayDate(value) {
       '<header class="planner-task-editor__head"><div><p class="uos-eyebrow">Planner task</p><h2 data-planner-task-info-dialog-title>Task information</h2></div>' +
       '<div class="planner-task-editor__head-actions"><button type="button" class="program-dialog__close" data-planner-task-info-close aria-label="Close task information">×</button></div></header>' +
       '<div class="planner-task-editor__body">' +
-      '<section class="planner-task-info-content planner-task-editor__wide" aria-labelledby="planner-task-info-summary-title"><h3 id="planner-task-info-summary-title">Task information</h3><h4 data-planner-task-info-title></h4><p data-planner-task-info-description></p></section>' +
+      '<section class="planner-task-editor__job planner-task-info-content planner-task-editor__wide" aria-labelledby="planner-task-info-summary-title"><h3 id="planner-task-info-summary-title">Task information</h3><h4 data-planner-task-info-title></h4><p data-planner-task-info-description></p></section>' +
       '<section class="planner-task-editor__job planner-task-editor__wide" aria-label="Scheduler calendar guide">' + calendarGuide() + '</section>' +
       '</div><footer class="planner-task-editor__actions"><button type="button" class="uos-button uos-button--secondary" data-planner-task-info-close>Close</button></footer>' +
       '</div>';
@@ -1147,12 +1147,19 @@ function displayDate(value) {
         var itemId = deleteBtn.getAttribute("data-delete-item");
         var app = window.UOS && window.UOS.ProgramApp;
         var plannerModel = window.UOS && window.UOS.ProgramPlannerModel;
-        if (app && plannerModel && typeof plannerModel.updateTask === "function") {
-          app.updateWorkspace(function (candidate) {
-            return plannerModel.updateTask(candidate, state.selectedProjectId, itemId, { suppressed: true }, {}).workspace;
-          }, { command: "Planner.suppressTask" }).catch(function (error) {
-            if (window.UOS && typeof window.UOS.toast === "function") window.UOS.toast(error.message || "Planner task deletion failed.", "error");
-          });
+      if (app && plannerModel && typeof plannerModel.updateTask === "function") {
+        var projectId = state.selectedProjectId;
+        var taskTitle = deleteBtn.closest("tr").querySelector(".planner-value-frame--task").textContent;
+        window.UOS.ProgramDeleteSafety.confirm({
+          title: "Remove Planner task?", confirmLabel: "Remove task",
+          message: 'Remove "' + taskTitle + '" from the Planner checklist? The task is retained as a suppressed record. Any linked Job and its financial history remain unchanged.',
+          apply: function (guard) {
+            return app.updateWorkspace(function (candidate) {
+              guard(candidate);
+              return plannerModel.updateTask(candidate, projectId, itemId, { suppressed: true }, {}).workspace;
+            }, { command: "Planner.suppressTask" });
+          }
+        });
         }
       } else if (addBtn) {
         openTaskEditor(null);

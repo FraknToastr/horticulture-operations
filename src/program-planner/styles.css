@@ -1,8 +1,4 @@
 /* Horticulture Program Planner — segmented canvas shell. */
-/* Register row-header: preserve one complete, white action rail and compact operational data. */
-.program-register-table__actions-cell { min-width: 420px; padding: 6px 8px !important; overflow: visible; }
-.program-register-table__actions-cell .program-register-mini-toolbar { display: inline-flex; flex-wrap: nowrap; gap: 8px; width: max-content; min-width: 100%; box-sizing: border-box; padding: 8px; overflow: visible; background: var(--uos-surface, #fff); }
-.program-register-table__actions-cell .program-register-mini-toolbar > button { flex: 0 0 auto; }
 
 body.program-planner {
   --program-content-max: 1280px;
@@ -10,16 +6,6 @@ body.program-planner {
   --program-rail-collapsed: 64px;
   background: var(--page-bg);
 }
-
-/* Register summary values: keep operational columns compact and leave width for the record identity. */
-.program-register-table__received-col,
-.program-register-table__received-cell { width: 88px; max-width: 88px; white-space: nowrap; }
-.program-register-table__reference-col,
-.program-register-table__reference-cell { width: 96px; max-width: 96px; }
-.program-register-table__project-col,
-.program-register-table__project-cell { width: 110px; max-width: 110px; }
-.program-register-table__budget-col,
-.program-register-table__budget-cell { width: 96px; max-width: 96px; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
 
 body.program-planner .uos-app,
 .program-app,
@@ -46,7 +32,6 @@ body.program-planner .uos-app,
   grid-template-columns: auto minmax(0, 1fr) auto;
   box-shadow: none;
 }
-
 
 /* Discrete Collapsible Filter Drawer */
 .program-filter-drawer {
@@ -305,7 +290,6 @@ html[data-suite-theme="dark"] body.is-evt-mode .uos-brand__headline {
   color: #38bdf8 !important;
 }
 
-
 .program-header__center {
   position: static;
   display: flex;
@@ -382,7 +366,6 @@ html[data-suite-theme="dark"] body.is-evt-mode .uos-brand__headline {
   min-width: 7.5rem;
   white-space: nowrap;
 }
-.program-scheduler-layout [data-scheduler-mini-toolbar] { display: none !important; }
 .program-scheduler-layout [data-filter-drawer-toggle] {
   pointer-events: none;
   cursor: default;
@@ -420,11 +403,9 @@ html[data-suite-theme="dark"] body.is-evt-mode .uos-brand__headline {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.program-scheduler-job-register__header,
 .program-scheduler-job-register__row {
   grid-template-columns: minmax(0, 1fr) minmax(5.5rem, auto) !important;
 }
-.program-scheduler-job-register__header > :nth-child(2),
 .program-scheduler-job-register__row > :nth-child(2) {
   display: none !important;
 }
@@ -432,7 +413,6 @@ html[data-suite-theme="dark"] body.is-evt-mode .uos-brand__headline {
   display: none !important;
 }
 /* The Scheduler job-register status cell is the only sidebar status column. */
-.program-scheduler-job-register__header > :last-child,
 .program-scheduler-job-register__row > :last-child {
   justify-self: start !important;
   text-align: left !important;
@@ -828,7 +808,6 @@ body.is-evt-mode .program-register-row[aria-selected="true"],
 /* Strong arrival cue when shortcut navigation focuses a selected sidebar row/card. */
 :is(
   .program-register-row,
-  tr[data-register-record],
   .program-event-card,
   .program-shape-card,
   .program-planner-card,
@@ -878,10 +857,9 @@ body.is-evt-mode .program-register-row[aria-selected="true"],
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is(
+:is(
     .program-register-row,
-    tr[data-register-record],
-    .program-event-card,
+  .program-event-card,
     .program-shape-card,
     .program-planner-card,
     .program-project-card,
@@ -2662,7 +2640,7 @@ body.uos-rail-collapsed .program-nav-group {
   color: #15803d !important;
 }
 
-.program-register-mini-toolbar {
+.program-register-mini-toolbar:not(.commercial-action-rail) {
   height: 38px;
   min-height: 38px;
   max-height: 38px;
@@ -2675,7 +2653,7 @@ body.uos-rail-collapsed .program-nav-group {
   background: var(--uos-surface-muted, #f1f5f9);
 }
 
-.program-register-mini-toolbar button {
+.program-register-mini-toolbar:not(.commercial-action-rail) button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2691,7 +2669,7 @@ body.uos-rail-collapsed .program-nav-group {
   cursor: pointer;
 }
 
-.program-register-mini-toolbar button:hover {
+.program-register-mini-toolbar:not(.commercial-action-rail) button:hover {
   background: var(--uos-brand-soft, #e6f4ea);
   color: var(--uos-brand-text, #047857);
   border-color: transparent;
@@ -2699,18 +2677,16 @@ body.uos-rail-collapsed .program-nav-group {
 }
 
 /* Row-level module shortcuts: availability is owner-coloured; ineligible controls stay neutral. */
-.program-register-mini-toolbar[data-owner="NSA"] { --register-shortcut-owner: #15803d; --register-shortcut-owner-soft: #f0fdf4; --register-shortcut-owner-hover: #dcfce7; }
-.program-register-mini-toolbar[data-owner="EVT"] { --register-shortcut-owner: #1d4ed8; --register-shortcut-owner-soft: #eff6ff; --register-shortcut-owner-hover: #dbeafe; }
-.program-register-mini-toolbar button[data-register-action] {
+.program-register-mini-toolbar:not(.commercial-action-rail)[data-owner="NSA"] { --register-shortcut-owner: #15803d; --register-shortcut-owner-soft: #f0fdf4; --register-shortcut-owner-hover: #dcfce7; }
+.program-register-mini-toolbar:not(.commercial-action-rail)[data-owner="EVT"] { --register-shortcut-owner: #1d4ed8; --register-shortcut-owner-soft: #eff6ff; --register-shortcut-owner-hover: #dbeafe; }
+.program-register-mini-toolbar:not(.commercial-action-rail) button[data-register-action] {
   border: 1px solid var(--panel-border, #cbd5e1);
   background: transparent;
   color: var(--uos-text-muted, #64748b);
 }
 
-.program-register-mini-toolbar button:disabled,
-.program-register-mini-toolbar button[aria-disabled="true"],
-.program-register-table td .program-register-mini-toolbar button:disabled,
-.program-register-table td .program-register-mini-toolbar button[aria-disabled="true"] {
+.program-register-mini-toolbar:not(.commercial-action-rail) button:disabled,
+.program-register-mini-toolbar:not(.commercial-action-rail) button[aria-disabled="true"]{
   opacity: 0.4;
   cursor: not-allowed !important;
   pointer-events: auto !important;
@@ -2720,7 +2696,7 @@ body.uos-rail-collapsed .program-nav-group {
   box-shadow: none !important;
 }
 
-.program-register-mini-toolbar button svg {
+.program-register-mini-toolbar:not(.commercial-action-rail) button svg {
   width: 17px;
   height: 17px;
   stroke: currentColor;
@@ -2730,45 +2706,12 @@ body.uos-rail-collapsed .program-nav-group {
   fill: none;
 }
 
-.program-register-table td .program-register-mini-toolbar {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-  padding: 0;
-  border-bottom: none;
-  background: transparent;
-  gap: 0.35rem;
-}
-
-.program-register-table td .program-register-mini-toolbar button {
-  width: 28px;
-  height: 28px;
-  border-radius: 5px;
-  border: 1px solid var(--panel-border, #cbd5e1);
-  background: #ffffff;
-}
-
-.program-register-table td .program-register-mini-toolbar button:hover {
-  background: var(--uos-brand-light, #ecfdf5);
-  color: var(--uos-brand-text, #047857);
-  border-color: var(--uos-brand-border, #a7f3d0);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
-}
-
-
-.program-register-table td .program-register-mini-toolbar button.program-register-delete-btn,
 .program-register-row button.program-register-delete-btn {
   border-color: #dc2626 !important;
 }
 
-.program-register-table td .program-register-mini-toolbar button.program-register-delete-btn:hover,
 .program-register-row button.program-register-delete-btn:hover {
   border-color: #991b1b !important;
-}
-
-.program-register-table td .program-register-mini-toolbar button svg {
-  width: 15px;
-  height: 15px;
 }
 
 .program-register-header-controls .program-register-controls {
@@ -2835,7 +2778,6 @@ body.uos-rail-collapsed .program-nav-group {
   font-size: 12px;
 }
 
-
 .program-register-detail__placeholder {
   display: flex;
   flex-direction: column;
@@ -2854,138 +2796,16 @@ body.uos-rail-collapsed .program-nav-group {
   stroke-width: 1.5;
 }
 
-.program-register-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
 
-.program-register-table th {
-  height: 38px;
-  min-height: 38px;
-  max-height: 38px;
-  box-sizing: border-box;
-  padding: 0 12px;
-  background: var(--uos-surface-muted, #f1f5f9);
-  border-bottom: 1px solid var(--panel-border);
-  text-align: left;
-  font-weight: 800;
-  color: var(--uos-text-muted);
-  vertical-align: middle;
-}
 
-.program-register-table__sort {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  width: 100%;
-  min-height: 30px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
 
-.program-register-table__sort:hover,
-.program-register-table__sort:focus-visible {
-  color: var(--program-owner-strong, var(--uos-text));
-}
 
-.program-register-table__sort:focus-visible {
-  outline: 2px solid var(--program-owner-accent, var(--uos-focus));
-  outline-offset: 2px;
-}
 
-.program-register-table__sort-icon {
-  color: var(--program-owner-accent, var(--uos-text-muted));
-  font-size: 13px;
-  font-weight: 900;
-  line-height: 1;
-}
 
-.program-register-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--panel-border);
-  color: var(--uos-text);
-}
 
-.program-register-table__reference-col,
-.program-register-table__reference-cell {
-  width: 108px;
-  max-width: 108px;
-}
 
-.program-register-table__status-col,
-.program-register-table__status-cell {
-  width: 112px;
-  max-width: 112px;
-}
 
-.program-register-table__received-col,
-.program-register-table__received-cell {
-  width: 96px;
-  max-width: 96px;
-  white-space: nowrap;
-}
 
-@media (max-width: 1366px) {
-  .program-register-table__reference-col,
-  .program-register-table__reference-cell { width: 94px; max-width: 94px; }
-  .program-register-table__status-col,
-  .program-register-table__status-cell { width: 100px; max-width: 100px; }
-  .program-register-table__received-col,
-  .program-register-table__received-cell { width: 88px; max-width: 88px; }
-  .program-register-table th,
-  .program-register-table td { padding-inline: 8px; }
-}
-
-.program-register-table tr {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.program-register-table tr:hover {
-  background: var(--uos-surface-subtle, #f8fafc);
-}
-
-/* Category Color persistent selected row highlight denoting active record in Details panel (Intensified for high visibility) */
-.program-register-table tr.is-selected,
-.program-register-table tr.is-selected[data-owner="NSA"],
-body.is-nsa-mode .program-register-table tr.is-selected {
-  background: #dcfce7 !important;
-}
-
-.program-register-table tr.is-selected td,
-.program-register-table tr.is-selected[data-owner="NSA"] td,
-body.is-nsa-mode .program-register-table tr.is-selected td {
-  background: #dcfce7 !important;
-  color: #0f172a !important;
-}
-
-.program-register-table tr.is-selected td:first-child,
-.program-register-table tr.is-selected[data-owner="NSA"] td:first-child,
-body.is-nsa-mode .program-register-table tr.is-selected td:first-child {
-  box-shadow: none !important;
-}
-
-.program-register-table tr.is-selected[data-owner="EVT"],
-body.is-evt-mode .program-register-table tr.is-selected {
-  background: #dbeafe !important;
-}
-
-.program-register-table tr.is-selected[data-owner="EVT"] td,
-body.is-evt-mode .program-register-table tr.is-selected td {
-  background: #dbeafe !important;
-  color: #0f172a !important;
-}
-
-.program-register-table tr.is-selected[data-owner="EVT"] td:first-child,
-body.is-evt-mode .program-register-table tr.is-selected td:first-child {
-  box-shadow: none !important;
-}
 
 .program-register-overview__body {
   max-width: 720px;
@@ -3970,7 +3790,6 @@ body.program-planner,
 
 /* Authoritative selected/focused entity prominence across every module. */
 :is(
-  tr[data-register-record],
   [data-event-card-id],
   [data-shape-card-id],
   [data-planner-project-id],
@@ -3983,7 +3802,6 @@ body.program-planner,
 }
 
 :is(
-  tr[data-register-record],
   [data-event-card-id],
   [data-shape-card-id],
   [data-planner-project-id],
@@ -3996,7 +3814,6 @@ body.program-planner,
 }
 
 :is(
-  tr[data-register-record],
   [data-event-card-id],
   [data-shape-card-id],
   [data-planner-project-id],
@@ -4009,7 +3826,6 @@ body.program-planner,
 }
 
 :is(
-  tr[data-register-record],
   [data-event-card-id],
   [data-shape-card-id],
   [data-planner-project-id],
@@ -4033,7 +3849,6 @@ body.program-planner,
 }
 
 :is(
-  tr[data-register-record],
   [data-event-card-id],
   [data-shape-card-id],
   [data-planner-project-id],
@@ -4053,9 +3868,8 @@ body.program-planner,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is(
-    tr[data-register-record],
-    [data-event-card-id],
+:is(
+  [data-event-card-id],
     [data-shape-card-id],
     [data-planner-project-id],
     [data-costing-project-id],
@@ -4955,7 +4769,7 @@ html[data-suite-theme="tritanopia"] body.program-planner {
     color: #0f172a;
   }
 
-  /* HIDE ALL APP CHROME, SIDEBARS & PANELS DURING PRINTING */
+/* HIDE ALL APP CHROME, SIDEBARS & PANELS DURING PRINTING */
   .program-rail,
   .program-header,
   .program-quote-sidebar,
@@ -4963,7 +4777,7 @@ html[data-suite-theme="tritanopia"] body.program-planner {
   .program-quote-preview-toolbar,
   .program-quote-preview-head,
   .program-quote-pane-head,
-  .program-register-mini-toolbar,
+  .program-register-mini-toolbar:not(.commercial-action-rail),
   .program-quote-preview-controls,
   [data-sidebar-search-wrap],
   .program-view:not([data-program-view="quotes"]) {
@@ -5873,7 +5687,6 @@ html[data-suite-theme="dark"] .program-event-card__actions-group .uos-button {
   background: #1e293b !important;
 }
 
-
 /* Universal Card Styling Across All Modules (Space Map, Planner, Costing, Quotes, Scheduler) */
 :is(
   .program-event-card,
@@ -6212,7 +6025,6 @@ html[data-suite-theme="dark"] :is(.program-event-card__divider, .program-costing
 html[data-suite-theme="dark"] :is(.program-scheduler-project-card__action) {
   background: #1e293b !important;
 }
-
 
 /* Scheduler Job Card Specific Enhancements */
 .program-scheduler-job-card__time-row {
@@ -8275,7 +8087,6 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-register-detail :is
   .program-map-data-dialog__footer-actions { align-items: stretch; flex-direction: column; }
 }
 
-
 /* Horizontal Filter Pill & Ribbon Scrollbar Hiding (Highly Recommended) */
 .program-status-filter-pills,
 .program-filter-pills-row,
@@ -8427,7 +8238,7 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-register-detail :is
 }
 
 /* Small Panel One-Click Shortcut Toolbar Row (38px height) */
-.program-register-mini-toolbar {
+.program-register-mini-toolbar:not(.commercial-action-rail) {
   height: 38px !important;
   min-height: 38px !important;
   max-height: 38px !important;
@@ -8461,7 +8272,7 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-register-detail :is
 }
 
 /* Small Panel One-Click Shortcut Toolbar Row (42px height with distinct button styling) */
-.program-register-mini-toolbar {
+.program-register-mini-toolbar:not(.commercial-action-rail) {
   flex: 0 0 42px !important;
   height: 42px !important;
   min-height: 42px !important;
@@ -8478,7 +8289,7 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-register-detail :is
 }
 
 /* Base Mini Toolbar Buttons Defaulting to Active Owner Tokens */
-.program-register-mini-toolbar button {
+.program-register-mini-toolbar:not(.commercial-action-rail) button {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -8496,71 +8307,63 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-register-detail :is
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
 }
 
-.program-register-mini-toolbar button:hover {
+.program-register-mini-toolbar:not(.commercial-action-rail) button:hover {
   background: var(--register-owner-soft-bg, #f0fdf4) !important;
   border-color: var(--register-owner-primary, #16a34a) !important;
   color: var(--register-owner-primary-dark, #14532d) !important;
 }
 
 /* Explicit Nature Strip (NSA) Family Colors */
-body.is-nsa-mode .program-register-mini-toolbar button,
-body.is-nature-mode .program-register-mini-toolbar button,
-body[data-owner-mode="NSA"] .program-register-mini-toolbar button,
-[data-owner="NSA"] .program-register-mini-toolbar button,
-[data-owner="nsa"] .program-register-mini-toolbar button,
-.program-register-detail[data-owner="NSA"] .program-register-mini-toolbar button,
-.program-register-table tr[data-owner="NSA"] td .program-register-mini-toolbar button {
+body.is-nsa-mode .program-register-mini-toolbar:not(.commercial-action-rail) button,
+body.is-nature-mode .program-register-mini-toolbar:not(.commercial-action-rail) button,
+body[data-owner-mode="NSA"] .program-register-mini-toolbar:not(.commercial-action-rail) button,
+[data-owner="NSA"] .program-register-mini-toolbar:not(.commercial-action-rail) button,
+[data-owner="nsa"] .program-register-mini-toolbar:not(.commercial-action-rail) button,
+.program-register-detail[data-owner="NSA"] .program-register-mini-toolbar:not(.commercial-action-rail) button{
   border: 1px solid #bbf7d0 !important;
   background: #ffffff !important;
   color: #166534 !important;
 }
 
-body.is-nsa-mode .program-register-mini-toolbar button:hover,
-body.is-nature-mode .program-register-mini-toolbar button:hover,
-body[data-owner-mode="NSA"] .program-register-mini-toolbar button:hover,
-[data-owner="NSA"] .program-register-mini-toolbar button:hover,
-[data-owner="nsa"] .program-register-mini-toolbar button:hover,
-.program-register-detail[data-owner="NSA"] .program-register-mini-toolbar button:hover,
-.program-register-table tr[data-owner="NSA"] td .program-register-mini-toolbar button:hover {
+body.is-nsa-mode .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+body.is-nature-mode .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+body[data-owner-mode="NSA"] .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+[data-owner="NSA"] .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+[data-owner="nsa"] .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+.program-register-detail[data-owner="NSA"] .program-register-mini-toolbar:not(.commercial-action-rail) button:hover{
   background: #f0fdf4 !important;
   border-color: #16a34a !important;
   color: #14532d !important;
 }
 
-
 /* Explicit Remediation (EVT) Family Colors */
-body.is-evt-mode .program-register-mini-toolbar button,
-body.is-events-mode .program-register-mini-toolbar button,
-body.is-remediation-mode .program-register-mini-toolbar button,
-body[data-owner-mode="EVT"] .program-register-mini-toolbar button,
-[data-owner="EVT"] .program-register-mini-toolbar button,
-[data-owner="evt"] .program-register-mini-toolbar button,
-.program-register-detail[data-owner="EVT"] .program-register-mini-toolbar button,
-.program-register-table tr[data-owner="EVT"] td .program-register-mini-toolbar button {
+body.is-evt-mode .program-register-mini-toolbar:not(.commercial-action-rail) button,
+body.is-events-mode .program-register-mini-toolbar:not(.commercial-action-rail) button,
+body.is-remediation-mode .program-register-mini-toolbar:not(.commercial-action-rail) button,
+body[data-owner-mode="EVT"] .program-register-mini-toolbar:not(.commercial-action-rail) button,
+[data-owner="EVT"] .program-register-mini-toolbar:not(.commercial-action-rail) button,
+[data-owner="evt"] .program-register-mini-toolbar:not(.commercial-action-rail) button,
+.program-register-detail[data-owner="EVT"] .program-register-mini-toolbar:not(.commercial-action-rail) button{
   border: 1px solid #bfdbfe !important;
   background: #ffffff !important;
   color: #1d4ed8 !important;
 }
 
-body.is-evt-mode .program-register-mini-toolbar button:hover,
-body.is-events-mode .program-register-mini-toolbar button:hover,
-body.is-remediation-mode .program-register-mini-toolbar button:hover,
-body[data-owner-mode="EVT"] .program-register-mini-toolbar button:hover,
-[data-owner="EVT"] .program-register-mini-toolbar button:hover,
-[data-owner="evt"] .program-register-mini-toolbar button:hover,
-.program-register-detail[data-owner="EVT"] .program-register-mini-toolbar button:hover,
-.program-register-table tr[data-owner="EVT"] td .program-register-mini-toolbar button:hover {
+body.is-evt-mode .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+body.is-events-mode .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+body.is-remediation-mode .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+body[data-owner-mode="EVT"] .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+[data-owner="EVT"] .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+[data-owner="evt"] .program-register-mini-toolbar:not(.commercial-action-rail) button:hover,
+.program-register-detail[data-owner="EVT"] .program-register-mini-toolbar:not(.commercial-action-rail) button:hover{
   background: #eff6ff !important;
   border-color: #2563eb !important;
   color: #1e3a8a !important;
 }
 
-
 /* Ensure disabled styles ONLY apply to buttons that are NOT linked */
-.program-register-mini-toolbar button:disabled:not(.is-current-module):not(.program-register-action--linked):not([data-linked-entity="true"]),
-.program-register-mini-toolbar button[aria-disabled="true"]:not(.is-current-module):not(.program-register-action--linked):not([data-linked-entity="true"]),
-.program-register-table td .program-register-mini-toolbar button:disabled:not(.is-current-module):not(.program-register-action--linked):not([data-linked-entity="true"]),
-.program-register-table td .program-register-mini-toolbar button[aria-disabled="true"]:not(.is-current-module):not(.program-register-action--linked):not([data-linked-entity="true"]) {
+.program-register-mini-toolbar:not(.commercial-action-rail) button:disabled:not(.is-current-module):not(.program-register-action--linked):not([data-linked-entity="true"]),
+.program-register-mini-toolbar:not(.commercial-action-rail) button[aria-disabled="true"]:not(.is-current-module):not(.program-register-action--linked):not([data-linked-entity="true"]){
   opacity: 0.45 !important;
   cursor: not-allowed !important;
   background: #f8fafc !important;
@@ -8569,7 +8372,7 @@ body[data-owner-mode="EVT"] .program-register-mini-toolbar button:hover,
   box-shadow: none !important;
 }
 
-.program-register-mini-toolbar button svg {
+.program-register-mini-toolbar:not(.commercial-action-rail) button svg {
   width: 16px !important;
   height: 16px !important;
   stroke: currentColor !important;
@@ -8598,7 +8401,6 @@ body[data-owner-mode="EVT"] .program-register-mini-toolbar button:hover,
   height: auto !important;
   overflow-y: auto !important;
 }
-
 
 /* Small Panel Header Left Alignment */
 .program-register-pane__head,
@@ -9478,10 +9280,6 @@ dd.is-privacy-masked {
     box-shadow: none !important;
   }
 
-
-
-
-
   [data-compact-panel].is-compact {
     display: flex !important;
     flex-direction: column !important;
@@ -9663,93 +9461,6 @@ dd.is-privacy-masked {
   overflow: auto;
 }
 
-.program-register-layout--disclosure .program-register-table {
-  table-layout: fixed;
-}
-
-.program-register-layout--disclosure .program-register-table th:first-child,
-.program-register-layout--disclosure .program-register-summary-row > td:first-child {
-  width: 44px;
-}
-
-.program-register-layout--disclosure .program-register-table th:nth-child(2) {
-  width: 19%;
-}
-
-.program-register-layout--disclosure .program-register-table th:nth-child(3) {
-  width: 18%;
-}
-
-.program-register-layout--disclosure .program-register-table th:nth-child(4) {
-  width: 13%;
-}
-
-.program-register-layout--disclosure .program-register-table th:nth-child(5) {
-  width: 12%;
-}
-
-.program-register-layout--disclosure .program-register-table th:nth-child(6) {
-  width: 12%;
-}
-
-.program-register-layout--disclosure .program-register-table th:last-child {
-  width: 286px;
-}
-
-.program-register-table__actions-col,
-.program-register-table__actions-cell {
-  min-width: 286px;
-}
-
-.program-register-table__actions-cell .program-register-mini-toolbar {
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  width: max-content;
-}
-
-.program-register-summary-row > td {
-  height: 50px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.program-register-summary-row:focus-within {
-  outline: 2px solid var(--program-owner-accent, #2563eb);
-  outline-offset: -2px;
-}
-
-.program-register-table__toggle-cell {
-  padding: 0 6px !important;
-  text-align: center;
-}
-
-.program-register-row-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--uos-text-muted, #64748b);
-  background: transparent;
-  cursor: pointer;
-}
-
-.program-register-row-toggle:hover {
-  border-color: var(--program-owner-accent, #2563eb);
-  color: var(--program-owner-accent, #2563eb);
-  background: var(--uos-surface-muted, #f8fafc);
-}
-
-.program-register-row-toggle:focus-visible {
-  outline: 2px solid var(--program-owner-accent, #2563eb);
-  outline-offset: 1px;
-}
-
-.program-register-row-toggle svg,
 .program-disclosure-summary__chevron svg {
   width: 18px;
   height: 18px;
@@ -9761,28 +9472,8 @@ dd.is-privacy-masked {
   transition: transform 0.16s ease;
 }
 
-.program-register-summary-row.is-disclosure-open .program-register-row-toggle svg,
 .program-disclosure-row.is-disclosure-open .program-disclosure-summary__chevron svg {
   transform: rotate(90deg);
-}
-
-.program-register-table__title-cell strong,
-.program-register-table__title-cell span {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.program-register-table__title-cell strong {
-  font-size: 13px;
-}
-
-.program-register-table__title-cell span {
-  margin-top: 2px;
-  color: var(--uos-text-muted, #64748b);
-  font-size: 10px;
-  font-weight: 700;
 }
 
 .program-register-drawer-row,
@@ -9797,6 +9488,7 @@ dd.is-privacy-masked {
 
 .program-register-drawer-row > td {
   padding: 0 !important;
+  vertical-align: top;
   border-bottom: 2px solid var(--program-owner-accent, #2563eb);
   white-space: normal;
 }
@@ -10378,7 +10070,6 @@ html[data-suite-theme="dark"] .program-disclosure-list__header {
 /* Calculator is the reference for selected/focused row prominence. Apply its
    clean accent outline and tint consistently after all legacy card resets. */
 :is(
-  tr[data-register-record],
   #eventPickerList > [data-event-card-id],
   #shapeList > [data-shape-card-id],
   #plannerPickerList > [data-planner-project-id],
@@ -10395,7 +10086,6 @@ html[data-suite-theme="dark"] .program-disclosure-list__header {
 }
 
 :is(
-  tr[data-register-record],
   #eventPickerList > [data-event-card-id],
   #shapeList > [data-shape-card-id],
   #plannerPickerList > [data-planner-project-id],
@@ -10419,22 +10109,6 @@ html[data-suite-theme="dark"] .program-disclosure-list__header {
 ):is(.is-selected, [aria-selected="true"], .is-navigation-focus) > .program-disclosure-summary .program-disclosure-summary__title {
   color: var(--program-owner-strong, var(--uos-text, #0f172a)) !important;
   font-weight: 900 !important;
-}
-
-/* Register uses table-row framing, so its open owner outline sits inside the
-   cells at two pixels while transient navigation focus remains three pixels on
-   compact rows. */
-#program-app tr.program-register-summary-row.is-disclosure-open.is-navigation-focus {
-  outline-width: 2px !important;
-  outline-offset: -2px !important;
-}
-
-#program-app tr.program-register-summary-row.is-navigation-focus,
-#program-app tr.program-register-summary-row.is-navigation-focus:has(> td [data-disclosure-toggle][aria-expanded="true"]) {
-  outline-width: 2px !important;
-  outline-color: var(--program-card-focus-colour, var(--program-owner-accent, #2563eb)) !important;
-  outline-offset: -2px !important;
-  animation: none !important;
 }
 
 /* Global open-row contract: retain the compact header and frame the header
@@ -10505,12 +10179,6 @@ html[data-suite-theme="dark"] .program-disclosure-list__header {
 #shapeList:not([hidden]) [data-map-inspector-controls] {
   visibility: visible !important;
   opacity: 1 !important;
-}
-
-@media (max-width: 1200px) {
-  .program-register-layout--disclosure .program-register-table {
-    min-width: 1080px;
-  }
 }
 
 @media (max-width: 900px) {
@@ -10654,7 +10322,6 @@ body[data-drawer-module] .program-register-module-host #shapeList > [data-shape-
   min-height: 0;
   overflow: auto;
 }
-.program-scheduler-job-register__header,
 .program-scheduler-job-register__row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(7rem, .8fr) minmax(5.5rem, auto);
@@ -10662,18 +10329,6 @@ body[data-drawer-module] .program-register-module-host #shapeList > [data-shape-
   gap: 10px;
   width: 100%;
   text-align: left;
-}
-.program-scheduler-job-register__header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  min-height: 34px;
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--panel-border, #d7ded9);
-  background: var(--uos-surface-muted, #f6f8f7);
-  color: var(--uos-text-muted, #5d6b63);
-  font-size: 11px;
-  font-weight: 800;
 }
 .program-scheduler-job-register__row {
   min-height: 52px;
@@ -10803,9 +10458,7 @@ body[data-drawer-module] .program-register-module-host #shapeList > [data-shape-
 .planner-section-toggle:focus-visible { outline: 2px solid var(--uos-focus); outline-offset: 3px; border-radius: 3px; }
 .planner-section-toggle__icon { display: inline-block; width: 14px; font-size: 16px; line-height: 1; transition: transform 120ms ease; }
 .planner-section-toggle[aria-expanded="false"] .planner-section-toggle__icon { transform: rotate(-90deg); }
-.program-register-table__project-col,
-.program-register-table__project-cell { width: 104px; min-width: 104px; }
-.program-register-project-state { display: inline-flex; align-items: center; justify-content: center; min-width: 78px; padding: 3px 7px; border: 1px solid var(--panel-border); border-radius: 999px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+
 .program-register-project-state.is-created { color: var(--uos-brand-text); border-color: var(--uos-brand-text); background: var(--uos-brand-soft); }
 .program-register-project-state.is-not-created { color: var(--uos-text-muted); background: var(--panel-bg); }
 .program-costing-workspace > .program-costing-projects-pane,
@@ -10852,9 +10505,7 @@ body[data-drawer-module] .program-register-module-host #shapeList > [data-shape-
   transition: transform 140ms ease;
 }
 
-/* Register rows set the shared disclosure-control dimensions; Planner supplies
-   the canonical visual treatment for both contexts. */
-.program-register-row-toggle,
+/* Planner section disclosure controls. Register actions use commercial-icon-button. */
 .planner-section-toggle {
   width: 30px;
   height: 30px;
@@ -10866,18 +10517,15 @@ body[data-drawer-module] .program-register-module-host #shapeList > [data-shape-
   background: var(--panel, #fff);
   color: var(--green, #18734b);
 }
-.program-register-row-toggle:hover,
 .planner-section-toggle:hover {
   border-color: var(--green, #18734b);
   background: #eef7f1;
   color: var(--green, #18734b);
 }
-.program-register-row-toggle:focus-visible,
 .planner-section-toggle:focus-visible {
   outline: 3px solid rgba(24, 115, 75, .28);
   outline-offset: 2px;
 }
-.program-register-row-toggle svg,
 .planner-section-toggle__icon {
   width: 18px;
   height: 18px;
@@ -11368,14 +11016,42 @@ html .program-scheduler-detail > .program-scheduler-inspector__head {border-bott
 :is(.program-quote-builder-table,.program-cost-table,.program-calculator-table),.commercial-table-shell {--commercial-frame-height:var(--uos-control-height,34px);--commercial-frame-gap:8px;}
 .commercial-value-frame {box-sizing:border-box;display:flex;align-items:center;width:100%;min-width:0;height:var(--commercial-frame-height,var(--uos-control-height,34px));min-height:var(--commercial-frame-height,var(--uos-control-height,34px));max-height:var(--commercial-frame-height,var(--uos-control-height,34px));padding:0 9px;overflow:hidden;border:1px solid var(--uos-border-strong,var(--uos-border,#cbd5e1));border-radius:var(--uos-radius-control,6px);background:var(--uos-surface,#fff);color:var(--uos-text,#172033);line-height:calc(var(--commercial-frame-height,var(--uos-control-height,34px)) - 2px);text-overflow:ellipsis;white-space:nowrap;}
 .commercial-action-rail {display:flex;align-items:center;justify-content:flex-end;gap:var(--commercial-frame-gap,8px);width:100%;min-width:0;}
+/* Value-frame emphasis is shared by every operational framed table. Drawing
+   inward keeps widths, control heights and gaps stable; action rails are excluded. */
+body.program-planner {
+  --commercial-row-background: var(--uos-nature-green-soft, #f0fdf4);
+  --commercial-frame-emphasis: #4ade80;
+  --program-section-header-background: #047857;
+}
+body.program-planner.is-evt-mode { --program-section-header-background: #0369a1; }
+#program-app .program-register-summary-row,
+#program-app .program-register-summary-row > td {
+  background: var(--commercial-row-background) !important;
+}
+#program-app :is(.program-cost-table,.program-calculator-table,.program-quote-builder-table) > tbody > tr:not(.program-costing-line-group),
+#program-app :is(.program-cost-table,.program-calculator-table,.program-quote-builder-table) > tbody > tr > td {
+  background: transparent !important;
+}
+/* Sticky action cells require an opaque surface, but never a row-state tint. */
+#program-app :is(.program-cost-table,.program-calculator-table,.program-quote-builder-table) > tbody > tr > td:last-child {
+  background: var(--uos-surface, #fff) !important;
+}
+#program-app :is(.commercial-frame-row,.program-cost-table > tbody > tr,.program-calculator-table > tbody > tr,.program-quote-builder-table > tbody > tr):focus-visible { outline: none; }
+#program-app :is(.commercial-frame-row,.program-cost-table > tbody > tr,.program-calculator-table > tbody > tr,.program-quote-builder-table > tbody > tr):is(:hover,:focus-within,:focus-visible,.is-selected,.is-duplicate-selected,.is-being-edited,.is-navigation-focus,[aria-selected="true"]) > td > :is(.commercial-value-frame,.uos-input,.uos-select,.program-cost-value,.program-category-pill,.program-rate-state,.program-cost-source-frame,.program-register-row-toggle) {
+  --commercial-frame-border-width: 2px;
+  border-color: var(--commercial-frame-emphasis) !important;
+  border-width: 2px !important;
+  box-shadow: none !important;
+}
 .commercial-icon-button {box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 var(--commercial-frame-height,var(--uos-control-height,34px))!important;width:var(--commercial-frame-height,var(--uos-control-height,34px))!important;min-width:var(--commercial-frame-height,var(--uos-control-height,34px))!important;max-width:var(--commercial-frame-height,var(--uos-control-height,34px))!important;height:var(--commercial-frame-height,var(--uos-control-height,34px))!important;min-height:var(--commercial-frame-height,var(--uos-control-height,34px))!important;max-height:var(--commercial-frame-height,var(--uos-control-height,34px))!important;margin:0!important;padding:0!important;border:1px solid var(--uos-border-strong,var(--uos-border,#cbd5e1))!important;border-radius:var(--uos-radius-control,6px)!important;background:var(--uos-surface,#fff)!important;}
 .commercial-icon-button svg {width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.program-delete-action > svg {color:var(--uos-danger,#c93648)!important;stroke:currentColor!important;}
 :is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>tbody>tr>td:not([colspan]) {padding:6px var(--commercial-frame-gap) 6px 0!important;vertical-align:middle;}
 :is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>tbody>tr>td:first-child {padding-left:8px!important;}
 :is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>thead>tr>th {padding-inline:0 var(--commercial-frame-gap)!important;text-align:left;}
 :is(.program-quote-builder-table,.program-cost-table,.program-calculator-table)>thead>tr>th:first-child {padding-left:8px!important;}
 :is(.program-quote-builder-table,.program-cost-table,.program-calculator-table) :is(.uos-input,.uos-select,.program-cost-value,.program-rate-state) {box-sizing:border-box;height:var(--commercial-frame-height);min-height:var(--commercial-frame-height);max-height:var(--commercial-frame-height);padding:0 9px;border-radius:var(--uos-radius-control);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;}
-:is(.program-cost-table,.program-calculator-table) .program-cost-value {line-height:calc(var(--commercial-frame-height) - 2px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+:is(.program-cost-table,.program-calculator-table) .program-cost-value {line-height:calc(var(--commercial-frame-height) - 2 * var(--commercial-frame-border-width,1px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .program-cost-table .program-rate-state {width:100%;}
 .program-calculator-table .program-cost-source {text-align:left;}
 .program-cost-source-frame {display:inline-flex;box-sizing:border-box;align-items:center;justify-content:center;width:var(--commercial-frame-height);height:var(--commercial-frame-height);border:1px solid var(--uos-border-strong);border-radius:var(--uos-radius-control);background:var(--uos-surface);}
@@ -11440,6 +11116,8 @@ html .program-scheduler-detail > .program-scheduler-inspector__head {border-bott
 .program-cost-table>thead>tr>th {display:flex;align-items:center;}
 .program-calculator-table>thead>tr>th:nth-child(3) {text-align:center!important;}
 .program-calculator-table .program-costing-line-group>th {text-align:left!important;}
+.program-costing-line-group__label {display:inline-flex;align-items:center;gap:8px;}
+.program-costing-line-group__label>svg {width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 
 /* Pin each complete column-heading band inside its own table scroller. */
 :is(.program-cost-table,.program-calculator-table)>thead {position:sticky;top:0;z-index:3;background:var(--uos-surface-muted);}
@@ -11460,7 +11138,7 @@ html .program-scheduler-detail > .program-scheduler-inspector__head {border-bott
 .program-job-calculator>.program-cost-totals {grid-row:4;}
 
 .program-scheduler-header__controls {flex:1;}
-.program-scheduler-job-register__header, html .program-scheduler-detail > .program-scheduler-inspector__head {height:var(--scheduler-header-height,52px)!important;min-height:var(--scheduler-header-height,52px)!important;box-sizing:border-box!important;align-items:center!important;}
+html .program-scheduler-detail > .program-scheduler-inspector__head {height:var(--scheduler-header-height,52px)!important;min-height:var(--scheduler-header-height,52px)!important;box-sizing:border-box!important;align-items:center!important;}
 
 /* Table truncation must not cut off the focused editor's outside ring. */
 .program-quote-builder-table td:focus-within,

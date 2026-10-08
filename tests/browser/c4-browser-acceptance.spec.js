@@ -37,6 +37,7 @@ test("RC-DEL-03: immediate Add → Remove reaches canonical zero without a settl
   const remove = frame.locator('[data-costing-remove]').first();
   await expect(remove).toBeEnabled();
   await remove.click();
+  await frame.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
   await expect(frame.locator('[data-costing-lines] tr:not(.program-costing-line-group)')).toHaveCount(0);
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(0);
   await expect(frame.locator("[data-costing-error]")).toBeHidden();
@@ -70,6 +71,7 @@ test("C4 mapped work deletion retains geometry and prevents automatic recreation
   await expect(frame.locator(`[data-costing-remove="${lineId}"]`)).toBeVisible();
   await expect(frame.locator(`[data-costing-remove="${lineId}"]`)).toBeEnabled();
   await frame.locator(`[data-costing-remove="${lineId}"]`).click();
+  await frame.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
   await expect.poll(() => child.evaluate(({ geometryId, jobId }) => {
     const ws = window.UOS.ProgramApp.workspace();
     return [
@@ -117,6 +119,7 @@ test("C4 deleted calculator line remains absent after reload", async ({ page }) 
     });
   });
   await remove.click();
+  await frame.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
   await expect.poll(() => child.evaluate((lineId) => !window.UOS.ProgramApp.workspace().entities.costingLines.some((item) => item.id === lineId), identity.lineId)).toBe(true);
   await expect.poll(() => child.evaluate(async (expected) => {
     const stored = await window.UOS.ProgramStorage.get();

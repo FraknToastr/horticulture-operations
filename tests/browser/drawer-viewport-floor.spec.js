@@ -67,6 +67,7 @@ for (const fixture of [
     expect(register.floorColor).toMatch(fixture.colour);
     expect(register.floorBottom).toBeLessThanOrEqual(register.viewportBottom);
     expect(register.floorBottom).toBeGreaterThanOrEqual(register.viewportBottom - 8);
+    expect(register.drawerBottom, JSON.stringify(register)).toBeLessThan(register.viewportBottom);
 
     await child.evaluate((recordId) => window.UOS.ProgramApp.navigateWithContext("costing", recordId), id);
     await child.waitForFunction(() => document.body.getAttribute("data-drawer-module") === "costing");
@@ -78,7 +79,7 @@ for (const fixture of [
     expect(calculator.floorColor).toMatch(fixture.colour);
     expect(calculator.floorBottom).toBeLessThanOrEqual(calculator.viewportBottom);
     expect(calculator.floorBottom).toBeGreaterThanOrEqual(calculator.viewportBottom - 8);
-    expect(calculator.drawerBottom).toBeLessThan(calculator.viewportBottom);
+    expect(calculator.drawerBottom, JSON.stringify({ register, calculator })).toBeLessThan(calculator.viewportBottom);
     expect(calculator.drawerHeight).toBeLessThanOrEqual(calculator.drawerMaxHeight + 0.5);
     expect(calculator.hostHeight).toBeLessThanOrEqual(calculator.drawerHeight + 0.5);
 

@@ -57,6 +57,7 @@ test("RC-DEL-01: Resource Calculator line deletion removes row from DOM, updates
   const removeButton = frame.locator(`[data-costing-remove="${lineId}"]`);
   await expect(removeButton).toBeVisible();
   await removeButton.click();
+  await frame.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
 
   // Row should disappear from DOM immediately
   await expect(lineRows).toHaveCount(0);
@@ -124,6 +125,7 @@ test("RC-DEL-02: Add line, edit quantity/rate, then remove: row disappears clean
   // Now delete the edited line
   const removeButton = frame.locator(`[data-costing-remove="${lineId}"]`);
   await removeButton.click();
+  await frame.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
 
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(0);
   await child.evaluate(() => window.UOS.ProgramCostingController.update(window.UOS.ProgramApp.workspace()));
@@ -183,6 +185,7 @@ test("RC-DEL-04: Add two different Rate Items, remove one: only target line is d
   // Remove only the first line
   const removeFirst = frame.locator(`[data-costing-remove="${firstId}"]`);
   await removeFirst.click();
+  await frame.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
 
   // Exactly 1 line row should remain
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(1);
@@ -235,6 +238,7 @@ test("RC-DEL-05: EVT mode Resource Calculator line creation and deletion parity"
   const lineId = await child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines[0].id);
   const removeBtn = frame.locator(`[data-costing-remove="${lineId}"]`);
   await removeBtn.click();
+  await frame.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
 
   await expect(lineRows).toHaveCount(0);
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(0);

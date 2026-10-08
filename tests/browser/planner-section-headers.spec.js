@@ -47,7 +47,10 @@ test("Project Planner merges section and column headers and collapses sections",
    const rect = element.getBoundingClientRect();
    return { width: rect.width, height: rect.height, borderRadius: style.borderRadius, color: style.color, backgroundColor: style.backgroundColor };
  });
- expect(registerControl).toEqual(plannerControl);
+  expect(registerControl.width).toBe(34);
+  expect(registerControl.height).toBe(34);
+  expect(registerControl.borderRadius).toBe(plannerControl.borderRadius);
+  expect(registerControl.backgroundColor).toBe(plannerControl.backgroundColor);
  expect(plannerControl.width).toBe(30);
  expect(plannerControl.height).toBe(30);
   await expect(section.locator(".planner-section-toggle")).toHaveAttribute("aria-expanded", "false");
@@ -69,6 +72,7 @@ test("Project Planner merges section and column headers and collapses sections",
       horizontalOverflow: wrap.scrollWidth - wrap.clientWidth,
       gaps: frames.slice(1).map((frame, index) => Math.round(frame.left - frames[index].right)),
       actionLabels: actions.map((button) => button.getAttribute("aria-label")),
+      taskLeftGap: Math.round(frames[0].left - row.getBoundingClientRect().left),
       railRightGap: Math.round(row.getBoundingClientRect().right - row.querySelector(".planner-action-rail").getBoundingClientRect().right)
     };
   });
@@ -77,8 +81,39 @@ test("Project Planner merges section and column headers and collapses sections",
   expect(plannerLayout.horizontalOverflow, JSON.stringify(plannerLayout)).toBeLessThanOrEqual(1);
   expect(plannerLayout.gaps, JSON.stringify(plannerLayout)).toEqual([8, 8, 8, 8]);
   expect(plannerLayout.actionLabels).toContain("View task information");
+  expect(plannerLayout.actionLabels[0]).toBe("View task information");
   expect(plannerLayout.actionLabels).toContain("Delete task");
-  expect(plannerLayout.railRightGap).toBe(0);
+  expect(plannerLayout.taskLeftGap).toBe(8);
+  expect(plannerLayout.railRightGap).toBe(8);
+  for (const font of ['default', 'dyslexic']) {
+    await child.evaluate(async font => {
+      document.documentElement.dataset.suiteFont = font;
+      await document.fonts.ready;
+    }, font);
+    const bounds = await table.locator('.planner-item-row:visible').first().evaluate(row => {
+      const rail = row.querySelector('.planner-action-rail');
+      const frame = row.querySelector('.commercial-value-frame').getBoundingClientRect();
+      const railRect = rail.getBoundingClientRect();
+      const cellRect = rail.closest('td').getBoundingClientRect();
+      return [...rail.querySelectorAll('.commercial-icon-button')].map(button => {
+        const rect = button.getBoundingClientRect();
+        return { width: rect.width, height: rect.height, frameHeight: frame.height,
+          railWidth: railRect.width, cellWidth: cellRect.width, gap: getComputedStyle(rail).gap,
+          railPadding: getComputedStyle(rail).padding, margin: getComputedStyle(button).margin,
+          controlWidth: getComputedStyle(row.closest('table')).getPropertyValue('--planner-action-width'),
+          left: rect.left - cellRect.left, right: cellRect.right - rect.right,
+          railLeft: rect.left - railRect.left, railRight: railRect.right - rect.right };
+      });
+    });
+    for (const button of bounds) {
+      expect(button.width).toBe(button.frameHeight);
+      expect(button.height).toBe(button.frameHeight);
+      expect(button.left, JSON.stringify(bounds)).toBeGreaterThanOrEqual(0);
+      expect(button.right).toBeGreaterThanOrEqual(0);
+      expect(button.railLeft).toBeGreaterThanOrEqual(0);
+      expect(button.railRight).toBeGreaterThanOrEqual(0);
+    }
+  }
   await frame.locator('[data-program-view="planner"]').screenshot({ path: "test-results/planner-section-headers.png" });
   await section.locator(".planner-section-toggle").focus();
   await expect(section.locator(".planner-section-toggle")).toBeFocused();
