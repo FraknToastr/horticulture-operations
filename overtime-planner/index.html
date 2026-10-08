@@ -1332,7 +1332,8 @@ body.modal-scroll-locked {
   <div id="import-modal-root"></div>
   <div id="staff-exemption-modal-root"></div>
   <div id="warnings-modal-root"></div>
-  <div id="reset-workspace-modal-root"></div>
+    <div id="reset-workspace-modal-root"></div>
+    <div id="job-reset-modal-root"></div>
   <div id="storage-health-modal-root"></div>
   <div id="quarantine-viewer-modal-root"></div>
 
@@ -9727,7 +9728,7 @@ window.HortOpsCalendarView = {
 };
 
 </script>
-  <script data-source="js/components/jobRegistry.js">
+    <script data-source="js/components/jobRegistry.js">
 /* === INLINED: js/components/jobRegistry.js === */
 // Job Registry View & Slideout Inspector Component
 window.HortOpsJobRegistry = {
@@ -10032,6 +10033,30 @@ window.HortOpsJobRegistry = {
     }
   }
 };
+
+</script>
+    <script data-source="js/components/jobResetBindings.js">
+/* === INLINED: js/components/jobResetBindings.js === */
+// Keep the legacy Job Registry renderer intact while adding allocation-reset entry points.
+(function() {
+ var registry = window.HortOpsJobRegistry;
+ if (!registry || typeof registry.render !== 'function') return;
+ registry.openReset = function(jobId) {
+  if (window.HortOpsJobResetModal && typeof window.HortOpsJobResetModal.open === 'function') window.HortOpsJobResetModal.open(jobId);
+ };
+ var originalRender = registry.render;
+ registry.render = function(state) {
+  var html = originalRender.call(this, state);
+  // Insert a compact reset control immediately before each destructive row action.
+  html = html.replace(/(<button class="btn btn-danger" style="padding: 0\.25rem 0\.4rem;" onclick="event\.stopPropagation\(\); window\.HortOpsJobRegistry\.deleteJob\('([^']+)'\)" title="Delete Job">)/g,
+   '<button class="btn btn-secondary" style="padding: 0.25rem 0.45rem; margin-right: 4px;" onclick="event.stopPropagation(); window.HortOpsJobRegistry.openReset(\'$2\')" title="Reset allocations" aria-label="Reset allocations">↻ <span>Reset</span></button>$1');
+  // The drawer receives the same command with an explicit label.
+  html = html.replace(/(Edit Job Specifications<\/button>)/,
+   '$1<button class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem;" onclick="window.HortOpsJobRegistry.openReset(\'' + (this.selectedJobId || '') + '\')">Reset allocations</button>');
+  html = html.replace('width: 100px; text-align: right;">Actions</th>', 'width: 150px; text-align: right;">Actions</th>');
+  return html;
+ };
+})();
 
 </script>
   <script data-source="js/components/staffRegistry.js">
@@ -10553,7 +10578,7 @@ window.HortOpsStaffAssignFilterBar = {
 };
 
 </script>
-  <script data-source="js/components/staffAssignModal/candidateList.js">
+    <script data-source="js/components/staffAssignModal/candidateList.js">
 /* === INLINED: js/components/staffAssignModal/candidateList.js === */
 // Staff Assignment Candidate List Sub-module
 // Renders candidate staff cards, suitability scoring, availability pills, and conflict warnings.
@@ -10627,6 +10652,35 @@ window.HortOpsStaffAssignCandidateList = {
     '</div>';
   }
 };
+
+</script>
+    <script data-source="js/components/staffAssignModal/candidateSections.js">
+/* === INLINED: js/components/staffAssignModal/candidateSections.js === */
+// Group the existing candidate cards without changing their allocation behaviour.
+(function() {
+ var list = window.HortOpsStaffAssignCandidateList;
+ if (!list || typeof list.render !== 'function') return;
+ var renderCards = list.render;
+ list.render = function(ctx) {
+  var candidates = ctx.filteredStaff || [];
+  var priority = ctx.getStaffPriority || function() { return 5; };
+  var matching = candidates.filter(function(staff) { return priority(staff) <= 4; });
+  var other = candidates.filter(function(staff) { return priority(staff) > 4; });
+  var makeSection = function(label, staff, isOpen) {
+   var sectionCtx = Object.assign({}, ctx, { filteredStaff: staff });
+   return '<details' + (isOpen ? ' open' : '') + ' style="border:1px solid var(--slate-200);border-radius:6px;background:#fff">' +
+    '<summary style="cursor:pointer;padding:0.65rem 0.75rem;font-weight:800;font-size:13px;color:var(--slate-700);display:flex;justify-content:space-between;align-items:center">' +
+     '<span>' + label + '</span><span class="badge badge-slate">' + staff.length + '</span>' +
+    '</summary>' +
+    '<div style="padding:0 0.5rem 0.5rem">' + renderCards(sectionCtx) + '</div>' +
+   '</details>';
+  };
+  return '<div style="display:flex;flex-direction:column;gap:0.6rem">' +
+   makeSection('Matching Names', matching, true) +
+   makeSection('Other', other, false) +
+  '</div>';
+ };
+})();
 
 </script>
   <script data-source="js/components/staffAssignModal/stagedCrew.js">
@@ -12657,9 +12711,13 @@ window.HortOpsJobEditModal = {
                 '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Color Tag</label>' +
                 '<input type="color" class="form-input" style="height: 32px; padding: 2px;" value="' + escapeAttr(data.color || '#047857') + '" onchange="window.HortOpsJobEditModal.updateField(\'color\', this.value)" />' +
               '</div>' +
-            '</div>' +
+      '</div>' +
+      '<div>' +
+        '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Location</label>' +
+        '<input type="text" class="form-input" value="' + escapeAttr(data.locationDetails || '') + '" oninput="window.HortOpsJobEditModal.updateField(\'locationDetails\', this.value)" />' +
+      '</div>' +
 
-            // Row 2: Team Preferences & Exclusive Rules
+      // Row 2: Team Preferences & Exclusive Rules
             teamPreferencesHtml +
 
             // Row 3: Operational Requirements
@@ -12704,13 +12762,7 @@ window.HortOpsJobEditModal = {
             // Row 4: Cadence & Frequency-Specific Configuration (P0-07)
             recurrenceFormHtml +
 
-            // Row 5: Location Details
-            '<div>' +
-              '<label style="display: block; font-weight: 700; font-size: 12px; margin-bottom: 0.25rem;">Location Details</label>' +
-              '<input type="text" class="form-input" value="' + escapeAttr(data.locationDetails || '') + '" oninput="window.HortOpsJobEditModal.updateField(\'locationDetails\', this.value)" />' +
-            '</div>' +
-
-            // Row 6: Regulatory Permits & Approvals
+      // Row 5: Regulatory Permits & Approvals
             '<div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.75rem;">' +
               '<label style="display: block; font-weight: 700; font-size: 12px; color: #92400e; margin-bottom: 0.5rem;">Regulatory Permits & Corridor Approvals</label>' +
               '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">' +
@@ -13933,7 +13985,7 @@ window.HortOpsWarningsModal = {
 };
 
 </script>
-  <script data-source="js/components/resetWorkspaceModal.js">
+    <script data-source="js/components/resetWorkspaceModal.js">
 /* === INLINED: js/components/resetWorkspaceModal.js === */
 // Confirmed Destructive Workspace Reset Modal Component (Stage 2 Mandate)
 // Requires explicit two-step typed confirmation ('RESET') to wipe persistent local storage and re-initialize clean slate.
@@ -14131,6 +14183,72 @@ window.HortOpsResetWorkspaceModal = {
       if (input) input.focus();
     }, 50);
   }
+};
+
+</script>
+    <script data-source="js/components/jobResetModal.js">
+/* === INLINED: js/components/jobResetModal.js === */
+// Job-scoped allocation reset confirmation. This only clears live operational state;
+// historical snapshots deliberately remain immutable audit evidence.
+window.HortOpsJobResetModal = {
+ jobId: null,
+ scope: 'current_and_future',
+ open: function(jobId) {
+  this.jobId = jobId;
+  this.scope = 'current_and_future';
+  if (window.HortOpsModalUtils && window.HortOpsModalUtils.lockBackgroundScroll) window.HortOpsModalUtils.lockBackgroundScroll();
+  this.render();
+ },
+ close: function() {
+  var root = document.getElementById('job-reset-modal-root');
+  if (root) root.innerHTML = '';
+  this.jobId = null;
+  if (window.HortOpsModalUtils && window.HortOpsModalUtils.unlockBackgroundScroll) window.HortOpsModalUtils.unlockBackgroundScroll();
+ },
+ setScope: function(scope) { this.scope = scope === 'all' ? 'all' : 'current_and_future'; this.render(); },
+ handleInput: function(value) { var button = document.getElementById('job-reset-confirm'); if (button) button.disabled = value !== 'RESET'; },
+ execute: function() {
+  var input = document.getElementById('job-reset-confirmation');
+  if (!input || input.value !== 'RESET') return;
+  var app = window.HortOpsApp;
+  var result = app && app.resetJobAllocations ? app.resetJobAllocations(this.jobId, this.scope) : { success: false, error: 'Job reset command unavailable' };
+  var feedback = document.getElementById('job-reset-feedback');
+  if (!result.success) { if (feedback) { feedback.style.display = 'block'; feedback.textContent = result.error || 'The reset could not be saved. No data was changed.'; } return; }
+  var count = result.counts || {};
+  if (feedback) {
+   feedback.style.display = 'block';
+   feedback.style.color = 'var(--emerald-800)';
+   feedback.style.background = 'var(--emerald-50)';
+   feedback.style.borderColor = 'var(--emerald-200)';
+   feedback.textContent = 'Reset complete: cleared ' + (count.cleared || 0) + ' live record(s); retained ' + (result.retainedSnapshots || 0) + ' historical snapshot(s) as audit history.';
+  }
+  var confirm = document.getElementById('job-reset-confirm');
+  if (confirm) confirm.disabled = true;
+ },
+ render: function() {
+  var root = document.getElementById('job-reset-modal-root');
+  var app = window.HortOpsApp;
+  if (!root || !app || !this.jobId) return;
+  var job = (app.state.jobs || []).find(function(item) { return item.id === window.HortOpsJobResetModal.jobId; });
+  if (!job) { this.close(); return; }
+  var preview = app.getJobAllocationResetPreview(this.jobId, this.scope, app.state);
+  var danger = this.scope === 'all';
+  var esc = function(value) { return window.HortOpsSecurityUtils && window.HortOpsSecurityUtils.escapeHtml ? window.HortOpsSecurityUtils.escapeHtml(value) : String(value || ''); };
+  root.innerHTML = '<div class="modal-overlay" onclick="if(event.target === this) window.HortOpsJobResetModal.close()">' +
+   '<div class="modal-card modal-md" role="dialog" aria-modal="true" aria-labelledby="job-reset-title" style="max-width:620px">' +
+   '<div class="modal-header" style="' + (danger ? 'background:#fff1f2;border-bottom:1px solid #fecdd3;' : '') + '">' +
+   '<div><h3 id="job-reset-title" style="margin:0">Reset allocations</h3><div style="font-size:12px;color:var(--slate-500);margin-top:3px">' + esc(job.name) + '</div></div>' +
+   '<button class="modal-close-btn" aria-label="Close" onclick="window.HortOpsJobResetModal.close()">×</button></div>' +
+   '<div class="modal-body" style="display:flex;flex-direction:column;gap:14px">' +
+   '<p style="margin:0;color:var(--slate-700);line-height:1.45">This keeps the job, staff records, absences, refusal history, and protected historical snapshots unchanged.</p>' +
+   '<label style="display:flex;gap:9px;align-items:flex-start;padding:10px;border:1px solid ' + (!danger ? 'var(--emerald-300);background:var(--emerald-50)' : 'var(--slate-200)') + ';border-radius:6px;cursor:pointer"><input type="radio" name="job-reset-scope" ' + (!danger ? 'checked' : '') + ' onchange="window.HortOpsJobResetModal.setScope(\'current_and_future\')"><span><strong>Reset current and future allocations</strong><br><span style="font-size:12px;color:var(--slate-600)">Clears live commitments dated ' + esc(preview.today) + ' or later.</span></span></label>' +
+   '<label style="display:flex;gap:9px;align-items:flex-start;padding:10px;border:1px solid ' + (danger ? '#fda4af;background:#fff1f2' : 'var(--slate-200)') + ';border-radius:6px;cursor:pointer"><input type="radio" name="job-reset-scope" ' + (danger ? 'checked' : '') + ' onchange="window.HortOpsJobResetModal.setScope(\'all\')"><span><strong style="color:#b91c1c">Reset all allocations — DANGER</strong><br><span style="font-size:12px;color:var(--slate-600)">Clears every live allocation and operational commitment. Historical snapshots remain as audit history.</span></span></label>' +
+   '<div style="background:var(--slate-50);border:1px solid var(--slate-200);border-radius:6px;padding:10px;font-size:13px;display:grid;grid-template-columns:1fr auto;gap:6px"><span>Assignments</span><strong>' + preview.assignments + '</strong><span>Permit overrides</span><strong>' + preview.permitOverrides + '</strong><span>Rostering instructions / provenance</span><strong>' + preview.rosteringInstructions + ' / ' + preview.rosteringProvenance + '</strong><span>Historical snapshots retained</span><strong>' + preview.historicalSnapshots + '</strong></div>' +
+   '<label for="job-reset-confirmation" style="font-size:13px;font-weight:700">Type <code>RESET</code> to confirm<input id="job-reset-confirmation" class="form-input" autocomplete="off" style="margin-top:6px;font-family:monospace" oninput="window.HortOpsJobResetModal.handleInput(this.value)"></label>' +
+   '<div id="job-reset-feedback" role="status" style="display:none;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;padding:9px;border-radius:6px;font-size:13px"></div></div>' +
+   '<div class="modal-footer"><button class="btn btn-secondary" onclick="window.HortOpsJobResetModal.close()">Cancel</button><button id="job-reset-confirm" class="btn ' + (danger ? 'btn-danger' : 'btn-primary') + '" disabled onclick="window.HortOpsJobResetModal.execute()">Reset allocations</button></div></div></div>';
+  var input = document.getElementById('job-reset-confirmation'); if (input) input.focus();
+ }
 };
 
 </script>
@@ -15022,7 +15140,69 @@ window.HortOpsApp = {
     return { success: true, instructionsSealed: instructionsToSeal };
   },
 
-  getJobDependencies: function(jobId, state) {
+ getJobAllocationResetPreview: function(jobId, scope, state) {
+  state = state || this.state;
+  var today = (window.HortOpsDateUtils && typeof window.HortOpsDateUtils.getLocalDateKey === 'function')
+   ? window.HortOpsDateUtils.getLocalDateKey() : new Date().toISOString().slice(0, 10);
+  var isAll = scope === 'all';
+  var matchesJobKey = function(key) {
+   key = String(key || '');
+   return key.indexOf(jobId + '@') === 0 || key.indexOf(jobId + '_') === 0 || key.indexOf(jobId + '-w') === 0 || key.indexOf(jobId + '-oneoff-') === 0;
+  };
+  var dateFor = function(key, record) {
+   if (record && typeof record.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(record.date)) return record.date;
+   if (record && typeof record.startDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(record.startDate)) return record.startDate;
+   var ids = [key, record && record.sourceShiftId, record && record.startShiftId, record && record.targetShiftId];
+   for (var i = 0; i < ids.length; i++) {
+    var found = String(ids[i] || '').match(/\d{4}-\d{2}-\d{2}/);
+    if (found) return found[0];
+   }
+   return '';
+  };
+  var inScope = function(key, record) { var d = dateFor(key, record); return isAll || (d && d >= today); };
+  var result = { assignments: 0, permitOverrides: 0, rosteringInstructions: 0, rosteringProvenance: 0, historicalSnapshots: 0, today: today };
+  Object.keys(state.customAssignments || {}).forEach(function(key) { if (matchesJobKey(key) && inScope(key, null)) result.assignments++; });
+  Object.keys(state.customPermits || {}).forEach(function(key) { if (matchesJobKey(key) && inScope(key, state.customPermits[key])) result.permitOverrides++; });
+  var instructions = (state.rostering && state.rostering.instructions) || {};
+  Object.keys(instructions).forEach(function(key) { var item = instructions[key]; if (item && item.jobId === jobId && inScope(key, item)) result.rosteringInstructions++; });
+  Object.keys((state.rostering && state.rostering.provenance) || {}).forEach(function(key) {
+   var item = state.rostering.provenance[key] || {};
+   var linked = matchesJobKey(key) || matchesJobKey(item.sourceShiftId) || matchesJobKey(item.targetShiftId) || (item.instructionId && instructions[item.instructionId] && instructions[item.instructionId].jobId === jobId);
+   if (linked && inScope(key, item)) result.rosteringProvenance++;
+  });
+  Object.keys(state.historicalSnapshots || {}).forEach(function(key) { var item = state.historicalSnapshots[key]; if (item && (item.jobId === jobId || matchesJobKey(key) || matchesJobKey(item.shiftId))) result.historicalSnapshots++; });
+  result.cleared = result.assignments + result.permitOverrides + result.rosteringInstructions + result.rosteringProvenance;
+  return result;
+ },
+ resetJobAllocations: function(jobId, scope) {
+  if (scope !== 'current_and_future' && scope !== 'all') return { success: false, error: 'Invalid reset scope' };
+  var job = (this.state.jobs || []).find(function(item) { return item.id === jobId; });
+  if (!job) return { success: false, error: 'Job not found' };
+  var preview = this.getJobAllocationResetPreview(jobId, scope, this.state);
+  var isAll = scope === 'all';
+  var matchesJobKey = function(key) { key = String(key || ''); return key.indexOf(jobId + '@') === 0 || key.indexOf(jobId + '_') === 0 || key.indexOf(jobId + '-w') === 0 || key.indexOf(jobId + '-oneoff-') === 0; };
+  var dateFor = function(key, record) { var d = record && (record.date || record.startDate); if (/^\d{4}-\d{2}-\d{2}$/.test(String(d || ''))) return d; var ids = [key, record && record.sourceShiftId, record && record.startShiftId, record && record.targetShiftId]; for (var i = 0; i < ids.length; i++) { var m = String(ids[i] || '').match(/\d{4}-\d{2}-\d{2}/); if (m) return m[0]; } return ''; };
+  var inScope = function(key, item) { var d = dateFor(key, item); return isAll || (d && d >= preview.today); };
+  var assignments = JSON.parse(JSON.stringify(this.state.customAssignments || {}));
+  var permits = JSON.parse(JSON.stringify(this.state.customPermits || {}));
+  var rostering = JSON.parse(JSON.stringify(this.state.rostering || { instructions: {}, provenance: {} }));
+  rostering.instructions = rostering.instructions || {};
+  rostering.provenance = rostering.provenance || {};
+  Object.keys(assignments).forEach(function(key) { if (matchesJobKey(key) && inScope(key, null)) delete assignments[key]; });
+  Object.keys(permits).forEach(function(key) { if (matchesJobKey(key) && inScope(key, permits[key])) delete permits[key]; });
+  Object.keys(rostering.instructions).forEach(function(key) { var item = rostering.instructions[key]; if (item && item.jobId === jobId && inScope(key, item)) delete rostering.instructions[key]; });
+  Object.keys(rostering.provenance).forEach(function(key) { var item = rostering.provenance[key] || {}; var linked = matchesJobKey(key) || matchesJobKey(item.sourceShiftId) || matchesJobKey(item.targetShiftId) || (item.instructionId && this.state.rostering && this.state.rostering.instructions && this.state.rostering.instructions[item.instructionId] && this.state.rostering.instructions[item.instructionId].jobId === jobId); if (linked && inScope(key, item)) delete rostering.provenance[key]; }, this);
+  var commit = this._commitCanonicalProposal({ assignments: assignments, permits: permits, rostering: rostering, historicalSnapshots: this.state.historicalSnapshots });
+  if (!commit.success) return { success: false, error: commit.error || 'Workspace save failed. Reset was not applied.' };
+  this.state.customAssignments = assignments;
+  this.state.customPermits = permits;
+  this.state.rostering = rostering;
+  this.state.storageStatus = commit.storageMode === 'session-only' ? 'session_only' : 'saved';
+  this.recomputeDigest();
+  this.renderCurrentView();
+  return { success: true, scope: scope, counts: preview, retainedSnapshots: preview.historicalSnapshots };
+ },
+ getJobDependencies: function(jobId, state) {
     state = state || this.state;
     var assignmentsCount = 0;
     var permitsCount = 0;
