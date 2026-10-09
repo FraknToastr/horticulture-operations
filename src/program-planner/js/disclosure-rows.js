@@ -149,6 +149,7 @@ var afterOpenWork = Object.create(null);
   }
 
   function firstNode(root, selectors) {
+    if (!Array.isArray(selectors)) return null;
     for (var index = 0; index < selectors.length; index += 1) {
       var node = root.querySelector(selectors[index]);
       if (node && text(node.textContent)) return node;
@@ -584,6 +585,10 @@ function runAfterOpen(key, callback) {
     document.addEventListener("keydown", function (event) {
       var toggleNode = event.target.closest && event.target.closest("[data-disclosure-toggle]");
       if (event.key === "Escape") {
+        if (event.defaultPrevented) return;
+        // An active map edit/placement session owns Escape before the outer drawer.
+        var mapView = event.target.closest && event.target.closest('[data-program-view="map"]');
+        if (mapView && mapView.querySelector('[data-editing-vertices="true"],[data-placement-active]')) return;
         // Each Tools drawer owns Escape before the outer Register drawer.
         if (event.target.closest && event.target.closest("[data-calculator-tools]:not([hidden]),[data-costing-tools]:not([hidden])")) return;
         var context = event.target.closest && event.target.closest("[data-disclosure-drawer],[data-disclosure-toggle]");

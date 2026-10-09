@@ -50,6 +50,27 @@
   }
   function authoritativeMeasurement(input) {
     var geometry = geometryValue(input), type = text(geometry && geometry.type);
+    if (input && input.localPlacement) {
+      var basis = input.localPlacement, module = UOS.MoasureGeometry;
+      if (!module || basis.version !== 1 || basis.type !== type) throw commandError("WORK_LOCAL_BASIS_INVALID", "Invalid local measurement basis.");
+      var measured = module.measure(type, basis.coordinates);
+      var projected = module.place(basis.coordinates, basis.anchor, basis.bearing);
+      var expected = module.flat(projected), actual = module.flat(geometry.coordinates);
+      if (actual.length !== expected.length || actual.some(function(p,i){return !coordinate(p)||Math.abs(p[0]-expected[i][0])>1e-8||Math.abs(p[1]-expected[i][1])>1e-8;})) throw commandError("WORK_LOCAL_BASIS_MISMATCH", "Map geometry does not match its local-metre placement.");
+      if (input.moasureSurvey && !basis.edited) {
+        var originalPoints = module.ring(input.moasureSurvey.points.map(function(p){return p.xyz;})).points;
+        var workingPoints = module.ring(basis.coordinates[0]).points;
+        if(JSON.stringify(originalPoints)!==JSON.stringify(workingPoints))throw commandError("WORK_SURVEY_BASIS_MISMATCH","The original survey outline does not match its local coordinates.");
+      }
+      if (basis.baselineGeometry && !basis.edited) {
+        var original = module.flat(basis.baselineGeometry.coordinates);
+        var baselinePoints = module.flat(module.place(basis.coordinates, basis.baselineAnchor || original[0], 0));
+        if(original.length!==baselinePoints.length || original.some(function(p,i){return Math.abs(p[0]-baselinePoints[i][0])>1e-8||Math.abs(p[1]-baselinePoints[i][1])>1e-8;})) throw commandError("WORK_BASELINE_MISMATCH","A rigid placement must preserve the original outline.");
+        var baseline = authoritativeMeasurement({geometry:basis.baselineGeometry});
+        measured.areaSqM = baseline.areaSqM; measured.lengthM = baseline.lengthM;
+      }
+      return {geometry:geometry,geometryKind:type.indexOf("Line")>=0?"line":"polygon",areaSqM:measured.areaSqM,lengthM:measured.lengthM};
+    }
     var areaSqM = 0, lengthM = 0, valid = true;
     function validLine(points, minimum) { return Array.isArray(points) && points.length >= minimum && points.every(coordinate); }
     function polygon(rings) {
@@ -126,6 +147,11 @@
   if (!supportedWorkType(key)) return null;
   var explicitId = text(geometry && geometry.rateItemId || payload.rateItemId);
   var eligible = eligibleSpatialRatesForWorkType(workspace, key);
+    if (payload.pricingUnit) eligible = eligible.filter(function (rate) {
+      var unit = text(rate.unit).toLowerCase();
+      var normalized = ["ha", "hectare", "hectares"].indexOf(unit) >= 0 ? "ha" : ["km²", "km2"].indexOf(unit) >= 0 ? "km²" : "m²";
+      return normalized === payload.pricingUnit;
+    });
   if (explicitId) return eligible.find(function (rate) { return rate.id === explicitId; }) || null;
   if (eligible.length === 1) return eligible[0];
   var defaultId = text(workTypeRateMapping(workspace, key).defaultRateItemId);
@@ -182,11 +208,14 @@
     if (text(raw.owner) && text(raw.owner) !== project.owner) throw commandError("WORK_GEOMETRY_OWNER_MISMATCH", "Work Geometry owner must match its Project.", { projectId: project.id });
     var source = existing ? clone(existing) : {};
     var patch = clone(raw), payload = Object.assign({}, object(source.payload) ? source.payload : {}, object(patch.payload) ? patch.payload : {});
-    var measurement = authoritativeMeasurement({
-      geometry: patch.geometry || source.geometry,
-      coordinates: patch.coordinates,
-      geometryKind: patch.geometryKind || patch.geometryType || source.geometryKind
-    });
+    if (existing && patch.moasureSurvey && JSON.stringify(patch.moasureSurvey) !== JSON.stringify(existing.moasureSurvey)) throw new Error("Original Moasure survey information cannot be overwritten.");
+    var nextGeo = patch.geometry || source.geometry;
+    var basis = patch.localPlacement || source.localPlacement;
+    if (basis && patch.geometry && !patch.localPlacement && JSON.stringify(patch.geometry)!==JSON.stringify(source.geometry)) {
+      basis = clone(basis); basis.coordinates = UOS.MoasureGeometry.unplace(patch.geometry.coordinates, basis.anchor, basis.bearing); basis.edited = true;
+      patch.localPlacement = basis;
+    }
+    var measurement = authoritativeMeasurement({geometry: nextGeo, coordinates: patch.coordinates, geometryKind: patch.geometryKind || patch.geometryType || source.geometryKind, localPlacement: basis, moasureSurvey: patch.moasureSurvey || source.moasureSurvey});
     Object.keys(patch).forEach(function (key) {
       if (["id", "owner", "projectId", "type", "geometry", "coordinates", "geometryKind", "geometryType", "payload", "areaSqM", "lengthM"].indexOf(key) < 0) source[key] = patch[key];
     });
@@ -216,6 +245,41 @@
     var replacement = measuredGeometry(project, geometryInput, current); replacement.id = current.id;
     workspace.entities.geometries = workspace.entities.geometries.map(function (item) { return item.id === current.id ? replacement : item; });
     return model.normalize(workspace);
+  }
+  function placementBasis(geometry) {
+    if (geometry.localPlacement) return clone(geometry.localPlacement);
+    var geo = geometryValue(geometry), anchor = UOS.MoasureGeometry.flat(geo.coordinates)[0].slice();
+    return { version: 1, type: geo.type, coordinates: UOS.MoasureGeometry.unplace(geo.coordinates, anchor, 0), anchor: anchor, bearing: 0, confirmed: true, edited: false, baselineGeometry: clone(geo), baselineAnchor: anchor.slice() };
+  }
+  function savePlacement(inputWorkspace, geometryId, pose, expectedGeometry) {
+    var current = geometryForCommand(inputWorkspace, geometryId);
+    if (expectedGeometry && JSON.stringify(current) !== expectedGeometry) throw commandError("WORK_PLACEMENT_STALE", "The polygon changed while placement was being edited. Cancel and reopen Move / Rotate.");
+    var basis = placementBasis(current);
+    basis.anchor = clone(pose.anchor); basis.bearing = Number(pose.bearing); basis.confirmed = true;
+    var geo = { type: basis.type, coordinates: UOS.MoasureGeometry.place(basis.coordinates, basis.anchor, basis.bearing) };
+    // Rigid placement never refreshes costing snapshots or changes operational identity.
+    return updateGeometry(inputWorkspace, geometryId, { geometry: geo, localPlacement: basis });
+  }
+  function importMoasure(inputWorkspace, projectId, csvText, filename, groupKeys, anchor, operationId) {
+    if (!text(operationId)) throw new Error("Moasure import requires an intentional operation identity.");
+    var project = projectForCommand(inputWorkspace, projectId);
+    var parsed = UOS.MoasureGeometry.parse(csvText, filename), selected = parsed.groups.filter(function(g){return groupKeys.indexOf(g.key)>=0;});
+    if (!selected.length || selected.length !== groupKeys.length) throw new Error("Select valid Moasure outlines.");
+    var workspace = clone(inputWorkspace);
+    selected.forEach(function(g){
+      var sourceId = operationId + ":" + g.key, id = modelDependency().stableId(project.owner, "geometry", sourceId);
+      var existing = workspace.entities.geometries.find(function(item){return item.id===id;});
+      if(existing) { if(existing.projectId!==project.id) throw new Error("Moasure operation belongs to another Project."); return; }
+      var basis = { version: 1, type: "Polygon", coordinates: [clone(g.coordinates)], anchor: clone(anchor), bearing: 0, confirmed: false, edited: false };
+      workspace = createGeometry(workspace, project.id, {
+        id: id, geometryKind: "polygon", workTypeKey: "turfing", localPlacement: basis,
+        geometry: {type:"Polygon",coordinates:UOS.MoasureGeometry.place(basis.coordinates,anchor,0)},
+        moasureSurvey: {filename:parsed.filename,layer:g.layer,path:g.path,layerName:g.name,points:clone(g.points),reportedAreaSqM:g.reportedAreaSqM,originalAreaSqM:g.areaSqM},
+        payload: {visible:true,valid:true,workTypeKey:"turfing",type:"turfing"},
+        provenance: {owner:project.owner,sourceApp:"uos.moasure",sourceVersion:1,sourceId:sourceId}
+      });
+    });
+    return workspace;
   }
   function geometryDependencies(workspace, geometryId) {
     var entities = workspace && workspace.entities || {}, id = text(geometryId), jobIds = [], costingIds = [];
@@ -251,6 +315,7 @@
     var workspace = clone(inputWorkspace);
     var geometry = find(workspace.entities.geometries, text(geometryId), "Geometry");
     var payload = object(geometry.payload) ? geometry.payload : (geometry.payload = {});
+    if (geometry.moasureSurvey && (!geometry.localPlacement || !geometry.localPlacement.confirmed)) throw commandError("WORK_PLACEMENT_UNCONFIRMED", "Confirm the Moasure polygon placement before creating a Job.", {geometryId:geometry.id});
 
     if (payload.valid === false) {
       throw commandError("WORK_GEOMETRY_INVALID", "Invalid Work Geometry cannot generate mapped work.", { geometryId: geometry.id });
@@ -285,7 +350,9 @@
     }
     catch (error) { throw commandError("WORK_GEOMETRY_MEASUREMENT_INVALID", error.message, { geometryId: geometry.id }); }
     measured = applyMappedSpatialQuantity(rate, measured);
- var quantity = Number(measured.quantity);
+ measured.areaSqM=authoritative.areaSqM;measured.lengthM=authoritative.lengthM;
+    measured.quantity=deps.model.spatialQuantityForRate(rate,authoritative.areaSqM);
+    var quantity = Number(measured.quantity);
     if (!Number.isFinite(quantity) || quantity <= 0) {
       var kind = text(rate.quantityKind) || "required";
       throw commandError("WORK_QUANTITY_INVALID", "Mapped work requires a positive " + kind + " measurement.", { geometryId: geometry.id, rateItemId: rate.id });
@@ -437,6 +504,9 @@ function resolveWorkTypeRate(workspace, key) {
 
   UOS.WorkAreaService = {
     measureGeometry: authoritativeMeasurement,
+    importMoasure: importMoasure,
+    placementBasis: placementBasis,
+    savePlacement: savePlacement,
     createGeometry: createGeometry,
     updateGeometry: updateGeometry,
     removeGeometry: removeGeometry,

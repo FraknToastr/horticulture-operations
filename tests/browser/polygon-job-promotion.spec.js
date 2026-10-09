@@ -148,7 +148,7 @@ test("PC-005 C3: Turfing polygon on fresh canonical Project resolves RATE-TURFIN
   expect(lineage.geomSyncState).toBe("synced");
   expect(lineage.geomRateItemId).toBe("RATE-TURFING");
   expect(lineage.turfMapping).toEqual({
-    eligibleRateItemIds: ["RATE-TURFING"],
+    eligibleRateItemIds: ["RATE-TURFING", "RATE-TURFING-HA"],
     defaultRateItemId: "RATE-TURFING"
   });
 });

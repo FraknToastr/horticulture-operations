@@ -38,6 +38,7 @@
     var selectedVertexIndex = null;
     var draggingVertexIndex = null;
     var dragMoved = false;
+    var transformShapeId=null,transformCallback=null,transformCentre=null,transformLastCoordinate=null,rotationHandle=null,rotatingHandle=false,lastRotationAngle=0;
     var suppressClick = false;
     var drawing = null;
     var previewCoordinate = null;
@@ -344,6 +345,7 @@
         Model.refreshShape(selected);
         if (selected.visible !== false && selected.valid) {
           var selectedMeasurements = Model.geometryMeasurements(selected.coordinates, selected.geometryType, selected.closed);
+      if(selected.measurementOverride){selectedMeasurements.areaSqM=selected.measurementOverride.areaSqM;selectedMeasurements.lengthM=selected.measurementOverride.lengthM;}
           addDetailedMeasurements(selectedMeasurements, selected.coordinates);
           if (showAreaLabel && selected.geometryType === "polygon" && selectedMeasurements.areaCoordinate) addMeasurementMarker("area", selectedMeasurements.areaCoordinate, "Area " + Model.formatArea(selectedMeasurements.areaSqM));
         }
@@ -397,7 +399,7 @@
           source: "uos-shapes",
           filter: ["all", ["==", ["get", "geometryType"], "polygon"], ["==", ["get", "selected"], false]],
           layout: { visibility: showEdges ? "visible" : "none", "line-cap": "round", "line-join": "round" },
-          paint: { "line-color": themeColor("--uos-text", "#26332d"), "line-width": 3, "line-opacity": 0.9, "line-dasharray": [1.5, 1.5] }
+          paint: { "line-color": themeColor("--uos-text", "#26332d"), "line-width": 2, "line-opacity": 0.9, "line-dasharray": [1.5, 1.5] }
         });
         map.addLayer({
           id: "uos-shape-selection-outline",
@@ -407,7 +409,7 @@
           layout: { "line-cap": "round", "line-join": "round" },
           paint: {
             "line-color": themeColor("--uos-surface", "#fff"),
-            "line-width": 6,
+            "line-width": 4,
             "line-opacity": 0.96
           }
         });
@@ -418,8 +420,8 @@
           filter: ["all", ["==", ["get", "geometryType"], "polygon"], ["==", ["get", "selected"], true]],
           paint: {
             "line-color": ["case", ["==", ["get", "valid"], false], themeColor("--uos-danger", "#9b3f35"), ["==", ["get", "selected"], true], themeColor("--uos-info", "#2365e8"), themeColor("--uos-brand-strong", "#285a44")],
-            "line-width": ["case", ["==", ["get", "selected"], true], 3, 2],
-            "line-dasharray": ["case", ["==", ["get", "valid"], false], ["literal", [2, 1]], ["literal", [1, 0]]]
+            "line-width": 2,
+            "line-dasharray": [1, 0]
           }
         });
         map.addLayer({
@@ -449,7 +451,7 @@
       if (!map.getSource("uos-draft")) {
         map.addSource("uos-draft", { type: "geojson", data: draftFeatures() });
         map.addLayer({ id: "uos-draft-fill", type: "fill", source: "uos-draft", filter: ["==", ["geometry-type"], "Polygon"], paint: { "fill-color": themeColor("--uos-warning", "#a0642a"), "fill-opacity": 0.18 } });
-        map.addLayer({ id: "uos-draft-line", type: "line", source: "uos-draft", filter: ["in", ["geometry-type"], ["literal", ["LineString", "Polygon"]]], paint: { "line-color": themeColor("--uos-warning", "#a0642a"), "line-width": 3, "line-dasharray": [2, 1] } });
+        map.addLayer({ id: "uos-draft-line", type: "line", source: "uos-draft", filter: ["in", ["geometry-type"], ["literal", ["LineString", "Polygon"]]], paint: { "line-color": themeColor("--uos-warning", "#a0642a"), "line-width": ["case",["==",["geometry-type"],"Polygon"],2,3], "line-dasharray": [2, 1] } });
         map.addLayer({ id: "uos-draft-points", type: "circle", source: "uos-draft", filter: ["==", ["geometry-type"], "Point"], paint: { "circle-radius": 5, "circle-color": themeColor("--uos-surface", "#fff"), "circle-stroke-color": themeColor("--uos-warning", "#a0642a"), "circle-stroke-width": 2 } });
       }
       if (!map.getSource("uos-edit-vertices")) {
@@ -624,6 +626,7 @@
     }
 
     function cancelActiveInteraction() {
+      cancelPlacement();
       placingLocation = false;
       drawing = null;
       previewCoordinate = null;
@@ -633,6 +636,44 @@
       notifyDraw();
     }
 
+    function cancelPlacement() {
+      transformShapeId = null; transformCallback = null; transformCentre = null; transformLastCoordinate = null;
+      if (rotationHandle) rotationHandle.remove(); rotationHandle = null;
+      if (map) { map.dragPan.enable(); map.getCanvas().style.cursor = ""; }
+    }
+    function transformShape() { return currentEvent && currentEvent.polygons.find(function(s){return s.id===transformShapeId;}); }
+    function placementCentre(shape) {
+      if (transformCentre) return transformCentre();
+      var p=shape.coordinates,n=p.length;
+      return p.reduce(function(a,v){return [a[0]+v[0]/n,a[1]+v[1]/n];},[0,0]);
+    }
+    function updateRotationHandle() {
+      var shape=transformShape();if(!map || !shape || !rotationHandle || rotatingHandle) return;
+      var p=shape.coordinates,centre=placementCentre(shape);
+      var radius=Math.max.apply(null,p.map(function(v){return Math.hypot((v[0]-centre[0])*Math.cos(centre[1]*Math.PI/180),v[1]-centre[1]);}));
+      rotationHandle.setLngLat([centre[0],centre[1]+Math.max(radius*1.3,.00003)]);
+    }
+    function rotationAngle() {
+      var shape=transformShape(),c=placementCentre(shape),h=rotationHandle.getLngLat();
+      return Math.atan2((h.lng-c[0])*Math.cos(c[1]*Math.PI/180),h.lat-c[1])*180/Math.PI;
+    }
+    function beginPlacement(id, callback, centre) {
+      cancelActiveInteraction(); transformShapeId=id; transformCallback=callback; transformCentre=centre || null; selectShape(id,false);
+      var el=document.createElement("button");el.type="button";el.className="uos-button uos-button--secondary uos-button--icon program-map-rotation-handle";
+      el.setAttribute("aria-label","Drag to rotate polygon");el.title="Drag to rotate polygon";
+      el.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M20 12a8 8 0 1 0-2 6"/></svg>';
+      rotationHandle=new maplibregl.Marker({element:el,draggable:true}).setLngLat([0,0]).addTo(map);
+      el.setAttribute("aria-label","Drag to rotate polygon");
+      updateRotationHandle();
+      rotationHandle.on("dragstart",function(){rotatingHandle=true;lastRotationAngle=rotationAngle();});
+      rotationHandle.on("drag",function(){var a=rotationAngle(),delta=a-lastRotationAngle;if(delta>180)delta-=360;if(delta<-180)delta+=360;lastRotationAngle=a;if(transformCallback)transformCallback({kind:"rotate",delta:delta});});
+      rotationHandle.on("dragend",function(){rotatingHandle=false;updateRotationHandle();});
+      map.getCanvas().style.cursor="move";
+    }
+    function previewShape(id, coordinates) {
+      var shape=currentEvent && currentEvent.polygons.find(function(s){return s.id===id;});
+      if(!shape)return;shape.coordinates=Model.clone(coordinates);Model.refreshShape(shape);refresh();updateRotationHandle();
+    }
     function undoPoint() {
       if (!drawing) return;
       drawing.coordinates.pop();
@@ -651,7 +692,7 @@
     function setEvent(event) {
       currentEvent = event || null;
       placingLocation = false;
-      if (map && !drawing && !editingShapeId) map.getCanvas().style.cursor = "";
+      if (map && !drawing && !editingShapeId && !transformShapeId) map.getCanvas().style.cursor = "";
       if (!currentEvent) selectedShapeId = null;
       else if (!currentEvent.polygons.some(function (shape) { return shape.id === selectedShapeId; })) selectedShapeId = currentEvent.polygons[0] ? currentEvent.polygons[0].id : null;
       if (!currentEvent || !currentEvent.polygons.some(function (shape) { return shape.id === editingShapeId; })) editShape(null);
@@ -906,6 +947,7 @@
     }
 
     function destroy() {
+      cancelPlacement();
       destroyed = true;
       ready = false;
       clearProviderLoadTimer();
@@ -1008,14 +1050,15 @@
             if (typeof options.onReady === "function") options.onReady();
           } catch (error) {  failInitialization(error); }
         });
-        map.on("moveend", function () {
+        map.on("moveend", function (event) {
           refresh();
           if (typeof options.onViewportChange === "function") {
             var center = map.getCenter();
-            options.onViewportChange({ center: [center.lng, center.lat], zoom: map.getZoom() });
+            options.onViewportChange({ center: [center.lng, center.lat], zoom: map.getZoom(),userInitiated:Boolean(event.originalEvent) });
           }
         });
         map.on("mousemove", function (event) {
+            if (transformLastCoordinate && transformCallback) { var next=[event.lngLat.lng,event.lngLat.lat];transformCallback({kind:"move",from:transformLastCoordinate,to:next});transformLastCoordinate=next;return; }
           if (editingShapeId && draggingVertexIndex !== null) {
             var editedShape = currentEvent && currentEvent.polygons.find(function (shape) { return shape.id === editingShapeId; });
             if (!editedShape) return;
@@ -1032,6 +1075,7 @@
           notifyDraw();
         });
         map.on("mousedown", function (event) {
+            if(transformShapeId) { if(rotationHandle && event.originalEvent && rotationHandle.getElement().contains(event.originalEvent.target))return; if(shapeIdAt(event.point)===transformShapeId){transformLastCoordinate=[event.lngLat.lng,event.lngLat.lat];map.dragPan.disable();if(event.originalEvent)event.originalEvent.preventDefault();}return; }
           if (!editingShapeId || !map.getLayer("uos-edit-vertices")) return;
           var hits = vertexHits(event.point);
           if (!hits.length) return;
@@ -1045,6 +1089,7 @@
           if (event.originalEvent && typeof event.originalEvent.preventDefault === "function") event.originalEvent.preventDefault();
         });
         map.on("touchstart", function (event) {
+            if(transformShapeId) { if(rotationHandle && event.originalEvent && rotationHandle.getElement().contains(event.originalEvent.target))return; if(shapeIdAt(event.point)===transformShapeId){transformLastCoordinate=[event.lngLat.lng,event.lngLat.lat];map.dragPan.disable();}return; }
           if (!editingShapeId || !map.getLayer("uos-edit-vertices")) return;
           var point = event.point;
           if (!point) return;
@@ -1059,6 +1104,7 @@
           refresh();
         });
         map.on("mouseup", function () {
+            if(transformLastCoordinate){transformLastCoordinate=null;map.dragPan.enable();return;}
           if (draggingVertexIndex === null) return;
           var editedShape = currentEvent && currentEvent.polygons.find(function (shape) { return shape.id === editingShapeId; });
           draggingVertexIndex = null;
@@ -1070,7 +1116,9 @@
           refresh();
           if (editedShape && typeof options.onShapeEdited === "function") options.onShapeEdited(editedShape);
         });
-        map.on("touchend", function () {
+        map.on("touchmove",function(event){if(transformLastCoordinate && transformCallback){var next=[event.lngLat.lng,event.lngLat.lat];transformCallback({kind:"move",from:transformLastCoordinate,to:next});transformLastCoordinate=next;}});
+          map.on("touchend", function () {
+            if(transformLastCoordinate){transformLastCoordinate=null;map.dragPan.enable();return;}
           if (draggingVertexIndex === null) return;
           var editedShape = currentEvent && currentEvent.polygons.find(function (shape) { return shape.id === editingShapeId; });
           draggingVertexIndex = null;
@@ -1083,6 +1131,7 @@
           if (editedShape && typeof options.onShapeEdited === "function") options.onShapeEdited(editedShape);
         });
         map.on("click", function (event) {
+            if(transformShapeId) return;
           if (suppressClick) { suppressClick = false; return; }
           if (placingLocation) {
             placingLocation = false; map.getCanvas().style.cursor = "";
@@ -1156,6 +1205,9 @@
       resetHome: resetView,
       zoomToShape: zoomToShape,
       startLocationPlacement: startLocationPlacement,
+      beginPlacement: beginPlacement,
+      cancelPlacement: cancelPlacement,
+      previewShape: previewShape,
       zoomToLocation: zoomToLocation,
       getProviderId: function () { return activeProviderId; },
       getSelectedShapeId: function () { return selectedShapeId; },
@@ -1199,7 +1251,7 @@
       },
       getLocationSnapshot: function () {
         var center = map && map.getCenter();
-        return { features: locationFeatures(), center: center ? [center.lng, center.lat] : null, zoom: map ? map.getZoom() : null, placing: placingLocation };
+        return { features: locationFeatures(), center: center ? [center.lng, center.lat] : null, zoom: map ? map.getZoom() : null, moving: map ? map.isMoving() : false, placing: placingLocation };
       }
     };
   }

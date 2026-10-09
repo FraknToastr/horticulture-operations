@@ -13,20 +13,26 @@
   var activeDrawMode = "polygon";
   var pendingDeleteShapeId = null;
   var pendingDeleteGuard = null;
-  var pendingVertexEditGuard = null;
+  var vertexDraft = null;
   var mapToggles = { Length: false, Area: true, Angles: false, Edges: true, Index: true, ActiveOnly: false, SelectedOnly: false };
   var activeProviderId = root.UOS_REMEDIATION_MAP_CONFIG && root.UOS_REMEDIATION_MAP_CONFIG.defaultProvider || "esri-world-imagery";
   var initialized = false;
+  var mapModuleRoot = null;
+  var pendingPolygonPlacementId = null;
   var sidebarViewMode = "events";
   var selectedEventFilterId = "all";
   var eventSearchQuery = "";
   var droppedGeometryFile = null;
   var renderedOwnerMode = "";
   var pendingCameraFocusId = null;
+  var cameraFocusVersion=0,pendingEntryZoom=false,pendingMoasureImport=null,placementDraft=null;
   var previousDestination = "";
   var pendingLocationPlacement = null;
 
-  function one(selector) { return root.document ? root.document.querySelector(selector) : null; }
+  function one(selector) {
+    if (!root.document) return null;
+    return root.document.querySelector(selector) || (mapModuleRoot && mapModuleRoot.querySelector(selector));
+  }
   function all(selector) { return root.document && typeof root.document.querySelectorAll === "function" ? Array.prototype.slice.call(root.document.querySelectorAll(selector)) : []; }
   function text(value) { return String(value == null ? "" : value).trim(); }
   function inRegisterDrawerMode() { return document.body.hasAttribute("data-drawer-module") || document.body.hasAttribute("data-drawer-context-pending"); }
@@ -53,24 +59,231 @@ function setMapCanvasCursor(cursor) {
 }
 
   function resetDrawingControls() {
-    var toolbar = one(".program-map-header-controls");
-    if (toolbar) toolbar.classList.remove("is-drawing");
-    ["#finishDrawingButton", "#undoDrawingButton", "#cancelDrawingButton"].forEach(function (selector) {
-      var button = one(selector);
-      if (button) button.disabled = true;
+    updateDrawingControls({ active: false });
+  }
+
+  function showError(error) {
+    var message = text(error && error.message || error);
+    updateMapToolStatus(message);
+    if (root.UOS && typeof root.UOS.toast === "function") root.UOS.toast(message, "error");
+  }
+
+  function vertexPatch(shape) {
+    var line = shape.geometryType === "line";
+    return {geometryKind: line ? "line" : "polygon", geometry: {type: line ? "LineString" : "Polygon", coordinates: line ? shape.coordinates : [shape.coordinates]}};
+  }
+
+  function updateVertexControls() {
+    if (!vertexDraft) return;
+    vertexDraft.invalidInput=all("#shapeList .is-editing .rem-vertex-coord").some(function(input){
+      var value=Number(input.value),lat=input.hasAttribute("data-coord-lat");
+      return input.value.trim()==="" || !Number.isFinite(value) || Math.abs(value)>(lat?90:180);
+    });
+    all("#shapeList .is-editing .rem-vertex-coord,#shapeList .is-editing [data-delete-vertex]").forEach(function(input){input.disabled=Boolean(vertexDraft.busy);});
+    var finish=one("#finishDrawingButton"),cancel=one("#cancelDrawingButton"),undo=one("#undoDrawingButton");
+    if(finish)finish.disabled=Boolean(vertexDraft.busy || vertexDraft.error || vertexDraft.invalidInput);
+    if(cancel)cancel.disabled=Boolean(vertexDraft.busy);
+    if(undo)undo.disabled=true;
+    all("#startDrawingButton,[data-draw-mode]").forEach(function(button){button.disabled=true;});
+    var toolbar=one("#floatingDrawToolbar");if(toolbar)toolbar.setAttribute("data-editing-vertices","true");
+    updateMapToolStatus(vertexDraft.error || "Editing vertices — Finish saves changes; Cancel discards them.");
+  }
+
+  function stageVertexShape(shape) {
+    if(!vertexDraft || shape.id!==vertexDraft.id || vertexDraft.busy)return;
+    vertexDraft.shape=JSON.parse(JSON.stringify(shape));
+    vertexDraft.invalidInput=false;
+    try {
+      var patch=vertexPatch(shape),basis=vertexDraft.original.localPlacement;
+      if(basis){
+        basis=JSON.parse(JSON.stringify(basis));
+        basis.coordinates=root.UOS.MoasureGeometry.unplace(patch.geometry.coordinates,basis.anchor,basis.bearing);
+        basis.edited=true;patch.localPlacement=basis;
+      } else {
+        var local=root.UOS.WorkAreaService.placementBasis(vertexDraft.original);
+        root.UOS.MoasureGeometry.measure(patch.geometry.type,root.UOS.MoasureGeometry.unplace(patch.geometry.coordinates,local.anchor,0));
+      }
+      var measurement=root.UOS.WorkAreaService.measureGeometry(patch);
+      shape.measurementOverride={areaSqM:measurement.areaSqM,lengthM:measurement.lengthM};
+      vertexDraft.shape.measurementOverride=shape.measurementOverride;
+      vertexDraft.shape.payload=Object.assign({},shape.payload,shape.measurementOverride);
+      vertexDraft.error=null;
+    }catch(error){vertexDraft.error=error.message;vertexDraft.shape.valid=false;}
+    var card=one('[data-shape-card-id="'+vertexDraft.id+'"]');
+    if(card){
+      var measure=card.querySelector(".program-shape-card__measure");
+      if(measure)measure.textContent=formatMeasure(vertexDraft.shape);
+      ["lat","lng"].forEach(function(axis){
+        card.querySelectorAll("[data-coord-"+axis+"]").forEach(function(input){
+          var point=shape.coordinates[Number(input.getAttribute("data-coord-"+axis))];
+          if(point && root.document.activeElement!==input)input.value=point[axis==="lat"?1:0];
+        });
+      });
+    }
+    updateVertexControls();
+    if(mapController)mapController.refresh();
+  }
+
+  function cancelVertexEditing() {
+    if(vertexDraft && vertexDraft.busy)return;
+    vertexDraft=null;editingShapeId=null;selectedVertexIndex=null;
+    if(mapController)mapController.editShape(null);
+    all("#startDrawingButton,[data-draw-mode]").forEach(function(button){button.disabled=false;});
+    var toolbar=one("#floatingDrawToolbar");if(toolbar)toolbar.removeAttribute("data-editing-vertices");
+    resetDrawingControls();updateMapToolStatus("");
+  }
+
+  function beginVertexEditing(id) {
+    if(vertexDraft && vertexDraft.busy)return;
+    cancelVertexEditing();cancelPolygonPlacement();pendingMoasureImport=null;pendingLocationPlacement=null;
+    if(mapController)mapController.cancelActiveInteraction();
+    var geometry=root.UOS.ProgramModel.workGeometryById(getWorkspace(),id);
+    if(!geometry)throw new Error("Select a valid polygon before editing.");
+    var shape=convertToEventShapes([geometry])[0];
+    vertexDraft={id:id,original:JSON.parse(JSON.stringify(geometry)),expected:JSON.stringify(geometry),shape:JSON.parse(JSON.stringify(shape)),error:null,busy:false};
+    editingShapeId=id;selectedShapeId=id;
+    renderShapeCards();mapController.editShape(id);updateVertexControls();
+  }
+
+  function finishVertexEditing() {
+    updateVertexControls();
+    if(!vertexDraft || vertexDraft.busy || vertexDraft.error || vertexDraft.invalidInput)return;
+    var draft=vertexDraft;
+    if(JSON.stringify(draft.shape.coordinates)===JSON.stringify(extractCoordinates(draft.original))){cancelVertexEditing();render();return;}
+    draft.busy=true;updateVertexControls();
+    root.UOS.ProgramApp.updateWorkspace(function(candidate){
+      var current=root.UOS.ProgramModel.workGeometryById(candidate,draft.id);
+      if(!current || JSON.stringify(current)!==draft.expected)throw new Error("This polygon changed during editing. Cancel and reopen it before saving.");
+      return syncExistingGeometryWork(root.UOS.WorkAreaService.updateGeometry(candidate,draft.id,vertexPatch(draft.shape)),draft.id);
+    }).then(function(){draft.busy=false;cancelVertexEditing();render();}).catch(function(error){
+      draft.busy=false;showError(error);render();updateVertexControls();
     });
   }
 
+  function polygonPlacementControls(geometry) {
+    var active=placementDraft && placementDraft.id===geometry.id;
+    var unconfirmed=geometry.moasureSurvey && (!geometry.localPlacement || !geometry.localPlacement.confirmed);
+    if(!active && !unconfirmed)return "";
+    var bearing=active?placementDraft.basis.bearing:(geometry.localPlacement?geometry.localPlacement.bearing:0);
+    var disabled=vertexDraft ? " disabled" : "";
+    return '<section class="program-polygon-placement" data-placement-controls="'+esc(geometry.id)+'" aria-label="Polygon placement">'+
+      '<p class="uos-field-hint">Drag the outline to move it. Drag the rotation handle or enter an angle. Save to confirm the anchored position.</p>'+
+      '<label class="uos-field"><span>Rotation (degrees)</span><input class="uos-input" type="number" step="any" data-placement-angle="'+esc(geometry.id)+'" value="'+Number(bearing.toFixed(2))+'"'+disabled+'></label>'+
+      '<div class="program-polygon-placement__actions"><button type="button" class="uos-button uos-button--primary" data-save-placement="'+esc(geometry.id)+'"'+disabled+'>Save anchored position</button>'+
+      '<button type="button" class="uos-button uos-button--secondary" data-cancel-placement="'+esc(geometry.id)+'"'+disabled+'>Cancel</button></div></section>';
+  }
+
+  function cancelPolygonPlacement() {
+    var previous=placementDraft;
+    pendingPolygonPlacementId = null;
+    placementDraft = null;
+    if (mapController && mapController.cancelPlacement) mapController.cancelPlacement();
+    if(previous){
+      var geometry=root.UOS.ProgramModel.workGeometryById(getWorkspace(),previous.id);
+      var panel=one('[data-placement-controls="'+previous.id+'"]');
+      if(panel){
+        if(geometry && geometry.moasureSurvey && (!geometry.localPlacement || !geometry.localPlacement.confirmed)){
+          var input=panel.querySelector("[data-placement-angle]");if(input)input.value=geometry.localPlacement?Number(geometry.localPlacement.bearing.toFixed(2)):0;
+        }else panel.remove();
+      }
+      if(mapController)mapController.setEvent(buildMapEvent(selectedEventFilterId));
+    }
+    var canvas=one(".program-map-canvas-container");if(canvas)canvas.removeAttribute("data-placement-active");
+  }
+  function paintPolygonPlacement() {
+    if(!placementDraft || !mapController)return;
+    var b=placementDraft.basis,geo=root.UOS.MoasureGeometry.place(b.coordinates,b.anchor,b.bearing);
+    var coords=b.type==="Polygon"?geo[0]:b.type==="MultiPolygon"?geo[0][0]:b.type==="MultiLineString"?geo[0]:geo;
+    mapController.previewShape(placementDraft.id,coords);
+    var angle=one('[data-placement-angle="'+placementDraft.id+'"]');if(angle && root.document.activeElement!==angle)angle.value=Number(b.bearing.toFixed(2));
+  }
+  function beginPolygonPlacement(id, options) {
+    options=options || {};
+    if(vertexDraft && vertexDraft.busy)return;
+    cancelVertexEditing();
+    if (!mapModuleRoot || !mapModuleRoot.isConnected || !mapModuleRoot.getBoundingClientRect().width) {
+      pendingPolygonPlacementId = id;
+      return;
+    }
+    var geometry=root.UOS.ProgramModel.workGeometryById(getWorkspace(),id);
+    if(!geometry)throw new Error("Select a valid Project polygon.");
+    cancelPolygonPlacement();pendingLocationPlacement=null;pendingMoasureImport=null;editingShapeId=null;
+    placementDraft={id:id,expected:JSON.stringify(geometry),basis:root.UOS.WorkAreaService.placementBasis(geometry)};
+    one(".program-map-canvas-container").setAttribute("data-placement-active","true");
+    mapController.resize();
+    if(options.zoom!==false)mapController.zoomToShape(id);
+    mapController.beginPlacement(id,function(change){
+      if(!placementDraft)return;var b=placementDraft.basis;
+      if(change.kind==="move") { var cosOld=Math.cos(b.anchor[1]*Math.PI/180);b.anchor[1]+=change.to[1]-change.from[1];b.anchor[0]+=(change.to[0]-change.from[0])*cosOld/Math.cos(b.anchor[1]*Math.PI/180); }
+      else placementDraft.basis=root.UOS.MoasureGeometry.rotate(b,b.bearing+change.delta);
+      paintPolygonPlacement();
+    },function(){
+      var b=placementDraft.basis;
+      return root.UOS.MoasureGeometry.place(root.UOS.MoasureGeometry.centroid(b.type,b.coordinates),b.anchor,b.bearing);
+    });
+    if(options.render!==false)renderShapeCards();
+    paintPolygonPlacement();setSelectToolActive(false);updateMapToolStatus("");
+  }
+  function openMoasureImport() {
+    if(vertexDraft && vertexDraft.busy)return;
+    cancelVertexEditing();
+    var state=canonicalMapState(getWorkspace());
+    if(state.scopeMode!=="projects" || !state.selectedProjectId)throw new Error("Select a Project in Space Map before importing Moasure CSV.");
+    cancelPolygonPlacement();pendingLocationPlacement=null;mapController.cancelActiveInteraction();
+    var dialog=one("#moasureImportDialog");one("#moasureCsvFile").value="";one("#moasureGroupList").replaceChildren();
+    one("#moasureAnchorButton").disabled=true;one("#moasureImportError").hidden=true;
+    pendingMoasureImport={projectId:state.selectedProjectId,operationId:(root.crypto && root.crypto.randomUUID ? root.crypto.randomUUID() : String(Date.now()) + Math.random())};
+    dialog.showModal();
+  }
+  function finishMoasureAnchor(coord) {
+    var pending=pendingMoasureImport;pendingMoasureImport=null;updateMapToolStatus("");setSelectToolActive(true);
+    root.UOS.ProgramApp.updateWorkspace(function(candidate){
+      var updated=root.UOS.WorkAreaService.importMoasure(candidate,pending.projectId,pending.text,pending.filename,pending.keys,coord,pending.operationId);
+      var first=updated.entities.geometries.find(function(g){return g.provenance && g.provenance.sourceId.indexOf(pending.operationId+":")===0;});
+      return writeCanonicalMapState(updated,{scopeMode:"projects",selectedProjectId:pending.projectId,selectedGeometryId:first.id,inspectorMode:"polygon"});
+    }).then(function(saved){render();var g=saved.entities.geometries.find(function(item){return item.provenance && item.provenance.sourceId.indexOf(pending.operationId+":")===0;});beginPolygonPlacement(g.id);}).catch(function(error){showError(error);render();});
+  }
+
+  function updateDrawingControls(state) {
+    if(vertexDraft){updateVertexControls();return;}
+    var active = Boolean(state && state.active);
+    all(".program-map-header-controls, #floatingDrawToolbar").forEach(function (toolbar) {
+      toolbar.classList.toggle("is-drawing", active);
+    });
+    var finish = one("#finishDrawingButton");
+    var cancel = one("#cancelDrawingButton");
+    var undo = one("#undoDrawingButton");
+    if (finish) finish.disabled = !(active && state.canFinish);
+    if (cancel) cancel.disabled = !active;
+    if (undo) undo.disabled = !(active && state.points > 0);
+    setSelectToolActive(!active);
+  }
+
+  function startMapDrawing() {
+    cancelVertexEditing();cancelPolygonPlacement();pendingMoasureImport=null;
+    if (!mapController) return;
+    pendingLocationPlacement = null;
+    updateMapToolStatus("");
+    mapController.startDrawing(activeDrawMode === "line" ? "line" : activeDrawMode === "square" ? "square" : "polygon");
+    var drawMenu = one(".program-map-menu--draw");
+    if (drawMenu) drawMenu.open = false;
+  }
+
   function cancelActiveMapInteraction() {
+    var hadDraft=Boolean(vertexDraft || placementDraft);
+    cancelVertexEditing();cancelPolygonPlacement();
     pendingLocationPlacement = null;
     updateMapToolStatus("");
     setSelectToolActive(true);
     resetDrawingControls();
     if (mapController && typeof mapController.cancelActiveInteraction === "function") mapController.cancelActiveInteraction();
     else if (mapController && typeof mapController.cancelDrawing === "function") mapController.cancelDrawing();
+    if(hadDraft)render();
   }
 
   function startPinPlacement(kind, registerId, locationId) {
+    if(vertexDraft && vertexDraft.busy)return Promise.resolve(null);
+    cancelVertexEditing();cancelPolygonPlacement();pendingMoasureImport=null;
     if (!registerId) return Promise.resolve(null);
     var placementWorkspace = getWorkspace();
     var placementContext = resolveMapContext(placementWorkspace, sidebarViewMode, "register", registerId);
@@ -376,6 +589,10 @@ function setMapCanvasCursor(cursor) {
     }
   }
 
+  function polygonPricingUnit(rate) {
+    var unit = text(rate && rate.unit).toLowerCase();
+    return ["ha", "hectare", "hectares"].indexOf(unit) >= 0 ? "ha" : ["km²", "km2"].indexOf(unit) >= 0 ? "km²" : "m²";
+  }
   function polygonRateLabel(rate) {
     var amount = Number(rate && rate.unitRate);
     var formatted = Number.isFinite(amount)
@@ -434,6 +651,7 @@ function setMapCanvasCursor(cursor) {
 
   function convertToEventShapes(geometries) {
     return geometries.map(function (geom) {
+      if(vertexDraft && vertexDraft.id===geom.id)return JSON.parse(JSON.stringify(vertexDraft.shape));
       var payload = geom.payload || {};
       var coords = extractCoordinates(geom);
       return {
@@ -444,6 +662,7 @@ function setMapCanvasCursor(cursor) {
         valid: payload.valid !== false,
         closed: payload.closed !== false,
         coordinates: coords,
+        measurementOverride: geom.localPlacement ? {areaSqM:payload.areaSqM,lengthM:payload.lengthM} : null,
         payload: payload
       };
     });
@@ -813,16 +1032,23 @@ function setMapCanvasCursor(cursor) {
       var resolvedRate = (root.UOS.WorkAreaService && currentWorkspace && geometryType)
         ? root.UOS.WorkAreaService.resolveGeometryRate(currentWorkspace, geometry || { payload: shape.payload, workTypeKey: geometryType })
         : null;
-      var eligibleRates = eligiblePolygonRates(currentWorkspace, geometryType);
+      var allEligibleRates = eligiblePolygonRates(currentWorkspace, geometryType);
+      var pricingUnit = text(geometry && geometry.payload && geometry.payload.pricingUnit) || polygonPricingUnit(resolvedRate);
+      var eligibleRates = allEligibleRates.filter(function (rate) { return polygonPricingUnit(rate) === pricingUnit; });
+      if (resolvedRate && !eligibleRates.some(function (rate) { return rate.id === resolvedRate.id; })) resolvedRate = null;
+      if (!resolvedRate && eligibleRates.length === 1) resolvedRate = eligibleRates[0];
       var selectedRateId = text(geometry && geometry.rateItemId || geometry && geometry.payload && geometry.payload.rateItemId || resolvedRate && resolvedRate.id);
-      if (!eligibleRates.some(function (rate) { return text(rate && rate.id) === selectedRateId; })) selectedRateId = "";
-      var canCreateJob = !jobCreated && Boolean(geometryType) && Boolean(resolvedRate);
+      if (!eligibleRates.some(function (rate) { return text(rate && rate.id) === selectedRateId; })) selectedRateId = text(resolvedRate && resolvedRate.id);
+      var placementConfirmed = !geometry.moasureSurvey || (geometry.localPlacement && geometry.localPlacement.confirmed);
+      var canCreateJob = !jobCreated && !editing && placementConfirmed && Boolean(geometryType) && Boolean(resolvedRate);
       var jobLabel = jobCreated ? "Job created" : "Create Job";
 
       var jobTooltip = "";
       if (jobCreated) {
         jobTooltip = "Operational Job already generated in Job Calculator";
-      } else if (!geometryType) {
+      } else if (editing) { jobTooltip = "Finish or Cancel vertex editing before creating a Job"; }
+      else if (!placementConfirmed) { jobTooltip = "Save Placement to confirm the Moasure polygon position before creating a Job"; }
+      else if (!geometryType) {
         jobTooltip = "Select a valid work type before generating a Job";
       } else if (!eligibleRates.length) {
         jobTooltip = 'Work type "' + geometryType + '" has no active compatible pricing rates';
@@ -851,22 +1077,29 @@ function setMapCanvasCursor(cursor) {
       }
 
       return '<div class="program-shape-card' + (selected ? " is-selected" : "") + (editing ? " is-editing" : "") + '" data-shape-card-id="' + esc(shape.id) + '" role="region" aria-label="Polygon ' + shapeNum + ': ' + esc(shapeTypeTitle) + '"' + (drawerMode ? ' data-disclosure-skip' : '') + '>' +
+        (geometry.moasureSurvey ? '<p class="uos-eyebrow">Moasure Polygon Inspector</p><p class="uos-field-hint">' + esc(geometry.moasureSurvey.filename) + ' · Layer ' + esc(geometry.moasureSurvey.layer) + ' / Path ' + esc(geometry.moasureSurvey.path) + '<br>' + (placementConfirmed ? 'Placement confirmed' : 'Placement unconfirmed') + (geometry.localPlacement.edited ? ' · Edited survey outline' : ' · Original survey outline') + '<br>CSV reported area: ' + esc(geometry.moasureSurvey.reportedAreaSqM == null ? "Not supplied" : geometry.moasureSurvey.reportedAreaSqM + " m²") + '</p>' : '') +
         '<div class="program-shape-card__head">' +
           '<label class="program-shape-card__toggle" data-uos-tooltip="Toggle map visibility for polygon ' + shapeNum + '" title="Toggle map visibility for polygon ' + shapeNum + '"><input type="checkbox" data-shape-visible="' + esc(shape.id) + '"' + (shape.visible ? " checked" : "") + ' aria-label="Toggle map visibility for polygon ' + shapeNum + ': ' + esc(shapeTypeTitle) + '"><span>' + shapeNum + '. ' + esc(shapeTypeTitle) + '</span></label>' +
           '<span class="program-shape-card__measure" data-uos-tooltip="Measured dimensions: ' + esc(formatMeasure(shape)) + '" title="Measured dimensions: ' + esc(formatMeasure(shape)) + '">' + esc(formatMeasure(shape)) + '</span>' +
         '</div>' +
         '<div class="program-shape-card__controls">' +
           '<label class="uos-field"><span>Work type</span><select class="uos-select" data-shape-type="' + esc(shape.id) + '" data-uos-tooltip="Select work type rate category for polygon ' + shapeNum + '" title="Select work type rate category for polygon ' + shapeNum + '" aria-label="Work type for polygon ' + shapeNum + '">' + workTypeOptions(shape.type) + '</select></label>' +
-          '<label class="uos-field"><span>Pricing Rate</span><select class="uos-select" data-shape-rate="' + esc(shape.id) + '"' + ((!geometryType || !eligibleRates.length) ? " disabled" : "") + ' data-uos-tooltip="Select the commercial pricing basis for polygon ' + shapeNum + '" title="Select the commercial pricing basis for polygon ' + shapeNum + '" aria-label="Pricing rate for polygon ' + shapeNum + '">' + polygonRateOptions(eligibleRates, selectedRateId, Boolean(geometryType)) + '</select></label>' +
+          '<label class="uos-field"><span>Pricing unit</span><select class="uos-select" data-shape-pricing-unit="' + esc(shape.id) + '" aria-label="Pricing unit polygon ' + shapeNum + '">' + ["m²", "ha"].concat(pricingUnit === "km²" ? ["km²"] : []).map(function (unit) { return '<option value="' + unit + '"' + (unit === pricingUnit ? " selected" : "") + '>' + unit + '</option>'; }).join("") + '</select></label>' +
+        '<label class="uos-field"><span>Pricing Rate</span><select class="uos-select" data-shape-rate="' + esc(shape.id) + '"' + ((!geometryType || !eligibleRates.length) ? " disabled" : "") + ' data-uos-tooltip="Select the commercial pricing basis for polygon ' + shapeNum + '" title="Select the commercial pricing basis for polygon ' + shapeNum + '" aria-label="Pricing rate for polygon ' + shapeNum + '">' + polygonRateOptions(eligibleRates, selectedRateId, Boolean(geometryType)) + '</select></label>' +
         '</div>' +
-        '<div class="program-shape-actions" role="group" aria-label="Shape actions for polygon ' + shapeNum + '">' +
+        '<div class="program-shape-actions program-shape-actions--labelled" role="group" aria-label="Edit polygon '+shapeNum+'">' +
+          '<button type="button" class="uos-button uos-button--sm ' + (editing ? "uos-button--primary is-active" : "uos-button--secondary") + '" data-shape-action="edit" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="' + (editing ? "Use Finish or Cancel on the floating toolbar" : "Edit polygon corner points and shape vertices on map") + '" title="' + (editing ? "Use Finish or Cancel on the floating toolbar" : "Edit polygon corner points and shape vertices on map") + '" aria-label="' + ("Edit vertices for polygon " + shapeNum) + '" aria-pressed="' + (editing ? "true" : "false") + '"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span>' + "Edit Vertices" + '</span></button>' +
+        '<button type="button" class="uos-button uos-button--secondary uos-button--sm" data-polygon-placement="' + esc(shape.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>Move / Rotate</button>' +
+      '</div>' +
+      '<div class="program-shape-actions program-shape-actions--icons" role="group" aria-label="Polygon tools '+shapeNum+'">' +
           '<button type="button" class="uos-button uos-button--secondary uos-button--icon" data-shape-action="zoom" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Zoom map to polygon ' + shapeNum + '" title="Zoom map to polygon ' + shapeNum + '" aria-label="Zoom to polygon ' + shapeNum + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>' +
-          '<button type="button" class="uos-button uos-button--sm ' + (editing ? "uos-button--primary is-active" : "uos-button--secondary") + '" data-shape-action="edit" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="' + (editing ? "Finish editing and save vertex positions" : "Edit polygon corner points and shape vertices on map") + '" title="' + (editing ? "Finish editing and save vertex positions" : "Edit polygon corner points and shape vertices on map") + '" aria-label="' + (editing ? "Done editing vertices for polygon " + shapeNum : "Edit vertices for polygon " + shapeNum) + '" aria-pressed="' + (editing ? "true" : "false") + '"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span>' + (editing ? "Done editing" : "Edit vertices") + '</span></button>' +
           '<button type="button" class="uos-button uos-button--secondary uos-button--icon" data-shape-action="duplicate" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Duplicate polygon ' + shapeNum + '" title="Duplicate polygon ' + shapeNum + '" aria-label="Duplicate polygon ' + shapeNum + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>' +
           '<button type="button" class="uos-button uos-button--secondary uos-button--icon" data-shape-action="export" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Export polygon ' + shapeNum + ' as GeoJSON" title="Export polygon ' + shapeNum + ' as GeoJSON" aria-label="Export polygon ' + shapeNum + ' as GeoJSON"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg></button>' +
           '<button type="button" class="uos-button uos-button--secondary uos-button--icon program-delete-action" data-shape-action="delete" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Delete polygon ' + shapeNum + ' and linked costing" title="Delete polygon ' + shapeNum + ' and linked costing" aria-label="Delete polygon ' + shapeNum + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
-        '</div>' +
-        '<div class="program-shape-card__job-row">' +
+      '</div>' +
+      polygonPlacementControls(geometry) +
+      '<div class="program-shape-card__job-row">' +
+        ((!jobCreated && !canCreateJob) ? '<p class="uos-field-hint" role="status">' + esc(jobTooltip) + ' (' + esc(pricingUnit) + ')</p>' : '') +
           '<button type="button" class="uos-button uos-button--sm program-create-job-btn' + (jobCreated ? " is-created" : "") + '" data-create-shape-job="' + esc(shape.id) + '"' + (jobBtnDisabled ? " disabled" : "") + ' data-uos-tooltip="' + esc(jobTooltip) + '" title="' + esc(jobTooltip) + '" aria-label="' + esc(jobLabel + " for polygon " + shapeNum + ": " + jobTooltip) + '">' +
             '<svg viewBox="0 0 24 24" aria-hidden="true">' + (jobCreated ? '<path d="m5 12 4 4L19 6"/>' : '<path d="M12 5v14M5 12h14"/>') + '</svg><span>' + jobLabel + '</span>' +
           '</button>' +
@@ -1377,7 +1610,7 @@ var selectedSpatialFilter = null;
     container.innerHTML = eventCardsHtml;
   }
 
-  
+
   function openLocationInspector(recordId) {
     var workspace = getWorkspace();
     var record = (workspace.entities.events || []).concat(workspace.entities.applications || []).find(function (r) { return r.id === recordId; });
@@ -1458,17 +1691,12 @@ var selectedSpatialFilter = null;
   }
 
   function leavePolygonInspector() {
-    if (editingShapeId && mapController && typeof mapController.editShape === "function") mapController.editShape(null);
-    editingShapeId = null;
-    selectedVertexIndex = null;
+    cancelVertexEditing();cancelPolygonPlacement();
     persistCanonicalMapState({ selectedGeometryId: "", inspectorMode: "project" });
   }
 
   function leavePolygonEditor() {
-    if (editingShapeId && mapController && typeof mapController.editShape === "function") mapController.editShape(null);
-    editingShapeId = null;
-    selectedVertexIndex = null;
-    renderShapeCards();
+    cancelVertexEditing();render();
   }
 
   function settleMapCardSelection(attribute, selectedId) {
@@ -1521,7 +1749,9 @@ var selectedSpatialFilter = null;
 
   function scheduleMapEventZoom() {
     if (!mapController || typeof mapController.zoomToShapes !== "function") return;
+    var version=cameraFocusVersion;
     var zoom = function () {
+      if(version!==cameraFocusVersion || !getWorkspace() || getWorkspace().workspace.destination!=="map")return;
       if (typeof mapController.resize === "function") mapController.resize();
       mapController.zoomToShapes();
     };
@@ -1613,6 +1843,7 @@ var selectedSpatialFilter = null;
             provider: activeProviderId
           };
         },
+        onViewportChange: function (viewport) { if(viewport.userInitiated){cameraFocusVersion++;pendingEntryZoom=false;} },
         onProviderChange: function (providerId) {
           activeProviderId = providerId || "offline";
           var picker = one("#providerSelect");
@@ -1624,6 +1855,7 @@ var selectedSpatialFilter = null;
         },
         onShapeSelected: function (shapeId) {
           var workspace = getWorkspace();
+          if(vertexDraft && shapeId!==vertexDraft.id)cancelVertexEditing();
           if (!shapeId) {
             if (canonicalMapState(workspace).scopeMode !== "projects") return;
             persistCanonicalMapState({ selectedGeometryId: "", inspectorMode: "geometry" });
@@ -1678,6 +1910,7 @@ var selectedSpatialFilter = null;
           });
         },
         onLocationPlaced: function (coord) {
+          if (pendingMoasureImport && pendingMoasureImport.keys) { finishMoasureAnchor(coord);return; }
           if (!coord || !Array.isArray(coord)) return;
           var placement = pendingLocationPlacement;
           pendingLocationPlacement = null;
@@ -1730,6 +1963,7 @@ var selectedSpatialFilter = null;
           }
         },
 
+        onDrawingChange: updateDrawingControls,
         onShapeCreated: function (newShape) {
           if (!newShape || !newShape.coordinates) return;
           if (root.UOS.ProgramApp) {
@@ -1761,25 +1995,16 @@ var selectedSpatialFilter = null;
                 });
               }
               return updated;
+            }).catch(function (error) {
+              showError(error.message || "The polygon could not be saved.");
+              render();
             });
           }
         },
 
-        onShapeEdited: function (editedShape) {
-          if (!editedShape || !editedShape.id || !root.UOS.ProgramApp) return;
-          var vertexEditGuard = pendingVertexEditGuard;
-          pendingVertexEditGuard = null;
-          root.UOS.ProgramApp.updateWorkspace(function (candidate) {
-            if (vertexEditGuard) vertexEditGuard(candidate);
-            var isLine = editedShape.geometryType === "line";
-            if (!root.UOS.WorkAreaService || typeof root.UOS.WorkAreaService.updateGeometry !== "function") throw new Error("WorkAreaService is unavailable.");
-            var updated = root.UOS.WorkAreaService.updateGeometry(candidate, editedShape.id, {
-              geometryKind: isLine ? "line" : "polygon",
-              geometry: { type: isLine ? "LineString" : "Polygon", coordinates: isLine ? editedShape.coordinates : [editedShape.coordinates] }
-            });
-            return syncExistingGeometryWork(updated, editedShape.id);
-          }).then(render).catch(function (error) { showError(error.message); render(); });
-        }
+        onReady: function () { render(); },
+        onShapePreview: stageVertexShape,
+        onShapeEdited: stageVertexShape
       });
       if (mapController && typeof mapController.setEvent === "function") {
         mapController.setEvent(buildMapEvent(selectedEventFilterId));
@@ -1976,6 +2201,70 @@ var selectedSpatialFilter = null;
   function bindEvents() {
     if (initialized) return;
     initialized = true;
+    mapModuleRoot = one('[data-program-view="map"]');
+
+    one("#moasureImportButton").addEventListener("click",function(){try{openMoasureImport();}catch(error){showError(error);}});
+    all("[data-moasure-cancel]").forEach(function(button){button.addEventListener("click",function(){pendingMoasureImport=null;one("#moasureImportDialog").close();});});
+    one("#moasureImportDialog").addEventListener("cancel",function(){pendingMoasureImport=null;});
+    one("#moasureCsvFile").addEventListener("change",async function(event){
+      var file=event.target.files[0],pending=pendingMoasureImport,version=pending ? (pending.fileVersion||0)+1 : 0;
+      if(!pending)return;pending.fileVersion=version;one("#moasureAnchorButton").disabled=true;one("#moasureImportError").hidden=true;
+      try {
+        if(!file)return;if(file.size>5000000)throw new Error("Moasure CSV exceeds the 5 MB limit.");
+        var textValue=await file.text(),parsed=root.UOS.MoasureGeometry.parse(textValue,file.name);
+        if(pendingMoasureImport!==pending || pending.fileVersion!==version)return;
+        pending.text=textValue;pending.filename=file.name;
+        one("#moasureGroupList").innerHTML=parsed.groups.map(function(g){return '<label><input type="checkbox" data-moasure-group="'+esc(g.key)+'" checked><span>'+esc(g.name)+' · Path '+esc(g.path)+'<br>'+g.areaSqM.toFixed(3)+' m² · '+g.points.length+' source points</span></label>';}).join("");
+        one("#moasureAnchorButton").disabled=false;
+      } catch(error){if(pendingMoasureImport===pending){one("#moasureImportError").textContent=error.message;one("#moasureImportError").hidden=false;}}
+    });
+    one("#moasureAnchorButton").addEventListener("click",function(){
+      if(!pendingMoasureImport)return;
+      pendingMoasureImport.keys=all("[data-moasure-group]:checked").map(function(input){return input.getAttribute("data-moasure-group");});
+      if(!pendingMoasureImport.keys.length){one("#moasureImportError").textContent="Select at least one outline.";one("#moasureImportError").hidden=false;return;}
+      one("#moasureImportDialog").close();mapController.startLocationPlacement();setSelectToolActive(false);
+      updateMapToolStatus("Click the map to anchor the Moasure CSV origin. Escape cancels.");
+    });
+    root.document.addEventListener("input",function(event){
+      var input=event.target.closest("[data-placement-angle]");
+      if(!input)return;
+      var id=input.getAttribute("data-placement-angle");
+      if(input.value==="" || !Number.isFinite(Number(input.value)))return;
+      try{
+        if(!placementDraft || placementDraft.id!==id)beginPolygonPlacement(id,{render:false,zoom:false});
+        placementDraft.basis=root.UOS.MoasureGeometry.rotate(placementDraft.basis,Number(input.value));
+        paintPolygonPlacement();
+      }catch(error){showError(error);}
+    });
+    root.document.addEventListener("click",function(event){
+      var button=event.target.closest("[data-polygon-placement],[data-save-placement],[data-cancel-placement]");
+      if(!button)return;
+      if(button.hasAttribute("data-polygon-placement")){
+        try{beginPolygonPlacement(button.getAttribute("data-polygon-placement"));}catch(error){showError(error);}
+      }else if(button.hasAttribute("data-cancel-placement")){
+        cancelPolygonPlacement();render();
+      }else{
+        var id=button.getAttribute("data-save-placement"),geometry=root.UOS.ProgramModel.workGeometryById(getWorkspace(),id);
+        var input=one('[data-placement-angle="'+id+'"]');
+        if(input && (input.value==="" || !Number.isFinite(Number(input.value)))){showError("Enter a valid rotation angle before saving.");return;}
+        var draft=placementDraft && placementDraft.id===id?placementDraft:{id:id,basis:root.UOS.WorkAreaService.placementBasis(geometry),expected:JSON.stringify(geometry)};
+        if(draft.busy)return;draft.busy=true;button.disabled=true;
+        root.UOS.ProgramApp.updateWorkspace(function(candidate){
+          return root.UOS.WorkAreaService.savePlacement(candidate,draft.id,draft.basis,draft.expected);
+        }).then(function(){cancelPolygonPlacement();render();}).catch(function(error){draft.busy=false;showError(error);render();});
+      }
+    });
+    root.document.addEventListener("keydown",function(event){
+      if(event.key!=="Escape" || root.document.querySelector("dialog[open],.uos-modal-backdrop"))return;
+      if(vertexDraft || placementDraft || (pendingMoasureImport && pendingMoasureImport.keys)){
+        event.preventDefault();event.stopImmediatePropagation();
+        if(vertexDraft)cancelVertexEditing();
+        if(placementDraft)cancelPolygonPlacement();
+        if(pendingMoasureImport){pendingMoasureImport=null;mapController.cancelActiveInteraction();}
+        render();
+      }
+    },true);
+
 
     root.document.addEventListener("click", function (event) {
 
@@ -2328,28 +2617,13 @@ var selectedSpatialFilter = null;
       } else if (drawModeBtn) {
         activeDrawMode = drawModeBtn.getAttribute("data-draw-mode");
         updateDrawModeUI();
+        startMapDrawing();
       } else if (selectToolBtn) {
         cancelActiveMapInteraction();
       } else if (startDrawBtn && mapController) {
-        pendingLocationPlacement = null;
-        updateMapToolStatus("");
-        setSelectToolActive(false);
-        mapController.startDrawing(activeDrawMode === "line" ? "line" : activeDrawMode === "square" ? "square" : "polygon");
-        var mapToolbar = one(".program-map-header-controls");
-        if (mapToolbar) mapToolbar.classList.add("is-drawing");
-        var drawMenu = one(".program-map-menu--draw");
-        if (drawMenu) drawMenu.open = false;
-        one("#finishDrawingButton").disabled = false;
-        one("#undoDrawingButton").disabled = false;
-        one("#cancelDrawingButton").disabled = false;
+        startMapDrawing();
       } else if (finishDrawBtn && mapController) {
-        mapController.finishDrawing();
-        setSelectToolActive(true);
-        var finishedToolbar = one(".program-map-header-controls");
-        if (finishedToolbar) finishedToolbar.classList.remove("is-drawing");
-        finishDrawBtn.disabled = true;
-        one("#undoDrawingButton").disabled = true;
-        one("#cancelDrawingButton").disabled = true;
+        if(vertexDraft)finishVertexEditing();else mapController.finishDrawing();
       } else if (undoDrawBtn && mapController) {
         mapController.undoPoint();
       } else if (cancelDrawBtn && mapController) {
@@ -2406,23 +2680,14 @@ var selectedSpatialFilter = null;
         } else if (action === "delete") {
           openDeleteDialog(shapeId);
         } else if (action === "edit") {
-          var nextEditingShapeId = editingShapeId === shapeId ? null : shapeId;
-          var editWorkspace = getWorkspace();
-          var editGeometry = editWorkspace && editWorkspace.entities && (editWorkspace.entities.geometries || []).find(function (item) { return item.id === shapeId; });
-          var editProjectId = editGeometry ? text(editGeometry.projectId || editGeometry.payload && editGeometry.payload.projectId) : "";
-          var editContext = resolveMapContext(editWorkspace, sidebarViewMode, "projects", editProjectId);
+          if(vertexDraft && vertexDraft.id===shapeId)return;
+          var editGeometry=root.UOS.ProgramModel.workGeometryById(getWorkspace(),shapeId);
+          var editContext=resolveMapContext(getWorkspace(),sidebarViewMode,"projects",editGeometry.projectId);
+          cancelVertexEditing();
           persistCanonicalMapState({
-            scopeMode: "projects",
-            selectedRegisterId: editContext.registerId || "",
-            selectedProjectId: editProjectId || "",
-            selectedLocationId: "",
-            selectedGeometryId: shapeId,
-            inspectorMode: "polygon"
-          }).then(function () {
-            editingShapeId = nextEditingShapeId;
-            renderShapeCards();
-            if (mapController) mapController.editShape(editingShapeId);
-          });
+            scopeMode:"projects",selectedRegisterId:editContext.registerId || "",selectedProjectId:editGeometry.projectId,
+            selectedLocationId:"",selectedGeometryId:shapeId,inspectorMode:"polygon"
+          }).then(function(){beginVertexEditing(shapeId);});
         } else if (action === "duplicate") {
           if (root.UOS.ProgramApp) {
             root.UOS.ProgramApp.updateWorkspace(function (candidate) {
@@ -2441,16 +2706,16 @@ var selectedSpatialFilter = null;
       } else if (event.target.closest("[data-delete-vertex]")) {
         var delBtn = event.target.closest("[data-delete-vertex]");
         var vIdx = Number(delBtn.getAttribute("data-delete-vertex"));
-        if (!editingShapeId || !Number.isInteger(vIdx) || !mapController) return;
+        if (!editingShapeId || (vertexDraft && vertexDraft.busy) || !Number.isInteger(vIdx) || !mapController) return;
         var vertexShapeId = editingShapeId;
         root.UOS.ProgramDeleteSafety.confirm({
           title: "Remove map vertex?", confirmLabel: "Remove vertex",
-          message: "Remove vertex " + (vIdx + 1) + " from this shape? Its dimensions and any linked mapped costing will be recalculated.",
+          message: "Remove vertex " + (vIdx + 1) + " from this shape? The removal is staged until Finish; Cancel restores it.",
           validate: function () { return editingShapeId === vertexShapeId; },
           apply: function (guard) {
-            pendingVertexEditGuard = guard;
+            guard(getWorkspace());
             var res = mapController.removeVertex(vertexShapeId, vIdx);
-            pendingVertexEditGuard = null;
+
             if (res && !res.success) throw new Error(res.reason || "Vertex removal failed.");
             renderShapeCards();
             return res;
@@ -2473,16 +2738,16 @@ var selectedSpatialFilter = null;
         var latAttr = target.getAttribute("data-coord-lat");
         var lngAttr = target.getAttribute("data-coord-lng");
         var vIdx = Number(latAttr !== null ? latAttr : lngAttr);
-        if (!editingShapeId || !Number.isInteger(vIdx) || !mapController) return;
+        if (!editingShapeId || (vertexDraft && vertexDraft.busy) || !Number.isInteger(vIdx) || !mapController) return;
         var row = target.closest(".rem-vertex-item");
         if (!row) return;
         var latInput = row.querySelector('[data-coord-lat="' + vIdx + '"]');
         var lngInput = row.querySelector('[data-coord-lng="' + vIdx + '"]');
         var lat = Number(latInput ? latInput.value : NaN);
         var lng = Number(lngInput ? lngInput.value : NaN);
-        if (Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        if (latInput && latInput.value.trim()!=="" && lngInput && lngInput.value.trim()!=="" && Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
           mapController.updateVertex(editingShapeId, vIdx, [lng, lat], { preview: true });
-        }
+        } else if(vertexDraft){vertexDraft.invalidInput=true;updateVertexControls();}
       }
     });
 
@@ -2517,18 +2782,18 @@ var selectedSpatialFilter = null;
         var latAttr = target.getAttribute("data-coord-lat");
         var lngAttr = target.getAttribute("data-coord-lng");
         var vIdx = Number(latAttr !== null ? latAttr : lngAttr);
-        if (!editingShapeId || !Number.isInteger(vIdx) || !mapController) return;
+        if (!editingShapeId || (vertexDraft && vertexDraft.busy) || !Number.isInteger(vIdx) || !mapController) return;
         var row = target.closest(".rem-vertex-item");
         if (!row) return;
         var latInput = row.querySelector('[data-coord-lat="' + vIdx + '"]');
         var lngInput = row.querySelector('[data-coord-lng="' + vIdx + '"]');
         var lat = Number(latInput ? latInput.value : NaN);
         var lng = Number(lngInput ? lngInput.value : NaN);
-        if (Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        if (latInput && latInput.value.trim()!=="" && lngInput && lngInput.value.trim()!=="" && Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
           mapController.updateVertex(editingShapeId, vIdx, [lng, lat], { commit: true });
         } else {
+          if(vertexDraft){vertexDraft.invalidInput=true;updateVertexControls();}
           showError("Please enter valid latitude (-90 to 90) and longitude (-180 to 180) values.");
-          renderShapeCards();
         }
       }
     });
@@ -2556,6 +2821,7 @@ var selectedSpatialFilter = null;
       var visibleInput = event.target.closest("[data-shape-visible]");
       var typeSelect = event.target.closest("[data-shape-type]");
       var rateSelect = event.target.closest("[data-shape-rate]");
+      var pricingUnitSelect = event.target.closest("[data-shape-pricing-unit]");
       var providerSelect = event.target.closest("#providerSelect");
 
       if (visibleInput) {
@@ -2569,6 +2835,17 @@ var selectedSpatialFilter = null;
             return root.UOS.WorkAreaService.updateGeometry(candidate, shapeId, { payload: { visible: isChecked } });
           }).then(renderShapeCards);
         }
+      } else if (pricingUnitSelect) {
+        var pricingShapeId = pricingUnitSelect.getAttribute("data-shape-pricing-unit");
+        var selectedUnit = pricingUnitSelect.value;
+        root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+          var geometry = root.UOS.ProgramModel.workGeometryById(candidate, pricingShapeId);
+          var rates = eligiblePolygonRates(candidate, geometryWorkType(geometry)).filter(function (rate) { return polygonPricingUnit(rate) === selectedUnit; });
+          var mapping = root.UOS.ProgramModel.workTypeRateMapping(candidate, geometryWorkType(geometry));
+          var choice = rates.length === 1 ? rates[0] : rates.find(function (rate) { return rate.id === mapping.defaultRateItemId; });
+          candidate = root.UOS.WorkAreaService.updateGeometry(candidate, pricingShapeId, { rateItemId: choice ? choice.id : null, payload: { pricingUnit: selectedUnit, rateItemId: choice ? choice.id : null } });
+          return choice ? syncExistingGeometryWork(candidate, pricingShapeId) : candidate;
+        }).then(renderShapeCards).catch(showError);
       } else if (typeSelect) {
         var shapeId = typeSelect.getAttribute("data-shape-type");
         var newType = typeSelect.value;
@@ -2649,6 +2926,12 @@ var selectedSpatialFilter = null;
     var wsData = workspace && workspace.workspace ? workspace.workspace : {};
     var destination = wsData.destination || "";
     var mapState = applyCanonicalMapState(workspace);
+    var importButton=one("#moasureImportButton");if(importButton)importButton.disabled=mapState.scopeMode!=="projects" || !mapState.selectedProjectId;
+    if(placementDraft){
+      var activeGeometry=root.UOS.ProgramModel.workGeometryById(workspace,placementDraft.id);
+      if(!activeGeometry || activeGeometry.projectId!==mapState.selectedProjectId || JSON.stringify(activeGeometry)!==placementDraft.expected)cancelPolygonPlacement();
+    }
+    if(pendingCameraFocusId && !(workspace.entities.applications||[]).concat(workspace.entities.events||[],workspace.entities.projects||[]).some(function(r){return r.id===pendingCameraFocusId;}))pendingCameraFocusId=null;
     if (destination === "map" && !storedMapStateMatches(workspace, mapState)) {
       persistCanonicalMapState(mapState);
       return;
@@ -2686,10 +2969,12 @@ var selectedSpatialFilter = null;
         mapControls.hidden = true;
       }
     }
-    if (destination !== "map") { closeMapMenus(); return; }
+    if(vertexDraft && !vertexDraft.busy && (destination!=="map" || mapState.selectedProjectId!==vertexDraft.original.projectId || mapState.inspectorMode!=="polygon" || mapState.selectedGeometryId!==vertexDraft.id)){cancelVertexEditing();}
+    if (destination !== "map") { previousDestination=destination;pendingEntryZoom=false;cancelPolygonPlacement();pendingMoasureImport=null;closeMapMenus();return; }
 
         var enteredFromOtherTab = previousDestination !== "map";
     previousDestination = destination;
+    if(enteredFromOtherTab){cameraFocusVersion++;pendingEntryZoom=true;}
 
     try {
       updateSidebarViewUI();
@@ -2708,11 +2993,13 @@ var selectedSpatialFilter = null;
       }
 
       // Handle entry into Space Map from another tab
-      if (enteredFromOtherTab && mapController) {
+      if ((pendingEntryZoom || pendingCameraFocusId) && mapController && mapController.ready()) {
+        pendingEntryZoom=false;
         if (pendingCameraFocusId) {
           var focusId = pendingCameraFocusId;
           pendingCameraFocusId = null;
-          filterMapByEvent(focusId, true);
+          var focusWorkspace=getWorkspace();var exists=(focusWorkspace.entities.applications||[]).concat(focusWorkspace.entities.events||[],focusWorkspace.entities.projects||[]).some(function(r){return r.id===focusId;});
+          if(exists)filterMapByEvent(focusId, true);
         } else if (mapEvent && ((mapEvent.polygons && mapEvent.polygons.length) || (mapEvent.focusLocations && mapEvent.focusLocations.length))) {
           scheduleMapEventZoom();
         } else if (typeof mapController.resetView === "function") {
@@ -2723,6 +3010,8 @@ var selectedSpatialFilter = null;
 
       updateTogglesUI();
       updateDrawModeUI();
+      if (pendingPolygonPlacementId) beginPolygonPlacement(pendingPolygonPlacementId);
+      if(vertexDraft)updateVertexControls();
     } catch (err) {
       if (root.console && typeof root.console.warn === "function") root.console.warn("ProgramMapController render issue:", err);
     }
@@ -2740,7 +3029,7 @@ var selectedSpatialFilter = null;
     init: function () { bindEvents(); render(); },
     render: render,
     getMapController: function () { return mapController; },
-    setCameraFocusIntent: function (id) { pendingCameraFocusId = id ? String(id) : null; },
+    setCameraFocusIntent: function (id) { cameraFocusVersion++;pendingCameraFocusId = id ? String(id) : null; },
     focusRecord: function (id) {
       if (!id) return;
       filterMapByEvent(id);

@@ -706,12 +706,25 @@ function button(label, kind, attribute, value) { var node = root.document.create
   }
   function persist(mutator) { var app = root.UOS && root.UOS.ProgramApp; if (!app || !app.updateWorkspace) return Promise.resolve(null); return app.updateWorkspace(mutator); }
   function mutate(operation) { if (!state.workspace) return Promise.resolve(null); showError(null); return persist(function (workspace) { return operation(model(), workspace); }).then(function (saved) { if (saved) root.setTimeout(function () { update(root.UOS.ProgramApp.workspace()); }, 0); return saved; }).catch(function (error) { showError(error); return null; }); }
-  function addRate(id) {
+  function addRate(id, areaInput) {
     var project = entities("projects").find(function (item) { return item.id === state.selectedProjectId; });
     if (!project) { showError(new Error("Select an existing Delivery Project before adding a rate item.")); return; }
+    var rateItem = entities("rateItems").find(function (rate) { return rate.id === id; });
+    var isArea = root.UOS.ProgramModel.isSpatiallyCompatibleRate(rateItem);
+    if (isArea && !areaInput) {
+      var dialog = one("[data-costing-area-dialog]"), form = one("[data-costing-area-form]");
+      form.reset(); form.dataset.rateId = id; form.dataset.projectId = project.id;
+      setText("[data-costing-area-rate]", title(rateItem) + " — " + money(rateItem.unitRate) + " per " + rateItem.unit);
+      dialog.showModal(); form.elements.area.focus(); return Promise.resolve(null);
+    }
+    var measurements = { quantity: 1, areaSqM: 1, lengthM: 1, volumeM3: 1, massKg: 1, hours: 1, workers: 1 };
+    if (isArea) {
+      if (areaInput.projectId !== project.id) { showError(new Error("The selected Project changed. Add the area again.")); return Promise.resolve(null); }
+      measurements.areaSqM = Number(areaInput.area) * (areaInput.unit === "ha" ? 10000 : 1);
+    }
     var operationId = root.crypto && root.crypto.randomUUID ? root.crypto.randomUUID() : String(Date.now()) + ":" + Math.random();
     return mutate(function (api, workspace) {
-      var result = api.createWork(workspace, project.id, id, { quantity: 1, areaSqM: 1, lengthM: 1, volumeM3: 1, massKg: 1, hours: 1, workers: 1 }, { operationId: operationId });
+      var result = api.createWork(workspace, project.id, id, measurements, { operationId: operationId });
       result.workspace.costing = Object.assign({}, result.workspace.costing, { selectedProjectId: project.id, section: state.section, mode: state.mode });
       return result;
     }).then(function (saved) {
@@ -946,6 +959,10 @@ function removeCalculatorLine(lineId, guard) {
   }
   function saveRate(event) {
     event.preventDefault(); var form = event.target, input = { id: state.editRateId || undefined, owner: "", kind: form.elements.kind.value, kindSource: "user", description: form.elements.description.value, title: form.elements.description.value, category: form.elements.category.value, unit: form.elements.unit.value, unitRate: form.elements.unitRate.value, quantityMode: form.elements.quantityMode.value, schedulerEnabled: form.elements.schedulerEnabled.checked, active: form.elements.active.checked };
+    var existingRate = entities("rateItems").find(function (rate) { return rate.id === state.editRateId; });
+    if (existingRate) {
+      ["measurementSource", "pricingSeed", "provenance"].forEach(function (key) { if (existingRate[key] !== undefined) input[key] = existingRate[key]; });
+    } else if (["m²", "ha", "km²"].indexOf(input.unit) >= 0 && input.quantityMode === "m2") input.measurementSource = form.elements.spatialEnabled.checked ? "mapped" : "estimated";
     if (!form.reportValidity()) return; var errorNode = one("[data-costing-rate-error]"); if (errorNode) errorNode.hidden = true;
     var mapping = { enabled: form.elements.spatialEnabled.checked, workTypeKey: form.elements.workTypeKey.value };
     persist(function (workspace) { return model().upsertRateItemWithWorkType(workspace, input, mapping); }).then(function (saved) {
@@ -1058,6 +1075,13 @@ function saveAdjustments(source) {
 }
 function bind() {
  if (state.bound || !root.document) return; state.bound = true;
+    var areaDialog = one("[data-costing-area-dialog]"), areaForm = one("[data-costing-area-form]");
+    all("[data-costing-area-cancel]").forEach(function (button) { button.addEventListener("click", function () { areaDialog.close(); }); });
+    areaForm.addEventListener("submit", function (event) {
+      event.preventDefault(); if (!areaForm.reportValidity()) return;
+      var submit = areaForm.querySelector('[type="submit"]'); submit.disabled = true;
+      Promise.resolve(addRate(areaForm.dataset.rateId, { area: areaForm.elements.area.value, unit: areaForm.elements.areaUnit.value, projectId: areaForm.dataset.projectId })).then(function (saved) { if (saved) areaDialog.close(); }).finally(function () { submit.disabled = false; });
+    });
  if (root.MutationObserver) new root.MutationObserver(sizeCategoryColumn).observe(root.document.documentElement, { attributes: true, attributeFilter: ["data-suite-font"] });
  if (root.document.fonts) {
    root.document.fonts.ready.then(sizeCategoryColumn);

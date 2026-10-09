@@ -81,7 +81,7 @@ test("first valid NSA PDF import reports only the imported Register delta", asyn
   const staged = await UOS.ProgramData.stage(pdfFile(), workspace);
 
   assert.equal(workspace.entities.applications.length, 0);
-  assert.equal(workspace.entities.rateItems.length, 45);
+  assert.equal(workspace.entities.rateItems.length, 47);
   assert.deepEqual(Array.from(staged.preview.warnings), []);
   assert.deepEqual(Array.from(staged.preview.conflicts), []);
   assert.equal(staged.preview.counts.applications, 1);

@@ -5221,7 +5221,7 @@ html[data-suite-theme="dark"] .program-scheduler-modes button.is-active {
   color: #12653a !important;
   box-shadow: inset 0 0 0 1px #15803d;
 }
-.program-shape-card__controls + .program-shape-actions { margin-top: 14px; }
+.program-shape-card__controls + .program-shape-actions { margin-top: 8px; }
 .program-map-workspace { min-height: 0; min-width: 0; display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: var(--panel-gap); height: 100%; width: 100%; align-items: stretch; align-content: stretch; box-sizing: border-box; }
 .program-map-sidebar { min-height: 0; min-width: 0; height: 100%; width: 100%; align-self: stretch; display: flex !important; flex-direction: column !important; border: 1px solid var(--panel-border); border-radius: var(--panel-radius); background: var(--panel-bg); box-sizing: border-box; overflow: hidden; }
 .program-map-sidebar__head { display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 0 16px; border-bottom: 1px solid var(--panel-border); background: var(--panel-bg); }
@@ -6194,7 +6194,16 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   border-color: var(--panel-border, #334155);
   color: var(--uos-text-muted, #94a3b8);
 }
-.program-shape-actions { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.program-shape-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.program-shape-actions--labelled { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+.program-shape-actions--labelled .uos-button { min-width:0; padding-inline:8px; }
+.program-shape-card { --polygon-button-height:var(--uos-control-height,34px); }
+.program-shape-card button.uos-button { box-sizing:border-box; height:var(--polygon-button-height); min-height:var(--polygon-button-height); padding-block:0; }
+.program-shape-actions--icons .uos-button { width:var(--polygon-button-height); min-width:var(--polygon-button-height); padding:0; }
+.program-polygon-placement { display:grid; gap:8px; margin-top:8px; padding:12px; border:1px solid var(--uos-border); border-radius:var(--uos-radius-panel); background:var(--uos-surface); }
+.program-polygon-placement p { margin:0; }
+.program-polygon-placement__actions { display:flex; flex-wrap:wrap; gap:8px; }
+@media(pointer:coarse) { .program-shape-card { --polygon-button-height:44px; } }
 .program-map-canvas-container {
   min-height: 380px;
   height: 100%;
@@ -11198,3 +11207,9 @@ html[data-suite-theme="dark"] .program-quote-issue-warnings {background:#382a14;
 .program-quote-pane-body {align-content:start;overscroll-behavior:contain;}
 .program-quote-section-scroll-space {grid-row:8;pointer-events:none;}
 @media print {.program-quote-section-navigation,.program-quote-section-scroll-space {display:none!important;}}
+
+/* Project survey placement reuses the existing map and form design system. */
+.program-map-canvas-container[data-placement-active] #floatingDrawToolbar { display:none; }
+.program-map-rotation-handle { cursor:grab; touch-action:none; }
+#moasureGroupList label { display:flex; align-items:start; gap:8px; padding:8px 0; }
+#moasureImportDialog .planner-task-editor__body { min-width:0; overflow-wrap:anywhere; }
