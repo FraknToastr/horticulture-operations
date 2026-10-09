@@ -75,11 +75,24 @@ for (const owner of ['NSA', 'EVT']) {
     async function editAndSave(field, value) {
       await row().locator('[data-planner-edit-task]').click();
       const editor = child.locator('[data-planner-task-form]');
-      if (field === 'classification') await editor.locator(`[name="${field}"]`).selectOption(value);
+      if (['classification', 'status', 'assigneeId'].includes(field)) await editor.locator(`[name="${field}"]`).selectOption(value);
       else await editor.locator(`[name="${field}"]`).fill(value);
+      if (field === 'status') {
+        await editor.locator('[name="operator"]').fill('Planner regression operator');
+        if (await editor.locator('[name="reason"]').isVisible()) await editor.locator('[name="reason"]').fill('Verify saved status shortcut styling');
+      }
       await editor.locator('button[type="submit"][value="save"]').click();
       await expect(editor).not.toBeVisible();
     }
+    await editAndSave('status', 'In Progress');
+    await expect(shortcut()).toHaveAttribute('data-shortcut-state', 'in-use');
+    await expect.poll(() => row().locator('td').first().evaluate(node => getComputedStyle(node).boxShadow)).toBe('none');
+    await editAndSave('status', 'Not Started');
+    await expect(shortcut()).toHaveAttribute('data-shortcut-state', 'unused');
+    await editAndSave('assigneeId', 'Admin');
+    await expect(shortcut()).toHaveAttribute('data-shortcut-state', 'in-use');
+    await editAndSave('assigneeId', 'Not assigned');
+    await expect(shortcut()).toHaveAttribute('data-shortcut-state', 'unused');
     await editAndSave('classification', 'operational');
     await assertReady();
     await editAndSave('notes', 'Delivery note');

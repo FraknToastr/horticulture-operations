@@ -86,6 +86,8 @@
     rate("RATE-PERMEABLE-PAVING", true, "Infrastructure", "Permeable Paving", "m²", 110, ""),
     rate("RATE-TREE-PLANTING", true, "Planting & Vegetation", "Tree Planting", "m²", 120, ""),
     rate("RATE-TURF-RENOVATION", true, "Groundworks & Turf", "Turf Renovation", "m²", 35, ""),
+    rate("RATE-TURFING-HA", true, "Groundworks & Turf", "Turfing", "ha", 112500, ""),
+    rate("RATE-AERATION-HA", true, "Groundworks & Turf", "Aeration", "ha", 45000, ""),
     rate("RATE-TURFING", true, "Groundworks & Turf", "Turfing", "m²", 45, "")
   ];
 

@@ -8,6 +8,53 @@ Customer backups, recovered workspaces, conversion reports, backup-dependent rec
 
 ## Reviewed source transport set
 
+### Space Map, area pricing and Moasure update
+
+Destination remains `overtime-stage3` → `origin/overtime-stage3`; `main` and
+`github-replacement` are not updated. The complete current tree and reachable
+history were rechecked. Existing remote Overtime history remains unchanged;
+this update adds no Overtime content, evidence or operator exports.
+
+The explicit transport allowlist for this update is:
+
+- `docs/publication-allowlist-2026-10-09.md`
+- `src/program-planner/index.html`
+- `src/program-planner/js/costing-model.js`
+- `src/program-planner/js/costing.js`
+- `src/program-planner/js/default-rate-catalog.js`
+- `src/program-planner/js/disclosure-rows.js`
+- `src/program-planner/js/model.js`
+- `src/program-planner/js/program-map.js`
+- `src/program-planner/js/work-area-service.js`
+- `src/program-planner/styles.css`
+- `src/remediation-planner/js/map.js`
+- `tests/browser/c6-work-type-rate-mapping.spec.js`
+- `tests/browser/delete-warning-audit.spec.js`
+- `tests/browser/nsa-pdf-import.spec.js`
+- `tests/browser/polygon-job-promotion.spec.js`
+- `tests/empty-operational-baseline.test.cjs`
+- `tests/governed-remediation.test.cjs`
+- `tests/nsa-pdf-import-preview.test.cjs`
+- `src/program-planner/js/moasure-geometry.js`
+- `src/program-planner/SPACE-MAP-MOASURE.md`
+- `tests/area-pricing.test.cjs`
+- `tests/moasure-geometry.test.cjs`
+- `tests/helpers/area-pricing-suite.cjs`
+- `tests/fixtures/moasure/north-terrace-6.csv`
+- `tests/browser/area-pricing.spec.js`
+- `tests/browser/map-drawing-lifecycle.spec.js`
+- `tests/browser/map-reimport-focus.spec.js`
+- `tests/browser/moasure-map.spec.js`
+- `tests/browser/polygon-inspector-editing.spec.js`
+
+Includes polygon drawing/focus fixes, canonical m²/ha pricing, project-linked
+Moasure imports, persistent anchor controls, consistent Inspector actions and
+cancellable vertex edits. The CSV under `tests/fixtures/moasure/` is a
+self-contained local-coordinate test fixture; original files under
+`src/MOASURE/` remain local. Customer backups, conversion reports, backup-dependent
+recovery tools/tests, screenshots, generated results and unrelated Overtime
+changes are excluded. No remote deletions or history rewrite are performed.
+
 ### Subsequent Quote navigation update
 
 The subsequent Quote-only commit uses this explicit allowlist:
@@ -55,3 +102,131 @@ This update removes the divider accents, fills the rail with six equal-width/ful
 - `tests/browser/scheduler-calendar-scope.spec.js`
 - `tests/delete-safety.test.cjs`
 - `tests/workspace-import-signature.test.cjs`
+
+### Space Map radial creation and approval controls
+
+Destination: `overtime-stage3` to `origin/overtime-stage3`. Neither `main` nor `github-replacement` is updated.
+
+The complete branch tree and reachable history were reviewed. Existing remote history contains legacy review archives, evidence files and logs; this NSA/EVT-only update leaves that history unchanged and publishes no Overtime changes. No remote deletion or history rewrite is authorized.
+
+The reviewed transport set is:
+
+- `docs/publication-allowlist-2026-10-09.md`
+- `src/program-planner/index.html`
+- `src/program-planner/styles.css`
+- `src/program-planner/space-map-editor.css`
+- `src/program-planner/js/program-map.js`
+- `src/remediation-planner/js/map.js`
+- `src/shared/assets/moasure_logo.avif`
+- `tests/browser/test-helper.cjs`
+- `tests/browser/space-map-editor.spec.js`
+- `tests/browser/space-map-radial.spec.js`
+- `tests/browser/space-map-draft-actions.spec.js`
+- `tests/browser/area-pricing.spec.js`
+- `tests/browser/delete-warning-audit.spec.js`
+- `tests/browser/floating-draw-toolbar.spec.js`
+- `tests/browser/location-filter.spec.js`
+- `tests/browser/map-drawing-lifecycle.spec.js`
+- `tests/browser/moasure-map.spec.js`
+- `tests/browser/polygon-inspector-editing.spec.js`
+- `tests/browser/polygon-job-promotion.spec.js`
+- `tests/browser/register-drawer-context.spec.js`
+- `tests/location-polygon-sidebar.test.cjs`
+
+Only Space Map hunks of the shared HTML and stylesheet are included. Unrelated Quote, Register, Planner and Overtime edits, local Moasure source files, backups, reports, rosters, screenshots and test outputs remain local. The logo asset is included at its shared location; it was not previously tracked at its original local path.
+
+Validation includes creation, pin operations, vertex edits, Moasure, pricing, job creation, drawer layout, branch angles, orb-edge connectors, both themes and narrow screens. Verification is repeated against the staged source tree before publication.
+
+Staged-tree verification passed: 68 focused browser regressions and all 29 included unit checks. Tests ran from an isolated export of the Git index on a separate local server; the export excludes unstaged local recovery tests and operator data. Generated logs and previews remain outside the transport set.
+
+### Owner-requested main publication of the source launcher and NSA/EVT apps
+
+Destination: isolated branch prepared from `origin/main` at `803ac45332cb784b6d7a6aa0ab448683030a13e0`, then a fast-forward update to `origin/main`. The publication does not merge `overtime-stage3` or update `github-replacement`.
+
+The complete proposed tree and reachable main history are reviewed. Existing legacy archives and evidence remain unchanged; no Overtime runtime, operator data or historical artifacts are added. The existing main root-launcher Overtime route is preserved.
+
+The source transport set includes the current tracked launcher, Program Planner, shared modules/assets/vendor libraries, remediation map modules, static server, dependency/build/test configuration and self-contained test fixtures. Synthetic Planner-column and Register-status regression tests are included. Local backup-recovery tests and their private input files are excluded.
+
+The resulting changed-file allowlist and validation results are recorded below.
+
+
+Validation of the reviewed main transport tree:
+
+- All 293 browser scenarios verified across 70 specification files. The final full run passed 292; its one remaining Rate Library assertion measured during a drawer entrance animation. After waiting for fonts and finite animations to settle, that assertion passed three consecutive isolated runs without changing the one-pixel layout requirement.
+- Unit suite: 29 passed; no failures or skips.
+- Runtime dependency closure: 93 resources present; launcher matches the local `src/index.html` byte for byte.
+- Added the previously missing OpenDyslexic Regular/Bold/Italic font files unchanged from upstream commit `1824da5c0e41dc3e13ffc7f3a636dcaf695d61b7`, with the SIL OFL licence and source attribution.
+- Corrected reading-font Calculator column clearance and vertical space, and Quote print totals width. Updated regression fixtures and interactions to the current rate catalogue, pricing, draft approval and Planner controls.
+- Reviewed all 761 proposed Git tree paths and the existing main reachable history. No Overtime changes, new archives, exported workspaces, evidence screenshots, raw logs or temporary test configuration are included. Existing main history is preserved.
+- The local root launcher is not part of this update; main's existing root launcher and its independent Overtime entrypoint remain unchanged.
+
+Explicit changed-file transport allowlist (68 files):
+
+- `docs/launcher-transport-allowlist.md`
+- `docs/publication-allowlist-2026-10-09.md`
+- `src/program-planner/SPACE-MAP-MOASURE.md`
+- `src/program-planner/index.html`
+- `src/program-planner/js/costing-model.js`
+- `src/program-planner/js/costing.js`
+- `src/program-planner/js/default-rate-catalog.js`
+- `src/program-planner/js/disclosure-rows.js`
+- `src/program-planner/js/moasure-geometry.js`
+- `src/program-planner/js/model.js`
+- `src/program-planner/js/planner.js`
+- `src/program-planner/js/program-map.js`
+- `src/program-planner/js/quote-builder.js`
+- `src/program-planner/js/work-area-service.js`
+- `src/program-planner/register-row-header.css`
+- `src/program-planner/space-map-editor.css`
+- `src/program-planner/styles.css`
+- `src/remediation-planner/js/map.js`
+- `src/shared/assets/moasure_logo.avif`
+- `src/shared/fonts/OFL.txt`
+- `src/shared/fonts/OpenDyslexic-Bold.woff`
+- `src/shared/fonts/OpenDyslexic-Italic.woff`
+- `src/shared/fonts/OpenDyslexic-Regular.woff`
+- `src/shared/fonts/README.md`
+- `tests/area-pricing.test.cjs`
+- `tests/browser/area-pricing.spec.js`
+- `tests/browser/c6-work-type-rate-mapping.spec.js`
+- `tests/browser/calculator-line-deletion.spec.js`
+- `tests/browser/cost-library-layout.spec.js`
+- `tests/browser/delete-warning-audit.spec.js`
+- `tests/browser/factory-reset-startup.spec.js`
+- `tests/browser/floating-draw-toolbar.spec.js`
+- `tests/browser/framed-table-emphasis.spec.js`
+- `tests/browser/location-active-register.spec.js`
+- `tests/browser/location-filter.spec.js`
+- `tests/browser/map-drawing-lifecycle.spec.js`
+- `tests/browser/map-reimport-focus.spec.js`
+- `tests/browser/moasure-map.spec.js`
+- `tests/browser/nsa-pdf-import.spec.js`
+- `tests/browser/planner-current-state.spec.js`
+- `tests/browser/planner-draft-recovery.spec.js`
+- `tests/browser/planner-editor-controls.spec.js`
+- `tests/browser/planner-responsive-columns.spec.js`
+- `tests/browser/planner-section-headers.spec.js`
+- `tests/browser/planner-task-editor.spec.js`
+- `tests/browser/polygon-inspector-editing.spec.js`
+- `tests/browser/polygon-job-promotion.spec.js`
+- `tests/browser/quote-funding.spec.js`
+- `tests/browser/quote-print-layout.spec.js`
+- `tests/browser/quote-section-navigation.spec.js`
+- `tests/browser/quote-status-pills.spec.js`
+- `tests/browser/rate-library-interactions.spec.js`
+- `tests/browser/register-drawer-context.spec.js`
+- `tests/browser/register-framed-layout.spec.js`
+- `tests/browser/register-project-status-colours.spec.js`
+- `tests/browser/register-shortcut-states.spec.js`
+- `tests/browser/space-map-draft-actions.spec.js`
+- `tests/browser/space-map-editor.spec.js`
+- `tests/browser/space-map-radial.spec.js`
+- `tests/browser/test-helper.cjs`
+- `tests/browser/workspace-backup-recovery.spec.js`
+- `tests/empty-operational-baseline.test.cjs`
+- `tests/fixtures/moasure/north-terrace-6.csv`
+- `tests/governed-remediation.test.cjs`
+- `tests/helpers/area-pricing-suite.cjs`
+- `tests/location-polygon-sidebar.test.cjs`
+- `tests/moasure-geometry.test.cjs`
+- `tests/nsa-pdf-import-preview.test.cjs`

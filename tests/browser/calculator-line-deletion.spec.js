@@ -36,7 +36,7 @@ test("RC-DEL-01: Resource Calculator line deletion removes row from DOM, updates
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.snapshot().busy)).toBe(false);
 
   // Add one active rate item
-  const addButton = frame.locator('[data-costing-add-rate]:not([disabled])').first();
+  const addButton = frame.locator('[data-costing-add-rate]:not([disabled]):not(.program-rate-btn--map)').first();
   await expect(addButton).toBeEnabled();
   await addButton.click();
 
@@ -103,7 +103,7 @@ test("RC-DEL-02: Add line, edit quantity/rate, then remove: row disappears clean
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.snapshot().busy)).toBe(false);
 
   // Add line
-  const addButton = frame.locator('[data-costing-add-rate]:not([disabled])').first();
+  const addButton = frame.locator('[data-costing-add-rate]:not([disabled]):not(.program-rate-btn--map)').first();
   await addButton.click();
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(1);
   await child.evaluate(() => window.UOS.ProgramCostingController.update(window.UOS.ProgramApp.workspace()));
@@ -163,14 +163,20 @@ test("RC-DEL-04: Add two different Rate Items, remove one: only target line is d
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.snapshot().busy)).toBe(false);
 
   // Add first rate item from Labour
-  const firstAdd = frame.locator('[data-costing-add-rate]:not([disabled])').first();
+  const firstAdd = frame.locator('[data-costing-add-rate]:not([disabled]):not(.program-rate-btn--map)').first();
   await firstAdd.click();
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(1);
 
   // Switch to Equipment section and add second rate item
   await frame.locator('[data-costing-section="Equipment"]').click();
-  const secondAdd = frame.locator('[data-costing-add-rate]:not([disabled])').first();
+  const secondAdd = frame.locator('[data-costing-add-rate]:not([disabled]):not(.program-rate-btn--map)').first();
   await secondAdd.click();
+    const areaForm=frame.locator('[data-costing-area-form]');
+    if(await areaForm.isVisible()){
+      await areaForm.locator('[name="area"]').fill('1');
+      await areaForm.locator('[name="areaUnit"]').selectOption('m²');
+      await areaForm.locator('[type="submit"]').click();
+    }
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(2);
   await child.evaluate(() => window.UOS.ProgramCostingController.update(window.UOS.ProgramApp.workspace()));
 
@@ -229,7 +235,7 @@ test("RC-DEL-05: EVT mode Resource Calculator line creation and deletion parity"
   await expect(frame.locator(".program-cost-table")).toBeVisible();
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.snapshot().busy)).toBe(false);
 
-  const addBtn = frame.locator('[data-costing-add-rate]:not([disabled])').first();
+  const addBtn = frame.locator('[data-costing-add-rate]:not([disabled]):not(.program-rate-btn--map)').first();
   await addBtn.click();
 
   const lineRows = frame.locator('[data-costing-lines] tr:not(.program-costing-line-group)');

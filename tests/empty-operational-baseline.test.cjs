@@ -28,16 +28,16 @@ for (const owner of ["NSA", "EVT"]) {
     const workspace = model.blank("2026-09-12T00:00:00.000Z");
     const ids = workspace.entities.rateItems.map((item) => item.id);
 
-    assert.equal(ids.length, 45);
-    assert.equal(new Set(ids).size, 45);
-    assert.equal(workspace.entities.rateItems.filter((item) => item.active !== false).length, 42);
+    assert.equal(ids.length, 47);
+    assert.equal(new Set(ids).size, 47);
+    assert.equal(workspace.entities.rateItems.filter((item) => item.active !== false).length, 44);
     assert.equal(workspace.entities.rateItems.filter((item) => item.active === false).length, 3);
   assert.ok(workspace.entities.rateItems.every((item) => item.owner === "" && item.id.startsWith("RATE-") && ["Labour", "Equipment", "Material", "Contractors", "Sundry"].includes(item.kind)));
     assert.equal(workspace.entities.rateItems.filter((item) => item.kind === "Labour").length, 3);
     assert.equal(workspace.entities.rateItems.filter((item) => item.kind === "Sundry").length, 5);
   assert.equal(workspace.workspace.destination, "register");
   assert.deepEqual(Object.fromEntries(["Labour", "Equipment", "Material", "Contractors", "Sundry"].map((kind) => [kind, workspace.entities.rateItems.filter((item) => item.kind === kind).length])), {
-    Labour: 3, Equipment: 2, Material: 33, Contractors: 2, Sundry: 5
+    Labour: 3, Equipment: 2, Material: 35, Contractors: 2, Sundry: 5
   });
     for (const collection of model.collections) {
       if (collection !== "rateItems") assert.deepEqual(json(workspace.entities[collection]), [], collection);
@@ -71,7 +71,7 @@ test("one-time reset destroys operational state, restores rates, and is idempote
   const result = model.resetOperationalBaseline(workspace, { at: "2026-09-12T01:00:00.000Z" });
   assert.equal(result.changed, true);
   assert.equal(result.workspace.workspaceRevision, 7);
-  assert.equal(result.workspace.entities.rateItems.length, 45);
+  assert.equal(result.workspace.entities.rateItems.length, 47);
   assert.equal(result.workspace.entities.rateItems.some((item) => item.id === "RATE-DIRTY"), false);
   for (const collection of model.collections) {
     if (collection !== "rateItems") assert.deepEqual(json(result.workspace.entities[collection]), [], collection);
@@ -84,7 +84,7 @@ test("one-time reset destroys operational state, restores rates, and is idempote
   assert.equal(result.workspace.statusControl.operatorName, "");
   assert.equal(result.workspace.migration.recovery, undefined);
   assert.equal(result.workspace.migration.unresolvedLinks, undefined);
-  assert.equal(result.report.rateItemCount, 45);
+  assert.equal(result.report.rateItemCount, 47);
   assert.equal(result.report.purgedEntities.tasks, 2);
   assert.doesNotThrow(() => model.assertValid(result.workspace));
 

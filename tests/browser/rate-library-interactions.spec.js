@@ -170,10 +170,18 @@ test("Rate Library tools disclose accessibly and icon menu aligns with Calculato
  const drawer = frame.locator("[data-costing-tools]");
  await expect(drawer).toBeHidden();
  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+ // Measure after the drawer entrance and font loading have settled.
+ const settleLayout = async () => child.evaluate(async () => {
+   await document.fonts.ready;
+   const finiteAnimations = document.getAnimations().filter(animation => animation.effect?.getComputedTiming().iterations !== Infinity);
+   await Promise.all(finiteAnimations.map(animation => animation.finished.catch(() => {})));
+ });
+ await settleLayout();
  const menuBefore = await frame.locator(".program-cost-tabs").boundingBox();
  await toggle.click();
  await expect(drawer).toBeVisible();
  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+ await settleLayout();
  const menuAfter = await frame.locator(".program-cost-tabs").boundingBox();
   // Kind choices remain in the top header when the Tools drawer opens.
   expect(Math.abs(menuAfter.y - menuBefore.y)).toBeLessThan(1);

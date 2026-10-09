@@ -549,15 +549,16 @@ function displayDate(value) {
       return Math.min(width, maximum);
     }
     var task = widest(".planner-value-frame--task", 180, Number.POSITIVE_INFINITY);
-    var status = widest(".planner-progress-frame", 96, 170);
-    var owner = widest(".planner-col-owner .planner-value-frame", 96, 220);
-    var due = widest(".planner-col-due .planner-value-frame", 54, 150);
+    var status = widest(".planner-progress-frame", 96, Number.POSITIVE_INFINITY);
+    var owner = widest(".planner-col-owner .planner-value-frame", 96, Number.POSITIVE_INFINITY);
+    var due = widest(".planner-col-due .planner-value-frame", 54, Number.POSITIVE_INFINITY);
     var actionCount = 3;
     Array.prototype.forEach.call(table.querySelectorAll(".planner-action-rail"), function (rail) {
       actionCount = Math.max(actionCount, rail.querySelectorAll("button,.planner-task-path").length);
     });
     var actionWidth = "calc(" + actionCount + " * var(--commercial-frame-height) + " + (actionCount - 1) + " * var(--commercial-frame-gap))";
-    var notes = widest(".planner-value-frame--notes", 34, 360);
+    // Notes receives only the remaining width; its content must not squeeze other values.
+    var notes = 34;
     table.style.setProperty("--planner-task-width", task + "px");
     table.style.setProperty("--planner-status-width", status + "px");
     table.style.setProperty("--planner-owner-width", owner + "px");
@@ -576,8 +577,19 @@ function displayDate(value) {
       Array.prototype.forEach.call(table.querySelectorAll(".planner-value-frame--task"), function (node) {
         renderedTask = Math.max(renderedTask, node.scrollWidth + 2);
       });
-      if (renderedTask <= currentTask) return;
       table.style.setProperty("--planner-task-width", renderedTask + "px");
+      function fitRendered(selector, width) {
+        Array.prototype.forEach.call(table.querySelectorAll(selector), function (node) {
+          if (node.scrollWidth > node.clientWidth) width = Math.max(width, node.scrollWidth + 2);
+        });
+        return width;
+      }
+      status = fitRendered(".planner-progress-frame", status);
+      owner = fitRendered(".planner-col-owner .planner-value-frame", owner);
+      due = fitRendered(".planner-col-due .planner-value-frame", due);
+      table.style.setProperty("--planner-status-width", status + "px");
+      table.style.setProperty("--planner-owner-width", owner + "px");
+      table.style.setProperty("--planner-due-width", due + "px");
  table.style.setProperty("--planner-table-min-width", "calc(" + (renderedTask + status + owner + due + notes + 56) + "px + var(--planner-action-width))");
     });
   }

@@ -83,8 +83,9 @@ for (const owner of ['NSA', 'EVT']) {
     const pdf = execFileSync('pdftotext', ['-layout', pdfPath, '-'], { encoding: 'utf8' });
     expect(pdf).toContain('SCOPE-END');
     expect(pdf).toContain('$141.00');
-    expect(pdf).toContain('$2,000.00');
-    expect(pdf).toContain('Customer amount payable (inc GST)');
+    expect(pdf).toContain('$155.10');
+    expect(pdf).not.toContain('$2,000.00');
+    expect(pdf).toContain('Estimated work cost (inc GST)');
     for (const pageText of pdf.split('\f').filter((_, index, pages) => index < pages.length - 1)) expect(pageText.trim()).not.toBe('');
     await child.evaluate(() => window.dispatchEvent(new Event('afterprint')));
     await expect(host).toHaveCount(0);

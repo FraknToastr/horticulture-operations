@@ -35,5 +35,5 @@ test("first valid NSA PDF import has no baseline Rate Catalog conflicts", async 
     };
   });
 
-  expect(result).toEqual({ applications: 1, rateItems: 45, receipt: "A3330", status: "received", receivedEvents: 1 });
+  expect(result).toEqual({ applications: 1, rateItems: 47, receipt: "A3330", status: "received", receivedEvents: 1 });
 });

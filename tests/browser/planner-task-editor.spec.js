@@ -59,6 +59,12 @@ test("Planner modal governs task fields and hands one Draft Planner Job to Sched
   })).toBe(true);
   await expect.poll(() => child.evaluate(() => window.UOS.ProgramSchedulerUI.snapshot().detail)).toBe(true);
   await expect(frame.locator('[data-scheduler-form]')).toBeVisible();
+  await expect.poll(() => child.evaluate(() => {
+    const workspace = window.UOS.ProgramApp.workspace();
+    const task = workspace.entities.tasks.find(item => item.title === "Inspect irrigation assets");
+    const jobs = workspace.entities.jobs.filter(item => item.sourceKind === "planner" && item.sourceEntityId === task.id);
+    return jobs.length === 1 && workspace.workspace.scheduler.selectedId === jobs[0].id && workspace.workspace.scheduler.selectedProjectId === task.projectId;
+  })).toBe(true);
   const lineage = await child.evaluate(() => {
     const workspace = window.UOS.ProgramApp.workspace();
     const task = workspace.entities.tasks.find((item) => item.title === "Inspect irrigation assets");

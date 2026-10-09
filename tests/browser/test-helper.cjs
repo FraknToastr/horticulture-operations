@@ -8,4 +8,9 @@ async function suppressBackupModalForFunctionalTest(page) {
   });
 }
 
-module.exports = { suppressBackupModalForFunctionalTest };
+async function startSpaceCreation(frame, kind) {
+  const hub=frame.locator('#spaceRadialToggle');
+  if(await hub.getAttribute('aria-expanded')==='false') await hub.click();
+  await frame.locator('[data-space-create="'+kind+'"]').click();
+}
+module.exports = { suppressBackupModalForFunctionalTest, startSpaceCreation };

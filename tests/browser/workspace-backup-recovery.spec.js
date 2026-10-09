@@ -79,11 +79,11 @@ test("stale revision cannot delete a newer workspace", async ({ browser }) => {
   const context = await browser.newContext();
   const firstPage = await context.newPage();
   const secondPage = await context.newPage();
-  await firstPage.goto("http://127.0.0.1:4199/src/program-planner/nsa.html");
+  await firstPage.goto(new URL("/src/program-planner/nsa.html", test.info().project.use.baseURL).href);
   const first = await programFrame(firstPage);
   const original = await seedOperationalRecord(first, "NSA-APP-REVISION-ONE");
 
-  await secondPage.goto("http://127.0.0.1:4199/src/program-planner/nsa.html");
+  await secondPage.goto(new URL("/src/program-planner/nsa.html", test.info().project.use.baseURL).href);
   const second = await programFrame(secondPage);
   await seedOperationalRecord(first, "NSA-APP-REVISION-TWO");
 

@@ -33,6 +33,17 @@ for (const owner of ['NSA', 'EVT']) {
       await expect(button(name)).toBeDisabled();
       await expect(button(name)).toHaveAttribute('data-shortcut-state', 'inactive');
       await expect(button(name)).toHaveAttribute('data-uos-tooltip', /linked delivery project/);
+      const inactive = await button(name).evaluate(element => {
+        const css = getComputedStyle(element);
+        const row = element.closest('.program-register-summary-row');
+        return { background: css.backgroundColor, projectBackground: getComputedStyle(row.querySelector('.program-register-project-state')).backgroundColor, colour: css.color, opacity: Number(css.opacity) };
+      });
+      expect(inactive.background).not.toBe(inactive.projectBackground);
+      expect(inactive.colour).toBe(await row.evaluate(node => {
+        const probe = document.createElement('span'); probe.style.color = 'var(--uos-text-muted)'; node.append(probe);
+        const colour = getComputedStyle(probe).color; probe.remove(); return colour;
+      }));
+      expect(inactive.opacity).toBeLessThan(1);
       await button(name).evaluate(element => element.click());
       await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().workspace.destination)).toBe('register');
     }

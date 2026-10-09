@@ -54,7 +54,17 @@ for (const owner of ['NSA', 'EVT']) {
     }, owner);
     const frame = page.frameLocator('iframe');
     const radio = mode => frame.locator(`[data-quote-funding-mode][value="${mode}"]`);
+    const agreementPill = frame.locator('[data-funding-agreement-pill]');
     await expect(radio('customer')).toBeChecked();
+    await expect(agreementPill).toHaveText('Proposed');
+    await expect(frame.locator('[data-proposed-coverage-note]')).toHaveCount(0);
+    await expect(frame.locator('[data-funding-label]')).toContainText(' (Proposed coverage (ex GST).)');
+    await expect(frame.locator('[data-funding-label]')).not.toContainText('*');
+    expect(await frame.locator('[data-funding-label]').evaluate(node => { const range = document.createRange(); range.selectNodeContents(node); return new Set([...range.getClientRects()].map(rect => Math.round(rect.top))).size; })).toBe(1);
+    expect(await agreementPill.evaluate(node => {
+      const card = node.closest('[data-funding-card]').getBoundingClientRect(), pill = node.getBoundingClientRect();
+      return pill.top - card.top < 14 && card.right - pill.right < 14;
+    })).toBe(true);
     await expect(frame.locator('[data-city-allocation-note]')).toHaveText('Available — excluded from this Quote');
     await verifyPdf(page, child, owner, 'customer', ['Customer-funded work.', 'Proposed customer contribution', '$100.00', '$10.00', '$110.00']);
     await radio('mixed').check();
@@ -114,6 +124,7 @@ for (const owner of ['NSA', 'EVT']) {
     await expect(frame.getByRole('dialog')).toContainText('Quote Issued');
     await frame.getByRole('dialog').getByRole('button', { name: 'OK', exact: true }).click();
     await expect(frame.locator('[data-customer-agreement]')).toHaveText('— Awaiting acceptance');
+    await expect(agreementPill).toHaveText('Proposed');
     await expect(contribution).toBeDisabled();
     await frame.locator('[data-quote-accept]').click();
     await frame.getByRole('dialog').getByRole('button', { name: 'Accept quote', exact: true }).click();
@@ -121,6 +132,7 @@ for (const owner of ['NSA', 'EVT']) {
     await frame.getByRole('dialog').getByRole('button', { name: 'OK', exact: true }).click();
     await expect.poll(async () => ({ status: await reloaded.evaluate(() => window.UOS.ProgramApp.workspace().entities.quotes[0].status), errors })).toEqual({ status: 'Accepted', errors: [] });
     await expect(frame.locator('[data-customer-agreement]')).toHaveText('— Accepted');
+    await expect(agreementPill).toHaveText('Accepted');
     await reloaded.evaluate(() => window.UOS.ProgramApp.navigate('reports'));
     const fundingReport = frame.locator('[data-reports-funding-body] tr').first();
     await expect(fundingReport.locator('td').nth(5)).toHaveText('Accepted');
@@ -140,7 +152,7 @@ for (const owner of ['NSA', 'EVT']) {
     await expect(frame.locator('[data-deposit-record]')).toBeDisabled();
     await expect(frame.locator('[data-payment-record]')).toBeDisabled();
     await expect(frame.locator('[data-payment-status]')).toHaveText('No customer payment required');
-    await expect(frame.locator('[data-quote-section-3-link]')).toHaveText('3 Notes');
+    await expect(frame.locator('[data-quote-section-3-link]')).toHaveText('3 - Notes');
     await expect(frame.locator('[data-quote-section-3-heading]')).toHaveText('3. Internal Notes');
     await expect(frame.locator('[data-quote-terms-label]')).toHaveText('Internal Notes');
     await expect(frame.locator('.uos-quote-sheet__title')).toHaveText('WORKS ESTIMATE');
@@ -156,6 +168,16 @@ for (const owner of ['NSA', 'EVT']) {
     await expect(radio('city')).toBeVisible();
     const choice = await frame.locator('.program-quote-funding-choice').evaluate(field => ({ width: field.clientWidth, scroll: field.scrollWidth }));
     expect(choice.scroll).toBeLessThanOrEqual(choice.width + 2);
+    await reloaded.evaluate(async projectId => {
+      await UOS.ProgramApp.updateWorkspace(ws => {
+        const quote = ws.entities.quotes.find(q => q.projectId === projectId && q.status === 'Draft');
+        ws = UOS.ProgramQuotes.saveDraft(ws, { id: quote.id, projectId, fundingMode: 'customer' });
+        ws = UOS.ProgramQuotes.issue(ws, quote.id);
+        return UOS.ProgramQuotes.decline(ws, quote.id);
+      });
+    }, projectId);
+    await expect(agreementPill).toHaveText('Rejected');
+    await expect(agreementPill).toHaveAttribute('data-quote-state', 'Declined');
     expect(errors).toEqual([]);
   });
 }

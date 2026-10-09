@@ -277,8 +277,13 @@ function hasLifecycleAction(actions, names) {
     if (useButton) { useButton.hidden = state.fundingMode !== "mixed" || Math.abs(suggestion - num(state.proposedCustomerContribution)) < 0.005; useButton.disabled = locked; }
     var agreement = UOS.ProgramQuotes.agreementStatus(customerQuote());
     Array.prototype.forEach.call(rootNode.querySelectorAll("[data-customer-agreement]"), function (node) { node.textContent = "— " + agreement; });
-    var coverage = rootNode.querySelector("[data-proposed-coverage-note]");
-    if (coverage) coverage.replaceChildren(document.createTextNode("Proposed coverage (ex GST)."), document.createElement("br"), document.createTextNode("Customer Agreement: " + agreement + "."));
+    var agreementPill = rootNode.querySelector("[data-funding-agreement-pill]");
+    if (agreementPill) {
+      var agreementLabel = state.status === "Accepted" ? "Accepted" : state.status === "Declined" ? "Rejected" : "Proposed";
+      agreementPill.textContent = agreementLabel;
+      agreementPill.setAttribute("data-quote-state", agreementLabel === "Proposed" ? "Draft" : state.status);
+      agreementPill.setAttribute("aria-label", "Customer agreement: " + agreementLabel);
+    }
   }
 
   function privacyDisplay(value, semanticField) {
@@ -358,7 +363,7 @@ function hasLifecycleAction(actions, names) {
     var internalNotes = state.fundingMode === "city";
     var section3Link = rootNode.querySelector("[data-quote-section-3-link]");
     if (section3Link) {
-      section3Link.textContent = internalNotes ? "3 Notes" : "3 Terms";
+      section3Link.textContent = internalNotes ? "3 - Notes" : "3 - Terms";
       section3Link.setAttribute("aria-label", internalNotes ? "Section 3: Internal Notes" : "Section 3: Scope and Terms");
     }
     var section3Heading = rootNode.querySelector("[data-quote-section-3-heading]");
@@ -491,7 +496,7 @@ function hasLifecycleAction(actions, names) {
       });
 
       var fundingLabel = rootNode.querySelector("[data-funding-label]");
-      if (fundingLabel) fundingLabel.textContent = funding.label || "Position";
+      if (fundingLabel) fundingLabel.textContent = (funding.label || "Position") + " (Proposed coverage (ex GST).)";
 
       var metricLabel = rootNode.querySelector("[data-funding-metric-label]");
       if (metricLabel) {
@@ -1718,6 +1723,11 @@ function renderPreview() {
     var rail = rootNode.querySelector(".program-quote-section-rail");
     if (!body || !rail) return;
     var headings = [1, 2, 3, 4, 5, 6].map(function (number) { return rootNode.querySelector("#quote-section-" + number); });
+    var cards = headings.map(function (heading) { return heading.closest(".program-quote-card"); });
+    var sectionBuffer = 12;
+    function viewportTop() {
+      return Math.max(body.getBoundingClientRect().top + body.clientTop, rail.parentElement.getBoundingClientRect().bottom);
+    }
     var buttons = Array.prototype.slice.call(rail.querySelectorAll("[data-quote-section-link]"));
     var spacer = document.createElement("div");
     spacer.className = "program-quote-section-scroll-space";
@@ -1732,15 +1742,16 @@ function renderPreview() {
     function update() {
       frame = null;
       if (!body.getClientRects().length || !body.clientHeight) return;
-      var last = headings[5], lastCard = last.closest(".program-quote-card");
+      var lastCard = cards[5];
       var style = getComputedStyle(body);
-      var tail = Math.max(0, body.clientHeight - 12 - (lastCard.getBoundingClientRect().bottom - last.getBoundingClientRect().top) - (parseFloat(style.paddingBottom) || 0) - (parseFloat(style.rowGap) || 0));
+      var hiddenTop = viewportTop() - body.getBoundingClientRect().top - body.clientTop;
+      var tail = Math.max(0, body.clientHeight - hiddenTop - sectionBuffer - lastCard.getBoundingClientRect().height - (parseFloat(style.paddingBottom) || 0) - (parseFloat(style.rowGap) || 0));
       var height = Math.ceil(tail) + "px";
       if (spacer.style.height !== height) spacer.style.height = height;
-      var marker = body.getBoundingClientRect().top + body.clientTop + 12;
+      var marker = viewportTop() + sectionBuffer;
       var current = 0;
-      headings.forEach(function (heading, index) {
-        if (heading.getBoundingClientRect().top <= marker + 1) current = index;
+      cards.forEach(function (card, index) {
+        if (card.getBoundingClientRect().top <= marker + 1) current = index;
       });
       buttons.forEach(function (button, index) {
         if (index === current) button.setAttribute("aria-current", "location");
@@ -1757,8 +1768,8 @@ function renderPreview() {
       event.preventDefault();
       event.stopPropagation();
       update();
-      var heading = headings[Number(button.getAttribute("data-quote-section-link")) - 1];
-      var top = body.scrollTop + heading.getBoundingClientRect().top - body.getBoundingClientRect().top - body.clientTop - 12;
+      var card = cards[Number(button.getAttribute("data-quote-section-link")) - 1];
+      var top = body.scrollTop + card.getBoundingClientRect().top - viewportTop() - sectionBuffer;
       body.scrollTo({ top: Math.max(0, top), behavior: "instant" });
       schedule();
     });

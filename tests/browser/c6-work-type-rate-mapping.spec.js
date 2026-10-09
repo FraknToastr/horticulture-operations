@@ -55,12 +55,7 @@ async function createPolygon(child, projectId, workTypeKey, id) {
 async function openPolygonInspector(frame, geometryId) {
   await frame.locator('[data-program-destination="map"]').click();
   await expect(frame.locator('[data-program-view="map"]')).toBeVisible();
-  const scope = frame.locator('[data-map-scope="projects"]');
-  await scope.click();
-  await expect(scope).toHaveAttribute("aria-pressed", "true");
-  const projectCard = frame.locator('#eventPickerList [data-event-card-id]').first();
-  await expect(projectCard).toBeVisible();
-  await projectCard.locator('[data-edit-event-id]').click();
+  await frame.locator('[data-space-expand="'+geometryId+'"]').click();
   const shapeCard = frame.locator(`[data-shape-card-id="${geometryId}"]`);
   await expect(shapeCard).toBeVisible();
   return shapeCard;
@@ -222,6 +217,8 @@ test("C6-BR-DUAL-01: Adding a dual-path Rate creates one row whose Map button ad
   await expect(mapAdd).toBeVisible();
   await expect(mapAdd).toHaveAttribute("aria-label", /Also available through mapped polygons/);
   await mapAdd.click();
+  await frame.locator('[data-costing-area-form] [name="area"]').fill("10");
+  await frame.locator('[data-costing-area-form] [type="submit"]').click();
   await expect.poll(() => child.evaluate((rateId) => {
     const line = window.UOS.ProgramApp.workspace().entities.costingLines.find((item) => item.rateItemId === rateId);
     return line ? { sourceKind: line.sourceKind, sourceGeometryId: line.sourceGeometryId } : null;
@@ -273,7 +270,7 @@ test("C6-BR-04: choose m² pricing for an Aeration polygon", async ({ page }) =>
   const shapeCard = await openPolygonInspector(frame, geometryId);
   const rateSelect = shapeCard.locator('[data-shape-rate]');
 
-  await expect(rateSelect).toHaveValue("");
+  await expect(rateSelect).toHaveValue(rates.m2);
   await rateSelect.selectOption(rates.m2);
   await expect(shapeCard.locator('[data-create-shape-job]')).toBeEnabled();
   await shapeCard.locator('[data-create-shape-job]').click();
@@ -296,6 +293,7 @@ test("C6-BR-05: choose hectare pricing and convert the same canonical measuremen
   const geometryId = await createPolygon(child, projectId, "aerate", "NSA-GEO-C6-BR05");
   const shapeCard = await openPolygonInspector(frame, geometryId);
 
+  await shapeCard.locator('[data-shape-pricing-unit]').selectOption('ha');
   await shapeCard.locator('[data-shape-rate]').selectOption(rates.ha);
   await shapeCard.locator('[data-create-shape-job]').click();
   await expect.poll(() => polygonCommercialState(child, geometryId)).toMatchObject({
@@ -325,6 +323,7 @@ test("C6-BR-06: switch pricing basis before Issue without changing geometry", as
     unit: "m²"
   });
   const before = await polygonCommercialState(child, geometryId);
+  await shapeCard.locator('[data-shape-pricing-unit]').selectOption('ha');
   await rateSelect.selectOption(rates.ha);
   await expect.poll(() => polygonCommercialState(child, geometryId)).toMatchObject({
     geometryRateItemId: rates.ha,
@@ -347,10 +346,11 @@ test("C6-BR-07: multiple eligible pricing options are visible and understandable
   const shapeCard = await openPolygonInspector(frame, geometryId);
   const rateSelect = shapeCard.locator('[data-shape-rate]');
 
-  await expect(rateSelect).toHaveValue("");
+  await expect(rateSelect).toHaveValue(rates.m2);
   await expect(rateSelect.locator(`option[value="${rates.m2}"]`)).toContainText(/Aeration fine area.*\$0\.10.*m²/);
+  await shapeCard.locator('[data-shape-pricing-unit]').selectOption('ha');
   await expect(rateSelect.locator(`option[value="${rates.ha}"]`)).toContainText(/Aeration hectare area.*\$300\.00.*ha/);
-  await expect(shapeCard.locator('[data-create-shape-job]')).toBeDisabled();
+  await expect(shapeCard.locator('[data-create-shape-job]')).toBeEnabled();
 });
 
 test("C6-BR-08: inactive and incompatible Rate Items are unavailable", async ({ page }) => {
@@ -362,10 +362,11 @@ test("C6-BR-08: inactive and incompatible Rate Items are unavailable", async ({ 
   const rateSelect = shapeCard.locator('[data-shape-rate]');
 
   await expect(rateSelect.locator(`option[value="${rates.m2}"]`)).toHaveCount(1);
+  await shapeCard.locator('[data-shape-pricing-unit]').selectOption('ha');
   await expect(rateSelect.locator(`option[value="${rates.ha}"]`)).toHaveCount(1);
   await expect(rateSelect.locator(`option[value="${rates.inactive}"]`)).toHaveCount(0);
   await expect(rateSelect.locator(`option[value="${rates.direct}"]`)).toHaveCount(0);
- await expect(shapeCard.locator('[data-create-shape-job]')).toBeDisabled();
+ await expect(shapeCard.locator('[data-create-shape-job]')).toBeEnabled();
 });
 
 test("C6-BR-09: polygon-derived Calculator controls are locked while manual controls remain editable", async ({ page }) => {

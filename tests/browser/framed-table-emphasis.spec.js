@@ -23,7 +23,8 @@ async function emphasis(row) {
 async function checkSelectionAndIndependentHover(page, first, second) {
   await page.mouse.move(0, 0);
   await first.locator('input,select,button').evaluateAll(nodes => nodes.forEach(node => node.blur()));
-  const baseline = await emphasis(first);
+  let baseline;
+  await expect.poll(async()=>{baseline=await emphasis(first);return baseline.backgrounds.every(fill=>["rgba(0, 0, 0, 0)","rgb(255, 255, 255)"].includes(fill));}).toBe(true);
   baseline.backgrounds.forEach(fill => expect(['rgba(0, 0, 0, 0)', 'rgb(255, 255, 255)']).toContain(fill));
   await first.locator('td').first().hover();
   await expect.poll(async () => (await emphasis(first)).frames.every(frame => frame.border === 'rgb(74, 222, 128)')).toBe(true);

@@ -212,6 +212,12 @@ function rateStructureChanged(existing, next) {
     });
     return commit(result);
   }
+  function depsAreaRate(rate) { return dependencies().model.isSpatiallyCompatibleRate(rate); }
+  function areaQuantity(rate, measurements) {
+    if (dependencies().model.isSpatiallyCompatibleRate(rate)) return dependencies().model.spatialQuantityForRate(rate, measurements && measurements.areaSqM);
+    return dependencies().rates.deriveQuantity(rate.quantityKind || MODE_TO_KIND[quantityMode(rate.quantityMode, rate.unit)], measurements);
+  }
+
   function createLine(inputWorkspace, rateItemId, measurements, options) {
     options = options || {};
     var result = workspace(inputWorkspace);
@@ -242,7 +248,7 @@ function rateStructureChanged(existing, next) {
       return dependencies().rates.calculateLine({
         id: rate.id, owner: targetOwner, category: rate.category, description: rate.description || rate.title,
         unit: rate.unit, unitRate: rate.unitRate, active: true, quantityKind: MODE_TO_KIND[mode]
- }, sourceMeasurements, { id: options.id, owner: targetOwner, discriminator: candidate, sourceGeometryId: sourceGeometryId, quantityOverride: options.quantityOverride });
+ }, sourceMeasurements, { id: options.id, owner: targetOwner, discriminator: candidate, sourceGeometryId: sourceGeometryId, quantityOverride: options.quantityOverride == null && depsAreaRate(rate) ? areaQuantity(rate, sourceMeasurements) : options.quantityOverride });
     }
     var line = calculate(discriminator || "line-" + sequence);
     while (!options.id && result.entities.costingLines.some(function (item) { return item.id === line.id; })) {
@@ -252,7 +258,9 @@ function rateStructureChanged(existing, next) {
     if (result.entities.costingLines.some(function (item) { return item.id === line.id; })) throw new Error('Costing line id "' + line.id + '" already exists.');
     line.jobId = job ? job.id : null;
     line.assignmentState = job ? "Assigned" : "Unassigned";
+    line.estimatedTotal = money(line.quantity * line.unitRate);
     line.projectId = project.id;
+    if (depsAreaRate(rate) && sourceMeasurements.areaSqM != null) line.sourceAreaSqM = nonNegative(sourceMeasurements.areaSqM, "Area");
  line.kind = CATEGORIES.indexOf(rate.kind) >= 0 ? rate.kind : "Equipment";
     line.applicationId = project.applicationId || null;
     line.eventId = project.eventId || null;
@@ -336,7 +344,7 @@ function rateStructureChanged(existing, next) {
         Object.assign(line, lineageFields);
       }
       if (geometry) {
-        var quantity = options.quantityOverride == null ? dependencies().rates.deriveQuantity(rate.quantityKind || MODE_TO_KIND[quantityMode(rate.quantityMode, rate.unit)], measurements) : options.quantityOverride;
+        var quantity = options.quantityOverride == null ? areaQuantity(rate, measurements) : options.quantityOverride;
         line.quantity = Math.round(nonNegative(quantity, "Quantity") * 1000000) / 1000000;
         line.estimatedTotal = money(line.quantity * line.unitRate);
         if (options.sourceAreaSqM !== undefined) line.sourceAreaSqM = options.sourceAreaSqM;
@@ -431,9 +439,19 @@ function rateStructureChanged(existing, next) {
     var line = find(result.entities.costingLines, text(lineId), "Costing line");
     changes = object(changes) ? changes : {};
     var previousJobId = line.jobId;
+    var canonicalArea = line.sourceAreaSqM;
+    if (canonicalArea != null && changes.quantity !== undefined) {
+      var divisor = dependencies().model.spatialQuantityForRate({ unit: line.unit, quantityMode: "m2", active: true }, 1);
+      canonicalArea = nonNegative(changes.quantity, "Quantity") / divisor;
+    }
     if (changes.quantity !== undefined) line.quantity = nonNegative(changes.quantity, "Quantity");
     if (changes.unitRate !== undefined) line.unitRate = money(nonNegative(changes.unitRate, "Unit rate"));
     if (changes.unit !== undefined) line.unit = text(changes.unit);
+    if (canonicalArea != null) {
+      line.sourceAreaSqM = canonicalArea;
+      line.quantity = dependencies().model.spatialQuantityForRate({ unit: line.unit, quantityMode: "m2", active: true }, canonicalArea);
+      line.calculation = line.calculation || {}; line.calculation.inputs = Object.assign({}, line.calculation.inputs, { areaSqM: canonicalArea });
+    }
     if (changes.title !== undefined) line.title = text(changes.title);
     line.estimatedTotal = money(line.quantity * line.unitRate);
     syncJobEstimate(result, previousJobId);
@@ -454,6 +472,7 @@ function rateStructureChanged(existing, next) {
     line.category = rate.category;
     line.unit = rate.unit;
     line.unitRate = money(nonNegative(rate.unitRate, "Unit rate"));
+    if (line.sourceAreaSqM != null && depsAreaRate(rate)) line.quantity = areaQuantity(rate, { areaSqM: line.sourceAreaSqM });
     line.estimatedTotal = money(line.quantity * line.unitRate);
     line.snapshotRefreshedAt = new Date().toISOString();
     syncJobEstimate(result, line.jobId);

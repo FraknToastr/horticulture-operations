@@ -259,8 +259,8 @@
  return Object.freeze({ eligibleRateItemIds: ids, defaultRateItemId: defaultRateItemId || null });
  }
  var CANONICAL_WORK_TYPE_RATE_ITEMS = Object.freeze({
- turfing: freezeWorkTypeRateMapping(["RATE-TURFING"], "RATE-TURFING"),
- aerate: freezeWorkTypeRateMapping(["RATE-AERATION"], "RATE-AERATION")
+ turfing: freezeWorkTypeRateMapping(["RATE-TURFING", "RATE-TURFING-HA"], "RATE-TURFING"),
+ aerate: freezeWorkTypeRateMapping(["RATE-AERATION", "RATE-AERATION-HA"], "RATE-AERATION")
  });
 
  function normalizeWorkTypeRateMappingEntry(value) {
@@ -336,7 +336,7 @@
   }
   if (ACTIVE_OWNER) referenceData[ACTIVE_OWNER] = {};
     else { referenceData.NSA = {}; referenceData.EVT = {}; }
-    return {
+    var result = {
     app: APP_ID,
     workspaceKind: WORKSPACE_KIND || undefined,
     schemaVersion: SCHEMA_VERSION,
@@ -356,6 +356,7 @@
       },
       migration: { status: "not-started", migratedAt: "", sources: [], warnings: [] }
     };
+    return recoverAreaPricing(result);
   }
   
   function coordinateValid(value) {
@@ -648,6 +649,76 @@ return target;
  });
  result.referenceData.shared.workTypeRateItems = mappings;
  }
+  function recoverAreaPricing(result) {
+    var rates = result.entities.rateItems;
+    var mappings = result.referenceData.shared.workTypeRateItems;
+    var legacyTypes = { "RATE-TURFING": "turfing", "RATE-AERATION": "aerate", "RATE-1C7Q6H6": "fertilise", "RATE-1HLJI7U": "topdressing", "RATE-0DLVIOB": "rolling" };
+    var recovery = result.migration.areaPricingRecovery || { version: 1, seededRateIds: [], repairedRateIds: [], warnings: [] };
+    result.migration.areaPricingRecovery = recovery;
+    function warn(message) { if (recovery.warnings.indexOf(message) < 0) recovery.warnings.push(message); }
+    function referenced(id) { return ["jobs", "costingLines", "quoteLines"].some(function (name) { return result.entities[name].some(function (line) { return line.rateItemId === id || line.sourceRateItemId === id; }); }); }
+    function typeFor(rate) {
+      var sourceId = text(rate.provenance && rate.provenance.sourceId).replace(/-ESTIMATED$/, "");
+      return rate.provenance && rate.provenance.migrationKind === "catalog-rate-clone" ? legacyTypes[sourceId] : legacyTypes[rate.id];
+    }
+    function areaUnit(rate) { return ["m²", "m2", "sqm", "ha", "hectare", "hectares", "km²", "km2"].indexOf(text(rate.unit).toLowerCase()) >= 0; }
+    rates.forEach(function (rate) {
+      if (!typeFor(rate) || !areaUnit(rate) || isSpatiallyCompatibleRate(rate) || rate.active === false || text(rate.status).toLowerCase() === "inactive") return;
+      if (referenced(rate.id)) { warn('Rate "' + rate.id + '" needs a new area-compatible version; historical references were preserved.'); return; }
+      rate.quantityMode = "m2"; rate.quantityKind = "area";
+      rate.payload = object(rate.payload) ? rate.payload : {};
+      rate.payload.quantityMode = "m2"; rate.payload.quantityKind = "area";
+      if (recovery.repairedRateIds.indexOf(rate.id) < 0) recovery.repairedRateIds.push(rate.id);
+    });
+    Object.keys(mappings).forEach(function (key) {
+      var entry = normalizeWorkTypeRateMappingEntry(mappings[key]);
+      function resolve(id) {
+        if (rates.some(function (rate) { return rate.id === id; })) return id;
+        var matches = rates.filter(function (rate) { return rate.provenance && rate.provenance.migrationKind === "catalog-rate-clone" && rate.provenance.sourceId === id; });
+        if (matches.length === 1) return matches[0].id;
+        if (/-HA$/.test(id)) {
+          var sources = rates.filter(function (rate) { return rate.provenance && rate.provenance.migrationKind === "catalog-rate-clone" && rate.provenance.sourceId === id.slice(0, -3); });
+          if (sources.length === 1) return sources[0].id + "-HA";
+        }
+        if (matches.length > 1) warn('Ambiguous legacy pricing rate "' + id + '" was not remapped.');
+        return id;
+      }
+      entry.eligibleRateItemIds = entry.eligibleRateItemIds.map(resolve).filter(function (id, index, ids) { return ids.indexOf(id) === index; });
+      entry.defaultRateItemId = entry.defaultRateItemId ? resolve(entry.defaultRateItemId) : null;
+      mappings[key] = entry;
+    });
+    rates.slice().forEach(function (rate) {
+      var key = typeFor(rate);
+      if (!key || !isSpatiallyCompatibleRate(rate)) return;
+      var estimated = text(rate.measurementSource) === "estimated";
+      if (!estimated && !Object.prototype.hasOwnProperty.call(mappings, key)) mappings[key] = { eligibleRateItemIds: [rate.id], defaultRateItemId: rate.id };
+      var entry = mappings[key];
+      var mapped = !estimated && entry && entry.eligibleRateItemIds.indexOf(rate.id) >= 0;
+      if (!mapped && !estimated) return;
+      if (["m²", "m2", "sqm"].indexOf(text(rate.unit).toLowerCase()) < 0) return;
+      var id = rate.id + "-HA";
+      var counterpart = rates.find(function (item) { return item.id === id; });
+      if (!counterpart && mapped) counterpart = rates.find(function (item) {
+        return entry.eligibleRateItemIds.indexOf(item.id) >= 0 && isSpatiallyCompatibleRate(item)
+          && ["ha", "hectare", "hectares"].indexOf(text(item.unit).toLowerCase()) >= 0
+          && text(item.measurementSource) === text(rate.measurementSource);
+      });
+      if (!counterpart) {
+        if (recovery.seededRateIds.indexOf(id) >= 0) return;
+        counterpart = clone(rate); counterpart.id = id; counterpart.unit = "ha";
+        counterpart.unitRate = Math.round(Number(rate.unitRate) * 2500 * 100) / 100;
+        counterpart.quantityMode = "m2"; counterpart.quantityKind = "area";
+        counterpart.payload = Object.assign({}, counterpart.payload, { unit: "ha", unitRate: counterpart.unitRate, quantityMode: "m2", quantityKind: "area" });
+        counterpart.provenance = Object.assign({}, counterpart.provenance, { sourceApp: "uos.area-pricing", sourceId: rate.id, migrationKind: "hectare-price-seed" });
+        counterpart.pricingSeed = { sourceRateItemId: rate.id, multiplier: 2500 };
+        rates.push(counterpart); recovery.seededRateIds.push(id);
+      }
+      if (counterpart.id === id && recovery.seededRateIds.indexOf(id) < 0) recovery.seededRateIds.push(id);
+      if (mapped && isSpatiallyCompatibleRate(counterpart) && entry.eligibleRateItemIds.indexOf(counterpart.id) < 0) entry.eligibleRateItemIds.push(counterpart.id);
+    });
+    return result;
+  }
+
   function canonicalizeRates(result) {
     var aliases = {}, canonical = {}, items = [];
     result.entities.rateItems.forEach(function (item) {
@@ -1043,6 +1114,7 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
     canonicalizePlannerTasks(result);
     canonicalizeChecklistLabels(result);
     canonicalizeRates(result);
+    recoverAreaPricing(result);
     canonicalizeQuoteAudit(result);
     var errors = validate(result);
     if (errors.length) throw new Error("Invalid unified workspace:\n- " + errors.join("\n- "));

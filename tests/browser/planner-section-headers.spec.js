@@ -141,5 +141,5 @@ test("Register exposes Project state and Locator exposes Metromaps", async ({ pa
   const frame = page.frameLocator("iframe");
   await expect(frame.locator(".program-register-table thead th.program-register-table__project-col")).toHaveText("Project");
   await frame.locator('[data-program-destination="map"]').click();
-  await expect(frame.locator("#providerSelect option[value=metromaps]")).toHaveText("Metromaps");
+  await expect(frame.locator("#providerSelect")).toHaveCount(0);
 });

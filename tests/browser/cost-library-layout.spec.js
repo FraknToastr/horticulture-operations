@@ -68,7 +68,7 @@ test("Cost Library gives Description a readable dominant column and adds rates f
     // remain the larger text column without assuming the old narrow category.
     expect(widths[1]).toBeGreaterThan(widths[0]);
     expect(widths[1]).toBeGreaterThan(widths[3] * 2.75);
-    const add = table.locator('[data-costing-add-rate]:not([disabled])').first();
+    const add = table.locator('[data-costing-add-rate]:not([disabled]):not(.program-rate-btn--map)').first();
     await expect(add).toBeEnabled();
     const addFitsActionCell = await add.evaluate((button) => {
       const cell = button.closest("td");
@@ -80,6 +80,12 @@ test("Cost Library gives Description a readable dominant column and adds rates f
     });
     expect(addFitsActionCell).toBe(true);
     await add.click();
+    const areaForm=frame.locator('[data-costing-area-form]');
+    if(await areaForm.isVisible()){
+      await areaForm.locator('[name="area"]').fill('1');
+      await areaForm.locator('[name="areaUnit"]').selectOption('m²');
+      await areaForm.locator('[type="submit"]').click();
+    }
     await expect(frame.locator("[data-costing-error]")).toBeHidden();
     await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(index + 1);
     await expect.poll(async () => frame.locator('[data-costing-lines] [data-costing-line-quantity]').count()).toBe(index + 1);

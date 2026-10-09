@@ -1741,7 +1741,7 @@ body.uos-rail-collapsed .program-nav-group {
     min-height: 100% !important;
     overflow: auto !important;
   }
-  .program-map-workspace,
+  .program-map-workspace:not(.space-editor),
   .program-planner-workspace,
   .program-register-layout,
   .program-scheduler-layout {
@@ -1751,11 +1751,11 @@ body.uos-rail-collapsed .program-nav-group {
     grid-template-rows: auto auto !important;
     overflow: visible !important;
   }
-  .program-map-sidebar,
+  .program-map-sidebar:not(.space-editor__sidebar),
   .program-register-pane,
   .program-planner-sidebar,
   .program-scheduler-inspector,
-  .program-map-canvas-container,
+  .program-map-canvas-container:not(.space-editor__canvas),
   .program-register-main-pane,
   .program-planner-main-pane,
   .program-scheduler-calendar {
@@ -2606,14 +2606,12 @@ body.uos-rail-collapsed .program-nav-group {
 }
 
 /* 5. Space Map Nature Mode Action Buttons */
-.is-nature-mode #startDrawingButton,
 .is-nature-mode .program-map-canvas-header .uos-button--primary {
   background: #15803d !important;
   border-color: #166534 !important;
   color: #ffffff !important;
 }
 
-.is-nature-mode #startDrawingButton:hover,
 .is-nature-mode .program-map-canvas-header .uos-button--primary:hover {
   background: #166534 !important;
   border-color: #14532d !important;
@@ -3254,7 +3252,8 @@ body.program-planner,
   border-right: 0;
 }
 
-.program-register-nsa-summary-group:not(:last-child)::after {
+.program-register-nsa-summary-group:not(:last-child)::after,
+.program-register-nsa-main-grid > .program-register-nsa-section--delivery::after {
   position: absolute;
   top: 18px;
   right: 0;
@@ -3771,7 +3770,8 @@ body.program-planner,
   .program-register-nsa-summary-group--status {
     grid-template-columns: minmax(0, 1fr);
   }
-  .program-register-nsa-summary-group::after {
+  .program-register-nsa-summary-group::after,
+  .program-register-nsa-main-grid > .program-register-nsa-section--delivery::after {
     display: none;
   }
   .program-register-nsa-section--applicant dl > div,
@@ -3791,7 +3791,7 @@ body.program-planner,
 /* Authoritative selected/focused entity prominence across every module. */
 :is(
   [data-event-card-id],
-  [data-shape-card-id],
+  .program-shape-card[data-shape-card-id],
   [data-planner-project-id],
   [data-costing-project-id],
   [data-scheduler-project],
@@ -3803,7 +3803,7 @@ body.program-planner,
 
 :is(
   [data-event-card-id],
-  [data-shape-card-id],
+  .program-shape-card[data-shape-card-id],
   [data-planner-project-id],
   [data-costing-project-id],
   [data-scheduler-project],
@@ -3815,7 +3815,7 @@ body.program-planner,
 
 :is(
   [data-event-card-id],
-  [data-shape-card-id],
+  .program-shape-card[data-shape-card-id],
   [data-planner-project-id],
   [data-costing-project-id],
   [data-scheduler-project],
@@ -3827,7 +3827,7 @@ body.program-planner,
 
 :is(
   [data-event-card-id],
-  [data-shape-card-id],
+  .program-shape-card[data-shape-card-id],
   [data-planner-project-id],
   [data-costing-project-id],
   [data-scheduler-project],
@@ -3850,7 +3850,7 @@ body.program-planner,
 
 :is(
   [data-event-card-id],
-  [data-shape-card-id],
+  .program-shape-card[data-shape-card-id],
   [data-planner-project-id],
   [data-costing-project-id],
   [data-scheduler-project],
@@ -3870,7 +3870,7 @@ body.program-planner,
 @media (prefers-reduced-motion: reduce) {
 :is(
   [data-event-card-id],
-    [data-shape-card-id],
+    .program-shape-card[data-shape-card-id],
     [data-planner-project-id],
     [data-costing-project-id],
     [data-scheduler-project],
@@ -3989,8 +3989,10 @@ body.program-planner,
 }
 
 .program-register-nsa-main-grid > .program-register-nsa-section--delivery {
+  position: relative;
   grid-column: 3;
   grid-row: 1;
+  border-right: 0;
 }
 
 .program-register-nsa-main-grid > .program-register-nsa-section--timeline {
@@ -5150,7 +5152,7 @@ html[data-suite-theme="dark"] .program-scheduler-modes button.is-active {
 .uos-button--sm { min-height: 28px; padding: 2px 8px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .uos-field--sm select { min-height: 28px; padding: 2px 20px 2px 6px; font-size: 11px; }
 .program-draw-modes, .program-map-toggles { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
-.program-map-canvas-container { position: relative; }
+.program-map-canvas-container:not(.space-editor__canvas) { position: relative; }
 .program-map-floating-draw-toolbar {
   position: absolute;
   z-index: 12;
@@ -5221,9 +5223,9 @@ html[data-suite-theme="dark"] .program-scheduler-modes button.is-active {
   color: #12653a !important;
   box-shadow: inset 0 0 0 1px #15803d;
 }
-.program-shape-card__controls + .program-shape-actions { margin-top: 14px; }
-.program-map-workspace { min-height: 0; min-width: 0; display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: var(--panel-gap); height: 100%; width: 100%; align-items: stretch; align-content: stretch; box-sizing: border-box; }
-.program-map-sidebar { min-height: 0; min-width: 0; height: 100%; width: 100%; align-self: stretch; display: flex !important; flex-direction: column !important; border: 1px solid var(--panel-border); border-radius: var(--panel-radius); background: var(--panel-bg); box-sizing: border-box; overflow: hidden; }
+.program-shape-card__controls + .program-shape-actions { margin-top: 8px; }
+.program-map-workspace:not(.space-editor) { min-height: 0; min-width: 0; display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: var(--panel-gap); height: 100%; width: 100%; align-items: stretch; align-content: stretch; box-sizing: border-box; }
+.program-map-sidebar:not(.space-editor__sidebar) { min-height: 0; min-width: 0; height: 100%; width: 100%; align-self: stretch; display: flex !important; flex-direction: column !important; border: 1px solid var(--panel-border); border-radius: var(--panel-radius); background: var(--panel-bg); box-sizing: border-box; overflow: hidden; }
 .program-map-sidebar__head { display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 0 16px; border-bottom: 1px solid var(--panel-border); background: var(--panel-bg); }
 .program-map-search-wrap { width: 100%; }
 .program-map-search { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid var(--panel-border); border-radius: 6px; background: var(--uos-surface-muted); transition: border-color .15s ease; }
@@ -6194,8 +6196,17 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   border-color: var(--panel-border, #334155);
   color: var(--uos-text-muted, #94a3b8);
 }
-.program-shape-actions { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.program-map-canvas-container {
+.program-shape-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.program-shape-actions--labelled { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+.program-shape-actions--labelled .uos-button { min-width:0; padding-inline:8px; }
+.program-shape-card { --polygon-button-height:var(--uos-control-height,34px); }
+.program-shape-card button.uos-button { box-sizing:border-box; height:var(--polygon-button-height); min-height:var(--polygon-button-height); padding-block:0; }
+.program-shape-actions--icons .uos-button { width:var(--polygon-button-height); min-width:var(--polygon-button-height); padding:0; }
+.program-polygon-placement { display:grid; gap:8px; margin-top:8px; padding:12px; border:1px solid var(--uos-border); border-radius:var(--uos-radius-panel); background:var(--uos-surface); }
+.program-polygon-placement p { margin:0; }
+.program-polygon-placement__actions { display:flex; flex-wrap:wrap; gap:8px; }
+@media(pointer:coarse) { .program-shape-card { --polygon-button-height:44px; } }
+.program-map-canvas-container:not(.space-editor__canvas) {
   min-height: 380px;
   height: 100%;
   border: 1px solid var(--panel-border);
@@ -6599,103 +6610,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   transition: background-color 0.15s ease;
 }
 
-/* Status Hues (Strengthened Color Tints & 5px Edge Accent Bars) */
-/* 1. Complete: Vibrant Green tint */
-.planner-item-row[data-status-slug="complete"],
-.planner-item-row[data-status-slug="complete"] td,
-.planner-desc-row[data-status-slug="complete"] td {
-  background: #dcfce7 !important;
-}
-
-.planner-item-row[data-status-slug="complete"] td:first-child,
-.planner-desc-row[data-status-slug="complete"] td:first-child {
-  box-shadow: inset 5px 0 0 #15803d !important;
-}
-
-.planner-item-row[data-status-slug="complete"]:hover td {
-  background: #bbf7d0 !important;
-}
-
-/* 2. In Progress: Vibrant Blue tint */
-.planner-item-row[data-status-slug="in-progress"],
-.planner-item-row[data-status-slug="in-progress"] td,
-.planner-desc-row[data-status-slug="in-progress"] td {
-  background: #dbeafe !important;
-}
-
-.planner-item-row[data-status-slug="in-progress"] td:first-child,
-.planner-desc-row[data-status-slug="in-progress"] td:first-child {
-  box-shadow: inset 5px 0 0 #1d4ed8 !important;
-}
-
-.planner-item-row[data-status-slug="in-progress"]:hover td {
-  background: #bfdbfe !important;
-}
-
-/* 3. Planned: Vibrant Indigo tint */
-.planner-item-row[data-status-slug="planned"],
-.planner-item-row[data-status-slug="planned"] td,
-.planner-desc-row[data-status-slug="planned"] td {
-  background: #e0e7ff !important;
-}
-
-.planner-item-row[data-status-slug="planned"] td:first-child,
-.planner-desc-row[data-status-slug="planned"] td:first-child {
-  box-shadow: inset 5px 0 0 #4338ca !important;
-}
-
-.planner-item-row[data-status-slug="planned"]:hover td {
-  background: #c7d2fe !important;
-}
-
-/* 4. On Hold: Vibrant Amber tint */
-.planner-item-row[data-status-slug="on-hold"],
-.planner-item-row[data-status-slug="on-hold"] td,
-.planner-desc-row[data-status-slug="on-hold"] td {
-  background: #fef3c7 !important;
-}
-
-.planner-item-row[data-status-slug="on-hold"] td:first-child,
-.planner-desc-row[data-status-slug="on-hold"] td:first-child {
-  box-shadow: inset 5px 0 0 #d97706 !important;
-}
-
-.planner-item-row[data-status-slug="on-hold"]:hover td {
-  background: #fde68a !important;
-}
-
-/* 4. Not Started: Pure White background & white accent bar */
-.planner-item-row[data-status-slug="not-started"],
-.planner-item-row[data-status-slug="not-started"] td,
-.planner-desc-row[data-status-slug="not-started"] td {
-  background: #ffffff !important;
-}
-
-.planner-item-row[data-status-slug="not-started"] td:first-child,
-.planner-desc-row[data-status-slug="not-started"] td:first-child {
-  box-shadow: inset 4px 0 0 #ffffff !important;
-}
-
-.planner-item-row[data-status-slug="not-started"]:hover td {
-  background: #f8fafc !important;
-}
-
-/* 5. N/A: Distinct Muted Grey tint */
-.planner-item-row[data-status-slug="n-a"],
-.planner-item-row[data-status-slug="n-a"] td,
-.planner-desc-row[data-status-slug="n-a"] td {
-  background: #e2e8f0 !important;
-}
-
-.planner-item-row[data-status-slug="n-a"] td:first-child,
-.planner-desc-row[data-status-slug="n-a"] td:first-child {
-  box-shadow: inset 5px 0 0 #94a3b8 !important;
-}
-
-.planner-item-row[data-status-slug="n-a"]:hover td {
-  background: #cbd5e1 !important;
-}
-
+/* Progress colours belong to value frames, not rows or left-edge accents. */
 .planner-task-cell {
   display: flex;
   align-items: center;
@@ -7023,6 +6938,9 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   text-align: center;
   letter-spacing: 0.3px;
 }
+.program-funding-gap__head--position { justify-content: space-between; gap: 8px; }
+.program-funding-gap__head--position > [data-funding-label] { flex: 1; min-width: 0; }
+.program-funding-gap__head--position > .program-quote-status-pill { flex: 0 0 auto; margin-left: auto; }
 .program-funding-gap__metric { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 8px; text-align: center; }
 .program-funding-gap__metric + .program-funding-gap__metric { border-left: 1px solid var(--program-owner-border, var(--panel-border, #cbd5e1)); }
 .program-funding-gap span { font-size: 11px; line-height: 1.2; font-weight: 700; text-align: center; color: var(--uos-text-muted, #475569); }
@@ -7044,9 +6962,19 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   background: #ffffff;
   padding: 14px;
 }
+.program-quote-pane-body > .program-quote-card:not(.program-quote-history) {
+  border-color: color-mix(in srgb, var(--uos-border-strong, #bdc8d6) 70%, var(--uos-text, #0f172a));
+}
 
 .program-quote-card__head {
   margin-bottom: 12px;
+}
+.program-quote-pane-body > .program-quote-card:not(.program-quote-history) > .program-quote-card__head {
+  margin: -14px -14px 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--uos-border-strong, #bdc8d6);
+  border-radius: 5px 5px 0 0;
+  background: var(--uos-surface-muted, #e2e8f0);
 }
 
 .program-quote-card__head h4 {
@@ -7389,7 +7317,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   flex: 0 1 auto;
   width: max-content;
   max-width: 100%;
-  min-width: 0;
+  min-width: min(100%, 410px);
   margin-inline-start: auto;
 }
 
@@ -7535,7 +7463,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
   box-sizing: border-box !important;
 }
 
-.program-map-workspace,
+.program-map-workspace:not(.space-editor),
 .program-planner-workspace,
 .program-register-layout,
 .program-scheduler-layout {
@@ -7553,7 +7481,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
 }
 
 /* Small Panes (Left Sidebars): Locked strictly to 400px width and 100% height */
-.program-map-sidebar,
+.program-map-sidebar:not(.space-editor__sidebar),
 .program-register-pane,
 .program-planner-sidebar,
 .program-scheduler-inspector {
@@ -7571,7 +7499,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
 }
 
 /* Large Panes (Right Main Panels): Locked strictly to 100% width and 100% height */
-.program-map-canvas-container,
+.program-map-canvas-container:not(.space-editor__canvas),
 .program-register-main-pane,
 .program-planner-main-pane,
 .program-scheduler-calendar {
@@ -7590,9 +7518,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
 .program-map-event-list:not([hidden]),
 .program-map-shape-list:not([hidden]),
 .program-table-wrap:not([hidden]),
-#plannerPickerList:not([hidden]),
-#eventPickerList:not([hidden]),
-#shapeList:not([hidden]) {
+#plannerPickerList:not([hidden]) {
   flex: 1 1 auto !important;
   min-height: 0 !important;
   height: 100% !important;
@@ -7762,13 +7688,13 @@ section[data-program-view="data"] {
 }
 
 @media (min-width: 761px) and (max-width: 1100px) {
-  .program-map-workspace,
+  .program-map-workspace:not(.space-editor),
   .program-planner-workspace,
   .program-register-layout,
   .program-scheduler-layout {
     grid-template-columns: 320px minmax(0, 1fr) !important;
   }
-  .program-map-sidebar,
+  .program-map-sidebar:not(.space-editor__sidebar),
   .program-register-pane,
   .program-planner-sidebar,
   .program-scheduler-inspector {
@@ -7796,7 +7722,7 @@ section[data-program-view="data"] {
   .program-persistence > span:not(.program-persistence__dot),
   .program-persistence button { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
   .program-canvas { height: auto !important; min-height: 100% !important; overflow: auto !important; }
-  .program-map-workspace,
+  .program-map-workspace:not(.space-editor),
   .program-planner-workspace,
   .program-register-layout,
   .program-scheduler-layout {
@@ -7806,11 +7732,11 @@ section[data-program-view="data"] {
     grid-template-rows: auto auto !important;
     overflow: visible !important;
   }
-  .program-map-sidebar,
+  .program-map-sidebar:not(.space-editor__sidebar),
   .program-register-pane,
   .program-planner-sidebar,
   .program-scheduler-inspector,
-  .program-map-canvas-container,
+  .program-map-canvas-container:not(.space-editor__canvas),
   .program-register-main-pane,
   .program-planner-main-pane,
   .program-scheduler-calendar {
@@ -7916,8 +7842,8 @@ body.program-planner.is-evt-mode {
    take their colour from the semantic brand aliases above. */
 body.program-planner:is(.is-nsa-mode, .is-evt-mode) :is(
   .program-island,
-  .program-map-sidebar,
-  .program-map-canvas-container,
+  .program-map-sidebar:not(.space-editor__sidebar),
+  .program-map-canvas-container:not(.space-editor__canvas),
   .program-register-pane,
   .program-register-main-pane,
   .program-planner-sidebar,
@@ -8107,19 +8033,19 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-register-detail :is
 }
 
 /* Sidebar & Inspector Slim Scrollbars (Recommended) */
-.program-map-sidebar,
+.program-map-sidebar:not(.space-editor__sidebar),
 .program-map-inspector,
 .program-map-body {
   scrollbar-width: thin;
   scrollbar-color: var(--uos-border) transparent;
 }
-.program-map-sidebar::-webkit-scrollbar,
+.program-map-sidebar:not(.space-editor__sidebar)::-webkit-scrollbar,
 .program-map-inspector::-webkit-scrollbar,
 .program-map-body::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-.program-map-sidebar::-webkit-scrollbar-thumb,
+.program-map-sidebar:not(.space-editor__sidebar)::-webkit-scrollbar-thumb,
 .program-map-inspector::-webkit-scrollbar-thumb,
 .program-map-body::-webkit-scrollbar-thumb {
   background: var(--uos-border);
@@ -8254,7 +8180,7 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-register-detail :is
 
 /* Small Panel Sidebar Flex Layout ? Reserves full room for 52px Header + 42px Shortcut Toolbar + Search + Scroll List */
 .program-register-pane,
-.program-map-sidebar,
+.program-map-sidebar:not(.space-editor__sidebar),
 .program-planner-sidebar,
 .program-costing-projects-pane,
 .program-scheduler-inspector,
@@ -9084,8 +9010,6 @@ dd.is-privacy-masked {
   .program-scheduler-list,
   .program-register-pane__list,
   #plannerPickerList,
-  #eventPickerList,
-  #shapeList,
   [data-costing-projects-list],
   [data-quote-projects-list],
   [data-scheduler-list]
@@ -9898,7 +9822,7 @@ dd.is-privacy-masked {
   clip-path: none;
 }
 
-.program-map-sidebar > .program-filter-drawer + .program-map-event-list.program-disclosure-list {
+.program-map-sidebar:not(.space-editor__sidebar) > .program-filter-drawer + .program-map-event-list.program-disclosure-list {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
@@ -10053,7 +9977,7 @@ html[data-suite-theme="dark"] .program-disclosure-list__header {
    conversion cannot animate legacy accents, radii, or elevation into view. */
 :is(
   #eventPickerList > [data-event-card-id],
-  #shapeList > [data-shape-card-id],
+  #shapeList > .program-shape-card[data-shape-card-id],
   #plannerPickerList > [data-planner-project-id],
   [data-costing-projects-list] > [data-costing-project-id],
   [data-scheduler-list] > [data-scheduler-project],
@@ -10071,7 +9995,7 @@ html[data-suite-theme="dark"] .program-disclosure-list__header {
    clean accent outline and tint consistently after all legacy card resets. */
 :is(
   #eventPickerList > [data-event-card-id],
-  #shapeList > [data-shape-card-id],
+  #shapeList > .program-shape-card[data-shape-card-id],
   #plannerPickerList > [data-planner-project-id],
   [data-costing-projects-list] > [data-costing-project-id],
   [data-scheduler-list] > [data-scheduler-project],
@@ -10087,7 +10011,7 @@ html[data-suite-theme="dark"] .program-disclosure-list__header {
 
 :is(
   #eventPickerList > [data-event-card-id],
-  #shapeList > [data-shape-card-id],
+  #shapeList > .program-shape-card[data-shape-card-id],
   #plannerPickerList > [data-planner-project-id],
   [data-costing-projects-list] > [data-costing-project-id],
   [data-scheduler-list] > [data-scheduler-project],
@@ -10100,7 +10024,7 @@ html[data-suite-theme="dark"] .program-disclosure-list__header {
 
 :is(
   #eventPickerList > [data-event-card-id],
-  #shapeList > [data-shape-card-id],
+  #shapeList > .program-shape-card[data-shape-card-id],
   #plannerPickerList > [data-planner-project-id],
   [data-costing-projects-list] > [data-costing-project-id],
   [data-scheduler-list] > [data-scheduler-project],
@@ -10155,7 +10079,7 @@ html[data-suite-theme="dark"] .program-disclosure-list__header {
 
 :is(
   #eventPickerList > [data-event-card-id],
-  #shapeList > [data-shape-card-id],
+  #shapeList > .program-shape-card[data-shape-card-id],
   #plannerPickerList > [data-planner-project-id],
   [data-costing-projects-list] > [data-costing-project-id],
   [data-scheduler-list] > [data-scheduler-project],
@@ -10249,21 +10173,8 @@ body[data-register-drawer-open] .program-register-main-pane > .program-table-wra
 
 /* Space Map keeps one canonical sidebar in both full-page and Register-drawer views.
    Drawer presentation must not force Project scope or hide Register/location context. */
-.program-register-module-host .program-map-workspace {
-  display: grid;
-  grid-template-columns: minmax(20rem, 25rem) minmax(0, 1fr) !important;
-  grid-template-rows: minmax(0, 1fr);
-  gap: 0 !important;
-}
-.program-register-module-host .program-map-workspace > .program-map-sidebar {
-  display: flex !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  border-right: 1px solid var(--panel-border, #d7ded9) !important;
-}
+
+
 .program-register-module-host .program-map-event-list:not([hidden]),
 .program-register-module-host .program-map-shape-list:not([hidden]) {
   display: flex !important;
@@ -10276,7 +10187,7 @@ body[data-register-drawer-open] .program-register-main-pane > .program-table-wra
 }
 .program-register-module-host [data-scheduler-list-mode] > .program-filter-drawer { display: none !important; }
 body[data-drawer-module] #main-workspace .program-register-module-host [data-scheduler-list] > [data-scheduler-job][data-disclosure-skip],
-body[data-drawer-module] .program-register-module-host #shapeList > [data-shape-card-id][data-disclosure-skip] {
+body[data-drawer-module] .program-register-module-host #shapeList > .program-shape-card[data-shape-card-id][data-disclosure-skip] {
   visibility: visible !important;
 }
 .program-register-module-host .program-costing-workspace,
@@ -10376,14 +10287,12 @@ body[data-drawer-module] .program-register-module-host #shapeList > [data-shape-
   .program-register-module-host { height: 100%; }
   .program-register-module-host .program-costing-workspace,
   .program-register-module-host .program-quote-layout,
-  .program-register-module-host .program-scheduler-layout,
-  .program-register-module-host .program-map-workspace {
+  .program-register-module-host .program-scheduler-layout {
     grid-template-columns: minmax(0, 1fr) !important;
     grid-template-rows: minmax(18rem, 42dvh) minmax(28rem, 1fr);
     overflow: auto;
   }
-  .program-register-module-host .program-scheduler-layout > .program-scheduler-inspector,
-  .program-register-module-host .program-map-workspace > .program-map-sidebar {
+  .program-register-module-host .program-scheduler-layout > .program-scheduler-inspector {
     width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
@@ -10460,7 +10369,7 @@ body[data-drawer-module] .program-register-module-host #shapeList > [data-shape-
 .planner-section-toggle[aria-expanded="false"] .planner-section-toggle__icon { transform: rotate(-90deg); }
 
 .program-register-project-state.is-created { color: var(--uos-brand-text); border-color: var(--uos-brand-text); background: var(--uos-brand-soft); }
-.program-register-project-state.is-not-created { color: var(--uos-text-muted); background: var(--panel-bg); }
+.program-register-project-state.is-not-created { color: #713f12; background: var(--register-project-pending-background, #ffff00); }
 .program-costing-workspace > .program-costing-projects-pane,
 .program-costing-workspace > .program-cost-catalog,
 .program-quote-layout > .program-quote-sidebar,
@@ -11025,7 +10934,7 @@ body.program-planner {
 }
 body.program-planner.is-evt-mode { --program-section-header-background: #0369a1; }
 #program-app .program-register-summary-row,
-#program-app .program-register-summary-row > td {
+#program-app .program-register-summary-row > td:not(.program-register-table__actions-cell) {
   background: var(--commercial-row-background) !important;
 }
 #program-app :is(.program-cost-table,.program-calculator-table,.program-quote-builder-table) > tbody > tr:not(.program-costing-line-group),
@@ -11132,7 +11041,7 @@ body.program-planner.is-evt-mode { --program-section-header-background: #0369a1;
 .program-job-calculator>.program-calculator-tools {grid-row:2;min-width:0;padding:10px 8px;border-bottom:1px solid var(--panel-border);background:var(--uos-surface);}
 .program-calculator-tools[hidden] {display:none!important;}
 .program-calculator-tools__actions {display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-.program-calculator-tools__actions>.uos-button {flex:0 0 auto;white-space:nowrap;}
+.program-calculator-tools__actions>.uos-button {flex:0 1 auto;min-width:0;max-width:100%;height:auto;white-space:normal;overflow-wrap:anywhere;}
 .program-calculator-tools__result {margin:8px 0 0;font-size:12px;white-space:pre-line;overflow-wrap:anywhere;max-height:120px;overflow:auto;}
 .program-job-calculator>.program-calculator-table-wrap {grid-row:3;}
 .program-job-calculator>.program-cost-totals {grid-row:4;}
@@ -11192,9 +11101,21 @@ html[data-suite-theme="dark"] .program-quote-issue-warnings {background:#382a14;
 .program-quote-builder-pane > .program-quote-pane-head {flex:0 0 auto;position:sticky;top:0;z-index:3;}
 .program-quote-section-navigation {flex:0 0 auto;min-width:0;border-bottom:1px solid var(--panel-border);background:var(--uos-surface-subtle,#f8fafc);position:sticky;top:52px;z-index:3;}
 .program-quote-section-rail {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));align-items:stretch;gap:0;min-width:0;min-height:44px;padding:0;}
-.program-quote-section-link {display:inline-flex;align-items:center;justify-content:center;min-width:0;min-height:44px;padding:6px 4px;border:1px solid transparent;border-radius:var(--uos-radius-control);font:inherit;font-size:14px;font-weight:600;white-space:normal;overflow-wrap:anywhere;text-align:center;background:transparent;color:var(--uos-text-muted);cursor:pointer;}
+.program-quote-section-link {display:inline-flex;align-items:center;justify-content:center;min-width:0;min-height:44px;padding:6px 4px;border:1px solid transparent;border-radius:0;font:inherit;font-size:14px;font-weight:600;white-space:normal;overflow-wrap:anywhere;text-align:center;background:transparent;color:var(--uos-text-muted);cursor:pointer;}
 .program-quote-section-link[aria-current="location"] {background:var(--program-owner-primary,var(--uos-brand));border-color:var(--program-owner-primary,var(--uos-brand));color:#fff;font-weight:800;}
 .program-quote-section-link:hover:not([aria-current]) {background:var(--uos-surface-muted,#e2e8f0);color:var(--uos-text);}
 .program-quote-pane-body {align-content:start;overscroll-behavior:contain;}
 .program-quote-section-scroll-space {grid-row:8;pointer-events:none;}
 @media print {.program-quote-section-navigation,.program-quote-section-scroll-space {display:none!important;}}
+
+/* Project survey placement reuses the existing map and form design system. */
+.program-map-canvas-container:not(.space-editor__canvas)[data-placement-active] #floatingDrawToolbar { display:none; }
+.program-map-rotation-handle { cursor:grab; touch-action:none; }
+#moasureGroupList label { display:flex; align-items:start; gap:8px; padding:8px 0; }
+#moasureImportDialog .planner-task-editor__body { min-width:0; overflow-wrap:anywhere; }
+
+/* The bundled reading font needs enough space for the Source heading. */
+html[data-suite-font="dyslexic"] .program-calculator-col-source { width:84px; }
+html[data-suite-font="dyslexic"] .program-calculator-table :is(th,td):nth-child(2) { width:84px; min-width:84px; }
+html[data-suite-font="dyslexic"] .program-costing-workspace .program-job-calculator { min-height:560px; }
+html[data-suite-font="dyslexic"] .program-calculator-table td:nth-child(2) .program-cost-source-frame { width:100%; }

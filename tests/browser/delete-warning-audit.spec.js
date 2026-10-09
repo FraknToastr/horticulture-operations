@@ -129,23 +129,28 @@ for (const owner of ['NSA', 'EVT']) {
       })), ids.recordId);
     }
     await addPin();
-    const remove = frame.locator(`[data-location-action="delete"][data-location-event-id="${ids.recordId}"]`);
-    await expect(remove).toBeVisible();
+    await frame.locator('[data-space-pin]').click();
+    const remove = frame.locator('#removeLocationButton');
+    await expect(remove).toBeEnabled();
     const before = await canonical(frame);
     await remove.click();
-    await expect(warning(frame)).toContainText('Warning audit pin');
+    await expect(warning(frame)).toContainText('Remove location pin');
     expect(await canonical(frame)).toBe(before);
     await warning(frame).getByRole('button', { name: 'Cancel', exact: true }).click();
     expect(await canonical(frame)).toBe(before);
     await remove.click();
     await warning(frame).getByRole('button', { name: 'Remove pin', exact: true }).click();
-    await expect(remove).toHaveCount(0);
+    await expect(frame.locator('[data-space-pin]')).toHaveCount(0);
+    expect(await canonical(frame)).toBe(before);
+    await frame.locator('#spaceAcceptDraft').click();
+    await expect.poll(()=>frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id).length,ids.recordId)).toBe(0);
     await addPin();
-    const retained = await canonical(frame);
+    await frame.locator('[data-space-pin]').click();
+    const retained = await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities));
     await frame.evaluate(() => { window.UOS.dialogs.confirm = undefined; });
     await remove.click();
     await expect(frame.locator('.uos-toast').filter({ hasText: 'warning dialog' })).toBeVisible();
-    expect(await canonical(frame)).toBe(retained);
+    expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(retained);
   });
   test(`${owner}: map vertex and polygon warnings prevent accidental geometry removal`, async ({ page }) => {
     const { frame, ids } = await setup(page, owner, 'map');
@@ -163,6 +168,7 @@ for (const owner of ['NSA', 'EVT']) {
     }, { geometryId, projectId: ids.projectId });
     const card = frame.locator(`[data-shape-card-id="${geometryId}"]`);
     const edit = card.locator('[data-shape-action="edit"]');
+    await card.locator('[data-space-expand]').click();
     await expect(edit).toBeVisible();
     await edit.click();
     const vertex = card.locator('[data-delete-vertex="0"]');
@@ -177,6 +183,8 @@ for (const owner of ['NSA', 'EVT']) {
     await vertex.click();
     await warning(frame).getByRole('button', { name: 'Remove vertex', exact: true }).click();
     await expect.poll(() => frame.evaluate(() => window.deleteAuditMap.removes)).toBe(1);
+    expect(await canonical(frame)).toBe(before);
+    await frame.locator("#spaceAcceptDraft").click();
     await expect.poll(() => canonical(frame)).not.toBe(before);
     const bin = card.locator('[data-shape-action="delete"]');
     await redIcon(bin, page);

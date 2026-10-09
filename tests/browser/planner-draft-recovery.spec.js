@@ -36,7 +36,10 @@ test('deleting a Planner job leaves its task as an unticked draft calendar', asy
     if (toggle) toggle.click();
   });
   await expect(draft).toBeVisible();
-  expect(await draft.locator('svg').evaluate((element) => element.innerHTML)).toBe('<rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M3 10h18"></path>');
+  await expect(draft.locator('svg')).toHaveCount(1);
+  await expect(draft).toBeEnabled();
+  await expect(draft).toHaveAttribute('data-planner-job-state','operational');
+  await expect(draft).toHaveAccessibleName(/create draft Job/i);
   await draft.click();
   await expect.poll(() => child.evaluate((taskId) => {
     const workspace = window.UOS.ProgramApp.workspace();

@@ -17,7 +17,7 @@ for (const [path, owner] of [["nsa.html", "NSA"], ["events.html", "EVT"]]) {
     await child.waitForFunction(() => window.UOS?.ProgramApp?.snapshot().phase === "ready");
     await child.waitForFunction(() => {
       const workspace = window.UOS.ProgramApp.workspace();
-      return workspace.workspace.destination === "register" && workspace.entities.rateItems.length === 45;
+      return workspace.workspace.destination === "register" && workspace.entities.rateItems.length === window.UOS.ProgramDefaultRateCatalog.items().length;
     });
     await expect(page).toHaveURL(`/src/program-planner/${path}`);
     const frame = page.frameLocator("iframe");
@@ -89,7 +89,7 @@ test("EVT factory-reset launch purges a valid stored workspace", async ({ page }
     const workspace = window.UOS.ProgramApp.workspace();
     return { events: workspace.entities.events.length, applications: workspace.entities.applications.length, rates: workspace.entities.rateItems.length, destination: workspace.workspace.destination, query: window.location.search };
   });
-  expect(result).toEqual({ events: 0, applications: 0, rates: 45, destination: "register", query: "?workspace=EVT" });
+  expect(result).toEqual({ events: 0, applications: 0, rates: await child.evaluate(() => window.UOS.ProgramDefaultRateCatalog.items().length), destination: "register", query: "?workspace=EVT" });
 });
 
 test("restored or cancelled NSA reset intent cannot delete Register records", async ({ page }) => {

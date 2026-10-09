@@ -324,7 +324,7 @@ function addCanonicalPolygon(UOS, ws, workTypeKey, id) {
 
 test("PC-005 C3: Fresh workspace contains canonical referenceData turfing -> RATE-TURFING mapping", () => {
   const { UOS } = loadMapSuite();
-  assert.deepEqual(Array.from(UOS.ProgramModel.canonicalWorkTypeRateItems.turfing.eligibleRateItemIds), ["RATE-TURFING"]);
+  assert.deepEqual(Array.from(UOS.ProgramModel.canonicalWorkTypeRateItems.turfing.eligibleRateItemIds), ["RATE-TURFING", "RATE-TURFING-HA"]);
   assert.ok(Object.isFrozen(UOS.ProgramModel.canonicalWorkTypeRateItems));
   // Exact reference equality: WorkAreaService consumes ProgramModel's authority rather than a local copy
   assert.equal(UOS.WorkAreaService.canonicalWorkTypeRateItems(), UOS.ProgramModel.canonicalWorkTypeRateItems);
@@ -335,8 +335,8 @@ test("PC-005 C3: Fresh workspace contains canonical referenceData turfing -> RAT
 
   // Dynamic authority delegation check: WorkAreaService dynamically queries ProgramModel
   const customCanonical = Object.freeze({
-    turfing: Object.freeze({ eligibleRateItemIds: Object.freeze(["RATE-TURFING"]), defaultRateItemId: "RATE-TURFING" }),
-    aerate: Object.freeze({ eligibleRateItemIds: Object.freeze(["RATE-AERATION"]), defaultRateItemId: "RATE-AERATION" })
+    turfing: Object.freeze({ eligibleRateItemIds: Object.freeze(["RATE-TURFING", "RATE-TURFING-HA"]), defaultRateItemId: "RATE-TURFING" }),
+    aerate: Object.freeze({ eligibleRateItemIds: Object.freeze(["RATE-AERATION", "RATE-AERATION-HA"]), defaultRateItemId: "RATE-AERATION" })
   });
   const originalCanonical = UOS.ProgramModel.canonicalWorkTypeRateItems;
   try {
@@ -348,7 +348,7 @@ test("PC-005 C3: Fresh workspace contains canonical referenceData turfing -> RAT
 
   const ws = UOS.ProgramModel.blank("2026-09-18T00:00:00.000Z");
   assert.deepEqual(JSON.parse(JSON.stringify(ws.referenceData.shared.workTypeRateItems.turfing)), {
-    eligibleRateItemIds: ["RATE-TURFING"], defaultRateItemId: "RATE-TURFING"
+    eligibleRateItemIds: ["RATE-TURFING", "RATE-TURFING-HA"], defaultRateItemId: "RATE-TURFING"
   });
   const turfRate = UOS.WorkAreaService.resolveWorkTypeRate(ws, "turfing");
   assert.ok(turfRate, "Rate Item for turfing must be resolved");
@@ -444,7 +444,7 @@ test("H1-01: Map status filtering normalizes casing and missing-status fallback"
 test("C6-01: Turfing canonical mapping remains valid in the singular authority", () => {
   const { UOS } = loadMapSuite();
   const ws = UOS.ProgramModel.blank("2026-09-22T00:00:00.000Z");
-  assert.deepEqual(Array.from(UOS.ProgramModel.canonicalWorkTypeRateItems.turfing.eligibleRateItemIds), ["RATE-TURFING"]);
+  assert.deepEqual(Array.from(UOS.ProgramModel.canonicalWorkTypeRateItems.turfing.eligibleRateItemIds), ["RATE-TURFING", "RATE-TURFING-HA"]);
   assert.equal(ws.referenceData.shared.workTypeRateItems.turfing.defaultRateItemId, "RATE-TURFING");
   assert.equal(UOS.WorkAreaService.resolveWorkTypeRate(ws, "turfing").id, "RATE-TURFING");
 });
@@ -452,7 +452,7 @@ test("C6-01: Turfing canonical mapping remains valid in the singular authority",
 test("C6-02: Aeration maps exactly to RATE-AERATION and creates spatial lineage", () => {
   const { UOS } = loadMapSuite();
   let ws = setupCanonicalProject(UOS, UOS.ProgramModel.blank("2026-09-22T00:00:00.000Z"));
-  assert.deepEqual(Array.from(ws.referenceData.shared.workTypeRateItems.aerate.eligibleRateItemIds), ["RATE-AERATION"]);
+  assert.deepEqual(Array.from(ws.referenceData.shared.workTypeRateItems.aerate.eligibleRateItemIds), ["RATE-AERATION", "RATE-AERATION-HA"]);
   ws = addCanonicalPolygon(UOS, ws, "aerate", "NSA-GEO-AERATION-V2");
   const geometry = ws.entities.geometries[0];
   ws = UOS.WorkAreaService.syncGeometry(ws, geometry.id, { explicit: true });
@@ -548,13 +548,13 @@ test("C6-08: Mapping changes affect future polygons without rewriting or reverti
     id: "RATE-AERATION-V2", kind: "Labour", category: "Maintenance", description: "Aeration V2", unit: "m²", unitRate: 24, quantityMode: "m2", active: true
   }, { enabled: true, workTypeKey: "aerate" });
   assert.deepEqual(JSON.parse(JSON.stringify(ws.referenceData.shared.workTypeRateItems.aerate)), {
-    eligibleRateItemIds: ["RATE-AERATION", "RATE-AERATION-V2"], defaultRateItemId: "RATE-AERATION"
+    eligibleRateItemIds: ["RATE-AERATION", "RATE-AERATION-HA", "RATE-AERATION-V2"], defaultRateItemId: "RATE-AERATION"
   });
   ws = UOS.WorkAreaService.syncGeometry(ws, firstGeometry.id);
   const preserved = ws.entities.costingLines.find((item) => item.id === firstLine.id);
   assert.deepEqual(JSON.parse(JSON.stringify({ rateItemId: preserved.rateItemId, description: preserved.description, unit: preserved.unit, unitRate: preserved.unitRate, estimatedTotal: preserved.estimatedTotal })), snapshot);
   assert.deepEqual(JSON.parse(JSON.stringify(ws.referenceData.shared.workTypeRateItems.aerate)), {
-    eligibleRateItemIds: ["RATE-AERATION", "RATE-AERATION-V2"], defaultRateItemId: "RATE-AERATION"
+    eligibleRateItemIds: ["RATE-AERATION", "RATE-AERATION-HA", "RATE-AERATION-V2"], defaultRateItemId: "RATE-AERATION"
   }, "old geometry resync must not overwrite global eligibility");
 
   ws = addCanonicalPolygon(UOS, ws, "aerate", "NSA-GEO-AERATION-FUTURE");

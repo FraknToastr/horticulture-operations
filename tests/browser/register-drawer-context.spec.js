@@ -36,9 +36,9 @@ test("opening another Register drawer cannot retain the previous Register map co
   const bDrawer = child.locator('[data-register-drawer-record="NSA-APP-NEW"]');
   await expect(bDrawer.locator('[data-program-view="map"]')).toHaveCount(1);
   await expect(aDrawer.locator('[data-program-view="map"]')).toHaveCount(0);
-  await expect(bDrawer.locator('#eventPickerList [data-event-card-id="NSA-APP-NEW"]')).toBeVisible();
-  await expect(bDrawer.locator('#eventPickerList [data-event-card-id="NSA-APP-A3330"]')).toHaveCount(0);
-  await expect(bDrawer.locator('[data-location-action="add"]')).toBeVisible();
+  expect(await child.evaluate(() => UOS.ProgramMapController.canonicalMapState(UOS.ProgramApp.workspace()).selectedRegisterId)).toBe("NSA-APP-NEW");
+  await expect(bDrawer.locator("[data-space-pin]")).toHaveCount(0);
+  await expect(bDrawer.locator("#spaceRadialToggle")).toBeVisible();
   const moduleFitsDrawer = await bDrawer.evaluate((drawer) => {
     const host = drawer.querySelector("[data-register-module-host]");
     return Boolean(host && drawer.getBoundingClientRect().height >= host.getBoundingClientRect().height);

@@ -1,6 +1,15 @@
 const { test, expect } = require('@playwright/test');
 const { suppressBackupModalForFunctionalTest } = require('./test-helper.cjs');
 
+async function assertFrameBuffer(frame, number) {
+  await expect.poll(() => frame.evaluate(number => {
+    const card = document.getElementById(`quote-section-${number}`).closest('.program-quote-card');
+    const body = document.querySelector('.program-quote-pane-body');
+    const rail = document.querySelector('.program-quote-section-navigation');
+    return card.getBoundingClientRect().top - Math.max(body.getBoundingClientRect().top + body.clientTop, rail.getBoundingClientRect().bottom);
+  }, number)).toBeCloseTo(12, 0);
+}
+
 async function setup(page, owner = 'NSA') {
   await suppressBackupModalForFunctionalTest(page);
   await page.setViewportSize({ width: 1600, height: 1000 });
@@ -24,12 +33,34 @@ async function setup(page, owner = 'NSA') {
 }
 
 
-for (const owner of ['NSA', 'EVT']) for (const width of [1440, 1024, 390]) test(`${owner} quote section navigation aligns headings and keeps headers fixed at ${width}`, async ({ page }, testInfo) => {
+for (const owner of ['NSA', 'EVT']) for (const width of [1440, 1024, 390]) test(`${owner} quote section navigation aligns outer frames and keeps headers fixed at ${width}`, async ({ page }, testInfo) => {
   const { frame } = await setup(page, owner);
   await page.setViewportSize({ width, height: 1000 });
   const rail = frame.getByRole('navigation', { name: 'Quote sections', exact: true });
   const body = frame.locator('.program-quote-pane-body');
   await expect(rail.getByRole('button')).toHaveCount(6);
+  await expect(frame.locator('.program-quote-info-text')).toHaveText('Use Calculator to add items to Quotes/Estimates');
+  const sections = frame.locator('.program-quote-pane-body > .program-quote-card:not(.program-quote-history)');
+  await expect(sections).toHaveCount(6);
+  expect(await sections.evaluateAll(cards => cards.every(card => {
+    const probe = document.createElement('span');
+    probe.style.border = '1px solid color-mix(in srgb, var(--uos-border-strong) 70%, var(--uos-text))';
+    card.append(probe);
+    const matches = getComputedStyle(card).borderTopColor === getComputedStyle(probe).borderTopColor;
+    probe.remove();
+    return matches;
+  }))).toBe(true);
+  expect(await sections.evaluateAll(cards => cards.every(card => {
+    const header = card.querySelector('.program-quote-card__head');
+    const probe = document.createElement('span');
+    probe.style.background = 'var(--uos-surface-muted)';
+    card.append(probe);
+    const css = getComputedStyle(header);
+    const matches = css.backgroundColor === getComputedStyle(probe).backgroundColor && css.borderBottomWidth === '1px' && css.borderBottomStyle === 'solid';
+    const bounds = header.getBoundingClientRect(), outer = card.getBoundingClientRect();
+    probe.remove();
+    return matches && Math.abs(bounds.left - outer.left - 1) < 1 && Math.abs(bounds.right - outer.right + 1) < 1;
+  }))).toBe(true);
   const layout = await rail.evaluate(el => {
     const railBounds = el.getBoundingClientRect();
     return {
@@ -39,7 +70,7 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1440, 1024, 390]) test(
       clientWidth: el.clientWidth,
       buttons: [...el.querySelectorAll('[data-quote-section-link]')].map(button => {
         const bounds = button.getBoundingClientRect();
-        return { width: bounds.width, height: bounds.height, top: bounds.top - railBounds.top, left: bounds.left - railBounds.left, accent: getComputedStyle(button, '::before').content, fontSize: getComputedStyle(button).fontSize, scrollWidth: button.scrollWidth, clientWidth: button.clientWidth };
+        return { width: bounds.width, height: bounds.height, top: bounds.top - railBounds.top, left: bounds.left - railBounds.left, accent: getComputedStyle(button, '::before').content, fontSize: getComputedStyle(button).fontSize, borderRadius: getComputedStyle(button).borderRadius, label: button.textContent, scrollWidth: button.scrollWidth, clientWidth: button.clientWidth };
       })
     };
   });
@@ -48,12 +79,14 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1440, 1024, 390]) test(
     expect(button.width).toBeCloseTo(layout.width / 6, 0);
     expect(button.height).toBeCloseTo(layout.height, 0);
     expect(button.fontSize).toBe('14px');
+    expect(button.borderRadius).toBe('0px');
+    expect(button.label).toMatch(new RegExp(`^${index + 1} - \\S`));
     expect(button.top).toBeCloseTo(0, 0);
     expect(button.left).toBeCloseTo(index * layout.width / 6, 0);
     expect(['none', 'normal']).toContain(button.accent);
     expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth);
   });
-  await expect(rail.locator('[aria-current="location"]')).toHaveText('1 Customer');
+  await expect(rail.locator('[aria-current="location"]')).toHaveText('1 - Customer');
   const fixedPositions = () => frame.evaluate(() => ['.program-quote-pane-head', '.program-quote-section-navigation'].map(selector => document.querySelector(selector).getBoundingClientRect().top));
   await expect.poll(() => frame.evaluate(async () => {
     const head = document.querySelector('.program-quote-pane-head');
@@ -67,15 +100,15 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1440, 1024, 390]) test(
   for (const number of [2, 4, 6, 5, 3, 1]) {
     await rail.locator(`[data-quote-section-link="${number}"]`).click();
     await expect(rail.locator('[aria-current="location"]')).toHaveAttribute('data-quote-section-link', String(number));
-    await expect.poll(() => body.evaluate((el, number) => document.getElementById(`quote-section-${number}`).getBoundingClientRect().top - el.getBoundingClientRect().top - el.clientTop, number)).toBeCloseTo(12, 0);
+    await expect.poll(() => body.evaluate((el, number) => document.getElementById(`quote-section-${number}`).closest(".program-quote-card").getBoundingClientRect().top - Math.max(el.getBoundingClientRect().top + el.clientTop, document.querySelector(".program-quote-section-navigation").getBoundingClientRect().bottom), number)).toBeCloseTo(12, 0);
     (await fixedPositions()).forEach((position, index) => expect(Math.abs(position - fixed[index])).toBeLessThan(1));
     expect(await preview()).toBe(beforePreview);
   }
   await rail.screenshot({ path: testInfo.outputPath('section-rail.png') });
-  await body.evaluate(el => { const heading = document.getElementById('quote-section-4'); el.scrollTop += heading.getBoundingClientRect().top - el.getBoundingClientRect().top - 12; });
-  await expect(rail.locator('[aria-current="location"]')).toHaveText('4 Funding');
+  await body.evaluate(el => { const heading = document.getElementById('quote-section-4').closest('.program-quote-card'); el.scrollTop += heading.getBoundingClientRect().top - el.getBoundingClientRect().top - 12; });
+  await expect(rail.locator('[aria-current="location"]')).toHaveText('4 - Funding');
   await body.evaluate(el => { el.scrollTop = 0; });
-  await expect(rail.locator('[aria-current="location"]')).toHaveText('1 Customer');
+  await expect(rail.locator('[aria-current="location"]')).toHaveText('1 - Customer');
 });
 
 test('quote section navigation survives autosaves and drawer remounts without moving focus', async ({ page }) => {
@@ -83,33 +116,62 @@ test('quote section navigation survives autosaves and drawer remounts without mo
   const rail = frame.getByRole('navigation', { name: 'Quote sections', exact: true });
   await rail.locator('[data-quote-section-link="3"]').focus();
   await page.keyboard.press('Enter');
-  await expect(rail.locator('[aria-current="location"]')).toHaveText('3 Terms');
+  await expect(rail.locator('[aria-current="location"]')).toHaveText('3 - Terms');
   await expect(rail.locator('[data-quote-section-link="3"]')).toBeFocused();
   const field = frame.locator('[data-quote-scope]');
   await field.fill('New scope recorded from the section navigation test');
   await field.blur();
   await expect.poll(() => frame.evaluate(id => UOS.ProgramApp.workspace().entities.quotes.find(q => q.projectId === id).scopeNotes, projectId)).toBe('New scope recorded from the section navigation test');
-  await expect(rail.locator('[aria-current="location"]')).toHaveText('3 Terms');
+  await expect(rail.locator('[aria-current="location"]')).toHaveText('3 - Terms');
   await frame.locator('[data-quote-save]').click();
   await frame.getByRole('dialog').getByRole('button', { name: 'OK', exact: true }).click();
-  await expect(rail.locator('[aria-current="location"]')).toHaveText('3 Terms');
+  await expect(rail.locator('[aria-current="location"]')).toHaveText('3 - Terms');
   await rail.locator('[data-quote-section-link="6"]').click();
-  await expect(rail.locator('[aria-current="location"]')).toHaveText('6 Position');
+  await expect(rail.locator('[aria-current="location"]')).toHaveText('6 - Position');
   await frame.locator('[data-quote-print]').evaluate(el => { window.print = () => window.dispatchEvent(new Event('beforeprint')); el.click(); });
-  await expect(frame.locator('.program-quote-print-host')).not.toContainText('1 Customer');
+  await expect(frame.locator('.program-quote-print-host')).not.toContainText('1 - Customer');
   await frame.evaluate(() => window.dispatchEvent(new Event('afterprint')));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await rail.locator('[data-quote-section-link="1"]').click();
-  await expect(rail.locator('[aria-current="location"]')).toHaveText('1 Customer');
+  await expect(rail.locator('[aria-current="location"]')).toHaveText('1 - Customer');
 });
 
+
+for (const owner of ['NSA', 'EVT']) test(`${owner}: frame navigation survives keyboard, resizing and module re-entry`, async ({ page }) => {
+  let { frame } = await setup(page, owner);
+  const recordId = owner + (owner === 'NSA' ? '-APP-RAIL' : '-EVENT-RAIL');
+  for (const viewport of [{ width: 1440, height: 520 }, { width: 1024, height: 680 }, { width: 390, height: 740 }]) {
+    await page.setViewportSize(viewport);
+    for (const number of [6, 1, 5, 2, 4, 3]) {
+      const button = frame.locator(`[data-quote-section-link="${number}"]`);
+      await button.focus();
+      await page.keyboard.press(number % 2 ? 'Enter' : 'Space');
+      await expect(button).toHaveAttribute('aria-current', 'location');
+      await assertFrameBuffer(frame, number);
+    }
+  }
+  await frame.evaluate(async recordId => {
+    await UOS.ProgramApp.navigateWithContext('register', recordId);
+    await UOS.ProgramApp.navigateWithContext('quotes', recordId);
+  }, recordId);
+  await frame.locator('[data-quote-section-link="6"]').click();
+  await assertFrameBuffer(frame, 6);
+  await page.reload();
+  frame = page.frames().find(f => f !== page.mainFrame());
+  await frame.waitForFunction(() => UOS.ProgramApp?.snapshot().phase === 'ready');
+  await frame.evaluate(recordId => UOS.ProgramApp.navigateWithContext('quotes', recordId), recordId);
+  for (const number of [1, 6]) {
+    await frame.locator(`[data-quote-section-link="${number}"]`).click();
+    await assertFrameBuffer(frame, number);
+  }
+});
 
 test('rail reveals the active item after narrowing and stays readable in both themes', async ({ page }) => {
   const { frame } = await setup(page);
   const rail = frame.getByRole('navigation', { name: 'Quote sections', exact: true });
   await rail.evaluate(el => { el.style.width = '240px'; });
   await rail.locator('[data-quote-section-link="6"]').click();
-  await expect(rail.locator('[aria-current="location"]')).toHaveText('6 Position');
+  await expect(rail.locator('[aria-current="location"]')).toHaveText('6 - Position');
   await rail.evaluate(el => { el.style.width = '180px'; });
   await expect.poll(() => rail.evaluate(el => {
     const r = el.getBoundingClientRect(), active = el.querySelector('[aria-current]').getBoundingClientRect();

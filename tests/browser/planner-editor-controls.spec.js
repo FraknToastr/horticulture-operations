@@ -52,7 +52,7 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1440, 390]) {
     await expect(leftRows.nth(2)).toHaveClass(/planner-guide-conversion/);
     await expect(guide.locator('.planner-guide-column').nth(1).locator('.planner-guide-conversion')).toHaveCount(0);
     expect(await guide.locator('.planner-guide-arrow').evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(30);
-    await expect(guide.locator('.planner-guide-conversion')).toContainText('Any Reminder task can have its purpose changed');
+    await expect(guide.locator('.planner-guide-conversion')).toContainText('Changing a Reminder task to');
     expect(await guide.evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(255, 255, 255)');
     expect(await rows.locator('svg').nth(0).innerHTML()).not.toContain('M8 16l');
     expect(await rows.locator('svg').nth(1).innerHTML()).not.toContain('M8 16l');

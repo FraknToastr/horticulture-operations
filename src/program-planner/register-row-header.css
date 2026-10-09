@@ -1,5 +1,6 @@
 /* Register summary layout; value and button appearance belongs to shared commercial classes. */
 .program-register-layout--disclosure .program-register-table {
+  --register-project-pending-background: #ffff00;
   width: var(--register-table-width, 100%);
   min-width: 0;
   table-layout: fixed;
@@ -41,13 +42,13 @@
   vertical-align: top;
 }
 .program-register-summary-row > .program-register-table__toggle-cell { padding-left: 8px; }
-.program-register-summary-row > td.program-register-table__actions-cell,
+#program-app .program-register-summary-row > td.program-register-table__actions-cell,
 .program-register-table > thead > tr > th.program-register-table__actions-col {
   position: sticky;
   right: 0;
   z-index: 2;
   padding-inline: 0;
-  background: var(--uos-surface, #fff);
+  background: var(--register-action-background, #fff);
   border: 0;
   box-shadow: none;
 }
@@ -88,12 +89,15 @@
   flex-wrap: nowrap;
   height: var(--commercial-frame-height);
   padding-inline: 8px;
-  background: var(--commercial-row-background, #f0fdf4);
+  background: var(--register-action-background, #fff);
 }
 .program-register-summary-row .commercial-icon-button { color: var(--uos-text-muted); box-shadow: none; }
 :is(.program-register-summary-row,.commercial-action-rail)[data-owner="NSA"] { --register-shortcut-owner: #15803d; --register-shortcut-owner-hover: #dcfce7; }
 :is(.program-register-summary-row,.commercial-action-rail)[data-owner="EVT"] { --register-shortcut-owner: #1d4ed8; --register-shortcut-owner-hover: #dbeafe; }
 .program-register-summary-row { --commercial-row-background: var(--register-shortcut-owner-hover); }
+.program-register-summary-row:is(:hover,:focus-within,:focus-visible,.is-selected,.is-being-edited,.is-navigation-focus,.is-disclosure-open,[aria-selected="true"]) {
+  --register-action-background: var(--commercial-row-background);
+}
 .program-register-summary-row .commercial-icon-button.is-available-module,
 .program-register-summary-row .program-register-row-toggle { color: var(--register-shortcut-owner, var(--program-owner-strong)); }
 .program-register-summary-row .commercial-icon-button[data-shortcut-state="unused"] { border-color: var(--register-shortcut-owner) !important; }
@@ -104,6 +108,11 @@
 }
 .program-register-summary-row .commercial-icon-button:not(:disabled):hover { background: var(--register-shortcut-owner-hover) !important; }
 .program-register-summary-row .commercial-icon-button:disabled { opacity: .45; cursor: not-allowed; }
+.program-register-summary-row .program-status-pill.status--in-progress {
+  --program-status-bg: #f3e3e8;
+  --program-status-fg: #7d4357;
+  --program-status-accent: #c694a7;
+}
 .program-register-summary-row .program-register-delete-btn { color: var(--uos-danger, #dc2626); }
 .program-register-summary-row .commercial-icon-button:focus-visible { outline: 2px solid var(--program-owner-strong); outline-offset: 2px; }
 .program-register-summary-row.is-disclosure-open .program-register-row-toggle svg { transform: rotate(90deg); }

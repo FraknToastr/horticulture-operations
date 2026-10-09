@@ -42,8 +42,8 @@ test('toolbar pills align with lifecycle buttons and history rows start with fix
   const status = frame.locator('[data-quote-status]');
   const assertHeights = async () => {
     const heights = await frame.locator('.program-quote-preview-toolbar').evaluate(el => [el.querySelector('.program-quote-live-pill'), el.querySelector('[data-quote-status]'), ...el.querySelectorAll('[data-quote-lifecycle-actions] button')].filter(n => n.getClientRects().length).map(n => n.getBoundingClientRect().height));
-    expect(new Set(heights).size).toBe(1);
-    expect(heights[0]).toBe(28);
+    expect(heights.length).toBeGreaterThanOrEqual(2);
+    heights.forEach(height=>expect(height).toBeCloseTo(28,4));
   };
   await assertHeights();
   await frame.locator('[data-quote-issue]').click();

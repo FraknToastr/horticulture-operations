@@ -39,6 +39,8 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
     await expect(row.locator('.program-register-table__title-cell')).toHaveText('Compact name');
     await expect(child.locator(`tr[data-register-record="${ids[2]}"] .program-register-table__title-cell`)).toHaveText(owner === 'NSA' ? 'Untitled application' : 'Untitled event');
     await expect(row.locator('td > .commercial-value-frame')).toHaveCount(8);
+  await expect(row.locator('.program-register-project-state')).toHaveText('Not Created');
+  expect(await row.locator('.program-register-project-state').evaluate(node => getComputedStyle(node).backgroundColor)).toBe('rgb(255, 255, 0)');
     await expect(row.locator('.program-status-pill > *, .program-register-project-state > *')).toHaveCount(0);
     await expect(row.locator('td:first-child [data-disclosure-toggle]')).toHaveCount(1);
     await expect(row.locator('.program-register-table__actions-cell [data-disclosure-toggle]')).toHaveCount(0);
@@ -47,7 +49,21 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
     expect(headerFills[0]).toBe(owner === 'NSA' ? 'rgb(4, 120, 87)' : 'rgb(3, 105, 161)');
     expect(await table.locator('thead th').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).color === 'rgb(255, 255, 255)'))).toBe(true);
     const usedFill = await row.locator('.is-current-module').first().evaluate(node => getComputedStyle(node).backgroundColor);
-    expect(await row.locator('td').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).backgroundColor))).toEqual(Array(10).fill(usedFill));
+    expect(await row.locator('td:not(.program-register-table__actions-cell)').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).backgroundColor))).toEqual(Array(9).fill(usedFill));
+    const expectRailBackgrounds = async () => {
+      const fills = await table.locator('.program-register-summary-row').evaluateAll(nodes => nodes.map(node => ({
+        expected: node.matches(':hover,:focus-within,:focus-visible,.is-selected,.is-being-edited,.is-navigation-focus,.is-disclosure-open,[aria-selected="true"]') ? getComputedStyle(node).backgroundColor : 'rgb(255, 255, 255)',
+        cell: getComputedStyle(node.querySelector('.program-register-table__actions-cell')).backgroundColor,
+        rail: getComputedStyle(node.querySelector('.commercial-action-rail')).backgroundColor
+      })));
+      expect(fills.length).toBeGreaterThan(0);
+      for (const fill of fills) {
+        expect(fill.cell).toBe(fill.expected);
+        expect(fill.rail).toBe(fill.expected);
+      }
+      expect(await row.locator('.is-current-module').first().evaluate(node => getComputedStyle(node).backgroundColor)).toBe(usedFill);
+    };
+    await expectRailBackgrounds();
     const geometry = await row.evaluate(node => {
       const frames = Array.from(node.querySelectorAll('td > .commercial-value-frame'));
       const next = node.nextElementSibling.nextElementSibling;
@@ -78,6 +94,7 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
     const highlighted = await row.evaluate(node => Array.from(node.querySelectorAll('.commercial-value-frame')).map(x => getComputedStyle(x).borderTopColor));
     expect(new Set(highlighted).size).toBe(1);
     expect(highlighted[0]).toBe('rgb(74, 222, 128)');
+    await expectRailBackgrounds();
     expect(await railAppearance()).toEqual(neutralRail);
     for (const frame of await row.locator('.commercial-value-frame').evaluateAll(nodes => nodes.map(node => ({ width: getComputedStyle(node).borderWidth, shadow: getComputedStyle(node).boxShadow })))) {
       expect(frame.width).toBe('2px');
@@ -90,7 +107,10 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
       expect(await candidate.locator('.commercial-value-frame').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).borderWidth === '2px'))).toBe(true);
     }
     expect(await railAppearance()).toEqual(neutralRail);
+    await expectRailBackgrounds();
     await row.evaluate(node => node.classList.remove('is-selected'));
+    await page.mouse.move(0, 0);
+    await expectRailBackgrounds();
     const scroller = child.locator('.program-register-main-pane .program-table-wrap');
     const headerBefore = await table.locator('thead th').first().boundingBox();
     await scroller.evaluate(node => { node.scrollTop = 120; });
@@ -100,6 +120,7 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
     await scroller.evaluate(node => { node.scrollLeft = node.scrollWidth; });
     const after = await row.locator('.program-register-table__actions-cell').boundingBox();
     expect(after.x).toBeCloseTo(before.x, 0);
+    await expectRailBackgrounds();
     const actionBounds = await row.locator('.commercial-action-rail').evaluate(node => {
       const bounds = node.closest('.program-table-wrap').getBoundingClientRect();
       return Array.from(node.querySelectorAll('button')).map(button => ({ left: button.getBoundingClientRect().left - bounds.left, right: bounds.right - button.getBoundingClientRect().right }));
@@ -108,7 +129,20 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
     await scroller.evaluate(node => { node.scrollLeft = 0; });
     await row.locator('[data-disclosure-toggle]').click();
     await expect(row.locator('[data-disclosure-toggle]')).toHaveAttribute('aria-expanded', 'true');
+    const dividerStyles = await child.locator(`[data-register-drawer-record="${ids[0]}"] .program-register-nsa-main-grid > .program-register-nsa-section--delivery`).evaluate(node => {
+      const delivery = getComputedStyle(node);
+      const divider = getComputedStyle(node, '::after');
+      const reference = getComputedStyle(node.parentElement.querySelector('.program-register-nsa-summary-group'), '::after');
+      return { border: delivery.borderRightWidth, top: divider.top, bottom: divider.bottom, width: divider.width,
+        fill: divider.backgroundColor, display: divider.display, reference: { top: reference.top, bottom: reference.bottom, width: reference.width, fill: reference.backgroundColor, display: reference.display } };
+    });
+    expect(dividerStyles.border).toBe('0px');
+    expect(dividerStyles.top).toBe('18px');
+    expect(dividerStyles.bottom).toBe('18px');
+    expect(dividerStyles.width).toBe('1px');
+    for (const property of ['top', 'bottom', 'width', 'fill', 'display']) expect(dividerStyles[property]).toBe(dividerStyles.reference[property]);
     await page.mouse.move(0, 0);
+    await expectRailBackgrounds();
     expect(await row.evaluate(node => new Set(Array.from(node.querySelectorAll('.commercial-value-frame')).map(x => getComputedStyle(x).borderTopColor)).size)).toBe(1);
     await page.screenshot({ path: testInfo.outputPath('framed-register.png') });
     await row.locator('[data-disclosure-toggle]').click();

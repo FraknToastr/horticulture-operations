@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
   { page: "nsa.html", owner: "NSA" },
   { page: "events.html", owner: "EVT" }
 ].forEach(({ page: entryPage, owner }) => {
-  test(`${owner} manual Register creation exposes one permanent full Location card`, async ({ page }) => {
+  test(`${owner} manual Register creation opens Location tools for the active record without a Project`, async ({ page }) => {
     await page.goto(`/src/program-planner/${entryPage}`);
     const child = page.frames().find((candidate) => candidate !== page.mainFrame());
     await child.waitForFunction(() => window.UOS && window.UOS.ProgramApp && window.UOS.ProgramApp.snapshot().phase === "ready");
@@ -32,15 +32,18 @@ test.beforeEach(async ({ page }) => {
 
     await frame.locator(`[data-register-action="map"][data-register-record="${activeId}"]`).click();
     await expect(frame.locator('body')).toHaveAttribute('data-drawer-module', 'map');
-    const cards = frame.locator("#eventPickerList > [data-event-card-id]");
-    await expect(cards).toHaveCount(1);
-    await expect(cards.first()).toHaveAttribute("data-event-card-id", activeId);
-    await expect(cards.first()).toHaveAttribute("data-disclosure-skip", "");
-    await expect(cards.first().locator('[data-location-action="add"]')).toHaveCSS("display", "flex");
-    await expect(cards.first().locator(".program-status-pill")).toHaveCount(0);
-    await expect(cards.first().locator('[data-location-action="move"]')).toHaveCount(0);
-    await expect(frame.locator("#eventPickerList [data-disclosure-toggle]")).toHaveCount(0);
-    await expect(frame.locator("#eventPickerList [data-disclosure-drawer]")).toHaveCount(0);
-    await expect(frame.locator(`#eventPickerList [data-event-card-id="${firstId}"]`)).toHaveCount(0);
+    expect(await child.evaluate(()=>UOS.ProgramMapController.canonicalMapState(UOS.ProgramApp.workspace()).selectedRegisterId)).toBe(activeId);
+    await expect(frame.locator('[data-space-panel="location"]')).toBeVisible();
+    await expect(frame.locator('[data-space-pin]')).toHaveCount(0);
+    await expect(frame.locator('#eventPickerList')).toContainText('No pins');
+    await expect(frame.locator('#eventPickerList .program-status-pill,[data-event-card-id]')).toHaveCount(0);
+    await frame.locator('#spaceRadialToggle').click();
+    await expect(frame.locator('[data-space-create="location"]')).toBeEnabled();
+    for(const kind of ['polygon','line','square'])await expect(frame.locator('[data-space-create="'+kind+'"]')).toBeDisabled();
+    await frame.locator('[data-space-create="location"]').click();
+    await expect(frame.locator('#spaceDraftActions')).toBeVisible();
+    await frame.locator('#spaceCancelDraft').click();
+    expect(await child.evaluate(()=>UOS.ProgramMapController.canonicalMapState(UOS.ProgramApp.workspace()).selectedRegisterId)).toBe(activeId);
+
   });
 });
