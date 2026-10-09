@@ -102,3 +102,39 @@ This update removes the divider accents, fills the rail with six equal-width/ful
 - `tests/browser/scheduler-calendar-scope.spec.js`
 - `tests/delete-safety.test.cjs`
 - `tests/workspace-import-signature.test.cjs`
+
+### Space Map radial creation and approval controls
+
+Destination: `overtime-stage3` to `origin/overtime-stage3`. Neither `main` nor `github-replacement` is updated.
+
+The complete branch tree and reachable history were reviewed. Existing remote history contains legacy review archives, evidence files and logs; this NSA/EVT-only update leaves that history unchanged and publishes no Overtime changes. No remote deletion or history rewrite is authorized.
+
+The reviewed transport set is:
+
+- `docs/publication-allowlist-2026-10-09.md`
+- `src/program-planner/index.html`
+- `src/program-planner/styles.css`
+- `src/program-planner/space-map-editor.css`
+- `src/program-planner/js/program-map.js`
+- `src/remediation-planner/js/map.js`
+- `src/shared/assets/moasure_logo.avif`
+- `tests/browser/test-helper.cjs`
+- `tests/browser/space-map-editor.spec.js`
+- `tests/browser/space-map-radial.spec.js`
+- `tests/browser/space-map-draft-actions.spec.js`
+- `tests/browser/area-pricing.spec.js`
+- `tests/browser/delete-warning-audit.spec.js`
+- `tests/browser/floating-draw-toolbar.spec.js`
+- `tests/browser/location-filter.spec.js`
+- `tests/browser/map-drawing-lifecycle.spec.js`
+- `tests/browser/moasure-map.spec.js`
+- `tests/browser/polygon-inspector-editing.spec.js`
+- `tests/browser/polygon-job-promotion.spec.js`
+- `tests/browser/register-drawer-context.spec.js`
+- `tests/location-polygon-sidebar.test.cjs`
+
+Only Space Map hunks of the shared HTML and stylesheet are included. Unrelated Quote, Register, Planner and Overtime edits, local Moasure source files, backups, reports, rosters, screenshots and test outputs remain local. The logo asset is included at its shared location; it was not previously tracked at its original local path.
+
+Validation includes creation, pin operations, vertex edits, Moasure, pricing, job creation, drawer layout, branch angles, orb-edge connectors, both themes and narrow screens. Verification is repeated against the staged source tree before publication.
+
+Staged-tree verification passed: 68 focused browser regressions and all 29 included unit checks. Tests ran from an isolated export of the Git index on a separate local server; the export excludes unstaged local recovery tests and operator data. Generated logs and previews remain outside the transport set.

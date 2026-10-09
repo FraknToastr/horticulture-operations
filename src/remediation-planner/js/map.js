@@ -49,6 +49,7 @@
     var initializationTimer = null;
     var destroyed = false;
     var measurementMarkers = [], placingLocation = false;
+    var locationMarkers=[],showLocationNumbers=true;
     var labelPlacements = [];
     var showLengthLabels = false;
     var showAreaLabel = true;
@@ -461,8 +462,8 @@
       }
       if (!map.getSource("uos-location")) {
         map.addSource("uos-location", { type: "geojson", data: locationFeatures() });
-        map.addLayer({ id: "uos-location-halo", type: "circle", source: "uos-location", paint: { "circle-radius": 14, "circle-color": ["match", ["get", "owner"], "NSA", "#15803d", "EVT", "#0284c7", "#15803d"], "circle-opacity": 0.22 } });
-        map.addLayer({ id: "uos-location-pin", type: "circle", source: "uos-location", paint: { "circle-radius": 7, "circle-color": ["match", ["get", "owner"], "NSA", "#15803d", "EVT", "#0284c7", "#15803d"], "circle-stroke-color": themeColor("--uos-surface", "#fff"), "circle-stroke-width": 3 } });
+        map.addLayer({ id: "uos-location-halo", type: "circle", source: "uos-location", paint: { "circle-radius": 14, "circle-color": ["match", ["get", "owner"], "NSA", "#15803d", "EVT", "#0284c7", "#15803d"], "circle-opacity": options.numberedLocations ? 0 : 0.22 } });
+        map.addLayer({ id: "uos-location-pin", type: "circle", source: "uos-location", paint: { "circle-radius": 7, "circle-color": ["match", ["get", "owner"], "NSA", "#15803d", "EVT", "#0284c7", "#15803d"], "circle-stroke-color": themeColor("--uos-surface", "#fff"), "circle-stroke-width": 3, "circle-opacity": options.numberedLocations ? 0 : 1, "circle-stroke-opacity": options.numberedLocations ? 0 : 1 } });
       }
     }
 
@@ -478,6 +479,7 @@
       if (draft) draft.setData(draftFeatures());
       if (edit) edit.setData(editFeatures());
       if (location) location.setData(locationFeatures());
+      renderNumberedLocations();
       refreshMeasurementMarkers();
     }
 
@@ -508,6 +510,37 @@
         map.setPaintProperty("uos-edit-vertices", "circle-stroke-color", themeColor("--uos-info", "#2365e8"));
       }
       if (map.getLayer("uos-edit-vertex-glow")) map.setPaintProperty("uos-edit-vertex-glow", "circle-color", themeColor("--uos-info", "#2365e8"));
+    }
+
+
+    function renderNumberedLocations(){
+      if(!options.numberedLocations)return;
+      locationMarkers.forEach(function(marker){marker.remove();});locationMarkers=[];
+      if(!map || !maplibregl.Marker)return;
+      locationFeatures().features.forEach(function(feature,index){
+        var element=document.createElement("button");
+        element.type="button";element.className="uos-numbered-location-pin";
+        var number=feature.properties.index+1;
+        element.setAttribute("aria-label","Location "+number);
+        element.style.cssText="background:none;border:0;padding:0;width:38px;height:48px;cursor:pointer";
+        element.innerHTML=pinSymbol(number,showLocationNumbers,feature.properties.owner);
+        element.addEventListener("click",function(event){event.stopPropagation();if(typeof options.onLocationSelected==="function")options.onLocationSelected({locationId:feature.properties.id,registerId:feature.properties.sourceRecordId});});
+        locationMarkers.push(new maplibregl.Marker({element:element,anchor:"bottom"}).setLngLat(feature.geometry.coordinates).addTo(map));
+      });
+    }
+    function fitCoordinates(coordinates){
+      if(!map || !coordinates.length)return false;
+      if(coordinates.length===1){map.easeTo({center:coordinates[0],zoom:19,duration:animDuration(300)});return true;}
+      var bounds=new maplibregl.LngLatBounds();
+      coordinates.forEach(function(c){bounds.extend(c);});
+      map.fitBounds(bounds,{padding:48,maxZoom:19,duration:animDuration(300)});
+      return true;
+    }
+    function fitLocations(){return fitCoordinates(locationFeatures().features.map(function(f){return f.geometry.coordinates;}));}
+    function fitGeometries(){
+      var coordinates=[];
+      (currentEvent && currentEvent.polygons || []).filter(function(shape){return shape.visible!==false;}).forEach(function(shape){(shape.coordinates || []).forEach(function(c){if(Model.coordinateValid(c))coordinates.push(c);});});
+      return fitCoordinates(coordinates);
     }
 
     function notifyDraw() {
@@ -947,6 +980,7 @@
     }
 
     function destroy() {
+      locationMarkers.forEach(function(marker){marker.remove();});locationMarkers=[];
       cancelPlacement();
       destroyed = true;
       ready = false;
@@ -1139,12 +1173,13 @@
             return;
           }
           if (drawing) {
+            if (drawing.mode === "square" && options.autoFinishSquare === false && drawing.coordinates.length >= 2) return;
             var coordinate = snapped([event.lngLat.lng, event.lngLat.lat], Boolean(event.originalEvent && event.originalEvent.shiftKey));
             drawing.coordinates.push(coordinate);
             previewCoordinate = null;
             refresh();
             notifyDraw();
-            if (drawing.mode === "square" && drawing.coordinates.length === 2) completeDrawing();
+            if (drawing.mode === "square" && drawing.coordinates.length === 2 && options.autoFinishSquare !== false) completeDrawing();
             return;
           }
           if (editingShapeId && map.getLayer("uos-edit-vertices")) {
@@ -1201,6 +1236,9 @@
       cancelActiveInteraction: cancelActiveInteraction,
       undoPoint: undoPoint,
       zoomToShapes: zoomToShapes,
+      fitLocations:fitLocations,
+      fitGeometries:fitGeometries,
+      setLocationNumbers:function(visible){var next=visible!==false;if(next!==showLocationNumbers){showLocationNumbers=next;renderNumberedLocations();}},
       resetView: resetView,
       resetHome: resetView,
       zoomToShape: zoomToShape,
@@ -1256,6 +1294,10 @@
     };
   }
 
-  UOS.RemediationMap = { create: create, resolveCameraTarget: resolveCameraTarget };
+  function pinSymbol(number,visible,owner){
+    var color=owner==="EVT"?"#137998":"#087c5c",label=String(Number(number)||0);
+    return '<svg viewBox="0 0 38 48" aria-hidden="true" style="width:100%;height:100%"><path d="M19 1C9 1 2 8 2 18c0 11 17 28 17 28s17-17 17-28C36 8 29 1 19 1Z" fill="'+color+'" stroke="white" stroke-width="2"/>'+(visible?'<text x="19" y="23" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" font-weight="750" fill="white" stroke="none" stroke-width="0" style="text-shadow:none">'+label+'</text>':'')+'</svg>';
+  }
+  UOS.RemediationMap = { create:create,resolveCameraTarget:resolveCameraTarget,pinSymbol:pinSymbol };
   if (typeof module !== "undefined" && module.exports) module.exports = UOS.RemediationMap;
 })();

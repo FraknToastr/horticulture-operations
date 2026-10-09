@@ -67,19 +67,8 @@ test("PC-005 C3: Turfing polygon on fresh canonical Project resolves RATE-TURFIN
   await frame.locator('[data-program-destination="map"]').click();
   await expect(frame.locator('[data-program-view="map"]')).toBeVisible();
 
-  // Switch scope to Projects
-  const projectScopeBtn = frame.locator('[data-map-scope="projects"]');
-  await projectScopeBtn.click();
-  await expect(projectScopeBtn).toHaveAttribute("aria-pressed", "true");
-
-  // Project card must show "1 polygon" and "Edit Polygons" button
-  const projectCard = frame.locator('#eventPickerList [data-event-card-id]');
-  await expect(projectCard).toHaveCount(1);
-  await expect(projectCard).toContainText("1 polygon");
-
-  const editPolygonsBtn = projectCard.locator('[data-edit-event-id]');
-  await expect(editPolygonsBtn).toHaveText("Edit Polygons");
-  await editPolygonsBtn.click();
+  // The linked project and geometry inspector are now present together.
+  await frame.locator("[data-space-expand]").first().click();
 
   // Polygon Inspector opens with shape card
   const shapeCard = frame.locator(`[data-shape-card-id="${geomId}"]`);
@@ -195,16 +184,8 @@ test("PC-005 C3: Unknown work type does not silently default to turfing and bloc
   await frame.locator('[data-program-destination="map"]').click();
   await expect(frame.locator('[data-program-view="map"]')).toBeVisible();
 
-  const projectScopeBtn = frame.locator('[data-map-scope="projects"]');
-  await projectScopeBtn.click();
-  await expect(projectScopeBtn).toHaveAttribute("aria-pressed", "true");
+  await frame.locator("[data-space-expand]").first().click();
 
-  const projectCard = frame.locator('#eventPickerList [data-event-card-id]');
-  await expect(projectCard).toHaveCount(1);
-  const editPolygonsBtn = projectCard.locator('[data-edit-event-id]');
-  await editPolygonsBtn.click();
-
-  // 4. Polygon Inspector opens with shape card
   const shapeCard = frame.locator(`[data-shape-card-id="${geomId}"]`);
   await expect(shapeCard).toBeVisible();
 

@@ -178,7 +178,7 @@ for (const owner of ['NSA', 'EVT']) {
     await warning(frame).getByRole('button', { name: 'Remove vertex', exact: true }).click();
     await expect.poll(() => frame.evaluate(() => window.deleteAuditMap.removes)).toBe(1);
     expect(await canonical(frame)).toBe(before);
-    await frame.locator("#finishDrawingButton").click();
+    await frame.locator("#spaceAcceptDraft").click();
     await expect.poll(() => canonical(frame)).not.toBe(before);
     const bin = card.locator('[data-shape-action="delete"]');
     await redIcon(bin, page);

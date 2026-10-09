@@ -25,13 +25,13 @@ async function openDrawing(page, owner) {
     await UOS.ProgramApp.navigate('map');
     return ids;
   }, owner);
-  await frame.locator('[data-map-scope="projects"]').click();
-  await frame.locator('[data-edit-event-id]').filter({ hasText: 'Add Polygons' }).first().click();
+  await frame.waitForFunction(()=>UOS.ProgramMapController.getMapController()?.ready());
   return { frame, ids, errors };
 }
 
 async function point(frame, x, y) {
   const canvas = frame.locator('.maplibregl-canvas');
+  await expect(canvas).toBeVisible();
   const rect = await canvas.boundingBox();
   await canvas.click({ position: { x: rect.width * x, y: rect.height * y } });
 }
@@ -90,7 +90,7 @@ for(const owner of ['NSA','EVT']){
   await card.locator('[data-shape-action="edit"]').click();
   const vertex=card.locator('[data-coord-lng="1"]');const longitude=Number(await vertex.inputValue());
   await vertex.fill(String(longitude+.000001));await vertex.dispatchEvent('change');
-  await frame.locator('#finishDrawingButton').click();
+  await frame.locator('#spaceAcceptDraft').click();
   await expect(card).toContainText('Edited survey outline');
   const edited=await frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries[0].payload.areaSqM);
   expect(edited).not.toBe(before.payload.areaSqM);

@@ -1,3 +1,4 @@
+const {startSpaceCreation}=require('./test-helper.cjs');
 const { test, expect } = require('@playwright/test');
 const { suppressBackupModalForFunctionalTest } = require('./test-helper.cjs');
 
@@ -25,13 +26,13 @@ async function openDrawing(page, owner) {
     await UOS.ProgramApp.navigate('map');
     return ids;
   }, owner);
-  await frame.locator('[data-map-scope="projects"]').click();
-  await frame.locator('[data-edit-event-id]').filter({ hasText: 'Add Polygons' }).first().click();
+  await frame.waitForFunction(()=>UOS.ProgramMapController.getMapController()?.ready());
   return { frame, ids, errors };
 }
 
 async function point(frame, x, y) {
   const canvas = frame.locator('.maplibregl-canvas');
+  await expect(canvas).toBeVisible();
   const rect = await canvas.boundingBox();
   await canvas.click({ position: { x: rect.width * x, y: rect.height * y } });
 }
@@ -40,9 +41,9 @@ async function point(frame, x, y) {
 for (const owner of ['NSA','EVT']) {
  test(owner+': inspector hectare choice and manual area use canonical m²', async ({page})=>{
   const {frame,errors}=await openDrawing(page,owner);
-  await frame.locator('#startDrawingButton').click();
+  await startSpaceCreation(frame,"polygon");
   await point(frame,.35,.55);await point(frame,.65,.55);await point(frame,.5,.8);
-  await frame.locator('#finishDrawingButton').click();
+  await frame.locator('#spaceAcceptDraft').click();
   const card=frame.locator('[data-shape-card-id]').first();
   await expect(card.locator('[data-shape-rate]')).toBeEnabled();
   await card.locator('[data-shape-pricing-unit]').selectOption('ha');
@@ -82,9 +83,9 @@ for (const owner of ['NSA','EVT']) {
    w.referenceData.shared.workTypeRateItems.turfing={eligibleRateItemIds:['RATE-TURFING'],defaultRateItemId:'RATE-TURFING'};
    return w;
   }));
-  await frame.locator('#startDrawingButton').click();
+  await startSpaceCreation(frame,"polygon");
   await point(frame,.35,.55);await point(frame,.65,.55);await point(frame,.5,.8);
-  await frame.locator('#finishDrawingButton').click();
+  await frame.locator('#spaceAcceptDraft').click();
   const card=frame.locator('[data-shape-card-id]').first();
   await expect(card.locator('[data-shape-rate]')).toHaveValue('RATE-RECOVERED-TURF');
   await card.locator('[data-shape-pricing-unit]').selectOption('ha');

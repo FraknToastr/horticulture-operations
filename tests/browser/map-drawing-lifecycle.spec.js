@@ -1,3 +1,4 @@
+const {startSpaceCreation}=require('./test-helper.cjs');
 const { test, expect } = require('@playwright/test');
 const { suppressBackupModalForFunctionalTest } = require('./test-helper.cjs');
 
@@ -25,13 +26,13 @@ async function openDrawing(page, owner) {
     await UOS.ProgramApp.navigate('map');
     return ids;
   }, owner);
-  await frame.locator('[data-map-scope="projects"]').click();
-  await frame.locator('[data-edit-event-id]').filter({ hasText: 'Add Polygons' }).first().click();
+  await frame.waitForFunction(()=>UOS.ProgramMapController.getMapController()?.ready());
   return { frame, ids, errors };
 }
 
 async function point(frame, x, y) {
   const canvas = frame.locator('.maplibregl-canvas');
+  await expect(canvas).toBeVisible();
   const rect = await canvas.boundingBox();
   await canvas.click({ position: { x: rect.width * x, y: rect.height * y } });
 }
@@ -39,10 +40,10 @@ async function point(frame, x, y) {
 for (const owner of ['NSA', 'EVT']) {
   test(`${owner}: fresh polygon completion, undo, cancellation and reload use real map clicks`, async ({ page }) => {
     const { frame, ids, errors } = await openDrawing(page, owner);
-    const finish = frame.locator('#finishDrawingButton');
-    const cancel = frame.locator('#cancelDrawingButton');
+    const finish = frame.locator('#spaceAcceptDraft');
+    const cancel = frame.locator('#spaceCancelDraft');
     const undo = frame.locator('#undoDrawingButton');
-    await frame.locator('#startDrawingButton').click();
+    await startSpaceCreation(frame,"polygon");
     await expect(finish).toBeDisabled();
     await expect(cancel).toBeEnabled();
     await expect(undo).toBeDisabled();
@@ -67,7 +68,7 @@ for (const owner of ['NSA', 'EVT']) {
     expect(saved).toHaveLength(1);
     expect(saved[0].projectId).toBe(ids.projectId);
     expect(saved[0].owner).toBe(owner);
-    await frame.locator('[data-draw-mode="polygon"]').click();
+    await startSpaceCreation(frame,"polygon");
     await point(frame, .4, .6);
     await cancel.click();
     expect(await frame.evaluate(() => UOS.ProgramApp.workspace().entities.geometries.length)).toBe(1);
@@ -78,18 +79,18 @@ for (const owner of ['NSA', 'EVT']) {
     expect(errors).toEqual([]);
   });
 
-  test(`${owner}: mode buttons complete polygons, lines and automatic squares`, async ({ page }) => {
+  test(`${owner}: mode buttons complete polygons, lines and accepted squares`, async ({ page }) => {
     const { frame, errors } = await openDrawing(page, owner);
     for (const mode of ['polygon', 'line', 'square']) {
-      await frame.locator(`[data-draw-mode="${mode}"]`).click();
+      await startSpaceCreation(frame,mode);
       await point(frame, .35, .55);
       await point(frame, .65, .55);
       if (mode === 'polygon') await point(frame, .65, .8);
-      if (mode !== 'square') await frame.locator('#finishDrawingButton').click();
+      await frame.locator('#spaceAcceptDraft').click();
       const count = ['polygon', 'line', 'square'].indexOf(mode) + 1;
       await expect.poll(() => frame.evaluate(() => UOS.ProgramApp.workspace().entities.geometries.length)).toBe(count);
-      await expect(frame.locator('#cancelDrawingButton')).toBeDisabled();
-      await expect(frame.locator('#floatingDrawToolbar')).not.toHaveClass(/is-drawing/);
+      await expect(frame.locator('#spaceCancelDraft')).toBeDisabled();
+      await expect(frame.locator('#spaceDrawingTools')).not.toHaveClass(/is-drawing/);
     }
     const kinds = await frame.evaluate(() => UOS.ProgramApp.workspace().entities.geometries.map(item => item.geometry.type));
     expect(kinds).toEqual(['Polygon', 'LineString', 'Polygon']);
@@ -101,11 +102,11 @@ for (const owner of ['NSA', 'EVT']) {
     await frame.evaluate(() => {
       UOS.WorkAreaService.createGeometry = () => { throw new Error('Drawing save rejected for test'); };
     });
-    await frame.locator('#startDrawingButton').click();
+    await startSpaceCreation(frame,"polygon");
     await point(frame, .35, .55);
     await point(frame, .65, .55);
     await point(frame, .65, .8);
-    await frame.locator('#finishDrawingButton').click();
+    await frame.locator('#spaceAcceptDraft').click();
     await expect(frame.locator('#mapToolStatus')).toContainText('Drawing save rejected for test');
     expect(await frame.evaluate(() => UOS.ProgramApp.workspace().entities.geometries.length)).toBe(0);
     expect(await frame.evaluate(() => UOS.ProgramApp.workspace().entities.projects.length)).toBe(1);

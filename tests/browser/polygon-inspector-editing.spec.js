@@ -19,7 +19,7 @@ for(const owner of ['NSA','EVT']){
     const preview=await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getOperationalSnapshot().features.features[0].geometry.coordinates);
     const stored=await frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries[0].geometry.coordinates);
     expect(preview).not.toEqual(stored);expect(await entities(frame)).toBe(before);
-    await frame.locator('#cancelDrawingButton').click();expect(await entities(frame)).toBe(before);
+    await frame.locator('#spaceCancelDraft').click();expect(await entities(frame)).toBe(before);
     await card.locator('[data-shape-action="edit"]').click();
     await card.locator('[data-delete-vertex="0"]').click();
     const warning=frame.getByRole('dialog').filter({has:frame.locator('.uos-modal__foot .uos-button--danger')});
@@ -27,7 +27,7 @@ for(const owner of ['NSA','EVT']){
     await warning.getByRole('button',{name:'Remove vertex',exact:true}).click();
     await expect(card.locator('[data-coord-lng]')).toHaveCount(3);
     expect(await entities(frame)).toBe(before);
-    await frame.locator('#finishDrawingButton').click();
+    await frame.locator('#spaceAcceptDraft').click();
     await expect(card.locator('[data-coord-lng]')).toHaveCount(0);
     expect(await entities(frame)).not.toBe(before);
     expect(errors).toEqual([]);
@@ -69,8 +69,7 @@ async function setup(page,owner){
     });
     await UOS.ProgramApp.navigate('map');return ids;
   },owner);
-  await frame.locator('[data-map-scope="projects"]').click();
-  await frame.locator('[data-edit-event-id="'+ids.projectId+'"]').first().click();
+  await frame.locator('[data-space-expand="'+ids.geometryId+'"]').click();
   await frame.waitForFunction(()=>UOS.ProgramMapController.getMapController()?.ready());
   expect(await frame.evaluate(()=>UOS.ProgramApp.workspace().entities.jobs.length)).toBe(1);
   expect(await frame.evaluate(()=>UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(1);
@@ -80,8 +79,7 @@ async function reopenInspector(frame,ids){
   await frame.evaluate(()=>UOS.ProgramApp.navigate('map'));
   const back=frame.locator('#backToListButton');
   if(await back.isVisible())await back.click();
-  await frame.locator('[data-map-scope="projects"]').click();
-  await frame.locator('[data-edit-event-id="'+ids.projectId+'"]').first().click();
+  await frame.locator('[data-space-expand="'+ids.geometryId+'"]').click();
 }
 const entities=frame=>frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities));
 async function editCoordinate(card){
@@ -94,14 +92,14 @@ for(const owner of ['NSA','EVT']){
   test(owner+': vertex edits are staged; Cancel, Escape and navigation preserve saved work',async({page})=>{
     const {frame,card,errors}=await setup(page,owner),before=await entities(frame);
     await card.locator('[data-shape-action="edit"]').click();
-    await expect(frame.locator('#finishDrawingButton')).toBeEnabled();
-    await expect(frame.locator('#cancelDrawingButton')).toBeEnabled();
-    await expect(frame.locator('#startDrawingButton')).toBeDisabled();
+    await expect(frame.locator('#spaceAcceptDraft')).toBeEnabled();
+    await expect(frame.locator('#spaceCancelDraft')).toBeEnabled();
+    for(const mode of ['polygon','line','square']) await expect(frame.locator('[data-space-create="'+mode+'"]')).toBeDisabled();
     await expect(frame.locator('#undoDrawingButton')).toBeDisabled();
     await expect(card.locator('[data-shape-action="edit"]')).toHaveText('Edit Vertices');
     await editCoordinate(card);
     expect(await entities(frame)).toBe(before);
-    await frame.locator('#cancelDrawingButton').click();
+    await frame.locator('#spaceCancelDraft').click();
     await expect(card.locator('[data-coord-lng]')).toHaveCount(0);
     expect(await entities(frame)).toBe(before);
     await card.locator('[data-shape-action="edit"]').click();await editCoordinate(card);
@@ -118,11 +116,11 @@ for(const owner of ['NSA','EVT']){
     await card.locator('[data-shape-action="edit"]').click();
     const input=card.locator('[data-coord-lng="1"]');
     await input.fill('');await input.dispatchEvent('change');
-    await expect(frame.locator('#finishDrawingButton')).toBeDisabled();
+    await expect(frame.locator('#spaceAcceptDraft')).toBeDisabled();
     expect(await entities(frame)).toBe(before);
     await input.fill('138.60035');await input.dispatchEvent('change');
-    await expect(frame.locator('#finishDrawingButton')).toBeEnabled();
-    await frame.locator('#finishDrawingButton').click();
+    await expect(frame.locator('#spaceAcceptDraft')).toBeEnabled();
+    await frame.locator('#spaceAcceptDraft').click();
     await expect(card.locator('[data-coord-lng]')).toHaveCount(0);
     const saved=await entities(frame);expect(saved).not.toBe(before);
     await page.reload();
@@ -136,11 +134,11 @@ for(const owner of ['NSA','EVT']){
       const g=w.entities.geometries.find(g=>g.id===id);g.payload.visible=false;return w;
     }),ids.geometryId);
     const stale=await entities(restored);
-    await restored.locator('#finishDrawingButton').click();
+    await restored.locator('#spaceAcceptDraft').click();
     await expect(restored.locator('.uos-toast').filter({hasText:'changed during editing'})).toBeVisible();
     expect(await entities(restored)).toBe(stale);
-    await expect(restored.locator('#cancelDrawingButton')).toBeEnabled();
-    await restored.locator('#cancelDrawingButton').click();
+    await expect(restored.locator('#spaceCancelDraft')).toBeEnabled();
+    await restored.locator('#spaceCancelDraft').click();
     expect(errors).toEqual([]);
   });
 
@@ -149,8 +147,7 @@ for(const owner of ['NSA','EVT']){
     const labelled=card.locator('.program-shape-actions--labelled');
     await expect(labelled.locator('button')).toHaveText(['Edit Vertices','Move / Rotate']);
     await expect(card.locator('.program-shape-actions--icons button')).toHaveCount(4);
-    const heights=await card.locator('button.uos-button').evaluateAll(b=>b.map(x=>x.getBoundingClientRect().height));
-    expect(new Set(heights).size).toBe(1);expect(heights[0]).toBe(34);
+    await expect.poll(()=>card.locator('button.uos-button').evaluateAll(b=>Array.from(new Set(b.map(x=>x.getBoundingClientRect().height))))).toEqual([32]);
     await expect.poll(()=>frame.evaluate(()=>UOS.ProgramMapController.getMapController().getOperationalSnapshot().layers.length)).toBeGreaterThanOrEqual(5);
     const layers=await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getOperationalSnapshot().layers);
     expect(layers.find(l=>l.id==='uos-shape-edges').paint['line-width']).toBe(2);
@@ -176,8 +173,10 @@ test('Moasure confirmation controls survive Escape and reload, and target their 
   await expect(moasure.locator('[data-placement-controls]')).toBeVisible();
   const id=await moasure.getAttribute('data-shape-card-id');
   const normal=frame.locator('[data-shape-card-id="'+ids.geometryId+'"]');
+  await frame.locator('[data-space-expand="'+ids.geometryId+'"]').click();
   await normal.locator('[data-polygon-placement]').click();
   await normal.locator('[data-placement-angle]').fill('20');
+  await frame.locator('[data-space-expand="'+id+'"]').click();
   await moasure.locator('[data-placement-angle]').fill('10');
   await expect(normal.locator('[data-placement-controls]')).toHaveCount(0);
   const normalPreview=await frame.evaluate(id=>UOS.ProgramMapController.getMapController().getOperationalSnapshot().features.features.find(f=>f.properties.id===id).geometry.coordinates,ids.geometryId);
@@ -189,7 +188,7 @@ test('Moasure confirmation controls survive Escape and reload, and target their 
   await page.reload();
   const restored=page.frames().find(f=>f!==page.mainFrame());
   await restored.waitForFunction(()=>window.UOS?.ProgramApp?.snapshot().phase==='ready');
-  await reopenInspector(restored,ids);
+  await reopenInspector(restored,{...ids,geometryId:id});
   const card=restored.locator('[data-shape-card-id="'+id+'"]');
   await expect(card.locator('[data-save-placement]')).toBeVisible();
   await card.locator('[data-save-placement]').click();

@@ -22,7 +22,8 @@
   <link rel="stylesheet" href="../shared/css/accessibility.css?v=20261001-modal-focus-v1">
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
-<link rel="stylesheet" href="styles.css?v=20261009-polygon-inspector-v2">
+<link rel="stylesheet" href="styles.css?v=20261009-space-editor-v7">
+  <link rel="stylesheet" href="space-map-editor.css?v=20261009-v7">
 <link rel="stylesheet" href="scheduler-week.css?v=20261005-selected-hourly-slot-v2">
   <link rel="stylesheet" href="planner-row-header.css?v=20261008-ready-frame-row-buffers-v13">
   <link rel="stylesheet" href="register-row-header.css?v=20261008-saved-work-only-v8">
@@ -293,96 +294,61 @@
           </section>
 
           <section class="program-map-layout program-view" data-program-view="map" aria-label="Space Map" hidden>
-            <div class="program-map-workspace">
-              <!-- Pane 1: Dual-Use Inspector & Event/App Picker -->
-              <aside class="program-map-sidebar program-island" aria-label="Polygon inspector, remediation events and nature strip applications sidebar">
-                <header class="program-map-sidebar__head">
-                  <div><p class="uos-eyebrow">Space Map</p><h3>Mapped Records</h3></div>
-                </header>
-                <!-- Scope selector -->
-                <div class="program-map-scope-wrap">
-                  <div class="uos-segmented program-map-scope-segmented" role="group" aria-label="Map Sidebar Scope">
-                    <button type="button" class="is-active" data-map-scope="register" aria-pressed="true">Register</button>
-                    <button type="button" data-map-scope="projects" aria-pressed="false">Projects</button>
+            <div class="program-map-workspace space-editor">
+              <aside class="program-map-sidebar space-editor__sidebar" aria-label="Space Map editor">
+                <section class="space-editor__panel" data-space-panel="location">
+                  <header class="space-editor__heading"><button type="button" data-space-collapse="location" aria-expanded="true" aria-controls="spaceLocationBody">▾ Location</button></header>
+                  <div id="spaceLocationBody" class="space-editor__body">
+                    <div class="space-editor__tools" role="toolbar" aria-label="Location tools">
+                      <div class="space-editor__tool-row space-editor__tool-row--two"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="moveLocationButton" disabled>Move</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="removeLocationButton" disabled>Remove</button></div>
+                      <div class="space-editor__tool-row space-editor__tool-row--one"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="undoLocationButton" disabled>Undo</button></div>
+                      <div class="space-editor__tool-row"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="fitLocationsButton">Fit</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="homeLocationsButton">Home</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="labelLocationsButton">Labels</button></div>
+                    </div>
+                    <div id="eventPickerList" class="space-editor__pins" aria-label="Location pins"></div>
+
+
+
                   </div>
-                </div>
-                <div class="program-filter-drawer" data-filter-drawer="map">
-                  <button type="button" class="program-filter-drawer-toggle" data-filter-drawer-toggle aria-expanded="false" aria-controls="mapFilterDrawerBody" aria-label="Toggle search and status filters">
-                    <span class="program-filter-drawer-toggle__lead">
-                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-                      <span>Search & Filters</span>
-                    </span>
-                    <span class="program-filter-drawer-toggle__trail">
-                          <span class="program-filter-drawer-active-badge" data-filter-drawer-badge="map" hidden>0</span>
-                          <span class="program-filter-drawer-reset" data-filter-drawer-reset="map" role="button" tabindex="0" aria-label="Reset active filters" title="Reset active filters" hidden>&times;</span>
-                      <svg viewBox="0 0 24 24" aria-hidden="true" class="program-filter-drawer-chevron"><path d="m6 9 6 6 6-6"/></svg>
-                    </span>
-                  </button>
-                  <div class="program-filter-drawer-body" id="mapFilterDrawerBody" data-filter-drawer-body data-sidebar-search-wrap hidden>
-                    <label class="program-map-search"><span class="uos-sr-only">Search events, applications or polygons</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="search" placeholder="Search events, apps, parks, IDs..." id="eventSearchInput" data-event-search aria-label="Search events and applications"></label>
-                    <div class="program-map-spatial-filter-row" id="mapSpatialFilterPills" data-spatial-filter-pills="map"></div>
-                    <div class="program-map-filter-divider"></div>
-                    <div class="program-status-filter-pills" id="mapStatusFilterPills" data-status-filter-pills="map"></div>
+                </section>
+                <section class="space-editor__panel" data-space-panel="space">
+                  <header class="space-editor__heading"><button type="button" data-space-collapse="space" aria-expanded="true" aria-controls="spaceManagementBody">▾ Space Management</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="coordinateShapeButton">Data</button></header>
+                  <div id="spaceManagementBody" class="space-editor__body">
+                    <div id="spaceProjectEmpty"></div>
+                    <div class="space-editor__tools" id="spaceDrawingTools" role="toolbar" aria-label="Space Management tools" data-module-controls="map">
+                      <div class="space-editor__moasure-panel">
+                <div class="space-editor__moasure-logo"><img src="../shared/assets/moasure_logo.avif" alt="Moasure"></div>
+                <button type="button" class="uos-button uos-button--secondary uos-button--sm" id="moasureImportButton">Import Moasure CSV</button>
+              </div>
+
+
+              <div class="space-editor__tool-row"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="zoomShapesButton">Fit</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="resetHomeButton">Home</button><details class="program-map-menu program-map-menu--display"><summary class="uos-button uos-button--secondary uos-button--sm">Labels</summary><div class="program-map-menu__panel program-map-menu__panel--display"><div class="program-map-toggles" role="group" aria-label="Geometry labels"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapLength">Length</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapArea">Area</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapAngles">Angles</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapEdges">Edges</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapIndex">Index</button></div></div></details></div>
+                      <div class="space-editor__tool-row space-editor__tool-row--one"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="undoDrawingButton" disabled>Undo</button></div>
+                    </div>
+                    <div id="shapeList" class="space-editor__geometries" aria-label="Geometry inspector"></div>
                   </div>
-                </div>
-                <!-- View 1: Remediation Events & Nature Strip Apps List Picker -->
-                <div class="program-map-event-list program-scroll-region" id="eventPickerList" data-sidebar-pane="list"></div>
-                <!-- View 2: Polygon Inspector (Opened via Add/Edit Polygons button) -->
-                <div class="program-map-shape-list program-scroll-region" id="shapeList" data-sidebar-pane="shapes" hidden></div>
+                </section>
+                <div class="space-editor__status" id="mapToolStatus" role="status" aria-live="polite" hidden></div>
+                <div class="space-editor__status" id="mapNotice" role="status" hidden></div>
               </aside>
-              <!-- Pane 2: Space Map Canvas Space -->
-              <div class="program-map-canvas-container program-island">
-                <header class="program-map-canvas-header">
-                  <div class="program-map-header-controls" data-module-controls="map" role="toolbar" aria-label="Space Map controls">
-                    <div class="program-map-primary-actions">
-                      <button class="uos-button uos-button--secondary uos-button--sm is-active" type="button" id="selectToolButton" data-map-tool="select" aria-pressed="true" title="Select records and pins, or cancel the active map tool"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M3 3l7 17 2.5-6.5L19 11z"/></svg><span>Select / Edit</span></button>
-                      <span class="program-map-tool-status" id="mapToolStatus" role="status" aria-live="polite" hidden></span>
-                      <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="moasureImportButton" title="Select a Project to import a Moasure CSV">Import Moasure CSV</button>
-              <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="coordinateShapeButton"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span>Data</span></button>
-                      <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="zoomShapesButton" aria-label="Fit map to all shapes">Fit</button>
-                      <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="resetHomeButton" aria-label="Reset viewport to Home" title="Reset viewport to Adelaide LGA Home"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
+              <div class="program-map-canvas-container space-editor__canvas">
+                <div class="space-radial" id="spaceRadialMenu">
+                  <button type="button" class="space-radial__hub" id="spaceRadialToggle" aria-label="Expand creation menu" aria-expanded="false" aria-controls="spaceRadialActions" data-uos-tooltip="Create on map" data-uos-tooltip-pos="bottom"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16M4 12h16"/></svg></button>
+                  <div class="space-radial__actions" id="spaceRadialActions" role="toolbar" aria-label="Create map objects" hidden>
+                    <svg class="space-radial__connections" viewBox="0 0 300 180" preserveAspectRatio="none" aria-hidden="true"><path d="M150 32 41 83M150 32 99 141M150 32 201 141M150 32 259 83"/></svg>
+                    <button type="button" class="space-radial__node" data-space-create="location" aria-label="Location" aria-describedby="spaceRadialLocationReason" data-uos-tooltip="Location" data-uos-tooltip-pos="bottom"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-8 8-13a8 8 0 1 0-16 0c0 5 8 13 8 13Z"/><circle cx="12" cy="9" r="3"/></svg></button>
+                    <button type="button" class="space-radial__node" data-space-create="polygon" aria-label="Polygon" aria-describedby="spaceRadialPolygonReason" data-uos-tooltip="Polygon" data-uos-tooltip-pos="bottom"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 4 16 2-3 14-14-3Z"/></svg></button>
+                    <button type="button" class="space-radial__node" data-space-create="line" aria-label="Line" aria-describedby="spaceRadialLineReason" data-uos-tooltip="Line" data-uos-tooltip-pos="bottom"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 20 16-16"/></svg></button>
+                    <button type="button" class="space-radial__node" data-space-create="square" aria-label="Line-to-Square" aria-describedby="spaceRadialSquareReason" data-uos-tooltip="Line-to-Square" data-uos-tooltip-pos="bottom"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4Z"/></svg></button>
+                    <div class="space-radial__third-tier" id="spaceDraftActions" role="toolbar" aria-label="Approve or cancel map operation" hidden>
+                      <svg class="space-radial__draft-connections" viewBox="0 0 300 226" preserveAspectRatio="none" aria-hidden="true"><path id="spaceDraftConnections"/></svg>
+                      <button type="button" class="space-radial__node space-radial__approve" id="spaceAcceptDraft" aria-label="Accept" aria-describedby="spaceAcceptDraftReason" data-uos-tooltip="Accept" data-uos-tooltip-pos="bottom" disabled><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg></button>
+                      <button type="button" class="space-radial__node" id="spaceCancelDraft" aria-label="Cancel" data-uos-tooltip="Cancel" data-uos-tooltip-pos="bottom" disabled><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
+                      <span class="uos-sr-only" id="spaceAcceptDraftReason"></span>
                     </div>
-                    <details class="program-map-menu program-map-menu--display">
-                      <summary class="uos-button uos-button--secondary uos-button--sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Display</span></summary>
-                      <div class="program-map-menu__panel program-map-menu__panel--display">
-                        <label class="uos-field uos-field--sm"><span>Basemap</span><select class="uos-select" id="providerSelect"><option value="offline">Offline grid (private)</option><option value="esri-world-imagery" selected>Esri World Imagery (aerial)</option><option value="carto-light">Carto Light</option><option value="osm">OpenStreetMap (OSM)</option><option value="metromaps">Metromaps</option></select></label>
-                        <div class="program-map-toggles" role="group" aria-label="Map display options">
-                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapLength" aria-pressed="false">Length</button>
-                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapArea" aria-pressed="true">Area</button>
-                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapAngles" aria-pressed="false">Angles</button>
-                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapEdges" aria-pressed="true">Edges</button>
-                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapIndex" aria-pressed="true">Index</button>
-                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapActiveOnly" aria-pressed="false">Active only</button>
-                          <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="toggleMapSelectedOnly" aria-pressed="false">Selected only</button>
-                        </div>
-                      </div>
-                    </details>
-                  </div>
-                </header>
-                      <div class="program-map-floating-draw-toolbar" id="floatingDrawToolbar" role="toolbar" aria-label="Drawing tools">
-                    <button class="program-map-floating-draw-toolbar__handle" type="button" aria-label="Drag drawing toolbar" title="Drag drawing toolbar">
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="6" r="1"/><circle cx="16" cy="6" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/><circle cx="8" cy="18" r="1"/><circle cx="16" cy="18" r="1"/></svg>
-                    </button>
-                    <div class="program-map-floating-draw-toolbar__controls">
-                      <div class="program-draw-modes" role="group" aria-label="Draw mode">
-                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-draw-mode="polygon" aria-pressed="true">Polygon</button>
-                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-draw-mode="line" aria-pressed="false">Line</button>
-                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-draw-mode="square" aria-pressed="false">Line to Square</button>
-                      </div>
-                      <button class="uos-button uos-button--primary uos-button--sm program-map-floating-draw-toolbar__start" type="button" id="startDrawingButton">Start Drawing</button>
-                      <div class="program-map-drawing-actions" role="group" aria-label="Active drawing controls">
-                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="finishDrawingButton" disabled>Finish</button>
-                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="cancelDrawingButton" disabled>Cancel</button>
-                        <button class="uos-button uos-button--secondary uos-button--sm" type="button" id="undoDrawingButton" disabled>Undo Point</button>
-                      </div>
-                    </div>
-                </div>
-                <div class="program-map-canvas-inner" id="eventMap" tabindex="0" aria-label="Interactive spatial map canvas">
-                  <div class="program-map-unavailable" id="mapUnavailable" hidden>
-                    <h3>Interactive map unavailable</h3>
-                    <p>Coordinate entry, validation and mapped costing remain available in the shape editor.</p>
+                    <span class="uos-sr-only" id="spaceRadialLocationReason"></span><span class="uos-sr-only" id="spaceRadialPolygonReason"></span><span class="uos-sr-only" id="spaceRadialLineReason"></span><span class="uos-sr-only" id="spaceRadialSquareReason"></span>
                   </div>
                 </div>
+                <div class="program-map-canvas-inner" id="eventMap" tabindex="0" aria-label="Interactive spatial map canvas"><div class="program-map-unavailable" id="mapUnavailable" hidden><h3>Interactive map unavailable</h3><p>Coordinate entry and mapped costing remain available from Data.</p></div></div>
               </div>
             </div>
           </section>
@@ -1263,9 +1229,9 @@
   <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
   <script defer src="../shared/vendor/maplibre/maplibre-gl.js"></script>
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
-    <script defer src="../remediation-planner/js/map.js?v=20261009-polygon-inspector-v2"></script>
-  <script defer src="js/program-map.js?v=20261009-polygon-inspector-v2"></script>
-  <script defer src="js/map-floating-draw-toolbar.js?v=20260930-inset-v3"></script>
+    <script defer src="../remediation-planner/js/map.js?v=20261009-space-editor-v7"></script>
+  <script defer src="js/program-map.js?v=20261009-space-editor-v7"></script>
+
 <script defer src="js/planner.js?v=20261008-task-delete-warning-v11"></script>
  <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>
   <script defer src="js/planner-presentation.js?v=20261008-red-delete-icon-v8"></script>

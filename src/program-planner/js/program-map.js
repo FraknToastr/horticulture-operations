@@ -14,7 +14,7 @@
   var pendingDeleteShapeId = null;
   var pendingDeleteGuard = null;
   var vertexDraft = null;
-  var mapToggles = { Length: false, Area: true, Angles: false, Edges: true, Index: true, ActiveOnly: false, SelectedOnly: false };
+  var mapToggles = { Length: false, Area: true, Angles: false, Edges: true, Index: true };
   var activeProviderId = root.UOS_REMEDIATION_MAP_CONFIG && root.UOS_REMEDIATION_MAP_CONFIG.defaultProvider || "esri-world-imagery";
   var initialized = false;
   var mapModuleRoot = null;
@@ -28,12 +28,113 @@
   var cameraFocusVersion=0,pendingEntryZoom=false,pendingMoasureImport=null,placementDraft=null;
   var previousDestination = "";
   var pendingLocationPlacement = null;
+  var pinSession=null, drawingState=null, expandedGeometryId=null;
+  var panelCollapse={location:false,space:false};
+  var radialExpanded=false,radialContext="",radialDraftKind=null;
+
+  function setRadialExpanded(expanded, restoreFocus) {
+    radialExpanded=Boolean(expanded);
+    var hub=one("#spaceRadialToggle"),actions=one("#spaceRadialActions");
+    if(actions)actions.hidden=!radialExpanded;
+    if(hub){
+      hub.setAttribute("aria-expanded",String(radialExpanded));
+      hub.setAttribute("aria-label",radialExpanded?"Collapse creation menu":"Expand creation menu");
+      hub.setAttribute("data-uos-tooltip",radialExpanded?"Collapse creation menu":"Create on map");
+      if(restoreFocus)hub.focus({preventScroll:true});
+    }
+  }
+
+  function updateRadialControls() {
+    updateDraftActions();
+    var hub=one("#spaceRadialToggle");if(!hub)return;
+    var state=canonicalMapState(getWorkspace());
+    var ready=Boolean(mapController && mapController.ready());
+    var draft=Boolean(pinSession || drawingState && drawingState.active || vertexDraft || placementDraft || pendingLocationPlacement || pendingMoasureImport || pendingPolygonPlacementId);
+    all("[data-space-create]").forEach(function(button){
+      var kind=button.getAttribute("data-space-create"),label=button.getAttribute("aria-label");
+      var reason="";
+      if(!ready)reason="Interactive map is unavailable or still loading.";
+      else if(draft)reason="Accept or cancel the current draft first.";
+      else if(kind==="location" && !state.selectedRegisterId)reason="Open a Register record to add a location.";
+      else if(kind!=="location" && !state.selectedProjectId)reason="Create a Project for this record before drawing.";
+      button.disabled=Boolean(reason);
+      var description=one("#"+button.getAttribute("aria-describedby"));if(description)description.textContent=reason;
+      button.setAttribute("data-uos-tooltip",label+(reason?" — "+reason:""));
+    });
+  }
+
+  function draftActionState() {
+    var workspace=getWorkspace();
+    if(!workspace || workspace.workspace.destination!=="map")return null;
+    if(pinSession)return {kind:"location",canAccept:!pinSession.busy && pinSession.operations.length>0,canCancel:!pinSession.busy,reason:pinSession.busy?"Saving locations.":"Place or change a location before accepting."};
+    if(vertexDraft)return {kind:vertexDraft.shape.geometryType==="line"?"line":"polygon",canAccept:!vertexDraft.busy && !vertexDraft.error && !vertexDraft.invalidInput,canCancel:!vertexDraft.busy,reason:vertexDraft.busy?"Saving vertex edits.":vertexDraft.error || "Correct invalid coordinates before accepting."};
+    if(drawingState && drawingState.active)return {kind:activeDrawMode,canAccept:Boolean(drawingState.canFinish),canCancel:true,reason:"Add at least "+(activeDrawMode==="polygon"?3:2)+" points before accepting."};
+    return null;
+  }
+
+  function orbConnection(parent, parentRadius, child, childRadius) {
+    var dx=child.x-parent.x,dy=child.y-parent.y,length=Math.hypot(dx,dy);
+    var ux=dx/length,uy=dy/length;
+    return "M"+(parent.x+ux*parentRadius)+" "+(parent.y+uy*parentRadius)+"L"+(child.x-ux*childRadius)+" "+(child.y-uy*childRadius);
+  }
+
+  function positionRadialControls() {
+    var menu=one("#spaceRadialMenu");if(!menu)return;
+    var width=menu.clientWidth;if(!width)return;
+    // Reserve space beside the outer nodes for their outward-facing branches.
+    var span=Math.min(300,Math.max(0,width-116)),hub={x:width/2,y:32};
+    var positions={location:.1367,polygon:.33,line:.67,square:.8633},parents={},connections=[];
+    Object.keys(positions).forEach(function(kind){
+      var parent={x:width/2+(positions[kind]-.5)*span,y:kind==="location" || kind==="square"?83:141};
+      parents[kind]=parent;one('[data-space-create="'+kind+'"]').style.left=parent.x+"px";
+      connections.push(orbConnection(hub,32,parent,24));
+    });
+    var firstTier=one(".space-radial__connections");
+    firstTier.setAttribute("viewBox","0 0 "+width+" 180");firstTier.querySelector("path").setAttribute("d",connections.join(""));
+    if(!radialDraftKind)return;
+    var parent=parents[radialDraftKind],outer=radialDraftKind==="location" || radialDraftKind==="square";
+    var axis={x:0,y:1};
+    if(outer){var dx=parent.x-hub.x,dy=parent.y-hub.y,length=Math.hypot(dx,dy);axis={x:dx/length,y:dy/length};}
+    var offsets=[-36,36].map(function(side){return {x:side*axis.y+53*axis.x,y:-side*axis.x+53*axis.y};});
+    // Scale the fan on very narrow maps without shifting its angle or centre.
+    var extent=Math.max(Math.abs(offsets[0].x),Math.abs(offsets[1].x));
+    var available=radialDraftKind==="location"?parent.x-20:width-20-parent.x;
+    var scale=outer?Math.min(1,available/extent):1;
+    var children=offsets.map(function(offset){return {x:parent.x+offset.x*scale,y:parent.y+offset.y*scale};});
+    ["#spaceAcceptDraft","#spaceCancelDraft"].forEach(function(id,index){
+      var button=one(id);button.style.left=children[index].x+"px";button.style.top=children[index].y+"px";
+    });
+    one(".space-radial__draft-connections").setAttribute("viewBox","0 0 "+width+" 226");
+    one("#spaceDraftConnections").setAttribute("d",children.map(function(child){return orbConnection(parent,24,child,24);}).join(""));
+  }
+
+  function updateDraftActions() {
+    var actions=one("#spaceDraftActions");if(!actions)return;
+    var state=draftActionState(),menu=one("#spaceRadialMenu"),editor=one(".program-map-workspace.space-editor");
+    var wasActive=editor.hasAttribute("data-radial-session");
+    if(state && radialDraftKind!==state.kind)setRadialExpanded(true);
+    radialDraftKind=state?state.kind:null;
+    actions.hidden=!state;
+    if(state){menu.setAttribute("data-active-parent",state.kind);editor.setAttribute("data-radial-session",state.kind);}
+    else{menu.removeAttribute("data-active-parent");editor.removeAttribute("data-radial-session");}
+    all("[data-space-create]").forEach(function(button){var active=Boolean(state && state.kind===button.getAttribute("data-space-create"));button.classList.toggle("is-active",active);if(active)button.setAttribute("aria-current","true");else button.removeAttribute("aria-current");});
+    var accept=one("#spaceAcceptDraft"),cancel=one("#spaceCancelDraft");
+    accept.disabled=!state || !state.canAccept;cancel.disabled=!state || !state.canCancel;
+    var reason=state && !state.canAccept?state.reason:"";
+    one("#spaceAcceptDraftReason").textContent=reason;accept.setAttribute("data-uos-tooltip","Accept"+(reason?" — "+reason:""));
+    positionRadialControls();
+    if(wasActive!==Boolean(state))root.requestAnimationFrame(function(){positionRadialControls();if(mapController)mapController.resize();});
+  }
 
   function one(selector) {
     if (!root.document) return null;
     return root.document.querySelector(selector) || (mapModuleRoot && mapModuleRoot.querySelector(selector));
   }
-  function all(selector) { return root.document && typeof root.document.querySelectorAll === "function" ? Array.prototype.slice.call(root.document.querySelectorAll(selector)) : []; }
+  function all(selector) {
+    var nodes=root.document && typeof root.document.querySelectorAll==="function" ? Array.prototype.slice.call(root.document.querySelectorAll(selector)) : [];
+    if(mapModuleRoot)Array.prototype.forEach.call(mapModuleRoot.querySelectorAll(selector),function(node){if(nodes.indexOf(node)<0)nodes.push(node);});
+    return nodes;
+  }
   function text(value) { return String(value == null ? "" : value).trim(); }
   function inRegisterDrawerMode() { return document.body.hasAttribute("data-drawer-module") || document.body.hasAttribute("data-drawer-context-pending"); }
   function esc(value) { return root.UOS && root.UOS.imports && typeof root.UOS.imports.escapeHtml === "function" ? root.UOS.imports.escapeHtml(value) : text(value); }
@@ -44,6 +145,7 @@
       status.textContent = text(message);
       status.hidden = !text(message);
     }
+    updateRadialControls();
   }
 
 function setSelectToolActive(active) {
@@ -80,13 +182,11 @@ function setMapCanvasCursor(cursor) {
       return input.value.trim()==="" || !Number.isFinite(value) || Math.abs(value)>(lat?90:180);
     });
     all("#shapeList .is-editing .rem-vertex-coord,#shapeList .is-editing [data-delete-vertex]").forEach(function(input){input.disabled=Boolean(vertexDraft.busy);});
-    var finish=one("#finishDrawingButton"),cancel=one("#cancelDrawingButton"),undo=one("#undoDrawingButton");
-    if(finish)finish.disabled=Boolean(vertexDraft.busy || vertexDraft.error || vertexDraft.invalidInput);
-    if(cancel)cancel.disabled=Boolean(vertexDraft.busy);
-    if(undo)undo.disabled=true;
-    all("#startDrawingButton,[data-draw-mode]").forEach(function(button){button.disabled=true;});
-    var toolbar=one("#floatingDrawToolbar");if(toolbar)toolbar.setAttribute("data-editing-vertices","true");
-    updateMapToolStatus(vertexDraft.error || "Editing vertices — Finish saves changes; Cancel discards them.");
+    var undo=one("#undoDrawingButton");if(undo)undo.disabled=true;
+    all("[data-space-create]").forEach(function(button){button.disabled=true;});
+    var toolbar=one("#spaceDrawingTools");if(toolbar)toolbar.setAttribute("data-editing-vertices","true");
+    updateMapToolStatus(vertexDraft.error || "Editing vertices — Accept saves changes; Cancel discards them.");
+    updateRadialControls();
   }
 
   function stageVertexShape(shape) {
@@ -128,8 +228,8 @@ function setMapCanvasCursor(cursor) {
     if(vertexDraft && vertexDraft.busy)return;
     vertexDraft=null;editingShapeId=null;selectedVertexIndex=null;
     if(mapController)mapController.editShape(null);
-    all("#startDrawingButton,[data-draw-mode]").forEach(function(button){button.disabled=false;});
-    var toolbar=one("#floatingDrawToolbar");if(toolbar)toolbar.removeAttribute("data-editing-vertices");
+    all("[data-space-create]").forEach(function(button){button.disabled=!canonicalMapState(getWorkspace()).selectedProjectId || Boolean(pinSession);});
+    var toolbar=one("#spaceDrawingTools");if(toolbar)toolbar.removeAttribute("data-editing-vertices");
     resetDrawingControls();updateMapToolStatus("");
   }
 
@@ -189,6 +289,7 @@ function setMapCanvasCursor(cursor) {
       if(mapController)mapController.setEvent(buildMapEvent(selectedEventFilterId));
     }
     var canvas=one(".program-map-canvas-container");if(canvas)canvas.removeAttribute("data-placement-active");
+    updateRadialControls();
   }
   function paintPolygonPlacement() {
     if(!placementDraft || !mapController)return;
@@ -228,12 +329,13 @@ function setMapCanvasCursor(cursor) {
     if(vertexDraft && vertexDraft.busy)return;
     cancelVertexEditing();
     var state=canonicalMapState(getWorkspace());
-    if(state.scopeMode!=="projects" || !state.selectedProjectId)throw new Error("Select a Project in Space Map before importing Moasure CSV.");
+    if(!state.selectedProjectId)throw new Error("Create a Project for this record before importing Moasure CSV.");
+    sidebarScopeMode="projects";selectedEventFilterId=state.selectedProjectId;
     cancelPolygonPlacement();pendingLocationPlacement=null;mapController.cancelActiveInteraction();
     var dialog=one("#moasureImportDialog");one("#moasureCsvFile").value="";one("#moasureGroupList").replaceChildren();
     one("#moasureAnchorButton").disabled=true;one("#moasureImportError").hidden=true;
     pendingMoasureImport={projectId:state.selectedProjectId,operationId:(root.crypto && root.crypto.randomUUID ? root.crypto.randomUUID() : String(Date.now()) + Math.random())};
-    dialog.showModal();
+    dialog.showModal();updateRadialControls();
   }
   function finishMoasureAnchor(coord) {
     var pending=pendingMoasureImport;pendingMoasureImport=null;updateMapToolStatus("");setSelectToolActive(true);
@@ -246,17 +348,28 @@ function setMapCanvasCursor(cursor) {
 
   function updateDrawingControls(state) {
     if(vertexDraft){updateVertexControls();return;}
+    drawingState=state;renderShapeCards();
     var active = Boolean(state && state.active);
-    all(".program-map-header-controls, #floatingDrawToolbar").forEach(function (toolbar) {
+    all("#spaceDrawingTools").forEach(function (toolbar) {
       toolbar.classList.toggle("is-drawing", active);
     });
-    var finish = one("#finishDrawingButton");
-    var cancel = one("#cancelDrawingButton");
     var undo = one("#undoDrawingButton");
-    if (finish) finish.disabled = !(active && state.canFinish);
-    if (cancel) cancel.disabled = !active;
     if (undo) undo.disabled = !(active && state.points > 0);
     setSelectToolActive(!active);
+    updateRadialControls();
+  }
+
+  function startSpaceDrawing(mode) {
+    activeDrawMode=mode;
+    startMapDrawing();
+  }
+
+  function startSpacePinPlacement(move) {
+    var session=beginPinSession();
+    pendingLocationPlacement={kind:move?"move":"add",registerId:session.registerId,locationId:move?session.selectedId:""};
+    mapController.startLocationPlacement();
+    updateMapToolStatus(move?"Click the new pin position.":"Click the map to place a location.");
+    renderEventPicker();
   }
 
   function startMapDrawing() {
@@ -264,12 +377,17 @@ function setMapCanvasCursor(cursor) {
     if (!mapController) return;
     pendingLocationPlacement = null;
     updateMapToolStatus("");
-    mapController.startDrawing(activeDrawMode === "line" ? "line" : activeDrawMode === "square" ? "square" : "polygon");
+    cancelPinSession();
+    var state=canonicalMapState(getWorkspace());
+    if(!state.selectedProjectId){showError("Create a Project for this record before drawing.");return;}
+    sidebarScopeMode="projects";selectedEventFilterId=state.selectedProjectId;
+    mapController.startDrawing(activeDrawMode);
     var drawMenu = one(".program-map-menu--draw");
     if (drawMenu) drawMenu.open = false;
   }
 
   function cancelActiveMapInteraction() {
+    if(pinSession && !pinSession.busy){cancelPinSession();renderEventPicker();}
     var hadDraft=Boolean(vertexDraft || placementDraft);
     cancelVertexEditing();cancelPolygonPlacement();
     pendingLocationPlacement = null;
@@ -343,6 +461,123 @@ function setMapCanvasCursor(cursor) {
     });
   }
 
+
+  function updatePanelCollapse(){
+    ["location","space"].forEach(function(name){
+      var panel=one('[data-space-panel="'+name+'"]'),button=one('[data-space-collapse="'+name+'"]');
+      panel.classList.toggle("is-collapsed",panelCollapse[name]);
+      one("#"+button.getAttribute("aria-controls")).hidden=panelCollapse[name];
+      button.setAttribute("aria-expanded",String(!panelCollapse[name]));
+      button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="'+(panelCollapse[name]?'m9 5 7 7-7 7':'m5 9 7 7 7-7')+'"/></svg><span>'+(name==="location"?"Location":"Space Management")+'</span>';
+    });
+    if(mapController)root.requestAnimationFrame(function(){mapController.resize();});
+  }
+  function beginPinSession(){
+    if(pinSession)return pinSession;
+    var workspace=getWorkspace(),state=canonicalMapState(workspace);
+    if(!state.selectedRegisterId)throw new Error("Open a Register record first.");
+    cancelVertexEditing();cancelPolygonPlacement();pendingMoasureImport=null;
+    if(mapController)mapController.cancelActiveInteraction();
+    pinSession={registerId:state.selectedRegisterId,selectedId:state.selectedLocationId,originalPins:JSON.stringify(root.UOS.ProgramModel.registerLocations(workspace,state.selectedRegisterId)),workspace:JSON.parse(JSON.stringify(workspace)),history:[],operations:[],busy:false};
+    return pinSession;
+  }
+  function refreshPinPreview(){
+    if(mapController){mapController.setEvent(buildMapEvent(selectedEventFilterId));if(pendingLocationPlacement)mapController.startLocationPlacement();}
+    renderEventPicker();
+  }
+  function cancelPinSession(){
+    if(pinSession && pinSession.busy)return;
+    pinSession=null;pendingLocationPlacement=null;
+    if(mapController){mapController.cancelActiveInteraction();mapController.setEvent(buildMapEvent(selectedEventFilterId));}
+    updateMapToolStatus("");
+  }
+  function stagePinOperation(kind,id,coordinate){
+    var session=beginPinSession(), model=root.UOS.ProgramModel;
+    session.history.push({workspace:session.workspace,selectedId:session.selectedId,operationCount:session.operations.length});
+    var operation={kind:kind,id:id,coordinate:coordinate};
+    try{
+      if(kind==="add"){
+        operation.id="LOC-"+(root.crypto && root.crypto.randomUUID ? root.crypto.randomUUID() : Date.now()+"-"+Math.random().toString(36).slice(2));
+        session.workspace=model.addLocationToRegister(session.workspace,session.registerId,{id:operation.id,coordinate:coordinate});
+        session.selectedId=operation.id;
+      }else if(kind==="move"){
+        session.workspace=model.updateLocationInRegister(session.workspace,session.registerId,id,{coordinate:coordinate});session.selectedId=id;
+      }else{
+        session.workspace=model.removeLocationFromRegister(session.workspace,session.registerId,id);
+        if(session.selectedId===id)session.selectedId="";
+      }
+      session.operations.push(operation);
+    }catch(error){session.history.pop();throw error;}
+    refreshPinPreview();
+  }
+  function stagePinCoordinate(coordinate){
+    if(!pendingLocationPlacement || !coordinate)return;
+    var placement=pendingLocationPlacement;
+    pendingLocationPlacement=null;
+    try{stagePinOperation(placement.kind,placement.locationId,coordinate);updateMapToolStatus("Unsaved locations · Accept to commit, Cancel to discard.");}catch(error){showError(error);}
+  }
+  function finishPinSession(){
+    var session=pinSession;
+    if(!session || session.busy || !session.operations.length)return;
+    pendingLocationPlacement=null;if(mapController)mapController.cancelActiveInteraction();
+    session.busy=true;renderEventPicker();
+    root.UOS.ProgramApp.updateWorkspace(function(candidate){
+      if(JSON.stringify(root.UOS.ProgramModel.registerLocations(candidate,session.registerId))!==session.originalPins)throw new Error("Locations changed while editing. Cancel and retry to avoid overwriting changes.");
+      session.operations.forEach(function(op){if(op.guard)op.guard(candidate);});
+      var updated=candidate,model=root.UOS.ProgramModel;
+      session.operations.forEach(function(op){
+        if(op.kind==="add")updated=model.addLocationToRegister(updated,session.registerId,{id:op.id,coordinate:op.coordinate});
+        else if(op.kind==="move")updated=model.updateLocationInRegister(updated,session.registerId,op.id,{coordinate:op.coordinate});
+        else updated=model.removeLocationFromRegister(updated,session.registerId,op.id);
+      });
+      return writeCanonicalMapState(updated,{selectedLocationId:session.selectedId,inspectorMode:"location"});
+    }).then(function(){pinSession=null;updateMapToolStatus("");render();}).catch(function(error){session.busy=false;showError(error);renderEventPicker();});
+  }
+  function handleSpaceEditorClick(event){
+    var target=event.target;
+    var collapse=target.closest("[data-space-collapse]");
+    if(collapse){var name=collapse.getAttribute("data-space-collapse");panelCollapse[name]=!panelCollapse[name];updatePanelCollapse();return true;}
+    var pin=target.closest("[data-space-pin]");
+    if(pin){
+      var state=canonicalMapState(getWorkspace()),id=pin.getAttribute("data-space-pin");
+      var pins=root.UOS.ProgramModel.registerLocations(pinSession ? pinSession.workspace : getWorkspace(),state.selectedRegisterId);
+      var location=pins.find(function(p){return p.id===id;});
+      if(pinSession){pinSession.selectedId=id;renderEventPicker();}else persistCanonicalMapState({selectedLocationId:id,inspectorMode:"location"});
+      if(location && mapController)mapController.zoomToLocation(location.coordinate);
+      return true;
+    }
+    var expand=target.closest("[data-space-expand]"), summary=target.closest("[data-space-geometry]");
+    if(expand || (summary && !target.closest("input,select,button,a"))){
+      var id=(expand || summary).getAttribute(expand?"data-space-expand":"data-space-geometry");
+      if(vertexDraft && vertexDraft.id!==id)cancelVertexEditing();
+      if(placementDraft && placementDraft.id!==id)cancelPolygonPlacement();
+      if(expand)expandedGeometryId=expandedGeometryId===id?null:id;
+      var state=canonicalMapState(getWorkspace());
+      persistCanonicalMapState({scopeMode:"projects",selectedGeometryId:id,inspectorMode:"polygon",selectedProjectId:state.selectedProjectId});
+      if(mapController)mapController.selectShape(id,false);
+      renderShapeCards();return true;
+    }
+    var button=target.closest("#moveLocationButton,#removeLocationButton,#undoLocationButton,#fitLocationsButton,#homeLocationsButton,#labelLocationsButton");
+    if(!button || button.disabled)return false;
+    try{
+      var state=canonicalMapState(getWorkspace()),session=pinSession;
+      if(button.id==="moveLocationButton"){
+      startSpacePinPlacement(button.id==="moveLocationButton");
+    }else if(button.id==="removeLocationButton"){
+        session=beginPinSession();var id=session.selectedId;
+        root.UOS.ProgramDeleteSafety.confirm({title:"Remove location pin?",message:"Remove this location from the draft? Finish commits the removal; Cancel restores it.",confirmLabel:"Remove pin",cancelLabel:"Keep pin",apply:function(guard){if(pinSession!==session || session.busy)return Promise.resolve();stagePinOperation("remove",id);session.operations[session.operations.length-1].guard=guard;return Promise.resolve();}});
+      }else if(button.id==="undoLocationButton"){
+        var previous=session.history.pop();session.workspace=previous.workspace;session.selectedId=previous.selectedId;session.operations.length=previous.operationCount;
+        pendingLocationPlacement=null;refreshPinPreview();
+      }else if(button.id==="fitLocationsButton")mapController.fitLocations();
+      else if(button.id==="homeLocationsButton")mapController.resetView();
+      else if(button.id==="labelLocationsButton"){
+        root.UOS.ProgramApp.updateWorkspace(function(candidate){candidate.workspace.map=candidate.workspace.map || {};candidate.workspace.map.showLocationNumbers=candidate.workspace.map.showLocationNumbers===false;return candidate;});
+      }
+    }catch(error){showError(error);}
+    return true;
+  }
+
   function getWorkspace() {
     if (!root.UOS || !root.UOS.ProgramApp) return null;
     var app = root.UOS.ProgramApp;
@@ -358,13 +593,13 @@ function setMapCanvasCursor(cursor) {
     return list;
   }
 
-  function recordLocations(record, workspace) {
-    if (!record) return [];
-    var model = root.UOS && root.UOS.ProgramModel;
-    var sourceWorkspace = workspace && typeof workspace === "object" ? workspace : getWorkspace();
-    return model && typeof model.registerLocations === "function"
-      ? model.registerLocations(sourceWorkspace, record.id)
-      : [];
+  function recordLocations(record,workspace){
+    if(!record)return [];
+    var model=root.UOS && root.UOS.ProgramModel,ws=workspace && typeof workspace==="object" && workspace.entities ? workspace : getWorkspace();
+    var pins=model && model.registerLocations ? model.registerLocations(ws,record.id) : [];
+    var raw=(ws.entities.applications || []).concat(ws.entities.events || []).find(function(r){return r.id===record.id;});
+    var order=(raw && raw.locations || []).map(function(pin){return pin.id;});
+    return pins.sort(function(a,b){return order.indexOf(a.id)-order.indexOf(b.id);});
   }
 
   function getAllWorkspaceLocations(ownerFilter) {
@@ -448,75 +683,25 @@ function setMapCanvasCursor(cursor) {
     };
   }
 
-  function buildMapEvent(targetId, dataset) {
-    var workspace = getWorkspace();
-    var isAll = !targetId || targetId === "all";
-    var events = workspace && workspace.entities && Array.isArray(workspace.entities.events) ? workspace.entities.events : [];
-    var apps = workspace && workspace.entities && Array.isArray(workspace.entities.applications) ? workspace.entities.applications : [];
-    var projects = workspace && workspace.entities && Array.isArray(workspace.entities.projects) ? workspace.entities.projects : [];
-
-    var targetOwner = sidebarViewMode === "applications" ? "NSA" : "EVT";
-    var filteredData = dataset || resolveFilteredMapDataset(workspace, sidebarViewMode, sidebarScopeMode, selectedSpatialFilter, selectedStatusFilters, eventSearchQuery);
-
-    if (isAll) {
-      var allLocs = filteredData.locations;
-      var allPolys = convertToEventShapes(filteredData.geometries);
-      return {
-        id: "all",
-        eventName: "Program Workspace Map",
-        location: allLocs[0] || null,
-        locations: allLocs,
-        focusLocations: allLocs,
-        allLocations: allLocs,
-        polygons: allPolys,
-        owner: targetOwner
-      };
+  function buildMapEvent(targetId,dataset) {
+    var workspace=pinSession ? pinSession.workspace : getWorkspace(), state=canonicalMapState(getWorkspace());
+    var owner=state.ownerMode || workspace.workspace.ownerMode;
+    var ctx=resolveMapContext(workspace,owner==="NSA"?"applications":"events","register",state.selectedRegisterId);
+    if(ctx.register || ctx.project){
+      var pins=ctx.register ? recordLocations(ctx.register,workspace).map(function(pin){return Object.assign({},pin,{sourceRecordId:ctx.register.id,owner:ctx.register.owner});}) : [];
+      var geometries=ctx.project ? root.UOS.ProgramModel.projectWorkGeometry(workspace,ctx.project.id) : [];
+      return {id:targetId,eventName:text((ctx.project || ctx.register).title || (ctx.project || ctx.register).eventName),locations:pins,location:pins[0] || null,focusLocations:pins,allLocations:pins,polygons:convertToEventShapes(geometries),owner:owner};
     }
-
-    var ctx = resolveMapContext(workspace, sidebarViewMode, sidebarScopeMode, targetId);
-
-    // 1. Project Scope
-    if (ctx.scope === "projects" && ctx.project) {
-      var project = ctx.project;
-      var projectGeoms = (root.UOS && root.UOS.ProgramModel && typeof root.UOS.ProgramModel.projectWorkGeometry === "function")
-        ? root.UOS.ProgramModel.projectWorkGeometry(workspace, project.id)
-        : (filteredData.index.projectWorkGeometriesById[project.id] || []);
-      var linkedRegister = ctx.register || ((root.UOS && root.UOS.ProgramModel && typeof root.UOS.ProgramModel.registerForProject === "function") ? root.UOS.ProgramModel.registerForProject(workspace, project) : null);
-      var linkedPins = linkedRegister ? recordLocations(linkedRegister, workspace) : [];
-      return {
-        id: project.id,
-        eventName: project.title || project.name || "Delivery Project",
-        location: linkedPins[0] || null,
-        locations: linkedPins,
-        focusLocations: linkedPins,
-        allLocations: filteredData.locations,
-        polygons: convertToEventShapes(projectGeoms),
-        owner: project.owner
-      };
-    }
-
-    // 2. Register Scope
-    var registerRecord = ctx.register || events.find(function (e) { return e.id === targetId; }) || apps.find(function (a) { return a.id === targetId; });
-    var regPins = registerRecord ? recordLocations(registerRecord, workspace) : [];
-    return {
-      id: registerRecord ? registerRecord.id : targetId,
-      eventName: registerRecord ? (registerRecord.eventName || registerRecord.title || registerRecord.name) : "Register Record",
-      location: regPins[0] || null,
-      locations: regPins,
-      focusLocations: regPins,
-      allLocations: filteredData.locations,
-      polygons: [], // Register records NEVER directly own Work Geometry in v3
-      owner: registerRecord ? registerRecord.owner : targetOwner
-    };
+    return {id:"empty",eventName:"Open a Register record",locations:[],focusLocations:[],allLocations:[],polygons:[],owner:owner};
   }
 
   function getGeometriesForEvent(targetId) {
     var workspace = getWorkspace();
-    var target = targetId || selectedEventFilterId;
-    if (!target || target === "all") return getGeometries();
+    var target = canonicalMapState(workspace).selectedRegisterId;
+    if (!target || target === "all") return [];
 
     var ctx = resolveMapContext(workspace, sidebarViewMode, sidebarScopeMode, target);
-    if (ctx.scope === "projects" && ctx.projectId) {
+    if (ctx.projectId) {
       return (window.UOS && window.UOS.ProgramModel && typeof window.UOS.ProgramModel.projectWorkGeometry === "function")
         ? window.UOS.ProgramModel.projectWorkGeometry(workspace, ctx.projectId)
         : [];
@@ -789,7 +974,7 @@ function setMapCanvasCursor(cursor) {
      endless persist -> program-ready -> render loop. */
   var hasStoredRegisterSelection = Object.prototype.hasOwnProperty.call(mapUi, "selectedRegisterId");
   var registerId = text(hasStoredRegisterSelection ? mapUi.selectedRegisterId : ui.selectedEntityId);
-    var projectId = text(mapUi.selectedProjectId || ui.selectedProjectId);
+    var projectId = text(Object.prototype.hasOwnProperty.call(mapUi,"selectedProjectId") ? mapUi.selectedProjectId : ui.selectedProjectId);
     var geometryId = text(mapUi.selectedGeometryId);
     var locationId = text(mapUi.selectedLocationId);
     var scopeMode = mapUi.scopeMode === "projects" ? "projects" : "register";
@@ -835,23 +1020,10 @@ function setMapCanvasCursor(cursor) {
       }
     }
 
-    if (scopeMode === "register") {
-      geometryId = "";
-      if (inspectorMode === "polygon" || inspectorMode === "geometry" || inspectorMode === "project") inspectorMode = locationId ? "location" : "register";
-      if (locationId && register) {
-        var locations = recordLocations(register, workspace);
-        if (!locations.some(function (location) { return location && location.id === locationId; })) locationId = "";
-      } else if (!register) locationId = "";
-    } else {
-      locationId = "";
-      if (inspectorMode === "location" || inspectorMode === "register") inspectorMode = geometryId ? "polygon" : "project";
-      if (geometry && projectId && text(geometry.projectId || geometry.payload && geometry.payload.projectId) !== projectId) {
-        geometryId = "";
-        inspectorMode = "project";
-      }
-      if (!geometryId && inspectorMode === "polygon") inspectorMode = "geometry";
-    }
-
+    if(!register){project=null;projectId="";geometryId="";locationId="";}
+    if(locationId && register && !recordLocations(register,workspace).some(function(pin){return pin.id===locationId;}))locationId="";
+    if(geometry && text(geometry.projectId || geometry.payload && geometry.payload.projectId)!==projectId)geometryId="";
+    if(!geometryId && inspectorMode==="polygon")inspectorMode="geometry";
     return {
       scopeMode: scopeMode,
       ownerMode: text((scopeMode === "projects" && project && project.owner) || (register && register.owner) || mapUi.ownerMode || ui.ownerMode),
@@ -892,13 +1064,6 @@ function setMapCanvasCursor(cursor) {
     var next = Object.assign({}, existing, patch || {});
     next.scopeMode = next.scopeMode === "projects" ? "projects" : "register";
     if (["register", "location", "project", "geometry", "polygon"].indexOf(next.inspectorMode) < 0) next.inspectorMode = next.scopeMode === "projects" ? "project" : "register";
-    if (next.scopeMode === "register") {
-      next.selectedGeometryId = "";
-      if (next.inspectorMode === "polygon" || next.inspectorMode === "geometry" || next.inspectorMode === "project") next.inspectorMode = next.selectedLocationId ? "location" : "register";
-    } else {
-      next.selectedLocationId = "";
-      if (next.inspectorMode === "location" || next.inspectorMode === "register") next.inspectorMode = next.selectedGeometryId ? "polygon" : "project";
-    }
     candidate.workspace.map = candidate.workspace.map || {};
     candidate.workspace.map.scopeMode = next.scopeMode;
     candidate.workspace.map.ownerMode = next.ownerMode || candidate.workspace.ownerMode || "";
@@ -997,13 +1162,7 @@ function setMapCanvasCursor(cursor) {
       if (geometryId) linkedJobIds[geometryId] = true;
     });
 
-    if (eventSearchQuery) {
-      shapes = shapes.filter(function (s) {
-        var id = text(s.id).toLowerCase();
-        var label = text(workTypeLabel(s.type)).toLowerCase();
-        return id.indexOf(eventSearchQuery) >= 0 || label.indexOf(eventSearchQuery) >= 0;
-      });
-    }
+
 
     var shapePaneMode = editingShapeId ? "editor" : "inspector";
     container.setAttribute("data-map-shape-mode", shapePaneMode);
@@ -1014,12 +1173,7 @@ function setMapCanvasCursor(cursor) {
       : '<button type="button" class="uos-button uos-button--secondary uos-button--sm" id="backToListButton">← Back to Mapped Locations</button>';
     var backBarHtml = '<div class="program-map-inspector-bar" data-map-inspector-controls data-mode="' + esc(shapePaneMode) + '">' + backButtonHtml + '<span>' + (editingShapeId ? "Polygon editor" : "Polygon inspector") + '</span></div>';
 
-    if (!shapes.length) {
-      container.innerHTML = backBarHtml + '<div class="program-map-empty" role="listitem">No mapped polygon shapes yet. Use Start drawing to add mapped work.</div>';
-      var emptyInspectorBar = container.querySelector("[data-map-inspector-controls]");
-      container.style.setProperty("--program-map-inspector-height", (emptyInspectorBar ? emptyInspectorBar.offsetHeight : 0) + "px");
-      return;
-    }
+
 
         var cardsHtml = shapes.map(function (shape, index) {
       var selected = shape.id === selectedShapeId;
@@ -1046,7 +1200,7 @@ function setMapCanvasCursor(cursor) {
       var jobTooltip = "";
       if (jobCreated) {
         jobTooltip = "Operational Job already generated in Job Calculator";
-      } else if (editing) { jobTooltip = "Finish or Cancel vertex editing before creating a Job"; }
+      } else if (editing) { jobTooltip = "Accept or Cancel vertex editing before creating a Job"; }
       else if (!placementConfirmed) { jobTooltip = "Save Placement to confirm the Moasure polygon position before creating a Job"; }
       else if (!geometryType) {
         jobTooltip = "Select a valid work type before generating a Job";
@@ -1088,7 +1242,7 @@ function setMapCanvasCursor(cursor) {
         '<label class="uos-field"><span>Pricing Rate</span><select class="uos-select" data-shape-rate="' + esc(shape.id) + '"' + ((!geometryType || !eligibleRates.length) ? " disabled" : "") + ' data-uos-tooltip="Select the commercial pricing basis for polygon ' + shapeNum + '" title="Select the commercial pricing basis for polygon ' + shapeNum + '" aria-label="Pricing rate for polygon ' + shapeNum + '">' + polygonRateOptions(eligibleRates, selectedRateId, Boolean(geometryType)) + '</select></label>' +
         '</div>' +
         '<div class="program-shape-actions program-shape-actions--labelled" role="group" aria-label="Edit polygon '+shapeNum+'">' +
-          '<button type="button" class="uos-button uos-button--sm ' + (editing ? "uos-button--primary is-active" : "uos-button--secondary") + '" data-shape-action="edit" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="' + (editing ? "Use Finish or Cancel on the floating toolbar" : "Edit polygon corner points and shape vertices on map") + '" title="' + (editing ? "Use Finish or Cancel on the floating toolbar" : "Edit polygon corner points and shape vertices on map") + '" aria-label="' + ("Edit vertices for polygon " + shapeNum) + '" aria-pressed="' + (editing ? "true" : "false") + '"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span>' + "Edit Vertices" + '</span></button>' +
+          '<button type="button" class="uos-button uos-button--sm ' + (editing ? "uos-button--primary is-active" : "uos-button--secondary") + '" data-shape-action="edit" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="' + (editing ? "Use Accept or Cancel on the radial menu" : "Edit polygon corner points and shape vertices on map") + '" title="' + (editing ? "Use Accept or Cancel on the radial menu" : "Edit polygon corner points and shape vertices on map") + '" aria-label="' + ("Edit vertices for polygon " + shapeNum) + '" aria-pressed="' + (editing ? "true" : "false") + '"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span>' + "Edit Vertices" + '</span></button>' +
         '<button type="button" class="uos-button uos-button--secondary uos-button--sm" data-polygon-placement="' + esc(shape.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>Move / Rotate</button>' +
       '</div>' +
       '<div class="program-shape-actions program-shape-actions--icons" role="group" aria-label="Polygon tools '+shapeNum+'">' +
@@ -1108,9 +1262,23 @@ function setMapCanvasCursor(cursor) {
       '</div>';
     }).join("");
 
-    container.innerHTML = backBarHtml + cardsHtml;
-    var inspectorBar = container.querySelector("[data-map-inspector-controls]");
-    container.style.setProperty("--program-map-inspector-height", (inspectorBar ? inspectorBar.offsetHeight : 0) + "px");
+        var holder=root.document.createElement("div");holder.innerHTML=cardsHtml;
+    var rows=shapes.map(function(shape,index){
+      var geometry=geometries.find(function(g){return g.id===shape.id;}) || {};
+      var card=holder.querySelector('[data-shape-card-id="'+esc(shape.id)+'"]');
+      card.removeAttribute("data-shape-card-id");card.setAttribute("data-disclosure-skip","");card.className="space-editor__inspector"+(editingShapeId===shape.id?" is-editing":"");
+      var head=card.querySelector(".program-shape-card__head");if(head)head.remove();
+      var rateSelect=card.querySelector("[data-shape-rate]");
+      var rateLabel=rateSelect && rateSelect.value && rateSelect.selectedOptions[0] ? rateSelect.selectedOptions[0].textContent : "Not selected";
+      var open=expandedGeometryId===shape.id || editingShapeId===shape.id || placementDraft && placementDraft.id===shape.id;
+      return '<tbody data-shape-card-id="'+esc(shape.id)+'" data-disclosure-skip class="'+(selectedShapeId===shape.id?'is-selected':'')+'"><tr class="space-editor__geometry-summary" data-space-geometry="'+esc(shape.id)+'"><td><input type="checkbox" data-shape-visible="'+esc(shape.id)+'"'+(shape.visible?' checked':'')+' aria-label="Show geometry '+(index+1)+'"></td><td>'+esc((index+1)+'. '+(geometry.moasureSurvey?'Moasure':'Geometry'))+'</td><td>'+esc(shape.type?workTypeLabel(shape.type):"Not selected")+'</td><td>'+esc(rateLabel)+'</td><td>'+esc(formatMeasure(shape))+'</td><td><button type="button" data-space-expand="'+esc(shape.id)+'" aria-expanded="'+Boolean(open)+'" aria-controls="spaceDrawer'+index+'" aria-label="Expand geometry '+(index+1)+'">'+'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="'+(open?'m5 9 7 7 7-7':'m9 5 7 7-7 7')+'"/></svg></button></td></tr><tr class="space-editor__drawer" id="spaceDrawer'+index+'"'+(open?'':' hidden')+'><td colspan="6">'+card.outerHTML+'</td></tr></tbody>';
+    }).join("");
+    var draft=drawingState && drawingState.active ? '<tbody data-space-draft><tr class="space-editor__geometry-summary"><td>—</td><td>Drawing</td><td>'+esc(activeDrawMode)+'</td><td>Not selected</td><td>'+esc(drawingState.measurementSummary || "0 points")+'</td><td>▾</td></tr><tr><td colspan="6">Draft · '+drawingState.points+' points. Accept to save, Cancel to discard.</td></tr></tbody>' : '';
+    container.innerHTML='<table class="space-editor__table"><thead><tr><th scope="col"><input type="checkbox" data-space-visible-all aria-label="Show all related geometries"></th><th scope="col">Geometry</th><th scope="col">Job Type</th><th scope="col">Cost Type</th><th scope="col">Measure</th><th scope="col"><span class="uos-sr-only">Expand</span></th></tr></thead>'+draft+rows+'</table>';
+    var master=container.querySelector('[data-space-visible-all]'), count=shapes.filter(function(shape){return shape.visible;}).length;
+    master.checked=shapes.length>0 && count===shapes.length;master.indeterminate=count>0 && count<shapes.length;master.disabled=!shapes.length;
+    addSpaceControlIcons(container);
+
   }
 
       function isPolygonGeometry(g) {
@@ -1135,7 +1303,7 @@ function setMapCanvasCursor(cursor) {
     (targetOwner === "NSA" ? apps : events).forEach(function (rec) {
       if (!rec || !rec.id) return;
       registerById[rec.id] = rec;
-      var locs = recordLocations(rec, targetOwner);
+      var locs = recordLocations(rec, workspace);
       registerLocationCountById[rec.id] = locs.length;
       registerLocationsById[rec.id] = locs;
     });
@@ -1410,206 +1578,37 @@ var selectedSpatialFilter = null;
     return geometries.some(isPolygonGeometry);
   }
 
-  function renderEventPicker() {
-    var container = one("#eventPickerList");
-    if (!container) return;
-    var isRegisterScope = sidebarScopeMode === "register";
-    var isRegisterDrawer = isRegisterScope && inRegisterDrawerMode();
-    /* Location Cards in a Register drawer and Project Polygon Summaries are
-       full-size operational surfaces, never disclosure rows. */
-    var isAlwaysExpandedCard = isRegisterDrawer || !isRegisterScope;
-    container.setAttribute("data-disclosure-metric-heading", isRegisterScope ? "Location" : "Areas");
-
-    var workspace = getWorkspace();
-    var mapState = canonicalMapState(workspace);
-    var expectedOwner = sidebarViewMode === "applications" ? "NSA" : "EVT";
-    var activeRegister = null;
-    if (isRegisterDrawer && mapState.selectedRegisterId) {
-      activeRegister = ((workspace.entities && workspace.entities.applications) || [])
-        .concat((workspace.entities && workspace.entities.events) || [])
-        .find(function (record) {
-          return record && record.id === mapState.selectedRegisterId && record.owner === expectedOwner;
-        }) || null;
-    }
-    var dataset = resolveFilteredMapDataset(workspace, sidebarViewMode, sidebarScopeMode, selectedSpatialFilter, selectedStatusFilters, eventSearchQuery);
-
-    var geometryCounts = Object.create(null);
-    geometryCounts = dataset.index.polygonCountByProjectId || geometryCounts;
-
-    renderSpatialFilterPills(dataset.index);
-    renderStatusFilterPills();
-
-    if (selectedEventFilterId && selectedEventFilterId !== "all" && !dataset.filteredRecordIds[selectedEventFilterId] && !activeRegister) {
-      selectedEventFilterId = "all";
-      /*
-       * This is a presentation fallback (for example, when a map filter
-       * excludes the selected project).  Persisting it here re-enters render
-       * through `uos:program-ready` and caused the Project map to flicker.
-       * User selection and navigation handlers remain the only writers.
-       */
-    }
-
-    if (mapController && typeof mapController.setEvent === "function") {
-      mapController.setEvent(buildMapEvent(selectedEventFilterId, dataset));
-    }
-
-    var items = dataset.items;
-    /* Project mode is an active-project inspector. Its zero-polygon state is
-       still actionable, so retain the selected linked Project even when the
-       filtered map dataset has no rendered geometry. */
-    if (!isRegisterScope && mapState.selectedProjectId) {
-      var activeProject = ((workspace.entities && workspace.entities.projects) || []).find(function (project) {
-    return project && project.id === mapState.selectedProjectId && (!project.owner || project.owner === expectedOwner);
-      }) || null;
-      if (activeProject) items = [activeProject];
-    }
-    /* The Location sidebar is a working-record inspector, not a second
-       Register browser.  Keep the active Register visible even before its
-       first pin exists, and never mix unrelated Register cards into that
-       record's context. */
-    if (activeRegister) items = [activeRegister];
-
-    if (!items.length) {
-      container.innerHTML = '<div class="program-map-notice" role="listitem">No ' + (sidebarScopeMode === "projects" ? "Delivery project" : (sidebarViewMode === "applications" ? "Nature Strip application" : "Remediation event")) + ' records match your search or active filters.</div>';
-      return;
-    }
-
-    var eventCardsHtml = items.map(function (item) {
-      var id = item.id || item.eventId || item.applicationId;
-      var owner = item.owner || (id.indexOf("NSA") === 0 ? "NSA" : (sidebarViewMode === "applications" ? "NSA" : "EVT"));
-      var sourceId = item.applicationId || item.eventId || id;
-      var sourceRecord = (workspace.entities.events || []).concat(workspace.entities.applications || []).find(function (record) { return record.id === sourceId; }) || item;
-      var name = sourceRecord.eventName || sourceRecord.title || sourceRecord.name || item.eventName || item.title || item.name || id;
-
-      var rawLocAddress = text(typeof sourceRecord.location === "object" ? (sourceRecord.location.name || sourceRecord.location.address || sourceRecord.address) : (sourceRecord.address || sourceRecord.location));
-      if (!rawLocAddress || rawLocAddress.toLowerCase() === "mapped location") {
-        rawLocAddress = "No location address specified";
-      }
-
-      var locations = dataset.index.registerLocationsById[sourceRecord.id] || recordLocations(sourceRecord);
-      if (!locations.length && item !== sourceRecord) {
-        locations = dataset.index.registerLocationsById[item.id] || recordLocations(item);
-      }
-      var isLocRecorded = locations.length > 0;
-      var locationPinCount = locations.length;
-      var locationPillText = locationPinCount === 1 ? "1 location" : (locationPinCount + " locations");
-      var locPillClass = isLocRecorded ? "program-card-pill--recorded" : "program-card-pill--missing";
-      var selectedLocation = isRegisterScope && mapState.selectedRegisterId === id && mapState.selectedLocationId
-        ? locations.find(function (location) { return location && location.id === mapState.selectedLocationId; }) || null
-        : null;
-
-      var shapeCount = geometryCounts[id] || 0;
-      var polygonPillText = shapeCount === 1 ? "1 polygon" : (shapeCount + " polygons");
-      var polyPillClass = shapeCount > 0 ? "program-card-pill--poly" : "program-card-pill--missing";
-      var buttonLabel = shapeCount > 0 ? "Edit Polygons" : "Add Polygons";
-
-      var isSelected = selectedEventFilterId === id;
-
-      var linkedProj = sidebarScopeMode === "projects" ? item : (dataset.index.projectByRegisterId[item.id] || null);
-      var projIdVal = item.projectId || (linkedProj ? linkedProj.id : "");
-
-      var regId = isRegisterScope ? id : (item.eventId || item.applicationId || "");
-      var projId = isRegisterScope ? (projIdVal || "") : id;
-
-      var iconSvg = owner === "EVT"
-        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m12 13 1 2 2 .3-1.5 1.5.4 2.2-1.9-1-1.9 1 .4-2.2-1.5-1.5 2-.3Z"/></svg>'
-        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>';
-
-      var bottomControlsHtml = "";
-      if (isRegisterScope) {
-        var locationActionHtml = "";
-        locationActionHtml =
-          '<button type="button" class="uos-button uos-button--secondary uos-button--sm program-card-action-btn" data-location-action="add" data-location-event-id="' + esc(id) + '" title="Add another location pin">Add pin</button>';
-        if (locationPinCount === 1) {
-          locationActionHtml +=
-            '<button type="button" class="uos-button uos-button--secondary uos-button--sm program-card-action-btn" data-location-action="move" data-location-event-id="' + esc(id) + '" data-location-id="' + esc(locations[0].id) + '" title="Move this location pin">Move</button>' +
-            '<button type="button" class="uos-button uos-button--secondary uos-button--sm program-card-action-btn uos-button--danger-text" data-location-action="delete" data-location-event-id="' + esc(id) + '" data-location-id="' + esc(locations[0].id) + '" title="Remove this location pin">Remove</button>';
-        } else if (locationPinCount > 1) {
-          locationActionHtml +=
-            '<button type="button" class="uos-button uos-button--secondary uos-button--sm program-card-action-btn" data-inspect-locations="' + esc(id) + '" title="Move or remove individual location pins">Manage pins</button>';
-        }
-        var selectedLocationHtml = "";
-        if (selectedLocation) {
-          var coordinate = Array.isArray(selectedLocation.coordinate) ? selectedLocation.coordinate : [];
-          var coordinateLabel = coordinate.length >= 2
-            ? Number(coordinate[1]).toFixed(5) + ", " + Number(coordinate[0]).toFixed(5)
-            : "Coordinates unavailable";
-          selectedLocationHtml =
-            '<div class="program-location-context-card" data-selected-location-card="' + esc(selectedLocation.id) + '">' +
-              '<div class="program-location-context-card__head">' +
-                '<span class="program-location-context-card__eyebrow">Selected location</span>' +
-                '<strong>' + esc(selectedLocation.name || selectedLocation.address || "Location pin") + '</strong>' +
-              '</div>' +
-              '<span class="program-location-context-card__coord">' + esc(coordinateLabel) + '</span>' +
-              '<div class="program-location-context-card__actions">' +
-                '<button type="button" class="uos-button uos-button--secondary uos-button--sm" data-pin-action="zoom" data-pin-id="' + esc(selectedLocation.id) + '" data-pin-reg-id="' + esc(id) + '">Zoom</button>' +
-                '<button type="button" class="uos-button uos-button--secondary uos-button--sm" data-pin-action="move" data-pin-id="' + esc(selectedLocation.id) + '" data-pin-reg-id="' + esc(id) + '">Move</button>' +
-                '<button type="button" class="uos-button uos-button--secondary uos-button--sm uos-button--danger-text" data-pin-action="delete" data-pin-id="' + esc(selectedLocation.id) + '" data-pin-reg-id="' + esc(id) + '">Remove</button>' +
-              '</div>' +
-            '</div>';
-        }
-        bottomControlsHtml =
-          '<div class="program-event-card__divider"></div>' +
-          '<div class="program-event-card__action-row">' +
-            '<button type="button" class="program-card-pill ' + locPillClass + '" data-inspect-locations="' + esc(id) + '" title="Click to inspect and manage location pins">' +
-              esc(locationPillText) +
-            '</button>' +
-            locationActionHtml +
-          '</div>' +
-          selectedLocationHtml;
-      } else {
-        bottomControlsHtml =
-          '<div class="program-event-card__divider"></div>' +
-          '<div class="program-event-card__action-row">' +
-            '<span class="program-card-pill ' + polyPillClass + '">' + esc(polygonPillText) + '</span>' +
-            '<button type="button" class="uos-button uos-button--secondary uos-button--sm program-card-action-btn" data-edit-event-id="' + esc(id) + '" title="' + esc(buttonLabel) + '">' +
-              esc(buttonLabel) +
-            '</button>' +
-          '</div>';
-      }
-
-      var promoteButtonHtml = "";
-      var projectConflict = isRegisterScope && dataset.index.projectConflictByRegisterId[id];
-      if (projectConflict) {
-        promoteButtonHtml = '<div class="program-event-card__divider"></div>' +
-          '<div class="program-event-card__actions-row"><span role="alert">Project relationship conflict — review Data Health</span></div>';
-      } else if (isRegisterScope && !projIdVal) {
-        promoteButtonHtml = '<div class="program-event-card__divider"></div>' +
-          '<div class="program-event-card__actions-row">' +
-            '<button type="button" class="uos-button uos-button--secondary uos-button--sm program-event-promote-btn" data-promote-register-id="' + esc(id) + '" title="Create Delivery Project">' +
-              '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px;stroke-width:2.5;"><path d="M12 5v14M5 12h14"/></svg>' +
-              '<span>Create Delivery Project</span>' +
-            '</button>' +
-          '</div>';
-      }
-
-      return '<div class="program-event-card' + (isSelected ? " is-selected" : "") + '" data-event-card-id="' + esc(id) + '" data-owner="' + esc(owner) + '"' + (isAlwaysExpandedCard ? ' data-disclosure-skip' : '') + ' role="listitem" tabindex="0">' +
-        '<div class="program-event-card__head">' +
-          '<div class="program-event-card__head-left">' +
-            '<div class="program-event-card__icon-badge program-event-card__icon-badge--' + esc(owner.toLowerCase()) + '">' + iconSvg + '</div>' +
-            '<h5>' + esc(name) + '</h5>' +
-          '</div>' +
-        '</div>' +
-        '<div class="program-event-card__divider"></div>' +
-        '<div class="program-event-card__id-section">' +
-          (regId ? '<div class="program-event-card__id-row"><svg class="program-event-card__id-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="program-event-card__id-label">Register ID:</span><span class="program-event-card__id-value">' + esc(regId) + '</span></div>' : '') +
-          (projId ? '<div class="program-event-card__id-row"><svg class="program-event-card__id-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span class="program-event-card__id-label">Project ID:</span><span class="program-event-card__id-value">' + esc(projId) + '</span></div>' : '') +
-        '</div>' +
-        '<div class="program-event-card__divider"></div>' +
-        '<div class="program-event-card__loc-section">' +
-          '<div class="program-event-card__loc-row" title="' + esc(rawLocAddress) + '">' +
-            '<svg class="program-event-card__loc-pin" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 9a8 8 0 1 0-16 0c0 4 2.7 8 8 12.7z"/></svg>' +
-            '<span class="program-event-card__loc-text">' + esc(rawLocAddress) + '</span>' +
-          '</div>' +
-        '</div>' +
-        bottomControlsHtml +
-        promoteButtonHtml +
-      '</div>';
-    }).join("");
-
-    container.innerHTML = eventCardsHtml;
+  function addSpaceControlIcons(container) {
+    var paths={add:'M12 5v14M5 12h14',move:'M12 3v18M3 12h18M9 6l3-3 3 3',remove:'M3 6h18M8 6V3h8v3M6 6v15h12V6',finish:'m5 12 4 4L19 6',cancel:'m6 6 12 12M6 18 18 6',undo:'M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12',fit:'M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6',home:'m3 11 9-8 9 8M5 10v11h14V10',labels:'M3 5h18M6 5v14M18 5v14M9 19h6',polygon:'m4 4 16 2-3 14-14-3Z',line:'m4 20 16-16',square:'M4 4h16v16H4Z',import:'M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4',data:'M4 3h16v18H4ZM8 7h8M8 11h8M8 15h5'};
+    container.querySelectorAll('button.uos-button,summary.uos-button').forEach(function(button){
+      if(button.querySelector('svg'))return;
+      var label=button.textContent.trim().toLowerCase(),key=button.getAttribute('data-space-create') || (label.indexOf('moasure')>=0?'import':label.indexOf('drawing')>=0?'polygon':label.split(' ')[0]);
+      var path=paths[key] || paths.data;
+      button.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="'+path+'"/></svg>');
+    });
   }
 
+  function renderEventPicker() {
+    var workspace=getWorkspace(), state=canonicalMapState(workspace), entities=workspace.entities;
+    var owner=state.ownerMode || workspace.workspace.ownerMode;
+    one(".space-editor").setAttribute("data-space-owner",owner);
+    var registers=(entities.applications || []).concat(entities.events || []).filter(function(r){return r.owner===owner;});
+    var record=registers.find(function(r){return r.id===state.selectedRegisterId;});
+    var pins=record ? recordLocations(record,pinSession ? pinSession.workspace : workspace) : [];
+    var selected=pinSession ? pinSession.selectedId : state.selectedLocationId;
+    var numbers=!(workspace.workspace.map && workspace.workspace.map.showLocationNumbers===false);
+    one("#eventPickerList").innerHTML=pins.length ? pins.map(function(pin,index){return '<button type="button" class="space-editor__pin'+(pin.id===selected?' is-selected':'')+'" data-space-pin="'+esc(pin.id)+'" aria-label="Location '+(index+1)+': '+esc(pin.name || pin.address)+'" aria-pressed="'+(pin.id===selected)+'" title="'+esc(pin.address || pin.name)+'">'+root.UOS.RemediationMap.pinSymbol(index+1,numbers,owner)+'</button>';}).join("") : '<p class="space-editor__empty">'+(record?'No pins. Use + to place a location.':'Open a Register record to manage its locations.')+'</p>';
+    one("#spaceProjectEmpty").innerHTML=!state.selectedProjectId && record ? '<button type="button" class="uos-button uos-button--secondary uos-button--sm" data-promote-register-id="'+esc(record.id)+'">Create Project</button>' : '';
+    var busy=Boolean(pinSession && pinSession.busy);
+    one("#moveLocationButton").disabled=!selected || !pins.some(function(p){return p.id===selected;}) || busy;
+    one("#removeLocationButton").disabled=one("#moveLocationButton").disabled;
+    one("#undoLocationButton").disabled=!pinSession || !pinSession.history.length || busy;
+    one("#labelLocationsButton").setAttribute("aria-pressed",String(numbers));
+    addSpaceControlIcons(one(".space-editor"));
+    ["#moasureImportDialog","#coordinateShapeDialog"].forEach(function(id){var dialog=one(id);if(dialog)addSpaceControlIcons(dialog);});
+    all("[data-space-create],#moasureImportButton").forEach(function(button){button.disabled=!state.selectedProjectId || Boolean(vertexDraft) || Boolean(pinSession);});
+    updateRadialControls();
+  }
 
   function openLocationInspector(recordId) {
     var workspace = getWorkspace();
@@ -1660,34 +1659,11 @@ var selectedSpatialFilter = null;
   }
 
   function updateSidebarViewUI() {
-    var drawerMode = inRegisterDrawerMode();
-    // Drawer mounting is presentation only. It must never rewrite the canonical
-    // Space Map scope or inspector selection.
-    // Work Geometry and its inspector are Project-owned in the v3 model.
-    // Register scope must never retain a stale Project inspector pane.
-    if (sidebarScopeMode !== "projects" && sidebarViewMode === "shapes") {
-      var activeWorkspace = getWorkspace();
-      var activeOwner = activeWorkspace && activeWorkspace.workspace && activeWorkspace.workspace.ownerMode;
-      sidebarViewMode = activeOwner === "EVT" ? "events" : "applications";
-    }
-    var mapLayout = one(".program-map-layout");
-    if (mapLayout) {
-      mapLayout.classList.toggle("is-nature-mode", sidebarViewMode === "applications");
-    }
-    if (window.UOS && window.UOS.ProgramApp && typeof window.UOS.ProgramApp.updateRailTheme === "function") window.UOS.ProgramApp.updateRailTheme();
-
-    var shapesPane = one('[data-sidebar-pane="shapes"]');
-    var listPane = one('[data-sidebar-pane="list"]');
-
-    if (sidebarViewMode === "shapes") {
-      if (shapesPane) shapesPane.hidden = false;
-      if (listPane) listPane.hidden = true;
-      renderShapeCards();
-    } else {
-      if (shapesPane) shapesPane.hidden = true;
-      if (listPane) listPane.hidden = false;
-      renderEventPicker();
-    }
+    var owner=canonicalMapState(getWorkspace()).ownerMode;
+    var mapLayout=one(".program-map-layout");
+    if(mapLayout)mapLayout.classList.toggle("is-nature-mode",owner==="NSA");
+    if(root.UOS && root.UOS.ProgramApp && typeof root.UOS.ProgramApp.updateRailTheme==="function")root.UOS.ProgramApp.updateRailTheme();
+    renderEventPicker();renderShapeCards();updatePanelCollapse();
   }
 
   function leavePolygonInspector() {
@@ -1834,7 +1810,9 @@ var selectedSpatialFilter = null;
     if (!mapController && root.UOS.RemediationMap) {
       mapController = root.UOS.RemediationMap.create({
         container: container,
-        maplibregl: root.maplibregl || (typeof window !== "undefined" && window.maplibregl) || (typeof maplibregl !== "undefined" ? maplibregl : null),
+        autoFinishSquare:false,
+        numberedLocations:true,
+      maplibregl: root.maplibregl || (typeof window !== "undefined" && window.maplibregl) || (typeof maplibregl !== "undefined" ? maplibregl : null),
         getWorkspaceMap: function () {
           var mapConfig = root.UOS_REMEDIATION_MAP_CONFIG || (typeof window !== "undefined" && window.UOS_REMEDIATION_MAP_CONFIG) || {};
           return {
@@ -1854,6 +1832,7 @@ var selectedSpatialFilter = null;
           if (notice) notice.textContent = "Aerial imagery is unavailable. The offline grid is active.";
         },
         onShapeSelected: function (shapeId) {
+        expandedGeometryId=shapeId;
           var workspace = getWorkspace();
           if(vertexDraft && shapeId!==vertexDraft.id)cancelVertexEditing();
           if (!shapeId) {
@@ -1894,6 +1873,7 @@ var selectedSpatialFilter = null;
           }
         },
         onLocationSelected: function (selection) {
+          if(pinSession){pinSession.selectedId=selection.locationId;renderEventPicker();return;}
           if (!selection || !selection.registerId) return;
           var locationWorkspace = getWorkspace();
           var locationContext = resolveMapContext(locationWorkspace, sidebarViewMode, "register", selection.registerId);
@@ -1909,60 +1889,10 @@ var selectedSpatialFilter = null;
             scheduleSelectedSidebarCardVisibility(selection.registerId);
           });
         },
-        onLocationPlaced: function (coord) {
-          if (pendingMoasureImport && pendingMoasureImport.keys) { finishMoasureAnchor(coord);return; }
-          if (!coord || !Array.isArray(coord)) return;
-          var placement = pendingLocationPlacement;
-          pendingLocationPlacement = null;
-          updateMapToolStatus("");
-          setSelectToolActive(true);
-          if (root.UOS.ProgramApp) {
-            root.UOS.ProgramApp.updateWorkspace(function (candidate) {
-              var ctx = resolveMapContext(candidate, sidebarViewMode, "register", placement && placement.registerId || selectedEventFilterId);
-              var targetReg = ctx.register || (ctx.project && root.UOS.ProgramModel && typeof root.UOS.ProgramModel.registerForProject === "function" ? root.UOS.ProgramModel.registerForProject(candidate, ctx.project) : null);
-              if (!targetReg) throw new Error("A Register record is required to place a Location Pin.");
-              var beforeLocationIds = Object.create(null);
-              var modelLocationsBefore = root.UOS.ProgramModel && typeof root.UOS.ProgramModel.registerLocations === "function"
-                ? root.UOS.ProgramModel.registerLocations(candidate, targetReg.id) : [];
-              modelLocationsBefore.forEach(function (location) { beforeLocationIds[location.id] = true; });
-              var updated;
-              if (placement && placement.kind === "move") {
-                updated = root.UOS.ProgramModel.updateLocationInRegister(candidate, targetReg.id, placement.locationId, { coordinate: coord });
-              } else {
-                updated = root.UOS.ProgramModel.addLocationToRegister(candidate, targetReg.id, { coordinate: coord });
-              }
-              var updatedLocations = root.UOS.ProgramModel && typeof root.UOS.ProgramModel.registerLocations === "function"
-                ? root.UOS.ProgramModel.registerLocations(updated, targetReg.id) : [];
-              var selectedLocation = placement && placement.kind === "move"
-                ? placement.locationId
-                : ((updatedLocations.find(function (location) { return !beforeLocationIds[location.id]; }) || {}).id || "");
-              return writeCanonicalMapState(updated, {
-                scopeMode: "register",
-                selectedRegisterId: targetReg.id,
-                selectedProjectId: ctx.projectId || "",
-                selectedLocationId: selectedLocation,
-                selectedGeometryId: "",
-                inspectorMode: "location"
-              });
-            }).then(function () {
-              var locBtn = one("#toggleLocationButton");
-              if (locBtn) locBtn.disabled = false;
-              render();
-              if (mapController && typeof mapController.zoomToLocation === "function") {
-                mapController.zoomToLocation(coord);
-              }
-              root.requestAnimationFrame(function () {
-                root.requestAnimationFrame(function () {
-                  if (mapController && typeof mapController.zoomToLocation === "function") mapController.zoomToLocation(coord);
-                });
-              });
-              if (root.UOS.toast) root.UOS.toast(placement && placement.kind === "move" ? "Location pin moved." : "Location pin added.", "success");
-            }).catch(function (error) {
-              if (root.UOS.toast) root.UOS.toast(error.message || "The location pin could not be saved.", "error");
-            });
-          }
+        onLocationPlaced: function(coord){
+          if(pendingMoasureImport && pendingMoasureImport.keys){finishMoasureAnchor(coord);return;}
+          stagePinCoordinate(coord);
         },
-
         onDrawingChange: updateDrawingControls,
         onShapeCreated: function (newShape) {
           if (!newShape || !newShape.coordinates) return;
@@ -1985,6 +1915,7 @@ var selectedSpatialFilter = null;
               var created = (updated.entities.geometries || []).find(function (geometry) { return !beforeIds[geometry.id]; });
               var projectContext = resolveMapContext(updated, sidebarViewMode, "projects", project.id);
               if (created) {
+                expandedGeometryId=created.id;
                 updated = writeCanonicalMapState(updated, {
                   scopeMode: "projects",
                   selectedRegisterId: projectContext.registerId || "",
@@ -2024,14 +1955,14 @@ var selectedSpatialFilter = null;
   }
 
   function updateTogglesUI() {
+    var workspace=getWorkspace();
+    if(mapController && mapController.setLocationNumbers)mapController.setLocationNumbers(!(workspace.workspace.map && workspace.workspace.map.showLocationNumbers===false));
     [
       { id: "#toggleMapLength", key: "Length" },
       { id: "#toggleMapArea", key: "Area" },
       { id: "#toggleMapAngles", key: "Angles" },
       { id: "#toggleMapEdges", key: "Edges" },
-      { id: "#toggleMapIndex", key: "Index" },
-      { id: "#toggleMapActiveOnly", key: "ActiveOnly" },
-      { id: "#toggleMapSelectedOnly", key: "SelectedOnly" }
+      { id: "#toggleMapIndex", key: "Index" }
     ].forEach(function (toggle) {
       var btn = one(toggle.id);
       if (btn) btn.setAttribute("aria-pressed", String(mapToggles[toggle.key] !== false));
@@ -2044,16 +1975,9 @@ var selectedSpatialFilter = null;
         mapToggles.Angles === true,
         mapToggles.Edges === true,
         mapToggles.Index !== false,
-        mapToggles.SelectedOnly === true
+        false
       );
     }
-  }
-
-  function updateDrawModeUI() {
-    all("[data-draw-mode]").forEach(function (button) {
-      var mode = button.getAttribute("data-draw-mode");
-      button.setAttribute("aria-pressed", String(mode === activeDrawMode));
-    });
   }
 
   function exportShapeAsGeoJson(shapeId) {
@@ -2203,9 +2127,36 @@ var selectedSpatialFilter = null;
     initialized = true;
     mapModuleRoot = one('[data-program-view="map"]');
 
+    root.document.addEventListener("click",function(event){
+      if(event.target.closest(".space-editor") && handleSpaceEditorClick(event)){event.preventDefault();event.stopImmediatePropagation();}
+    });
+    root.addEventListener("resize",positionRadialControls);
+    one("#spaceAcceptDraft").addEventListener("click",function(){
+      updateDraftActions();if(this.disabled)return;
+      if(pinSession)finishPinSession();else if(vertexDraft)finishVertexEditing();else if(drawingState && drawingState.active)mapController.finishDrawing();
+    });
+    one("#spaceCancelDraft").addEventListener("click",function(){
+      updateDraftActions();if(this.disabled)return;
+      cancelActiveMapInteraction();
+    });
+    one("#spaceRadialToggle").addEventListener("click",function(event){
+      event.preventDefault();event.stopPropagation();
+      updateRadialControls();setRadialExpanded(!radialExpanded);
+    });
+    one("#spaceRadialActions").addEventListener("click",function(event){
+      var button=event.target.closest("[data-space-create]");if(!button)return;
+      event.preventDefault();event.stopPropagation();updateRadialControls();
+      if(button.disabled)return;
+      try{
+        var kind=button.getAttribute("data-space-create");
+        if(kind==="location")startSpacePinPlacement(false);else startSpaceDrawing(kind);
+        updateRadialControls();
+        one("#eventMap").focus({preventScroll:true});
+      }catch(error){showError(error);}
+    });
     one("#moasureImportButton").addEventListener("click",function(){try{openMoasureImport();}catch(error){showError(error);}});
-    all("[data-moasure-cancel]").forEach(function(button){button.addEventListener("click",function(){pendingMoasureImport=null;one("#moasureImportDialog").close();});});
-    one("#moasureImportDialog").addEventListener("cancel",function(){pendingMoasureImport=null;});
+    all("[data-moasure-cancel]").forEach(function(button){button.addEventListener("click",function(){pendingMoasureImport=null;one("#moasureImportDialog").close();updateRadialControls();});});
+    one("#moasureImportDialog").addEventListener("cancel",function(){pendingMoasureImport=null;updateRadialControls();});
     one("#moasureCsvFile").addEventListener("change",async function(event){
       var file=event.target.files[0],pending=pendingMoasureImport,version=pending ? (pending.fileVersion||0)+1 : 0;
       if(!pending)return;pending.fileVersion=version;one("#moasureAnchorButton").disabled=true;one("#moasureImportError").hidden=true;
@@ -2254,46 +2205,25 @@ var selectedSpatialFilter = null;
         }).then(function(){cancelPolygonPlacement();render();}).catch(function(error){draft.busy=false;showError(error);render();});
       }
     });
-    root.document.addEventListener("keydown",function(event){
+    // Map sessions own Escape before the Register drawer's document capture handlers.
+    (root.document.defaultView || root.document).addEventListener("keydown",function(event){
       if(event.key!=="Escape" || root.document.querySelector("dialog[open],.uos-modal-backdrop"))return;
-      if(vertexDraft || placementDraft || (pendingMoasureImport && pendingMoasureImport.keys)){
+      if(pinSession || drawingState && drawingState.active || vertexDraft || placementDraft || (pendingMoasureImport && pendingMoasureImport.keys)){
         event.preventDefault();event.stopImmediatePropagation();
+        if(pinSession){cancelPinSession();renderEventPicker();}
+        if(drawingState && drawingState.active)mapController.cancelDrawing();
         if(vertexDraft)cancelVertexEditing();
         if(placementDraft)cancelPolygonPlacement();
         if(pendingMoasureImport){pendingMoasureImport=null;mapController.cancelActiveInteraction();}
         render();
+      }else if(radialExpanded){
+        event.preventDefault();event.stopImmediatePropagation();
+        setRadialExpanded(false,true);
       }
     },true);
 
 
     root.document.addEventListener("click", function (event) {
-
-      var spatialFilterBtn = event.target.closest("[data-map-spatial-filter]");
-      if (spatialFilterBtn) {
-        var spatialFilterVal = spatialFilterBtn.getAttribute("data-map-spatial-filter");
-        if (selectedSpatialFilter === spatialFilterVal) {
-          selectedSpatialFilter = null;
-        } else {
-          selectedSpatialFilter = spatialFilterVal;
-        }
-        renderEventPicker();
-        return;
-      }
-
-      var statusFilterBtn = event.target.closest("[data-map-status-filter]");
-      if (statusFilterBtn) {
-        var statusFilterVal = statusFilterBtn.getAttribute("data-map-status-filter");
-        var statusIdx = selectedStatusFilters.findIndex(function (filter) {
-          return normalizedStatus(filter) === normalizedStatus(statusFilterVal);
-        });
-        if (statusIdx >= 0) {
-          selectedStatusFilters.splice(statusIdx, 1);
-        } else {
-          selectedStatusFilters.push(statusFilterVal);
-        }
-        renderEventPicker();
-        return;
-      }
 
       var inspectLocBtn = event.target.closest("[data-inspect-locations]");
       var pinActionBtn = event.target.closest("[data-pin-action]");
@@ -2408,8 +2338,8 @@ var selectedSpatialFilter = null;
       var editEventBtn = event.target.closest("[data-edit-event-id]");
       var createShapeJobBtn = event.target.closest("[data-create-shape-job]");
       var eventCard = event.target.closest("[data-event-card-id]");
-      var drawModeBtn = event.target.closest("[data-draw-mode]");
-      var toggleBtn = event.target.closest("#toggleMapLength,#toggleMapArea,#toggleMapAngles,#toggleMapEdges,#toggleMapIndex,#toggleMapActiveOnly,#toggleMapSelectedOnly");
+
+      var toggleBtn = event.target.closest("#toggleMapLength,#toggleMapArea,#toggleMapAngles,#toggleMapEdges,#toggleMapIndex");
       var shapeCard = event.target.closest("[data-shape-card-id]");
       var actionBtn = event.target.closest("[data-shape-action]");
       var coordModalBtn = event.target.closest("#coordinateShapeButton");
@@ -2419,10 +2349,9 @@ var selectedSpatialFilter = null;
       var cancelDeleteBtn = event.target.closest("#cancelDeleteShapeButton,#cancelDeleteShapeModalButton");
       var confirmDeleteBtn = event.target.closest("#confirmDeleteShapeButton");
       var selectToolBtn = event.target.closest("#selectToolButton");
-      var startDrawBtn = event.target.closest("#startDrawingButton");
-      var finishDrawBtn = event.target.closest("#finishDrawingButton");
+
       var undoDrawBtn = event.target.closest("#undoDrawingButton");
-      var cancelDrawBtn = event.target.closest("#cancelDrawingButton");
+
       var fitBtn = event.target.closest("#zoomShapesButton");
       var homeBtn = event.target.closest("#resetHomeButton");
       var backToListBtn = event.target.closest("#backToListButton");
@@ -2614,24 +2543,14 @@ var selectedSpatialFilter = null;
         var selectedProject = (selectedRecords.projects || []).find(function (item) { return item.id === cardId; }) ||
           (selectedRecord && root.UOS.ProgramRegister && typeof root.UOS.ProgramRegister.buildLinkedProject === "function" ? root.UOS.ProgramRegister.buildLinkedProject(selectedWorkspace, selectedRecord) : null);
         if (selectedProject && root.UOS.ProgramApp && typeof root.UOS.ProgramApp.setWorkingContext === "function") root.UOS.ProgramApp.setWorkingContext(selectedProject.owner || (selectedRecord && selectedRecord.owner), selectedProject.id);
-      } else if (drawModeBtn) {
-        activeDrawMode = drawModeBtn.getAttribute("data-draw-mode");
-        updateDrawModeUI();
-        startMapDrawing();
       } else if (selectToolBtn) {
         cancelActiveMapInteraction();
-      } else if (startDrawBtn && mapController) {
-        startMapDrawing();
-      } else if (finishDrawBtn && mapController) {
-        if(vertexDraft)finishVertexEditing();else mapController.finishDrawing();
       } else if (undoDrawBtn && mapController) {
         mapController.undoPoint();
-      } else if (cancelDrawBtn && mapController) {
-        cancelActiveMapInteraction();
       } else if (homeBtn && mapController && typeof mapController.resetView === "function") {
         mapController.resetView();
       } else if (fitBtn && mapController) {
-        mapController.zoomToShapes();
+        mapController.fitGeometries();
       } else if (coordModalBtn) {
         openImportDialog();
       } else if (exportMapBtn) {
@@ -2667,8 +2586,6 @@ var selectedSpatialFilter = null;
         else if (id === "toggleMapAngles") mapToggles.Angles = mapToggles.Angles === false;
         else if (id === "toggleMapEdges") mapToggles.Edges = mapToggles.Edges === false;
         else if (id === "toggleMapIndex") mapToggles.Index = mapToggles.Index === false;
-        else if (id === "toggleMapActiveOnly") mapToggles.ActiveOnly = mapToggles.ActiveOnly === false;
-        else if (id === "toggleMapSelectedOnly") mapToggles.SelectedOnly = mapToggles.SelectedOnly === false;
         updateTogglesUI();
       } else if (actionBtn) {
         var action = actionBtn.getAttribute("data-shape-action");
@@ -2809,15 +2726,19 @@ var selectedSpatialFilter = null;
       geometryDrop.addEventListener("keydown", function (event) { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); var input = one("#geometryFileInput"); if (input) input.click(); } });
     }
 
-    root.document.addEventListener("input", function (event) {
-      var searchInput = event.target.closest("#eventSearchInput,[data-event-search]");
-      if (searchInput) {
-        eventSearchQuery = text(searchInput.value).toLowerCase();
-        updateSidebarViewUI();
-      }
-    });
 
     root.document.addEventListener("change", function (event) {
+      var masterVisible=event.target.closest("[data-space-visible-all]");
+      if(masterVisible){
+        var contextState=canonicalMapState(getWorkspace()),projectId=contextState.selectedProjectId,visible=masterVisible.checked;
+        root.UOS.ProgramApp.updateWorkspace(function(candidate){
+          if(canonicalMapState(candidate).selectedProjectId!==projectId)return candidate;
+          var geometries=root.UOS.ProgramModel.projectWorkGeometry(candidate,projectId);
+          geometries.forEach(function(geometry){candidate=root.UOS.WorkAreaService.updateGeometry(candidate,geometry.id,{payload:{visible:visible}});});
+          return candidate;
+        }).then(renderShapeCards).catch(showError);
+        return;
+      }
       var visibleInput = event.target.closest("[data-shape-visible]");
       var typeSelect = event.target.closest("[data-shape-type]");
       var rateSelect = event.target.closest("[data-shape-rate]");
@@ -2914,6 +2835,8 @@ var selectedSpatialFilter = null;
       var dest = workspace && workspace.workspace && workspace.workspace.destination;
       if (dest && dest !== "map") {
         previousDestination = dest;
+        setRadialExpanded(false);
+        updateDraftActions();
         return;
       }
       render();
@@ -2926,7 +2849,12 @@ var selectedSpatialFilter = null;
     var wsData = workspace && workspace.workspace ? workspace.workspace : {};
     var destination = wsData.destination || "";
     var mapState = applyCanonicalMapState(workspace);
-    var importButton=one("#moasureImportButton");if(importButton)importButton.disabled=mapState.scopeMode!=="projects" || !mapState.selectedProjectId;
+    var nextRadialContext=[mapState.ownerMode,mapState.selectedRegisterId,mapState.selectedProjectId].join(":");
+    if(destination!=="map" || radialContext!==nextRadialContext)setRadialExpanded(false);
+    radialContext=nextRadialContext;
+    updateRadialControls();
+    if(pinSession && !pinSession.busy && pinSession.registerId!==mapState.selectedRegisterId)cancelPinSession();
+    var importButton=one("#moasureImportButton");if(importButton)importButton.disabled=!mapState.selectedProjectId;
     if(placementDraft){
       var activeGeometry=root.UOS.ProgramModel.workGeometryById(workspace,placementDraft.id);
       if(!activeGeometry || activeGeometry.projectId!==mapState.selectedProjectId || JSON.stringify(activeGeometry)!==placementDraft.expected)cancelPolygonPlacement();
@@ -2970,11 +2898,11 @@ var selectedSpatialFilter = null;
       }
     }
     if(vertexDraft && !vertexDraft.busy && (destination!=="map" || mapState.selectedProjectId!==vertexDraft.original.projectId || mapState.inspectorMode!=="polygon" || mapState.selectedGeometryId!==vertexDraft.id)){cancelVertexEditing();}
-    if (destination !== "map") { previousDestination=destination;pendingEntryZoom=false;cancelPolygonPlacement();pendingMoasureImport=null;closeMapMenus();return; }
+    if (destination !== "map") { previousDestination=destination;pendingEntryZoom=false;cancelPinSession();cancelPolygonPlacement();pendingMoasureImport=null;closeMapMenus();return; }
 
         var enteredFromOtherTab = previousDestination !== "map";
     previousDestination = destination;
-    if(enteredFromOtherTab){cameraFocusVersion++;pendingEntryZoom=true;}
+    if(enteredFromOtherTab){expandedGeometryId=mapState.selectedGeometryId || null;panelCollapse={location:false,space:false};cameraFocusVersion++;pendingEntryZoom=true;}
 
     try {
       updateSidebarViewUI();
@@ -3009,8 +2937,7 @@ var selectedSpatialFilter = null;
       }
 
       updateTogglesUI();
-      updateDrawModeUI();
-      if (pendingPolygonPlacementId) beginPolygonPlacement(pendingPolygonPlacementId);
+        if (pendingPolygonPlacementId) beginPolygonPlacement(pendingPolygonPlacementId);
       if(vertexDraft)updateVertexControls();
     } catch (err) {
       if (root.console && typeof root.console.warn === "function") root.console.warn("ProgramMapController render issue:", err);
