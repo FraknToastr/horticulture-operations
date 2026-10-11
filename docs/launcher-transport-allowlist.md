@@ -22,6 +22,8 @@ The repository-root `index.html` has an existing Overtime link. This NSA/EVT pub
 
 ## Exclusions
 
+Owner-authorized exception (11 October 2026): `src/MOASURE/North Terrace 6.csv` is included as a Moasure import sample. The other local Moasure files remain excluded.
+
 Do not publish operator or customer workspace exports, local backups, conversion reports, backup-dependent recovery scripts/tests, local Moasure source files, PDFs, rosters, review archives, evidence packages, logs, screenshots, scratch outputs, dependency caches or browser profiles. Preserve local originals. Existing remote history is not deleted or rewritten by this publication.
 
 ## Space Map update — 11 October 2026
