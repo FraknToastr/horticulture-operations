@@ -38,19 +38,21 @@ export function outlineBuffers(rings, origin) {
 
 export function dashedStrip(ring, width, origin, pattern) {
   if (!Array.isArray(pattern) || pattern.length < 2 || !pattern[1]) return strip(ring, width, origin);
-  const dash = pattern.map(n => Math.max(.01, n * width)), cycle = dash.reduce((a, b) => a + b, 0), vertices = []; let travelled = 0;
+  const dash = pattern.map(n => Math.max(.01, n * width)), vertices = [];
+  let index = 0, remaining = dash[0];
   for (let i = 1; i < ring.length; i++) {
     const a = ring[i - 1], b = ring[i], length = Math.hypot(b[0] - a[0], b[1] - a[1]); if (!length) continue;
     let distance = 0;
     while (distance < length) {
-      let phase = (travelled + distance) % cycle, index = 0;
-      while (index < dash.length - 1 && phase >= dash[index]) { phase -= dash[index]; index++; }
-      const next = Math.min(length, distance + dash[index] - phase);
+      // Consume each dash explicitly: modulo at a rounded dash boundary can
+      // produce a zero step and truncate every later part of the preview.
+      const step = Math.min(remaining, length - distance), next = distance + step;
       if (next <= distance) break;
       if (!(index % 2)) { const p = d => [a[0] + (b[0] - a[0]) * d / length, a[1] + (b[1] - a[1]) * d / length]; for (const v of strip([p(distance), p(next)], width, origin)) vertices.push(v); }
       distance = next;
+      if (step === remaining) { index = (index + 1) % dash.length; remaining = dash[index]; }
+      else remaining -= step;
     }
-    travelled += length;
   }
   return vertices;
 }

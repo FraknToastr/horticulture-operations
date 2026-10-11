@@ -3,7 +3,7 @@
   var UOS = window.UOS = window.UOS || {};
   var source = document.currentScript.src;
   var spaceMapBuild = "20261010-gpu-map-v2";
-  var rendererBuild = "20261011-raster-resolution-v3";
+  var rendererBuild = "20261011-drawing-dashes-v1";
   var pending = {};
 
   function load(name, path, globalName) {

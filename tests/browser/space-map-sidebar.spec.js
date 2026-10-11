@@ -48,7 +48,8 @@ for(const owner of ['NSA','EVT']){
     await expect(frame.locator('.space-editor__geometry-card').first().locator('.program-shape-actions button')).toHaveCount(6);
     const card=frame.locator('.space-editor__geometry-card').first();
     await expect(card.locator('.space-editor__fields thead')).toHaveCount(0);
-    await expect(card.locator('.program-shape-actions')).toBeHidden();
+    await expect(card.locator('.program-shape-actions')).toBeVisible();
+    await expect(card.locator('.space-editor__drawer')).toBeHidden();
     await card.locator('[data-space-expand]').click();await expect(card.locator('.program-shape-actions')).toBeVisible();
     await expect.poll(()=>frame.evaluate(()=>{
       const card=document.querySelector('.space-editor__geometry-card');
@@ -56,8 +57,21 @@ for(const owner of ['NSA','EVT']){
       return {consistent:controls.length>6 && controls.every(style=>style.borderTopWidth==='1px' && style.borderTopStyle==='solid' && style.borderTopColor===controls[0].borderTopColor && style.borderRadius==='2px'),seam:getComputedStyle(card.querySelector('.space-editor__fields tr:last-child td')).borderBottomWidth,shadow:getComputedStyle(card).boxShadow};
     })).toEqual({consistent:true,seam:'0px',shadow:'none'});
     await expect.poll(()=>card.locator('.space-editor__fields tr').first().evaluate(row=>{const label=row.cells[0].getBoundingClientRect().width,value=row.cells[1].getBoundingClientRect().width;return {compact:label>0 && label<value/2,wrap:getComputedStyle(row.cells[0]).whiteSpace};})).toEqual({compact:true,wrap:'nowrap'});
-    await card.locator('[data-space-expand]').click();await expect(card.locator('.program-shape-actions')).toBeHidden();
+    await card.locator('[data-space-expand]').click();await expect(card.locator('.program-shape-actions')).toBeVisible();
+    await expect(card.locator('.space-editor__drawer')).toBeHidden();
     await expect(card.locator('.space-editor__fields')).toBeVisible();
+    await card.locator('[data-shape-action="edit"]').click();
+    const edit=card.locator('[data-shape-action="edit"]');await expect(edit).toHaveAttribute('aria-pressed','true');
+    await page.mouse.move(0,0);
+    for(const theme of ['light','dark']){
+      await frame.evaluate(t=>document.documentElement.dataset.suiteTheme=t,theme);
+      await expect(edit).toHaveCSS('color','rgb(255, 255, 255)');
+      await expect(edit.locator('svg')).toHaveCSS('stroke','rgb(255, 255, 255)');
+      await edit.hover();
+      expect(await edit.evaluate(button=>{const style=getComputedStyle(button);return getComputedStyle(button.querySelector('svg')).stroke===style.color && style.color!==style.backgroundColor;})).toBe(true);
+      await page.mouse.move(0,0);
+    }
+    await frame.locator('#spaceCancelDraft').click();await frame.evaluate(()=>document.documentElement.dataset.suiteTheme='light');
     await expect(frame.locator('#coordinateShapeButton')).toBeEnabled();await frame.locator('#coordinateShapeButton').click();await expect(frame.locator('#coordinateShapeDialog')).toBeVisible();await frame.locator('#cancelCoordinateShapeButton').click();
     await frame.locator('.program-map-menu--display summary').click();await expect(frame.locator('#toggleMapArea')).toBeVisible();await frame.locator('#toggleMapArea').click();
     await frame.locator('.program-map-menu--display summary').click();

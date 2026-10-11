@@ -4,13 +4,14 @@ const { pathToFileURL } = require('node:url');
 const { suppressBackupModalForFunctionalTest, startSpaceCreation } = require('./test-helper.cjs');
 test.use({ screenshot: 'off', trace: 'off', video: 'off', launchOptions: { args: ['--enable-unsafe-webgpu', '--use-angle=swiftshader', '--use-vulkan=swiftshader', '--enable-features=Vulkan'] } });
 
-async function open(page, owner, backend) {
+async function open(page, owner, backend, localFile = false) {
   await suppressBackupModalForFunctionalTest(page);
   await page.addInitScript(value => { window.UOS_SPACE_MAP_BACKEND = value; }, backend);
   await page.setViewportSize({ width: 1600, height: 1000 });
   const requests = [], errors = [];
   page.on('request', r => requests.push(r.url())); page.on('pageerror', e => errors.push(e.message));
-  await page.goto(`/src/program-planner/${owner === 'NSA' ? 'nsa' : 'events'}.html`);
+  const entry = `src/program-planner/${owner === 'NSA' ? 'nsa' : 'events'}.html`;
+  await page.goto(localFile ? pathToFileURL(path.resolve(entry)).href : '/' + entry);
   const frame = page.frames().find(f => f !== page.mainFrame());
   await frame.waitForFunction(() => UOS.ProgramApp?.snapshot().phase === 'ready');
   await frame.evaluate(() => { UOS_REMEDIATION_MAP_CONFIG.defaultProvider = 'offline'; });
@@ -55,6 +56,31 @@ test('local-file entry draws reference layers, full radial connectors and raster
   const panned=await canvas.screenshot();await page.mouse.wheel(0,-200);
   await expect.poll(async()=>Buffer.compare(panned,await canvas.screenshot())).not.toBe(0);
   expect(errors).toEqual([]);
+});
+
+for (const [owner, backend] of [['NSA', 'webgpu'], ['EVT', 'webgl']]) test(`${owner}: radial polygon preview draws complete dashed edges on ${backend}`, async ({ page }) => {
+  const { frame, errors } = await open(page, owner, backend, true);
+  await seed(frame, owner); await enter(frame);
+  await expect.poll(() => frame.evaluate(() => UOS.ProgramMapController.getMapController().getRendererMetrics().backend)).toBe(backend === 'webgpu' ? 'webgpu' : 'webgl2');
+  await startSpaceCreation(frame, 'polygon');
+  await clickPoint(frame, .3, .4); await clickPoint(frame, .7, .4); await clickPoint(frame, .7, .7);
+  await expect.poll(() => frame.evaluate(() => {
+    const adapter = UOS.ProgramMapController.getMapController().getRendererAdapter();
+    const line = adapter.sources.get('uos-draft').data.features.find(f => f.geometry.type === 'LineString');
+    const projected = line.geometry.coordinates.map(c => [c[0] / 360 * 40075016.68557849 - adapter.origin[0], Math.log(Math.tan(Math.PI / 4 + c[1] * Math.PI / 360)) * 40075016.68557849 / (2 * Math.PI) - adapter.origin[1]]);
+    const positions = (adapter.objects.get('uos-draft-line') || []).flatMap(mesh => Array.from(mesh.geometry.attributes.position.array));
+    const tolerance = 9 / adapter.scale;
+    const samples = [];
+    for (let i = 1; i < projected.length; i++) for (const fraction of [.25, .5, .75]) {
+      const a = projected[i - 1], b = projected[i];
+      samples.push([a[0] + (b[0] - a[0]) * fraction, a[1] + (b[1] - a[1]) * fraction]);
+    }
+    return samples.length > 0 && samples.every(point => {
+      for (let i = 0; i < positions.length; i += 3) if (Math.hypot(positions[i] - point[0], positions[i + 1] - point[1]) <= tolerance) return true;
+      return false;
+    });
+  })).toBe(true);
+  await frame.locator('#spaceCancelDraft').click(); expect(errors).toEqual([]);
 });
 
 for (const owner of ['NSA', 'EVT']) test(`${owner}: GPU adapter loads on demand, retains drawing on backend loss`, async ({ page }) => {
