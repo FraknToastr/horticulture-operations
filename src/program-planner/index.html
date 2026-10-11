@@ -22,8 +22,8 @@
   <link rel="stylesheet" href="../shared/css/accessibility.css?v=20261001-modal-focus-v1">
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
-<link rel="stylesheet" href="styles.css?v=20261009-main-launcher-v1">
-  <link rel="stylesheet" href="space-map-editor.css?v=20261010-gpu-map-v2">
+<link rel="stylesheet" href="styles.css?v=20261011-register-pending-v1">
+  <link rel="stylesheet" href="space-map-editor.css?v=20261011-project-empty-v1">
 <link rel="stylesheet" href="scheduler-week.css?v=20261005-selected-hourly-slot-v2">
   <link rel="stylesheet" href="planner-row-header.css?v=20261008-ready-frame-row-buffers-v13">
   <link rel="stylesheet" href="register-row-header.css?v=20261009-main-launcher-v1">
@@ -1060,10 +1060,10 @@
     <div class="program-data-dialog__frame"><header><div><p class="uos-eyebrow">Workspace backup</p><h2 id="program-export-title">Choose a portable format</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" data-program-export-cancel aria-label="Close export options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header><div class="program-export-options"><button type="button" data-program-export-json><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM15 3v5h5M9 13h6M9 17h6"/></svg><span><strong>Workspace backup (.json)</strong><small>Complete canonical schema-v5 workspace for recovery.</small></span></button><button type="button" data-program-export-bundle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v13H3zM7 3h10v4M9 11h6M9 15h6"/></svg><span><strong>CSV + GeoJSON bundle</strong><small>Optional interchange ZIP with entity tables and spatial geometry.</small></span></button></div><footer><button class="uos-button uos-button--secondary" type="button" data-program-export-cancel>Cancel</button></footer></div>
   </dialog>
 
-  <dialog class="program-rate-dialog" id="spaceSwitchDialog" aria-labelledby="spaceSwitchTitle">
-          <h2 id="spaceSwitchTitle">Discard unfinished work?</h2>
-          <p>Switching will discard the current map draft.</p>
-          <div class="program-polygon-placement__actions"><button type="button" class="uos-button uos-button--secondary" id="spaceKeepEditing">Keep editing</button><button type="button" class="uos-button uos-button--primary" id="spaceDiscardSwitch">Discard and switch</button></div>
+  <dialog class="program-rate-dialog" id="spaceSwitchDialog" aria-labelledby="spaceSwitchTitle" aria-describedby="spaceSwitchDescription">
+          <header><h2 id="spaceSwitchTitle">Discard unfinished work?</h2></header>
+          <div class="space-switch-dialog__body"><p id="spaceSwitchDescription">Switching will discard the current map draft.</p></div>
+          <footer><button type="button" class="uos-button uos-button--secondary" id="spaceKeepEditing">Keep editing</button><button type="button" class="uos-button uos-button--secondary" id="spaceDiscardSwitch">Discard and switch</button></footer>
         </dialog>
         <dialog class="program-rate-dialog planner-task-dialog" id="moasureImportDialog" aria-labelledby="moasureImportTitle">
     <div class="planner-task-editor">
@@ -1237,7 +1237,7 @@
   <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
     <script defer src="../remediation-planner/js/map.js?v=20261010-gpu-map-v2"></script>
-  <script defer src="js/program-map.js?v=20261010-gpu-map-v2"></script>
+  <script defer src="js/program-map.js?v=20261011-geometry-empty-v1"></script>
 
 <script defer src="js/planner.js?v=20261009-main-launcher-v1"></script>
  <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>

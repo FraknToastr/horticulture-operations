@@ -10369,7 +10369,7 @@ body[data-drawer-module] .program-register-module-host #shapeList > .program-sha
 .planner-section-toggle[aria-expanded="false"] .planner-section-toggle__icon { transform: rotate(-90deg); }
 
 .program-register-project-state.is-created { color: var(--uos-brand-text); border-color: var(--uos-brand-text); background: var(--uos-brand-soft); }
-.program-register-project-state.is-not-created { color: #713f12; background: var(--register-project-pending-background, #ffff00); }
+.program-register-project-state.is-not-created { color: #3f4715; background: #f8ffbc; }
 .program-costing-workspace > .program-costing-projects-pane,
 .program-costing-workspace > .program-cost-catalog,
 .program-quote-layout > .program-quote-sidebar,

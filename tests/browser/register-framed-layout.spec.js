@@ -40,7 +40,7 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
     await expect(child.locator(`tr[data-register-record="${ids[2]}"] .program-register-table__title-cell`)).toHaveText(owner === 'NSA' ? 'Untitled application' : 'Untitled event');
     await expect(row.locator('td > .commercial-value-frame')).toHaveCount(8);
   await expect(row.locator('.program-register-project-state')).toHaveText('Not Created');
-  expect(await row.locator('.program-register-project-state').evaluate(node => getComputedStyle(node).backgroundColor)).toBe('rgb(255, 255, 0)');
+  expect(await row.locator('.program-register-project-state').evaluate(node => getComputedStyle(node).backgroundColor)).toBe('rgb(248, 255, 188)');
     await expect(row.locator('.program-status-pill > *, .program-register-project-state > *')).toHaveCount(0);
     await expect(row.locator('td:first-child [data-disclosure-toggle]')).toHaveCount(1);
     await expect(row.locator('.program-register-table__actions-cell [data-disclosure-toggle]')).toHaveCount(0);

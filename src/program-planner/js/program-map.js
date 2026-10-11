@@ -53,14 +53,21 @@
     mapSaveCount++;updateSidebarControls();
     return root.UOS.ProgramApp.updateWorkspace(change).finally(function(){mapSaveCount--;updateSidebarControls();});
   }
-  function unfinishedMapWork() {
+  function activeMapInteraction() {
     return Boolean(pinSession || drawingState && drawingState.active || vertexDraft || placementDraft || pendingLocationPlacement || pendingMoasureImport || pendingPolygonPlacementId);
+  }
+  function unfinishedMapWork() {
+    if(pinSession && JSON.stringify(root.UOS.ProgramModel.registerLocations(pinSession.workspace,pinSession.registerId))!==pinSession.originalPins)return true;
+    if(drawingState && drawingState.active && drawingState.points>0)return true;
+    if(vertexDraft && (vertexDraft.invalidInput || JSON.stringify(vertexDraft.shape.coordinates)!==JSON.stringify(extractCoordinates(vertexDraft.original))))return true;
+    if(placementDraft && JSON.stringify(placementDraft.basis)!==placementDraft.originalBasis)return true;
+    return Boolean(pendingMoasureImport && pendingMoasureImport.text);
   }
   async function switchSpaceMode(mode, options) {
     options=options || {};
     if(mapBusy() || switchPending)return false;
     var state=mapViewState(getWorkspace());
-    if(state.scopeMode===mode && (!options.replaceDraft || !unfinishedMapWork()))return true;
+    if(state.scopeMode===mode && (!options.replaceDraft || !activeMapInteraction()))return true;
     switchPending=true;updateSidebarControls();
     try {
       if(unfinishedMapWork()){
@@ -70,6 +77,8 @@
           dialog.returnValue='keep';dialog.showModal();one('#spaceKeepEditing').focus();
         });
         if(!discard || mapBusy())return false;
+      }
+      if(activeMapInteraction()){
         cancelActiveMapInteraction();pendingMoasureImport=null;pendingLocationPlacement=null;pendingPolygonPlacementId=null;
         var importDialog=one('#moasureImportDialog');if(importDialog.open)importDialog.close();
       }
@@ -427,7 +436,8 @@ function setMapCanvasCursor(cursor) {
     var geometry=root.UOS.ProgramModel.workGeometryById(getWorkspace(),id);
     if(!geometry)throw new Error("Select a valid Project polygon.");
     cancelPolygonPlacement();pendingLocationPlacement=null;pendingMoasureImport=null;editingShapeId=null;
-    placementDraft={id:id,expected:JSON.stringify(geometry),basis:root.UOS.WorkAreaService.placementBasis(geometry)};
+    var basis=root.UOS.WorkAreaService.placementBasis(geometry);
+    placementDraft={id:id,expected:JSON.stringify(geometry),basis:basis,originalBasis:JSON.stringify(basis)};
     one(".program-map-canvas-container").setAttribute("data-placement-active","true");
     mapController.resize();
     if(options.zoom!==false)mapController.zoomToShape(id);
@@ -1271,6 +1281,7 @@ function setMapCanvasCursor(cursor) {
   function renderShapeCards() {
     var container = one("#shapeList");
     if (!container) return;
+    if (!mapViewState(getWorkspace()).selectedProjectId) { container.innerHTML=""; return; }
     var drawerMode = inRegisterDrawerMode();
     var geometries = getGeometriesForEvent(selectedEventFilterId);
     var shapes = convertToEventShapes(geometries);
@@ -1394,13 +1405,13 @@ function setMapCanvasCursor(cursor) {
       var title=geometry.moasureSurvey?'Moasure':'Event Space';
       return '<article class="space-editor__geometry-card'+(selectedShapeId===shape.id?' is-selected':'')+(editingShapeId===shape.id?' is-editing':'')+'" data-shape-card-id="'+esc(shape.id)+'" data-space-geometry="'+esc(shape.id)+'" data-disclosure-skip aria-label="'+esc(title)+' '+(index+1)+'">'+
         '<header class="space-editor__geometry-summary"><input type="checkbox" data-shape-visible="'+esc(shape.id)+'"'+(shape.visible?' checked':'')+' aria-label="Show geometry '+(index+1)+'"><h3>'+(index+1)+'. '+title+'</h3><button type="button" data-space-expand="'+esc(shape.id)+'" aria-expanded="'+Boolean(open)+'" aria-controls="spaceDrawer'+index+'" aria-label="Expand geometry '+(index+1)+'"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="'+(open?'m5 9 7 7 7-7':'m9 5 7 7-7 7')+'"/></svg></button></header>'+
-        '<table class="space-editor__fields" aria-label="'+esc(title)+' '+(index+1)+' details"><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row">Job Type</th><td>'+esc(shape.type?workTypeLabel(shape.type):"Not selected")+'</td></tr><tr><th scope="row">Cost Type</th><td>'+esc(rateLabel)+'</td></tr><tr><th scope="row">Measure</th><td>'+esc(formatMeasure(shape))+'</td></tr></tbody></table>'+
-        actions.outerHTML+'<div class="space-editor__drawer" id="spaceDrawer'+index+'"'+(open?'':' hidden')+'>'+card.outerHTML+'</div></article>';
+        '<table class="space-editor__fields" aria-label="'+esc(title)+' '+(index+1)+' details"><tbody><tr><th scope="row">Job Type</th><td>'+esc(shape.type?workTypeLabel(shape.type):"Not selected")+'</td></tr><tr><th scope="row">Cost Type</th><td>'+esc(rateLabel)+'</td></tr><tr><th scope="row">Measure</th><td>'+esc(formatMeasure(shape))+'</td></tr></tbody></table>'+
+        '<div class="space-editor__drawer" id="spaceDrawer'+index+'"'+(open?'':' hidden')+'>'+actions.outerHTML+card.outerHTML+'</div></article>';
     }).join("");
     var draft=drawingState && drawingState.active ? '<article class="space-editor__geometry-card" data-space-draft><header class="space-editor__geometry-summary"><h3>Event Space · Drawing</h3></header><p>Draft · '+drawingState.points+' points · '+esc(drawingState.measurementSummary || "0 points")+'. Accept to save, Cancel to discard.</p></article>' : '';
-    container.innerHTML='<label class="space-editor__visibility"><input type="checkbox" data-space-visible-all aria-label="Show all geometries">All geometries</label>'+draft+rows;
+    container.innerHTML=(shapes.length ? '<label class="space-editor__visibility"><input type="checkbox" data-space-visible-all aria-label="Show all geometries">All geometries</label>' : '')+draft+rows;
     var master=container.querySelector('[data-space-visible-all]'), count=shapes.filter(function(shape){return shape.visible;}).length;
-    master.checked=shapes.length>0 && count===shapes.length;master.indeterminate=count>0 && count<shapes.length;master.disabled=!shapes.length;
+    if(master){master.checked=count===shapes.length;master.indeterminate=count>0 && count<shapes.length;}
     addSpaceControlIcons(container);
 
   }
@@ -1722,7 +1733,9 @@ var selectedSpatialFilter = null;
     var selected=pinSession ? pinSession.selectedId : state.selectedLocationId;
     var numbers=!(workspace.workspace.map && workspace.workspace.map.showLocationNumbers===false);
     one("#eventPickerList").innerHTML=pins.length ? pins.map(function(pin,index){return '<button type="button" class="space-editor__pin'+(pin.id===selected?' is-selected':'')+'" data-space-pin="'+esc(pin.id)+'" aria-label="Location '+(index+1)+': '+esc(pin.name || pin.address)+'" aria-pressed="'+(pin.id===selected)+'" title="'+esc(pin.address || pin.name)+'">'+root.UOS.RemediationMap.pinSymbol(index+1,true,owner)+'</button>';}).join("") : '<p class="space-editor__empty">'+(record?'No pins. Use + to place a location.':'Open a Register record to manage its locations.')+'</p>';
-    one("#spaceProjectEmpty").innerHTML=!state.selectedProjectId && record ? '<button type="button" class="uos-button uos-button--secondary uos-button--sm" data-promote-register-id="'+esc(record.id)+'">Create Project</button>' : '';
+    var needsProject=!state.selectedProjectId && Boolean(record);
+    one("#spaceManagementBody").classList.toggle("is-project-empty",needsProject);
+    one("#spaceProjectEmpty").innerHTML=needsProject ? '<button type="button" class="uos-button uos-button--primary space-editor__create-project" data-promote-register-id="'+esc(record.id)+'">Create Project</button>' : '';
     one('#labelLocationsButton').setAttribute('aria-pressed',String(numbers));
     addSpaceControlIcons(one('.space-editor'));
     ['#moasureImportDialog','#coordinateShapeDialog'].forEach(function(id){var dialog=one(id);if(dialog)addSpaceControlIcons(dialog);});

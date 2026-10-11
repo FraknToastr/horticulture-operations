@@ -30,7 +30,8 @@ test('Register keeps pending yellow, Created fill and subdued In Progress pink d
   await expect(pending).toHaveText('Not Created');
   await expect(created).toHaveText('Created');
   await expect(progress).toHaveText('In Progress');
-  await expect.poll(() => background(pending)).toBe('rgb(255, 255, 0)');
+  await expect.poll(() => background(pending)).toBe('rgb(248, 255, 188)');
+  await expect(pending).toHaveCSS('color', 'rgb(63, 71, 21)');
   await expect.poll(() => background(progress)).toBe('rgb(243, 227, 232)');
   expect(await created.evaluate(node => {
     const probe = document.createElement('span'); probe.style.background = 'var(--uos-brand-soft)'; node.append(probe);
@@ -41,6 +42,6 @@ test('Register keeps pending yellow, Created fill and subdued In Progress pink d
   await row('WORKING').evaluate(node => node.classList.add('is-selected'));
   await page.mouse.move(0, 0);
   await expect.poll(() => background(progress)).toBe('rgb(243, 227, 232)');
-  await expect.poll(() => background(pending)).toBe('rgb(255, 255, 0)');
+  await expect.poll(() => background(pending)).toBe('rgb(248, 255, 188)');
   await expect(row('PENDING').locator('[data-register-action="planner"]')).toBeDisabled();
 });
