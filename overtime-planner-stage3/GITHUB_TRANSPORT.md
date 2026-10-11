@@ -1,5 +1,14 @@
 # GitHub transport boundary
 
+## Current branch authority — 11 October 2026
+
+The owner requires main to be the sole local and remote branch, containing the
+latest files for src/index.html and overtime-planner-stage3/index.html. Earlier
+branch destinations below are historical. This changes Git organisation only;
+Overtime retains its independent source, dependencies, storage and tests.
+No new product phase, schema change or release certification is implied.
+
+
 The approved destination is the host repository's `github-replacement` branch. Overtime remains a separate application in this folder; publishing does not integrate it with NSA/EVT or update `main`.
 
 `GITHUB_TRANSPORT_FILES.txt` is the reviewed, explicit file allowlist for this initial publication. It contains modular and generated standalone source, required compatibility fixtures and test probes, independent build/test configuration, necessary design and handoff documents, constitutional files and governance records. Signed narrative review records remain governance documents, not release approval by the current developers.

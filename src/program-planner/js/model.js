@@ -2,6 +2,22 @@
   "use strict";
 
   var UOS = window.UOS = window.UOS || {};
+  // Business dates follow the workspace zone, independently of the device zone.
+  var businessDateFormats = Object.create(null);
+  UOS.ProgramDates = {
+    today: function (workspace, instant) {
+      var zone = workspace && workspace.context && workspace.context.timeZone || "Australia/Adelaide";
+      var formatter = businessDateFormats[zone] || (businessDateFormats[zone] = new Intl.DateTimeFormat("en-AU", { timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit" }));
+      var parts = formatter.formatToParts(new Date(instant === undefined ? Date.now() : instant));
+      function part(type) { return parts.find(function (entry) { return entry.type === type; }).value; }
+      return part("year") + "-" + part("month") + "-" + part("day");
+    },
+    addDays: function (date, days) {
+      var value = new Date(date + "T00:00:00Z");
+      value.setUTCDate(value.getUTCDate() + days);
+      return value.toISOString().slice(0, 10);
+    }
+  };
   var ACTIVE_CONFIG = UOS.ProgramAppConfig && typeof UOS.ProgramAppConfig.current === "function" ? UOS.ProgramAppConfig.current() : null;
   var APP_ID = ACTIVE_CONFIG && ACTIVE_CONFIG.appId || "uos.horticulture";
   var WORKSPACE_KIND = ACTIVE_CONFIG && ACTIVE_CONFIG.workspaceKind || "";

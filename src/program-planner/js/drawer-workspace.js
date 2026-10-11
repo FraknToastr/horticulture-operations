@@ -28,7 +28,13 @@
     if (!root || !root.isConnected || root.hidden || root.closest("[hidden]")) return null;
     var context = costingContext(root);
     if (costingPosition && costingPosition.root === root && costingPosition.context === context) return costingPosition;
-    costingPosition = { root: root, context: context, scrolls: Array.prototype.map.call(root.querySelectorAll(".program-cost-table-wrap,.program-calculator-table-wrap"), function (node) { return { node: node, top: node.scrollTop, left: node.scrollLeft }; }) };
+    var active = document.activeElement, focus = null;
+    if (active && root.contains(active)) {
+      var attribute = ["data-costing-line-quantity", "data-costing-line-unit", "data-costing-line-rate", "data-costing-line-calendar", "data-costing-remove"].find(function (name) { return active.hasAttribute(name); });
+      var selector = attribute ? '[' + attribute + '="' + CSS.escape(active.getAttribute(attribute)) + '"]' : nodePath(active, root);
+      focus = { node: active, selector: selector, start: active.selectionStart, end: active.selectionEnd, direction: active.selectionDirection };
+    }
+    costingPosition = { root: root, context: context, focus: focus, scrolls: Array.prototype.map.call(root.querySelectorAll(".program-cost-table-wrap,.program-calculator-table-wrap"), function (node) { return { node: node, top: node.scrollTop, left: node.scrollLeft }; }) };
     return costingPosition;
   }
   function restoreCostingPosition(saved) {
@@ -38,6 +44,14 @@
     if (!workspace || workspace.workspace.destination !== "costing" || costingContext(root) !== saved.context) { costingPosition = null; return; }
     // Register rebuilding temporarily detaches the module. Restore once mounted.
     if (!root.isConnected || root.hidden || root.closest("[hidden]")) return;
+    var focused = document.activeElement;
+    if (saved.focus && !document.querySelector("dialog[open]") && (focused === document.body || focused === saved.focus.node)) {
+      var target = root.contains(saved.focus.node) ? saved.focus.node : saved.focus.selector && root.querySelector(saved.focus.selector);
+      if (target && !target.disabled && target.getClientRects().length) {
+        target.focus({ preventScroll: true });
+        if (typeof saved.focus.start === "number" && target.setSelectionRange) target.setSelectionRange(saved.focus.start, saved.focus.end, saved.focus.direction || "none");
+      }
+    }
     saved.scrolls.forEach(function (item) { if (root.contains(item.node)) { item.node.scrollTop = item.top; item.node.scrollLeft = item.left; } });
     if (costingPosition === saved) costingPosition = null;
   }

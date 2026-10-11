@@ -14,7 +14,7 @@
   function text(value) { return String(value == null ? "" : value).trim(); }
   function one(selector) { return root && root.querySelector(selector); }
   function all(selector) { return root ? Array.prototype.slice.call(root.querySelectorAll(selector)) : []; }
-  function today() { return new Date().toISOString().slice(0, 10); }
+  function today() { return UOS.ProgramDates.today(state.workspace); }
   function model() { return UOS.ProgramSchedulerModel; }
   function dateAt(iso) { return new Date(iso + "T00:00:00Z"); }
   function dateString(date) { return date.toISOString().slice(0, 10); }

@@ -53,7 +53,7 @@
   function request(input, spec) {
     var ws = UOS.ProgramModel.normalize(clone(input)), budget = year(ws, spec.budgetId);
     var recorder = text(spec.recorder || spec.actor), reason = text(spec.reason), evidence = text(spec.evidence || spec.evidenceRef);
-    var effectiveDate = text(spec.effectiveDate || spec.date || new Date().toISOString().slice(0, 10));
+    var effectiveDate = text(spec.effectiveDate || spec.date || UOS.ProgramDates.today(ws));
     if (!recorder || !reason || !evidence) throw new Error("Recorder, reason, and evidence are required.");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(effectiveDate)) throw new Error("Effective date must be YYYY-MM-DD.");
     var amountCents = cents(spec.amount);

@@ -7,6 +7,9 @@
   "use strict";
 
  var state = { workspace: null, section: "Labour", query: "", category: "all", rateSort: "description", rateSortDirection: "asc", jobId: "", preliminaries: 0, margin: 0, pendingAdjustments: null, editRateId: "", editorOpener: null, mode: "applications", selectedProjectId: "", bound: false };
+  var costingNeedsRender = true;
+  var costingRenderQueued = false;
+  var renderedCosting = {};
 function text(value) { return String(value == null ? "" : value).trim(); }
 function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnProperty.call(value, key); }
   function clone(value) { return value === undefined ? undefined : JSON.parse(JSON.stringify(value)); }
@@ -685,16 +688,67 @@ function button(label, kind, attribute, value) { var node = root.document.create
     Array.from(new Set(entities("rateItems").filter(function (rate) { return rateSection(rate) === state.section; }).map(function (rate) { return text(rate.category); }).filter(Boolean))).sort().forEach(function (category) { var option = root.document.createElement("option"); option.value = category; option.textContent = category; select.appendChild(option); });
     select.value = Array.prototype.some.call(select.options, function (option) { return option.value === retained; }) ? retained : "all"; state.category = select.value;
   }
-  function render() {
+  function refreshCalendarIndicators() {
+    all("[data-costing-line-calendar]").forEach(function (calendar) {
+      var line = entities("costingLines").find(function (item) { return item.id === calendar.getAttribute("data-costing-line-calendar"); });
+      if (!line) return;
+      var job = entities("jobs").find(function (item) { return item.id === line.jobId; });
+      var status = job ? (job.startDate && text(job.status).toLowerCase() !== "draft" ? "scheduled" : "draft") : "suspended";
+      if (calendar.getAttribute("data-costing-calendar-state") === status) return;
+      calendar.setAttribute("data-costing-calendar-state", status);
+      var label = (job ? "Open Scheduler job for " : "Recreate draft job for ") + title(line);
+      calendar.setAttribute("aria-label", label);
+      calendar.title = label;
+      var path = calendar.querySelector("path");
+      if (path) path.setAttribute("d", "M8 3v4M16 3v4M3 10h18" + (status === "scheduled" ? "M8 16l2.5 2.5L16.5 13" : ""));
+    });
+  }
+  function render(incremental) {
     if (!state.workspace || !model() || !root.document) return;
+    if (state.workspace.workspace.destination !== "costing") {
+      costingNeedsRender = true;
+      refreshCalendarIndicators();
+      return;
+    }
+    var costingRoot = one('[data-program-view="costing"]');
+    if (!costingRoot || !costingRoot.isConnected || costingRoot.hidden || costingRoot.closest("[hidden]")) {
+      // Keep the last rendered inputs until the existing module is remounted.
+      if (!costingRenderQueued) {
+        costingRenderQueued = true;
+        root.requestAnimationFrame(function () {
+          costingRenderQueued = false;
+          var mounted = one('[data-program-view="costing"]');
+          if (mounted && mounted.isConnected && !mounted.hidden && !mounted.closest("[hidden]")) render(true);
+        });
+      }
+      return;
+    }
+    var full = costingNeedsRender || !incremental;
+    var inputs = {};
+    ["projects", "applications", "events", "jobs", "costingLines", "rateItems", "catalogs", "geometries"].forEach(function (name) { inputs[name] = JSON.stringify(entities(name)); });
+    inputs.workTypes = JSON.stringify(state.workspace.referenceData && state.workspace.referenceData.shared && state.workspace.referenceData.shared.workTypeRateItems || {});
     var drawerUI = root.UOS.ProgramDrawerWorkspace, position = drawerUI && drawerUI.captureCostingPosition();
-    renderProjects();
-    renderCatalogControls();
-    renderCategories();
-    renderCatalog();
-    decorateCatalogAccessibility();
-    renderMapped();
-    renderCalculator();
+    var privacy = root.UOS.ProgramPrivacy, privacyEnabled = privacy && typeof privacy.isEnabled === "function" && privacy.isEnabled();
+    var projectsKey = JSON.stringify([state.mode, state.selectedProjectId, state.projectSearchQuery, state.projectJobFilter, state.projectStatusFilters, privacyEnabled, inputs.projects, inputs.applications, inputs.events, inputs.jobs, inputs.costingLines, inputs.geometries]);
+    if (full || projectsKey !== renderedCosting.projects) {
+      renderProjects();
+      var projectSearch = one("[data-costing-project-search]");
+      if (projectSearch) projectSearch.value = state.projectSearchQuery || "";
+      renderedCosting.projects = JSON.stringify([state.mode, state.selectedProjectId, state.projectSearchQuery, state.projectJobFilter, state.projectStatusFilters, privacyEnabled, inputs.projects, inputs.applications, inputs.events, inputs.jobs, inputs.costingLines, inputs.geometries]);
+    }
+    var projectExists = entities("projects").some(function (project) { return project.id === state.selectedProjectId; });
+    var catalogKey = JSON.stringify([state.section, state.query, state.category, state.rateSort, state.rateSortDirection, state.selectedProjectId, projectExists, Boolean(currentJob()), inputs.rateItems, inputs.catalogs, inputs.workTypes]);
+    if (full || catalogKey !== renderedCosting.catalog) {
+      renderCatalogControls();
+      renderCategories();
+      renderCatalog();
+      decorateCatalogAccessibility();
+      renderedCosting.catalog = JSON.stringify([state.section, state.query, state.category, state.rateSort, state.rateSortDirection, state.selectedProjectId, projectExists, Boolean(currentJob()), inputs.rateItems, inputs.catalogs, inputs.workTypes]);
+    }
+    var mappedKey = JSON.stringify([inputs.geometries, inputs.rateItems, inputs.workTypes]);
+    if (full || mappedKey !== renderedCosting.mapped) { renderMapped(); renderedCosting.mapped = mappedKey; }
+    var calculatorKey = JSON.stringify([state.mode, state.selectedProjectId, state.jobId, state.preliminaries, state.margin, inputs.projects, inputs.jobs, inputs.costingLines, inputs.rateItems]);
+    if (full || calculatorKey !== renderedCosting.calculator) { renderCalculator(); renderedCosting.calculator = calculatorKey; }
     renderCalculatorTools();
     updatePillPicker();
     all("[data-costing-section]").forEach(function (tab) { tab.setAttribute("aria-selected", String(tab.getAttribute("data-costing-section") === state.section)); });
@@ -703,6 +757,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
     if (margin) margin.value = state.margin;
     showError(state.error ? new Error(state.error) : null);
     if (position) drawerUI.restoreCostingPosition(position);
+    costingNeedsRender = false;
   }
   function persist(mutator) { var app = root.UOS && root.UOS.ProgramApp; if (!app || !app.updateWorkspace) return Promise.resolve(null); return app.updateWorkspace(mutator); }
   function mutate(operation) { if (!state.workspace) return Promise.resolve(null); showError(null); return persist(function (workspace) { return operation(model(), workspace); }).then(function (saved) { if (saved) root.setTimeout(function () { update(root.UOS.ProgramApp.workspace()); }, 0); return saved; }).catch(function (error) { showError(error); return null; }); }
@@ -1009,8 +1064,6 @@ function update(workspace) {
       state.projectSearchQuery = "";
       state.projectJobFilter = "all";
       state.projectStatusFilters = [];
-      var projectSearch = one("[data-costing-project-search]");
-      if (projectSearch) projectSearch.value = "";
     }
     state.workspace = clone(workspace);
   var incomingJobId = text(costing.jobId);
@@ -1035,7 +1088,7 @@ function update(workspace) {
     state.preliminaries = persistedPreliminaries;
     state.margin = persistedMargin;
     updatePillPicker();
-    render();
+    render(true);
   }
   function saveUi() { return persist(function (workspace) { var project = (workspace.entities.projects || []).find(function (item) { return item.id === state.selectedProjectId; }); workspace.workspace.costing = { jobId: state.jobId || null, section: state.section, mode: state.mode, selectedProjectId: project ? project.id : "" }; workspace.workspace.selectedProjectId = project ? project.id : ""; workspace.workspace.selectedEntityId = project ? (project.applicationId || project.eventId || project.id) : ""; if (project) workspace.workspace.ownerMode = project.owner; workspace.workspace.planner = workspace.workspace.planner || {}; workspace.workspace.planner.selectedProjectId = project ? project.id : ""; return workspace; }).catch(function (error) { showError(error); return null; }); }
 function saveAdjustments(source) {
@@ -1316,9 +1369,7 @@ root.document.addEventListener("click", function (event) {
       workspace = app && typeof app.workspace === "function" ? app.workspace() : null;
     }
     if (!workspace || !workspace.workspace) return;
-    var currentDest = workspace.workspace.destination;
-    var isCostingActive = currentDest === "costing" || (root.document && root.document.querySelector('[data-program-view="costing"]:not([hidden])'));
-    if (!isCostingActive) return;
+    if (workspace.workspace.destination !== "costing") { costingNeedsRender = true; return; }
     update(workspace);
   });
   root.document.addEventListener("uos:workspace-changed", function (event) {

@@ -351,7 +351,7 @@ function valueOrExisting(input, name, existing) {
       projectId: source.projectId, quoteNumber: source.quoteNumber, revision: Math.max(1, Number(source.revision) || 1) + 1,
       auditRootNumber: source.auditRootNumber, rootQuoteId: source.rootQuoteId || source.id, previousQuoteId: source.id,
       clientName: source.clientName, address: source.address, phone: source.phone, email: source.email, preparedBy: source.preparedBy,
-      quoteDate: new Date().toISOString().slice(0, 10), expiryDate: source.expiryDate,
+      quoteDate: UOS.ProgramDates.today(result), expiryDate: source.expiryDate,
       discountRate: source.discountRate, discountAmount: source.discountAmount, contingencyRate: source.contingencyRate, scopeNotes: source.scopeNotes, terms: source.terms, customLines: adjustments,
       fundingMode: source.fundingMode || null, proposedCustomerContribution: source.proposedCustomerContribution,
       suppressCouncilDisclosure: source.suppressCouncilDisclosure === true

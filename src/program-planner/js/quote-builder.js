@@ -14,8 +14,8 @@
   var state = {
     workspace: null,
     quoteNumber: "",
-    quoteDate: new Date().toISOString().slice(0, 10),
-    expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+    quoteDate: UOS.ProgramDates.today(),
+    expiryDate: UOS.ProgramDates.addDays(UOS.ProgramDates.today(), 30),
     preparedBy: "",
     quoteId: "",
     auditNumber: "",
@@ -859,7 +859,7 @@ function renderPreview() {
         else input.disabled = noCustomerPayment || !hasSavedQuote;
       });
       var paymentDate = form.elements.paymentDate;
-      if (paymentDate && !paymentDate.value) paymentDate.value = new Date().toISOString().slice(0, 10);
+      if (paymentDate && !paymentDate.value) paymentDate.value = UOS.ProgramDates.today(state.workspace);
     }
     if (formNote) formNote.textContent = noCustomerPayment ? "No customer payment required" : !state.quoteId
       ? "Save the Quote, then issue or accept it before recording payments."
@@ -1700,8 +1700,8 @@ function renderPreview() {
     state.preparedBy = "";
     state.scopeNotes = "";
     state.terms = "";
-    state.quoteDate = new Date().toISOString().slice(0, 10);
-    state.expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    state.quoteDate = UOS.ProgramDates.today(state.workspace);
+    state.expiryDate = UOS.ProgramDates.addDays(state.quoteDate, 30);
     state.discountRate = 0;
     state.contingencyRate = 0;
     state.operationalAmount = 0;

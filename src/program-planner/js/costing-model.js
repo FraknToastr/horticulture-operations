@@ -199,7 +199,7 @@ function rateStructureChanged(existing, next) {
       do { id = dependencies().model.stableId(project.owner, "job", project.id + ":manual:" + sequence); sequence += 1; }
       while (result.entities.jobs.some(function (job) { return job.id === id; }));
     }
-    var today = new Date().toISOString().slice(0, 10);
+    var today = UOS.ProgramDates.today(result);
     result.entities.jobs.push({
       id: id, owner: project.owner, type: "job", projectId: project.id,
       applicationId: project.applicationId || undefined, eventId: project.eventId || undefined,

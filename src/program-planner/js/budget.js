@@ -11,7 +11,7 @@
   function entities(name) { return state.workspace && state.workspace.entities && state.workspace.entities[name] || []; }
   function budgetApi() { return UOS.ProgramBudget; }
   function app() { return UOS.ProgramApp; }
-  function currentYear() { var today = new Date(), first = today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1; return first + "-" + String((first + 1) % 100).padStart(2, "0"); }
+  function currentYear() { var today = UOS.ProgramDates.today(state.workspace), year = Number(today.slice(0, 4)), first = Number(today.slice(5, 7)) >= 7 ? year : year - 1; return first + "-" + String((first + 1) % 100).padStart(2, "0"); }
   function nextYear(year) { var first = Number(text(year).slice(0, 4)) + 1; return first + "-" + String((first + 1) % 100).padStart(2, "0"); }
   function yearLabel(year) { return "FY " + text(year).replace("-", "/"); }
   function recordFor(id) { return entities("applications").concat(entities("events")).find(function (item) { return item.id === id; }); }
@@ -21,7 +21,7 @@
   function approvalDraftKey() { return state.owner + ":" + state.year; }
   function approvalDraft() {
     var key = approvalDraftKey();
-    if (!state.approvalDrafts[key]) state.approvalDrafts[key] = { amount: "", actor: "", approver: "", reason: "", evidence: "", date: new Date().toISOString().slice(0, 10) };
+    if (!state.approvalDrafts[key]) state.approvalDrafts[key] = { amount: "", actor: "", approver: "", reason: "", evidence: "", date: UOS.ProgramDates.today(state.workspace) };
     return state.approvalDrafts[key];
   }
   function rememberApprovalDraft(form) {
@@ -110,7 +110,7 @@
   function select(label, name, options) {
     return '<label class="program-budget__field"><span>' + label + '</span><select class="uos-select" name="' + name + '" required>' + options.map(function (item) { return '<option value="' + escapeHtml(item.value) + '">' + escapeHtml(item.label) + '</option>'; }).join("") + '</select></label>';
   }
-  function authorityFields() { return field("Recording officer", "actor", "text", "", ' autocomplete="name"') + '<label class="program-budget__field"><span>Named approver</span><input class="uos-input" name="approver" autocomplete="name"></label>' + field("Reason", "reason", "text", "") + field("Evidence", "evidence", "text", "") + field("Effective date", "date", "date", new Date().toISOString().slice(0, 10)); }
+  function authorityFields() { return field("Recording officer", "actor", "text", "", ' autocomplete="name"') + '<label class="program-budget__field"><span>Named approver</span><input class="uos-input" name="approver" autocomplete="name"></label>' + field("Reason", "reason", "text", "") + field("Evidence", "evidence", "text", "") + field("Effective date", "date", "date", UOS.ProgramDates.today(state.workspace)); }
   function moneyField(value) { return field("Amount (AUD)", "amount", "number", value || "", ' min="0.01" step="0.01" inputmode="decimal"'); }
   function inlineAuthorityFields(values) {
     return field("Recording officer", "actor", "text", values.actor, ' autocomplete="name"') +

@@ -1,5 +1,14 @@
 # Overtime Planner Stage 3 development transition
 
+## Current branch authority — 11 October 2026
+
+The owner requires main to be the sole local and remote branch, containing the
+latest files for src/index.html and overtime-planner-stage3/index.html. Earlier
+branch destinations below are historical. This changes Git organisation only;
+Overtime retains its independent source, dependencies, storage and tests.
+No new product phase, schema change or release certification is implied.
+
+
 ## Current Stage 4F transition
 
 Stage 4F absence-impact review and bounded one-off replacement planning is complete locally under the owner-approved date-range and policy-preservation rules. `STAGE4F_CHECKPOINT.md` supersedes earlier stop-before-4F wording below. Regular working hours remain excluded. Stage 4 roadmap work is complete through 4F; stop before post-Stage 4 work until the owner resumes it. No GitHub update or independent review verdict is included.

@@ -1,5 +1,14 @@
 # Independent Overtime Planner agent instructions
 
+## Current branch authority — 11 October 2026
+
+The owner requires main to be the sole local and remote branch, containing the
+latest files for src/index.html and overtime-planner-stage3/index.html. Earlier
+branch destinations below are historical. This changes Git organisation only;
+Overtime retains its independent source, dependencies, storage and tests.
+No new product phase, schema change or release certification is implied.
+
+
 ## Current Stage 4F authority
 
 The owner explicitly resumed Stage 4F under the conservative absence policy: review affected occurrences inside changed absence dates, preserve visible conflicts until approval, apply replacements as one-off manual assignments and leave fixed/rotation scope unchanged. The increment is implemented and verified locally; `STAGE4F_CHECKPOINT.md` supersedes earlier stop-before-4F wording. Stage 4 roadmap work is complete through 4F. Stop before post-Stage 4 work until the owner resumes it. Regular working hours remain excluded from entry, review and calculation.

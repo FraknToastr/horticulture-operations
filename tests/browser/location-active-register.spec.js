@@ -33,7 +33,7 @@ test.beforeEach(async ({ page }) => {
     await frame.locator(`[data-register-action="map"][data-register-record="${activeId}"]`).click();
     await expect(frame.locator('body')).toHaveAttribute('data-drawer-module', 'map');
     expect(await child.evaluate(()=>UOS.ProgramMapController.canonicalMapState(UOS.ProgramApp.workspace()).selectedRegisterId)).toBe(activeId);
-    await expect(frame.locator('[data-space-panel="location"]')).toBeVisible();
+    await expect(frame.locator('[data-space-panel="combined"]')).toBeVisible();
     await expect(frame.locator('[data-space-pin]')).toHaveCount(0);
     await expect(frame.locator('#eventPickerList')).toContainText('No pins');
     await expect(frame.locator('#eventPickerList .program-status-pill,[data-event-card-id]')).toHaveCount(0);
