@@ -42,7 +42,7 @@ for (const owner of ['NSA', 'EVT']) {
     const { frame, ids, errors } = await openDrawing(page, owner);
     const finish = frame.locator('#spaceAcceptDraft');
     const cancel = frame.locator('#spaceCancelDraft');
-    const undo = frame.locator('#undoDrawingButton');
+    const undo = frame.locator('#undoLocationButton');
     await startSpaceCreation(frame,"polygon");
     await expect(finish).toBeDisabled();
     await expect(cancel).toBeEnabled();

@@ -23,3 +23,10 @@ The repository-root `index.html` has an existing Overtime link. This NSA/EVT pub
 ## Exclusions
 
 Do not publish operator or customer workspace exports, local backups, conversion reports, backup-dependent recovery scripts/tests, local Moasure source files, PDFs, rosters, review archives, evidence packages, logs, screenshots, scratch outputs, dependency caches or browser profiles. Preserve local originals. Existing remote history is not deleted or rewritten by this publication.
+
+## Space Map update — 11 October 2026
+
+The main update includes the GPU renderer, lazy tree worker/loader, local bundles
+and licenses, MetroMap tile-resolution correction, map radial controls and their
+self-contained tests. The existing Overtime entrypoint and runtime remain unchanged.
+Local exports, archives, screenshots, logs and unrelated pending edits are excluded.

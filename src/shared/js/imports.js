@@ -19,10 +19,14 @@
   }
 
   function openPdf(data) {
-    if (!window.pdfjsLib) return Promise.reject(new Error("The local PDF import runtime is unavailable."));
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl.href;
-    var bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
-    return window.pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+    var ready = window.pdfjsLib ? Promise.resolve(window.pdfjsLib)
+      : UOS.ProgramRuntime ? UOS.ProgramRuntime.ensurePdf()
+      : Promise.reject(new Error("The local PDF import runtime is unavailable."));
+    return ready.then(function (pdf) {
+      pdf.GlobalWorkerOptions.workerSrc = pdfWorkerUrl.href;
+      var bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
+      return pdf.getDocument({ data: bytes, isEvalSupported: false }).promise;
+    });
   }
 
   function parseCsv(text) {

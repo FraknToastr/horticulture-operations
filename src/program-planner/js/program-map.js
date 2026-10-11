@@ -7,6 +7,7 @@
   "use strict";
 
   var mapController = null;
+  var mapRuntimePending = false;
   var selectedShapeId = null;
   var editingShapeId = null;
   var selectedVertexIndex = null;
@@ -29,8 +30,126 @@
   var previousDestination = "";
   var pendingLocationPlacement = null;
   var pinSession=null, drawingState=null, expandedGeometryId=null;
-  var panelCollapse={location:false,space:false};
+  var mapSaveCount=0, switchPending=false;
+  var pendingScopeMode=null, visibleSidebarMode=null, restoreSidebarScroll=false, sidebarContext=null;
+  var sidebarScroll={register:0,projects:0};
+  var moasureFooterObserver=null;
+  var sidebarScrollFrame=null;
   var radialExpanded=false,radialContext="",radialDraftKind=null;
+
+
+  function mapBusy() {
+    return mapSaveCount>0 || Boolean(pinSession && pinSession.busy || vertexDraft && vertexDraft.busy || placementDraft && placementDraft.busy);
+  }
+  function restoreVisibleSidebarScroll() {
+    var body=one('.space-editor__body');
+    if(!restoreSidebarScroll || !body)return;
+    if(body.clientHeight){body.scrollTop=sidebarScroll[visibleSidebarMode] || 0;restoreSidebarScroll=false;return;}
+    if(getWorkspace().workspace.destination==='map' && !sidebarScrollFrame){
+      sidebarScrollFrame=root.requestAnimationFrame(function(){sidebarScrollFrame=null;restoreVisibleSidebarScroll();});
+    }
+  }
+  function updateMapWorkspace(change) {
+    mapSaveCount++;updateSidebarControls();
+    return root.UOS.ProgramApp.updateWorkspace(change).finally(function(){mapSaveCount--;updateSidebarControls();});
+  }
+  function unfinishedMapWork() {
+    return Boolean(pinSession || drawingState && drawingState.active || vertexDraft || placementDraft || pendingLocationPlacement || pendingMoasureImport || pendingPolygonPlacementId);
+  }
+  async function switchSpaceMode(mode, options) {
+    options=options || {};
+    if(mapBusy() || switchPending)return false;
+    var state=mapViewState(getWorkspace());
+    if(state.scopeMode===mode && (!options.replaceDraft || !unfinishedMapWork()))return true;
+    switchPending=true;updateSidebarControls();
+    try {
+      if(unfinishedMapWork()){
+        var discard=await new Promise(function(resolve){
+          var dialog=one('#spaceSwitchDialog');
+          dialog.addEventListener('close',function(){resolve(dialog.returnValue==='discard');},{once:true});
+          dialog.returnValue='keep';dialog.showModal();one('#spaceKeepEditing').focus();
+        });
+        if(!discard || mapBusy())return false;
+        cancelActiveMapInteraction();pendingMoasureImport=null;pendingLocationPlacement=null;pendingPolygonPlacementId=null;
+        var importDialog=one('#moasureImportDialog');if(importDialog.open)importDialog.close();
+      }
+ pendingScopeMode=mode;
+ render();
+ await persistCanonicalMapState({scopeMode:mode,inspectorMode:mode==='register'?'location':'project'});
+ return true;
+ }finally{pendingScopeMode=null;switchPending=false;render();updateRadialControls();updateSidebarControls();}
+  }
+  function moasureDisabledReason() {
+    if(!mapViewState(getWorkspace()).selectedProjectId)return 'Create a Project for this record before importing Moasure CSV.';
+    if(!mapController || !mapController.ready())return 'Interactive map unavailable or still loading.';
+    return '';
+  }
+  function showMoasureDropMessage(message) {
+    var status=one('#moasureDropStatus');status.textContent=message || '';status.hidden=!message;
+  }
+  function updateSidebarControls() {
+    if(!one('#moasureImportButton'))return;
+ var state=mapViewState(getWorkspace()),location=state.scopeMode==='register',busy=mapBusy() || switchPending,ready=Boolean(mapController && mapController.ready());
+ var context=[state.ownerMode,state.selectedRegisterId,state.selectedProjectId].join(':');
+ if(sidebarContext!==context){sidebarContext=context;sidebarScroll={register:0,projects:0};visibleSidebarMode=null;}
+ var body=one('.space-editor__body'),changedMode=visibleSidebarMode!==state.scopeMode;
+ if(changedMode && visibleSidebarMode)sidebarScroll[visibleSidebarMode]=body.scrollTop;
+    one('#spaceLocationBody').hidden=!location;one('#spaceManagementBody').hidden=location;
+ if(changedMode){visibleSidebarMode=state.scopeMode;restoreSidebarScroll=true;}
+    one('#coordinateShapeButton').hidden=location;one('#coordinateShapeButton').disabled=!state.selectedProjectId || busy || !ready;
+    one('#labelLocationsButton').hidden=!location;
+    var labels=one('.program-map-menu--display');labels.hidden=location;if(location)labels.open=false;
+    all('[data-space-mode]').forEach(function(button){button.setAttribute('aria-pressed',String(button.getAttribute('data-space-mode')===state.scopeMode));button.disabled=busy && !switchPending;button.setAttribute('aria-disabled',String(busy));});
+    var workspace=pinSession?pinSession.workspace:getWorkspace();
+    var pins=state.selectedRegisterId?root.UOS.ProgramModel.registerLocations(workspace,state.selectedRegisterId):[];
+    var selected=pinSession?pinSession.selectedId:state.selectedLocationId;
+    var geometry=state.selectedGeometryId?root.UOS.ProgramModel.workGeometryById(workspace,state.selectedGeometryId):null;
+    var valid=location?pins.some(function(pin){return pin.id===selected;}):Boolean(geometry && geometry.projectId===state.selectedProjectId);
+    var editing=Boolean(!location && (vertexDraft || drawingState && drawingState.active || pendingMoasureImport));
+    one('#moveLocationButton').disabled=!ready || busy || !valid || editing || Boolean(!location && convertToEventShapes([geometry])[0].visible===false);
+    one('#removeLocationButton').disabled=!ready || busy || !valid || editing || Boolean(!location && placementDraft);
+    one('#undoLocationButton').disabled=!ready || busy || (location?!(pinSession && pinSession.history.length):!(drawingState && drawingState.active && drawingState.points>0 && !vertexDraft && !placementDraft));
+    one('#fitLocationsButton').disabled=!ready || busy;one('#homeLocationsButton').disabled=!ready || busy;one('#labelLocationsButton').disabled=!ready || busy;
+ var reason=moasureDisabledReason(),drop=one('#moasureImportButton');drop.disabled=Boolean(reason) || busy;drop.title=reason || 'Drop Moasure CSV or click to browse';
+ one('#moasureReplaceFile').disabled=Boolean(reason) || busy;
+    if(reason)showMoasureDropMessage(reason);else if(one('#moasureDropStatus').textContent===drop.dataset.disabledReason)showMoasureDropMessage('');
+    drop.dataset.disabledReason=reason;
+    updateDraftActions();
+  }
+  function validateMoasureFiles(files) {
+    if(files.length!==1)throw new Error('Choose or drop one Moasure CSV file.');
+    if(!/\.csv$/i.test(files[0].name))throw new Error('Choose a .csv file.');
+    if(files[0].size>5000000)throw new Error('Moasure CSV exceeds the 5 MB limit.');
+    return files[0];
+  }
+  async function receiveMoasureFiles(files) {
+    if(!files.length || mapBusy() || switchPending)return; // Cancelled browsing leaves the draft and preview intact.
+    var file,pending=pendingMoasureImport;
+    try {
+      var reason=moasureDisabledReason();if(reason)throw new Error(reason);
+      if(pending && one('#moasureImportDialog').open){
+        pending.fileVersion=(pending.fileVersion||0)+1;delete pending.text;delete pending.keys;
+        one('#moasureGroupList').replaceChildren();one('#moasureAnchorButton').disabled=true;one('#moasureImportError').hidden=true;
+      }
+      file=validateMoasureFiles(files);
+      if(!pending || !one('#moasureImportDialog').open){
+        if(!await switchSpaceMode('projects',{replaceDraft:true}))return;
+        openMoasureImport();pending=pendingMoasureImport;
+      }
+      var version=pending.fileVersion=(pending.fileVersion||0)+1;
+      showMoasureDropMessage('');
+      var content=await file.text();
+      if(pendingMoasureImport!==pending || pending.fileVersion!==version)return;
+      var parsed=root.UOS.MoasureGeometry.parse(content,file.name);
+      pending.text=content;pending.filename=file.name;
+      one('#moasureGroupList').innerHTML=parsed.groups.map(function(g){return '<label class="uos-field"><input type="checkbox" data-moasure-group="'+esc(g.key)+'" checked><span>'+esc(g.name)+' · Path '+esc(g.path)+'<br>'+g.areaSqM.toFixed(3)+' m² · '+g.points.length+' points</span></label>';}).join('');
+      one('#moasureAnchorButton').disabled=false;
+    }catch(error){
+      if(pending && (pendingMoasureImport!==pending || typeof version!=='undefined' && pending.fileVersion!==version))return;
+      showMoasureDropMessage(error.message);
+      if(pending && one('#moasureImportDialog').open){one('#moasureImportError').textContent=error.message;one('#moasureImportError').hidden=false;}
+    }finally{one('#moasureCsvFile').value='';updateSidebarControls();}
+  }
 
   function setRadialExpanded(expanded, restoreFocus) {
     radialExpanded=Boolean(expanded);
@@ -47,14 +166,13 @@
   function updateRadialControls() {
     updateDraftActions();
     var hub=one("#spaceRadialToggle");if(!hub)return;
-    var state=canonicalMapState(getWorkspace());
+    var state=mapViewState(getWorkspace());
     var ready=Boolean(mapController && mapController.ready());
-    var draft=Boolean(pinSession || drawingState && drawingState.active || vertexDraft || placementDraft || pendingLocationPlacement || pendingMoasureImport || pendingPolygonPlacementId);
     all("[data-space-create]").forEach(function(button){
       var kind=button.getAttribute("data-space-create"),label=button.getAttribute("aria-label");
       var reason="";
       if(!ready)reason="Interactive map is unavailable or still loading.";
-      else if(draft)reason="Accept or cancel the current draft first.";
+      else if(mapBusy() || switchPending)reason="Wait for the current save or mode switch to finish.";
       else if(kind==="location" && !state.selectedRegisterId)reason="Open a Register record to add a location.";
       else if(kind!=="location" && !state.selectedProjectId)reason="Create a Project for this record before drawing.";
       button.disabled=Boolean(reason);
@@ -80,7 +198,7 @@
 
   function positionRadialControls() {
     var menu=one("#spaceRadialMenu");if(!menu)return;
-    var width=menu.clientWidth;if(!width)return;
+    var width=menu.getBoundingClientRect().width;if(!width)return;
     // Reserve space beside the outer nodes for their outward-facing branches.
     var span=Math.min(300,Math.max(0,width-116)),hub={x:width/2,y:32};
     var positions={location:.1367,polygon:.33,line:.67,square:.8633},parents={},connections=[];
@@ -228,7 +346,7 @@ function setMapCanvasCursor(cursor) {
     if(vertexDraft && vertexDraft.busy)return;
     vertexDraft=null;editingShapeId=null;selectedVertexIndex=null;
     if(mapController)mapController.editShape(null);
-    all("[data-space-create]").forEach(function(button){button.disabled=!canonicalMapState(getWorkspace()).selectedProjectId || Boolean(pinSession);});
+    all("[data-space-create]").forEach(function(button){button.disabled=!mapViewState(getWorkspace()).selectedProjectId || Boolean(pinSession);});
     var toolbar=one("#spaceDrawingTools");if(toolbar)toolbar.removeAttribute("data-editing-vertices");
     resetDrawingControls();updateMapToolStatus("");
   }
@@ -251,7 +369,7 @@ function setMapCanvasCursor(cursor) {
     var draft=vertexDraft;
     if(JSON.stringify(draft.shape.coordinates)===JSON.stringify(extractCoordinates(draft.original))){cancelVertexEditing();render();return;}
     draft.busy=true;updateVertexControls();
-    root.UOS.ProgramApp.updateWorkspace(function(candidate){
+    updateMapWorkspace(function(candidate){
       var current=root.UOS.ProgramModel.workGeometryById(candidate,draft.id);
       if(!current || JSON.stringify(current)!==draft.expected)throw new Error("This polygon changed during editing. Cancel and reopen it before saving.");
       return syncExistingGeometryWork(root.UOS.WorkAreaService.updateGeometry(candidate,draft.id,vertexPatch(draft.shape)),draft.id);
@@ -328,7 +446,7 @@ function setMapCanvasCursor(cursor) {
   function openMoasureImport() {
     if(vertexDraft && vertexDraft.busy)return;
     cancelVertexEditing();
-    var state=canonicalMapState(getWorkspace());
+    var state=mapViewState(getWorkspace());
     if(!state.selectedProjectId)throw new Error("Create a Project for this record before importing Moasure CSV.");
     sidebarScopeMode="projects";selectedEventFilterId=state.selectedProjectId;
     cancelPolygonPlacement();pendingLocationPlacement=null;mapController.cancelActiveInteraction();
@@ -339,7 +457,7 @@ function setMapCanvasCursor(cursor) {
   }
   function finishMoasureAnchor(coord) {
     var pending=pendingMoasureImport;pendingMoasureImport=null;updateMapToolStatus("");setSelectToolActive(true);
-    root.UOS.ProgramApp.updateWorkspace(function(candidate){
+    updateMapWorkspace(function(candidate){
       var updated=root.UOS.WorkAreaService.importMoasure(candidate,pending.projectId,pending.text,pending.filename,pending.keys,coord,pending.operationId);
       var first=updated.entities.geometries.find(function(g){return g.provenance && g.provenance.sourceId.indexOf(pending.operationId+":")===0;});
       return writeCanonicalMapState(updated,{scopeMode:"projects",selectedProjectId:pending.projectId,selectedGeometryId:first.id,inspectorMode:"polygon"});
@@ -353,8 +471,7 @@ function setMapCanvasCursor(cursor) {
     all("#spaceDrawingTools").forEach(function (toolbar) {
       toolbar.classList.toggle("is-drawing", active);
     });
-    var undo = one("#undoDrawingButton");
-    if (undo) undo.disabled = !(active && state.points > 0);
+    updateSidebarControls();
     setSelectToolActive(!active);
     updateRadialControls();
   }
@@ -378,7 +495,7 @@ function setMapCanvasCursor(cursor) {
     pendingLocationPlacement = null;
     updateMapToolStatus("");
     cancelPinSession();
-    var state=canonicalMapState(getWorkspace());
+    var state=mapViewState(getWorkspace());
     if(!state.selectedProjectId){showError("Create a Project for this record before drawing.");return;}
     sidebarScopeMode="projects";selectedEventFilterId=state.selectedProjectId;
     mapController.startDrawing(activeDrawMode);
@@ -439,7 +556,7 @@ function setMapCanvasCursor(cursor) {
     var location = recordLocations(record, workspace).find(function (item) { return item.id === locationId; });
     function remove(guard) {
       if (!root.UOS.ProgramApp) return Promise.resolve(null);
-      return root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+      return updateMapWorkspace(function (candidate) {
         guard(candidate);
         var state = canonicalMapState(candidate);
         var updated = root.UOS.ProgramModel.removeLocationFromRegister(candidate, registerId, locationId);
@@ -462,16 +579,6 @@ function setMapCanvasCursor(cursor) {
   }
 
 
-  function updatePanelCollapse(){
-    ["location","space"].forEach(function(name){
-      var panel=one('[data-space-panel="'+name+'"]'),button=one('[data-space-collapse="'+name+'"]');
-      panel.classList.toggle("is-collapsed",panelCollapse[name]);
-      one("#"+button.getAttribute("aria-controls")).hidden=panelCollapse[name];
-      button.setAttribute("aria-expanded",String(!panelCollapse[name]));
-      button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="'+(panelCollapse[name]?'m9 5 7 7-7 7':'m5 9 7 7 7-7')+'"/></svg><span>'+(name==="location"?"Location":"Space Management")+'</span>';
-    });
-    if(mapController)root.requestAnimationFrame(function(){mapController.resize();});
-  }
   function beginPinSession(){
     if(pinSession)return pinSession;
     var workspace=getWorkspace(),state=canonicalMapState(workspace);
@@ -521,7 +628,7 @@ function setMapCanvasCursor(cursor) {
     if(!session || session.busy || !session.operations.length)return;
     pendingLocationPlacement=null;if(mapController)mapController.cancelActiveInteraction();
     session.busy=true;renderEventPicker();
-    root.UOS.ProgramApp.updateWorkspace(function(candidate){
+    updateMapWorkspace(function(candidate){
       if(JSON.stringify(root.UOS.ProgramModel.registerLocations(candidate,session.registerId))!==session.originalPins)throw new Error("Locations changed while editing. Cancel and retry to avoid overwriting changes.");
       session.operations.forEach(function(op){if(op.guard)op.guard(candidate);});
       var updated=candidate,model=root.UOS.ProgramModel;
@@ -535,11 +642,11 @@ function setMapCanvasCursor(cursor) {
   }
   function handleSpaceEditorClick(event){
     var target=event.target;
-    var collapse=target.closest("[data-space-collapse]");
-    if(collapse){var name=collapse.getAttribute("data-space-collapse");panelCollapse[name]=!panelCollapse[name];updatePanelCollapse();return true;}
+    var modeButton=target.closest('[data-space-mode]');
+    if(modeButton){if(!modeButton.disabled)switchSpaceMode(modeButton.getAttribute('data-space-mode')).catch(showError);return true;}
     var pin=target.closest("[data-space-pin]");
     if(pin){
-      var state=canonicalMapState(getWorkspace()),id=pin.getAttribute("data-space-pin");
+      var state=mapViewState(getWorkspace()),id=pin.getAttribute("data-space-pin");
       var pins=root.UOS.ProgramModel.registerLocations(pinSession ? pinSession.workspace : getWorkspace(),state.selectedRegisterId);
       var location=pins.find(function(p){return p.id===id;});
       if(pinSession){pinSession.selectedId=id;renderEventPicker();}else persistCanonicalMapState({selectedLocationId:id,inspectorMode:"location"});
@@ -552,7 +659,7 @@ function setMapCanvasCursor(cursor) {
       if(vertexDraft && vertexDraft.id!==id)cancelVertexEditing();
       if(placementDraft && placementDraft.id!==id)cancelPolygonPlacement();
       if(expand)expandedGeometryId=expandedGeometryId===id?null:id;
-      var state=canonicalMapState(getWorkspace());
+      var state=mapViewState(getWorkspace());
       persistCanonicalMapState({scopeMode:"projects",selectedGeometryId:id,inspectorMode:"polygon",selectedProjectId:state.selectedProjectId});
       if(mapController)mapController.selectShape(id,false);
       renderShapeCards();return true;
@@ -560,8 +667,16 @@ function setMapCanvasCursor(cursor) {
     var button=target.closest("#moveLocationButton,#removeLocationButton,#undoLocationButton,#fitLocationsButton,#homeLocationsButton,#labelLocationsButton");
     if(!button || button.disabled)return false;
     try{
-      var state=canonicalMapState(getWorkspace()),session=pinSession;
-      if(button.id==="moveLocationButton"){
+      var state=mapViewState(getWorkspace()),session=pinSession;
+      if(state.scopeMode==='projects'){
+      if(button.id==='moveLocationButton')beginPolygonPlacement(state.selectedGeometryId);
+      else if(button.id==='removeLocationButton')openDeleteDialog(state.selectedGeometryId);
+      else if(button.id==='undoLocationButton')mapController.undoPoint();
+      else if(button.id==='fitLocationsButton')mapController.fitGeometries();
+      else if(button.id==='homeLocationsButton')mapController.resetView();
+      updateSidebarControls();return true;
+    }
+    if(button.id==="moveLocationButton"){
       startSpacePinPlacement(button.id==="moveLocationButton");
     }else if(button.id==="removeLocationButton"){
         session=beginPinSession();var id=session.selectedId;
@@ -572,7 +687,7 @@ function setMapCanvasCursor(cursor) {
       }else if(button.id==="fitLocationsButton")mapController.fitLocations();
       else if(button.id==="homeLocationsButton")mapController.resetView();
       else if(button.id==="labelLocationsButton"){
-        root.UOS.ProgramApp.updateWorkspace(function(candidate){candidate.workspace.map=candidate.workspace.map || {};candidate.workspace.map.showLocationNumbers=candidate.workspace.map.showLocationNumbers===false;return candidate;});
+        updateMapWorkspace(function(candidate){candidate.workspace.map=candidate.workspace.map || {};candidate.workspace.map.showLocationNumbers=candidate.workspace.map.showLocationNumbers===false;return candidate;});
       }
     }catch(error){showError(error);}
     return true;
@@ -684,13 +799,14 @@ function setMapCanvasCursor(cursor) {
   }
 
   function buildMapEvent(targetId,dataset) {
-    var workspace=pinSession ? pinSession.workspace : getWorkspace(), state=canonicalMapState(getWorkspace());
+    var workspace=pinSession ? pinSession.workspace : getWorkspace(), state=mapViewState(getWorkspace());
     var owner=state.ownerMode || workspace.workspace.ownerMode;
     var ctx=resolveMapContext(workspace,owner==="NSA"?"applications":"events","register",state.selectedRegisterId);
     if(ctx.register || ctx.project){
       var pins=ctx.register ? recordLocations(ctx.register,workspace).map(function(pin){return Object.assign({},pin,{sourceRecordId:ctx.register.id,owner:ctx.register.owner});}) : [];
       var geometries=ctx.project ? root.UOS.ProgramModel.projectWorkGeometry(workspace,ctx.project.id) : [];
-      return {id:targetId,eventName:text((ctx.project || ctx.register).title || (ctx.project || ctx.register).eventName),locations:pins,location:pins[0] || null,focusLocations:pins,allLocations:pins,polygons:convertToEventShapes(geometries),owner:owner};
+      if(state.scopeMode==='register')geometries=[];else pins=[];
+      return {id:targetId,eventName:text((ctx.project || ctx.register).title || (ctx.project || ctx.register).eventName),locations:pins,location:pins[0] || null,focusLocations:pins,allLocations:pins,polygons:convertToEventShapes(geometries).filter(function(shape){return shape.visible!==false;}),owner:owner};
     }
     return {id:"empty",eventName:"Open a Register record",locations:[],focusLocations:[],allLocations:[],polygons:[],owner:owner};
   }
@@ -961,7 +1077,11 @@ function setMapCanvasCursor(cursor) {
 
   var sidebarScopeMode = "register";
 
-  function canonicalMapState(workspace) {
+  function mapViewState(workspace) {
+    return canonicalMapState(workspace,pendingScopeMode);
+  }
+
+  function canonicalMapState(workspace, scopeOverride) {
     workspace = workspace || getWorkspace() || { entities: {}, workspace: {} };
     var ui = workspace.workspace || {};
     var mapUi = ui.map || {};
@@ -977,7 +1097,7 @@ function setMapCanvasCursor(cursor) {
     var projectId = text(Object.prototype.hasOwnProperty.call(mapUi,"selectedProjectId") ? mapUi.selectedProjectId : ui.selectedProjectId);
     var geometryId = text(mapUi.selectedGeometryId);
     var locationId = text(mapUi.selectedLocationId);
-    var scopeMode = mapUi.scopeMode === "projects" ? "projects" : "register";
+    var scopeMode = scopeOverride || (mapUi.scopeMode === "projects" ? "projects" : "register");
     var inspectorMode = text(mapUi.inspectorMode);
     if (["register", "location", "project", "geometry", "polygon"].indexOf(inspectorMode) < 0) inspectorMode = scopeMode === "projects" ? "project" : "register";
 
@@ -1036,7 +1156,7 @@ function setMapCanvasCursor(cursor) {
   }
 
   function applyCanonicalMapState(workspace) {
-    var state = canonicalMapState(workspace);
+    var state = mapViewState(workspace);
     sidebarScopeMode = state.scopeMode;
     selectedEventFilterId = sidebarScopeMode === "projects" ? (state.selectedProjectId || "all") : (state.selectedRegisterId || "all");
     selectedShapeId = state.selectedGeometryId || null;
@@ -1095,7 +1215,7 @@ function setMapCanvasCursor(cursor) {
         /* Let the validated application mutation provide the authoritative error path. */
       }
     }
-    return root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+    return updateMapWorkspace(function (candidate) {
       return writeCanonicalMapState(candidate, patch);
     });
   }
@@ -1241,11 +1361,10 @@ function setMapCanvasCursor(cursor) {
           '<label class="uos-field"><span>Pricing unit</span><select class="uos-select" data-shape-pricing-unit="' + esc(shape.id) + '" aria-label="Pricing unit polygon ' + shapeNum + '">' + ["m²", "ha"].concat(pricingUnit === "km²" ? ["km²"] : []).map(function (unit) { return '<option value="' + unit + '"' + (unit === pricingUnit ? " selected" : "") + '>' + unit + '</option>'; }).join("") + '</select></label>' +
         '<label class="uos-field"><span>Pricing Rate</span><select class="uos-select" data-shape-rate="' + esc(shape.id) + '"' + ((!geometryType || !eligibleRates.length) ? " disabled" : "") + ' data-uos-tooltip="Select the commercial pricing basis for polygon ' + shapeNum + '" title="Select the commercial pricing basis for polygon ' + shapeNum + '" aria-label="Pricing rate for polygon ' + shapeNum + '">' + polygonRateOptions(eligibleRates, selectedRateId, Boolean(geometryType)) + '</select></label>' +
         '</div>' +
-        '<div class="program-shape-actions program-shape-actions--labelled" role="group" aria-label="Edit polygon '+shapeNum+'">' +
-          '<button type="button" class="uos-button uos-button--sm ' + (editing ? "uos-button--primary is-active" : "uos-button--secondary") + '" data-shape-action="edit" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="' + (editing ? "Use Accept or Cancel on the radial menu" : "Edit polygon corner points and shape vertices on map") + '" title="' + (editing ? "Use Accept or Cancel on the radial menu" : "Edit polygon corner points and shape vertices on map") + '" aria-label="' + ("Edit vertices for polygon " + shapeNum) + '" aria-pressed="' + (editing ? "true" : "false") + '"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;margin-right:4px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span>' + "Edit Vertices" + '</span></button>' +
-        '<button type="button" class="uos-button uos-button--secondary uos-button--sm" data-polygon-placement="' + esc(shape.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>Move / Rotate</button>' +
-      '</div>' +
-      '<div class="program-shape-actions program-shape-actions--icons" role="group" aria-label="Polygon tools '+shapeNum+'">' +
+        '<div class="program-shape-actions program-shape-actions--icons" role="group" aria-label="Polygon tools '+shapeNum+'">' +
+          '<button type="button" class="uos-button uos-button--sm uos-button--icon ' + (editing ? "uos-button--primary is-active" : "uos-button--secondary") + '" data-shape-action="edit" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="' + (editing ? "Use Accept or Cancel on the radial menu" : "Edit polygon corner points and shape vertices on map") + '" title="' + (editing ? "Use Accept or Cancel on the radial menu" : "Edit polygon corner points and shape vertices on map") + '" aria-label="' + ("Edit vertices for polygon " + shapeNum) + '" aria-pressed="' + (editing ? "true" : "false") + '"><svg viewBox="0 0 24 24" aria-hidden="true" ><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>' +
+        '<button type="button" class="uos-button uos-button--secondary uos-button--sm uos-button--icon" data-polygon-placement="' + esc(shape.id) + '" aria-label="Move / Rotate polygon '+shapeNum+'" title="Move / Rotate" data-uos-tooltip="Move / Rotate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg></button>' +
+
           '<button type="button" class="uos-button uos-button--secondary uos-button--icon" data-shape-action="zoom" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Zoom map to polygon ' + shapeNum + '" title="Zoom map to polygon ' + shapeNum + '" aria-label="Zoom to polygon ' + shapeNum + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>' +
           '<button type="button" class="uos-button uos-button--secondary uos-button--icon" data-shape-action="duplicate" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Duplicate polygon ' + shapeNum + '" title="Duplicate polygon ' + shapeNum + '" aria-label="Duplicate polygon ' + shapeNum + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>' +
           '<button type="button" class="uos-button uos-button--secondary uos-button--icon" data-shape-action="export" data-action-id="' + esc(shape.id) + '" data-uos-tooltip="Export polygon ' + shapeNum + ' as GeoJSON" title="Export polygon ' + shapeNum + ' as GeoJSON" aria-label="Export polygon ' + shapeNum + ' as GeoJSON"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg></button>' +
@@ -1268,13 +1387,18 @@ function setMapCanvasCursor(cursor) {
       var card=holder.querySelector('[data-shape-card-id="'+esc(shape.id)+'"]');
       card.removeAttribute("data-shape-card-id");card.setAttribute("data-disclosure-skip","");card.className="space-editor__inspector"+(editingShapeId===shape.id?" is-editing":"");
       var head=card.querySelector(".program-shape-card__head");if(head)head.remove();
+      var actions=card.querySelector('.program-shape-actions');actions.remove();
       var rateSelect=card.querySelector("[data-shape-rate]");
       var rateLabel=rateSelect && rateSelect.value && rateSelect.selectedOptions[0] ? rateSelect.selectedOptions[0].textContent : "Not selected";
       var open=expandedGeometryId===shape.id || editingShapeId===shape.id || placementDraft && placementDraft.id===shape.id;
-      return '<tbody data-shape-card-id="'+esc(shape.id)+'" data-disclosure-skip class="'+(selectedShapeId===shape.id?'is-selected':'')+'"><tr class="space-editor__geometry-summary" data-space-geometry="'+esc(shape.id)+'"><td><input type="checkbox" data-shape-visible="'+esc(shape.id)+'"'+(shape.visible?' checked':'')+' aria-label="Show geometry '+(index+1)+'"></td><td>'+esc((index+1)+'. '+(geometry.moasureSurvey?'Moasure':'Geometry'))+'</td><td>'+esc(shape.type?workTypeLabel(shape.type):"Not selected")+'</td><td>'+esc(rateLabel)+'</td><td>'+esc(formatMeasure(shape))+'</td><td><button type="button" data-space-expand="'+esc(shape.id)+'" aria-expanded="'+Boolean(open)+'" aria-controls="spaceDrawer'+index+'" aria-label="Expand geometry '+(index+1)+'">'+'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="'+(open?'m5 9 7 7 7-7':'m9 5 7 7-7 7')+'"/></svg></button></td></tr><tr class="space-editor__drawer" id="spaceDrawer'+index+'"'+(open?'':' hidden')+'><td colspan="6">'+card.outerHTML+'</td></tr></tbody>';
+      var title=geometry.moasureSurvey?'Moasure':'Event Space';
+      return '<article class="space-editor__geometry-card'+(selectedShapeId===shape.id?' is-selected':'')+(editingShapeId===shape.id?' is-editing':'')+'" data-shape-card-id="'+esc(shape.id)+'" data-space-geometry="'+esc(shape.id)+'" data-disclosure-skip aria-label="'+esc(title)+' '+(index+1)+'">'+
+        '<header class="space-editor__geometry-summary"><input type="checkbox" data-shape-visible="'+esc(shape.id)+'"'+(shape.visible?' checked':'')+' aria-label="Show geometry '+(index+1)+'"><h3>'+(index+1)+'. '+title+'</h3><button type="button" data-space-expand="'+esc(shape.id)+'" aria-expanded="'+Boolean(open)+'" aria-controls="spaceDrawer'+index+'" aria-label="Expand geometry '+(index+1)+'"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="'+(open?'m5 9 7 7 7-7':'m9 5 7 7-7 7')+'"/></svg></button></header>'+
+        '<table class="space-editor__fields" aria-label="'+esc(title)+' '+(index+1)+' details"><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row">Job Type</th><td>'+esc(shape.type?workTypeLabel(shape.type):"Not selected")+'</td></tr><tr><th scope="row">Cost Type</th><td>'+esc(rateLabel)+'</td></tr><tr><th scope="row">Measure</th><td>'+esc(formatMeasure(shape))+'</td></tr></tbody></table>'+
+        actions.outerHTML+'<div class="space-editor__drawer" id="spaceDrawer'+index+'"'+(open?'':' hidden')+'>'+card.outerHTML+'</div></article>';
     }).join("");
-    var draft=drawingState && drawingState.active ? '<tbody data-space-draft><tr class="space-editor__geometry-summary"><td>—</td><td>Drawing</td><td>'+esc(activeDrawMode)+'</td><td>Not selected</td><td>'+esc(drawingState.measurementSummary || "0 points")+'</td><td>▾</td></tr><tr><td colspan="6">Draft · '+drawingState.points+' points. Accept to save, Cancel to discard.</td></tr></tbody>' : '';
-    container.innerHTML='<table class="space-editor__table"><thead><tr><th scope="col"><input type="checkbox" data-space-visible-all aria-label="Show all related geometries"></th><th scope="col">Geometry</th><th scope="col">Job Type</th><th scope="col">Cost Type</th><th scope="col">Measure</th><th scope="col"><span class="uos-sr-only">Expand</span></th></tr></thead>'+draft+rows+'</table>';
+    var draft=drawingState && drawingState.active ? '<article class="space-editor__geometry-card" data-space-draft><header class="space-editor__geometry-summary"><h3>Event Space · Drawing</h3></header><p>Draft · '+drawingState.points+' points · '+esc(drawingState.measurementSummary || "0 points")+'. Accept to save, Cancel to discard.</p></article>' : '';
+    container.innerHTML='<label class="space-editor__visibility"><input type="checkbox" data-space-visible-all aria-label="Show all geometries">All geometries</label>'+draft+rows;
     var master=container.querySelector('[data-space-visible-all]'), count=shapes.filter(function(shape){return shape.visible;}).length;
     master.checked=shapes.length>0 && count===shapes.length;master.indeterminate=count>0 && count<shapes.length;master.disabled=!shapes.length;
     addSpaceControlIcons(container);
@@ -1579,7 +1703,7 @@ var selectedSpatialFilter = null;
   }
 
   function addSpaceControlIcons(container) {
-    var paths={add:'M12 5v14M5 12h14',move:'M12 3v18M3 12h18M9 6l3-3 3 3',remove:'M3 6h18M8 6V3h8v3M6 6v15h12V6',finish:'m5 12 4 4L19 6',cancel:'m6 6 12 12M6 18 18 6',undo:'M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12',fit:'M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6',home:'m3 11 9-8 9 8M5 10v11h14V10',labels:'M3 5h18M6 5v14M18 5v14M9 19h6',polygon:'m4 4 16 2-3 14-14-3Z',line:'m4 20 16-16',square:'M4 4h16v16H4Z',import:'M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4',data:'M4 3h16v18H4ZM8 7h8M8 11h8M8 15h5'};
+    var paths={add:'M12 5v14M5 12h14',move:'M12 3v18M3 12h18M9 6l3-3 3 3',remove:'M3 6h18M8 6V3h8v3M6 6v15h12V6',finish:'m5 12 4 4L19 6',cancel:'m6 6 12 12M6 18 18 6',undo:'M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12',fit:'M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6',home:'m3 11 9-8 9 8M5 10v11h14V10',labels:'M3 3h8l10 10-8 8L3 11ZM7 7h.01',polygon:'m4 4 16 2-3 14-14-3Z',line:'m4 20 16-16',square:'M4 4h16v16H4Z',import:'M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4',data:'M4 3h16v18H4ZM8 7h8M8 11h8M8 15h5'};
     container.querySelectorAll('button.uos-button,summary.uos-button').forEach(function(button){
       if(button.querySelector('svg'))return;
       var label=button.textContent.trim().toLowerCase(),key=button.getAttribute('data-space-create') || (label.indexOf('moasure')>=0?'import':label.indexOf('drawing')>=0?'polygon':label.split(' ')[0]);
@@ -1589,7 +1713,7 @@ var selectedSpatialFilter = null;
   }
 
   function renderEventPicker() {
-    var workspace=getWorkspace(), state=canonicalMapState(workspace), entities=workspace.entities;
+    var workspace=getWorkspace(), state=mapViewState(workspace), entities=workspace.entities;
     var owner=state.ownerMode || workspace.workspace.ownerMode;
     one(".space-editor").setAttribute("data-space-owner",owner);
     var registers=(entities.applications || []).concat(entities.events || []).filter(function(r){return r.owner===owner;});
@@ -1597,17 +1721,12 @@ var selectedSpatialFilter = null;
     var pins=record ? recordLocations(record,pinSession ? pinSession.workspace : workspace) : [];
     var selected=pinSession ? pinSession.selectedId : state.selectedLocationId;
     var numbers=!(workspace.workspace.map && workspace.workspace.map.showLocationNumbers===false);
-    one("#eventPickerList").innerHTML=pins.length ? pins.map(function(pin,index){return '<button type="button" class="space-editor__pin'+(pin.id===selected?' is-selected':'')+'" data-space-pin="'+esc(pin.id)+'" aria-label="Location '+(index+1)+': '+esc(pin.name || pin.address)+'" aria-pressed="'+(pin.id===selected)+'" title="'+esc(pin.address || pin.name)+'">'+root.UOS.RemediationMap.pinSymbol(index+1,numbers,owner)+'</button>';}).join("") : '<p class="space-editor__empty">'+(record?'No pins. Use + to place a location.':'Open a Register record to manage its locations.')+'</p>';
+    one("#eventPickerList").innerHTML=pins.length ? pins.map(function(pin,index){return '<button type="button" class="space-editor__pin'+(pin.id===selected?' is-selected':'')+'" data-space-pin="'+esc(pin.id)+'" aria-label="Location '+(index+1)+': '+esc(pin.name || pin.address)+'" aria-pressed="'+(pin.id===selected)+'" title="'+esc(pin.address || pin.name)+'">'+root.UOS.RemediationMap.pinSymbol(index+1,true,owner)+'</button>';}).join("") : '<p class="space-editor__empty">'+(record?'No pins. Use + to place a location.':'Open a Register record to manage its locations.')+'</p>';
     one("#spaceProjectEmpty").innerHTML=!state.selectedProjectId && record ? '<button type="button" class="uos-button uos-button--secondary uos-button--sm" data-promote-register-id="'+esc(record.id)+'">Create Project</button>' : '';
-    var busy=Boolean(pinSession && pinSession.busy);
-    one("#moveLocationButton").disabled=!selected || !pins.some(function(p){return p.id===selected;}) || busy;
-    one("#removeLocationButton").disabled=one("#moveLocationButton").disabled;
-    one("#undoLocationButton").disabled=!pinSession || !pinSession.history.length || busy;
-    one("#labelLocationsButton").setAttribute("aria-pressed",String(numbers));
-    addSpaceControlIcons(one(".space-editor"));
-    ["#moasureImportDialog","#coordinateShapeDialog"].forEach(function(id){var dialog=one(id);if(dialog)addSpaceControlIcons(dialog);});
-    all("[data-space-create],#moasureImportButton").forEach(function(button){button.disabled=!state.selectedProjectId || Boolean(vertexDraft) || Boolean(pinSession);});
-    updateRadialControls();
+    one('#labelLocationsButton').setAttribute('aria-pressed',String(numbers));
+    addSpaceControlIcons(one('.space-editor'));
+    ['#moasureImportDialog','#coordinateShapeDialog'].forEach(function(id){var dialog=one(id);if(dialog)addSpaceControlIcons(dialog);});
+    updateRadialControls();updateSidebarControls();
   }
 
   function openLocationInspector(recordId) {
@@ -1659,11 +1778,12 @@ var selectedSpatialFilter = null;
   }
 
   function updateSidebarViewUI() {
-    var owner=canonicalMapState(getWorkspace()).ownerMode;
+    var owner=mapViewState(getWorkspace()).ownerMode;
     var mapLayout=one(".program-map-layout");
     if(mapLayout)mapLayout.classList.toggle("is-nature-mode",owner==="NSA");
     if(root.UOS && root.UOS.ProgramApp && typeof root.UOS.ProgramApp.updateRailTheme==="function")root.UOS.ProgramApp.updateRailTheme();
-    renderEventPicker();renderShapeCards();updatePanelCollapse();
+    renderEventPicker();renderShapeCards();updateSidebarControls();
+    restoreVisibleSidebarScroll();
   }
 
   function leavePolygonInspector() {
@@ -1812,7 +1932,7 @@ var selectedSpatialFilter = null;
         container: container,
         autoFinishSquare:false,
         numberedLocations:true,
-      maplibregl: root.maplibregl || (typeof window !== "undefined" && window.maplibregl) || (typeof maplibregl !== "undefined" ? maplibregl : null),
+      maplibregl: root.UOSSpaceGPU || root.maplibregl || (typeof window !== "undefined" && window.maplibregl) || (typeof maplibregl !== "undefined" ? maplibregl : null),
         getWorkspaceMap: function () {
           var mapConfig = root.UOS_REMEDIATION_MAP_CONFIG || (typeof window !== "undefined" && window.UOS_REMEDIATION_MAP_CONFIG) || {};
           return {
@@ -1897,7 +2017,7 @@ var selectedSpatialFilter = null;
         onShapeCreated: function (newShape) {
           if (!newShape || !newShape.coordinates) return;
           if (root.UOS.ProgramApp) {
-            root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+            updateMapWorkspace(function (candidate) {
               var geomType = newShape.geometryType === "line" ? "LineString" : "Polygon";
               var rawCoords = newShape.geometryType === "line" ? newShape.coordinates : [newShape.coordinates];
               var beforeIds = Object.create(null);
@@ -2073,7 +2193,7 @@ var selectedSpatialFilter = null;
       try {
         var newGeometries = prepareGeoJsonShapes(rawInput);
         if (!root.UOS.ProgramApp || typeof root.UOS.ProgramApp.updateWorkspace !== "function") return;
-        root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+        updateMapWorkspace(function (candidate) {
           if (!root.UOS.WorkAreaService || typeof root.UOS.WorkAreaService.createGeometry !== "function") throw new Error("WorkAreaService is unavailable.");
           newGeometries.forEach(function (geometry) {
             candidate = root.UOS.WorkAreaService.createGeometry(candidate, geometry.projectId, geometry);
@@ -2126,6 +2246,16 @@ var selectedSpatialFilter = null;
     if (initialized) return;
     initialized = true;
     mapModuleRoot = one('[data-program-view="map"]');
+    var footer=one('.space-editor__moasure-section'),sidebar=one('.space-editor__sidebar'),body=one('.space-editor__body');
+    function sizeFooter(){var height=footer.getBoundingClientRect().height;if(height)sidebar.style.setProperty('--space-moasure-height',height+'px');}
+    if(root.ResizeObserver){moasureFooterObserver=new root.ResizeObserver(sizeFooter);moasureFooterObserver.observe(footer);}
+    sizeFooter();
+    body.addEventListener('scroll',function(){if(!restoreSidebarScroll && visibleSidebarMode && body.clientHeight)sidebarScroll[visibleSidebarMode]=body.scrollTop;});
+    body.addEventListener('focusin',function(event){
+      var rect=event.target.getBoundingClientRect(),viewport=body.getBoundingClientRect(),bottom=footer.getBoundingClientRect().top;
+      if(rect.bottom>bottom-8)body.scrollTop+=rect.bottom-bottom+8;
+      else if(rect.top<viewport.top+8)body.scrollTop-=viewport.top+8-rect.top;
+    });
 
     root.document.addEventListener("click",function(event){
       if(event.target.closest(".space-editor") && handleSpaceEditorClick(event)){event.preventDefault();event.stopImmediatePropagation();}
@@ -2143,32 +2273,30 @@ var selectedSpatialFilter = null;
       event.preventDefault();event.stopPropagation();
       updateRadialControls();setRadialExpanded(!radialExpanded);
     });
-    one("#spaceRadialActions").addEventListener("click",function(event){
+    one("#spaceRadialActions").addEventListener("click",async function(event){
       var button=event.target.closest("[data-space-create]");if(!button)return;
       event.preventDefault();event.stopPropagation();updateRadialControls();
       if(button.disabled)return;
       try{
         var kind=button.getAttribute("data-space-create");
+        if(!await switchSpaceMode(kind==='location'?'register':'projects',{replaceDraft:true}))return;
         if(kind==="location")startSpacePinPlacement(false);else startSpaceDrawing(kind);
         updateRadialControls();
         one("#eventMap").focus({preventScroll:true});
       }catch(error){showError(error);}
     });
-    one("#moasureImportButton").addEventListener("click",function(){try{openMoasureImport();}catch(error){showError(error);}});
-    all("[data-moasure-cancel]").forEach(function(button){button.addEventListener("click",function(){pendingMoasureImport=null;one("#moasureImportDialog").close();updateRadialControls();});});
-    one("#moasureImportDialog").addEventListener("cancel",function(){pendingMoasureImport=null;updateRadialControls();});
-    one("#moasureCsvFile").addEventListener("change",async function(event){
-      var file=event.target.files[0],pending=pendingMoasureImport,version=pending ? (pending.fileVersion||0)+1 : 0;
-      if(!pending)return;pending.fileVersion=version;one("#moasureAnchorButton").disabled=true;one("#moasureImportError").hidden=true;
-      try {
-        if(!file)return;if(file.size>5000000)throw new Error("Moasure CSV exceeds the 5 MB limit.");
-        var textValue=await file.text(),parsed=root.UOS.MoasureGeometry.parse(textValue,file.name);
-        if(pendingMoasureImport!==pending || pending.fileVersion!==version)return;
-        pending.text=textValue;pending.filename=file.name;
-        one("#moasureGroupList").innerHTML=parsed.groups.map(function(g){return '<label><input type="checkbox" data-moasure-group="'+esc(g.key)+'" checked><span>'+esc(g.name)+' · Path '+esc(g.path)+'<br>'+g.areaSqM.toFixed(3)+' m² · '+g.points.length+' source points</span></label>';}).join("");
-        one("#moasureAnchorButton").disabled=false;
-      } catch(error){if(pendingMoasureImport===pending){one("#moasureImportError").textContent=error.message;one("#moasureImportError").hidden=false;}}
-    });
+    one('#spaceKeepEditing').addEventListener('click',function(){one('#spaceSwitchDialog').close('keep');});
+    one('#spaceDiscardSwitch').addEventListener('click',function(){one('#spaceSwitchDialog').close('discard');});
+    var drop=one('#moasureImportButton'),fileInput=one('#moasureCsvFile');
+    drop.addEventListener('click',function(){if(!moasureDisabledReason() && !mapBusy() && !switchPending){fileInput.value='';fileInput.click();}});
+    drop.addEventListener('keydown',function(event){if(event.key==='Enter' || event.key===' '){event.preventDefault();drop.click();}});
+    one('#moasureReplaceFile').addEventListener('click',function(){if(!moasureDisabledReason() && !mapBusy() && !switchPending){fileInput.value='';fileInput.click();}});
+    ['dragenter','dragover'].forEach(function(name){drop.addEventListener(name,function(event){event.preventDefault();if(!moasureDisabledReason() && !mapBusy() && !switchPending)drop.classList.add('is-drag-over');});});
+    drop.addEventListener('dragleave',function(event){if(!drop.contains(event.relatedTarget))drop.classList.remove('is-drag-over');});
+    drop.addEventListener('drop',function(event){event.preventDefault();drop.classList.remove('is-drag-over');receiveMoasureFiles(Array.from(event.dataTransfer.files));});
+    all('[data-moasure-cancel]').forEach(function(button){button.addEventListener('click',function(){pendingMoasureImport=null;one('#moasureImportDialog').close();updateRadialControls();updateSidebarControls();});});
+    one('#moasureImportDialog').addEventListener('cancel',function(){pendingMoasureImport=null;updateRadialControls();updateSidebarControls();});
+    fileInput.addEventListener('change',function(event){receiveMoasureFiles(Array.from(event.target.files));});
     one("#moasureAnchorButton").addEventListener("click",function(){
       if(!pendingMoasureImport)return;
       pendingMoasureImport.keys=all("[data-moasure-group]:checked").map(function(input){return input.getAttribute("data-moasure-group");});
@@ -2200,7 +2328,7 @@ var selectedSpatialFilter = null;
         if(input && (input.value==="" || !Number.isFinite(Number(input.value)))){showError("Enter a valid rotation angle before saving.");return;}
         var draft=placementDraft && placementDraft.id===id?placementDraft:{id:id,basis:root.UOS.WorkAreaService.placementBasis(geometry),expected:JSON.stringify(geometry)};
         if(draft.busy)return;draft.busy=true;button.disabled=true;
-        root.UOS.ProgramApp.updateWorkspace(function(candidate){
+        updateMapWorkspace(function(candidate){
           return root.UOS.WorkAreaService.savePlacement(candidate,draft.id,draft.basis,draft.expected);
         }).then(function(){cancelPolygonPlacement();render();}).catch(function(error){draft.busy=false;showError(error);render();});
       }
@@ -2251,7 +2379,7 @@ var selectedSpatialFilter = null;
       if (promoteRegBtn) {
         var promRegId = promoteRegBtn.getAttribute("data-promote-register-id");
         if (root.UOS.ProgramApp) {
-          root.UOS.ProgramApp.updateWorkspace(function (ws) {
+          updateMapWorkspace(function (ws) {
             var promoted = root.UOS.ProgramModel.promoteRegisterRecord(ws, promRegId);
             return writeCanonicalMapState(promoted.workspace, {
               scopeMode: "projects",
@@ -2417,7 +2545,7 @@ var selectedSpatialFilter = null;
         });
         var projId = (linkedJob && linkedJob.projectId) || (geom && geom.projectId) || "";
         if (root.UOS && root.UOS.ProgramApp) {
-          root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+          updateMapWorkspace(function (candidate) {
             candidate.workspace = candidate.workspace || {};
             if (projId) candidate.workspace.selectedProjectId = projId;
             if (linkedJob) candidate.workspace.selectedJobId = linkedJob.id;
@@ -2446,7 +2574,7 @@ var selectedSpatialFilter = null;
           ? root.UOS.ProgramRegister.buildLinkedProject(wsRec, recObj)
           : null;
         if (root.UOS && root.UOS.ProgramApp) {
-          root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+          updateMapWorkspace(function (candidate) {
             candidate.workspace = candidate.workspace || {};
             candidate.workspace.selectedEntityId = evId;
             if (recObj && (recObj.owner === "NSA" || recObj.owner === "EVT")) candidate.workspace.ownerMode = recObj.owner;
@@ -2481,7 +2609,7 @@ var selectedSpatialFilter = null;
           return;
         }
         if (root.UOS.ProgramApp) {
-          root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+          updateMapWorkspace(function (candidate) {
             var geometry = root.UOS.ProgramModel.workGeometryById(candidate, jobShapeId);
             if (!geometry) throw new Error("The selected polygon no longer exists.");
             candidate = root.UOS.WorkAreaService.updateGeometry(candidate, geometry.id, {
@@ -2551,7 +2679,7 @@ var selectedSpatialFilter = null;
         mapController.resetView();
       } else if (fitBtn && mapController) {
         mapController.fitGeometries();
-      } else if (coordModalBtn) {
+      } else if (coordModalBtn && !coordModalBtn.disabled) {
         openImportDialog();
       } else if (exportMapBtn) {
         exportScopedGeoJson();
@@ -2567,7 +2695,7 @@ var selectedSpatialFilter = null;
         if (pendingDeleteShapeId && root.UOS.ProgramApp) {
         var deletingShapeId = pendingDeleteShapeId;
         var deleteGuard = pendingDeleteGuard;
-        root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+        updateMapWorkspace(function (candidate) {
           if (!deleteGuard) throw new Error("Open the deletion warning before deleting a polygon.");
           deleteGuard(candidate);
             var updated = root.UOS.WorkAreaService.removeGeometry(candidate, deletingShapeId);
@@ -2607,7 +2735,7 @@ var selectedSpatialFilter = null;
           }).then(function(){beginVertexEditing(shapeId);});
         } else if (action === "duplicate") {
           if (root.UOS.ProgramApp) {
-            root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+            updateMapWorkspace(function (candidate) {
               var sourceGeom = candidate.entities.geometries.find(function (g) { return g.id === shapeId; });
               if (sourceGeom) {
                 var dup = JSON.parse(JSON.stringify(sourceGeom));
@@ -2730,8 +2858,8 @@ var selectedSpatialFilter = null;
     root.document.addEventListener("change", function (event) {
       var masterVisible=event.target.closest("[data-space-visible-all]");
       if(masterVisible){
-        var contextState=canonicalMapState(getWorkspace()),projectId=contextState.selectedProjectId,visible=masterVisible.checked;
-        root.UOS.ProgramApp.updateWorkspace(function(candidate){
+        var contextState=mapViewState(getWorkspace()),projectId=contextState.selectedProjectId,visible=masterVisible.checked;
+        updateMapWorkspace(function(candidate){
           if(canonicalMapState(candidate).selectedProjectId!==projectId)return candidate;
           var geometries=root.UOS.ProgramModel.projectWorkGeometry(candidate,projectId);
           geometries.forEach(function(geometry){candidate=root.UOS.WorkAreaService.updateGeometry(candidate,geometry.id,{payload:{visible:visible}});});
@@ -2752,14 +2880,14 @@ var selectedSpatialFilter = null;
           mapController.toggleShapeVisibility(shapeId, isChecked);
         }
         if (root.UOS.ProgramApp) {
-          root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+          updateMapWorkspace(function (candidate) {
             return root.UOS.WorkAreaService.updateGeometry(candidate, shapeId, { payload: { visible: isChecked } });
           }).then(renderShapeCards);
         }
       } else if (pricingUnitSelect) {
         var pricingShapeId = pricingUnitSelect.getAttribute("data-shape-pricing-unit");
         var selectedUnit = pricingUnitSelect.value;
-        root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+        updateMapWorkspace(function (candidate) {
           var geometry = root.UOS.ProgramModel.workGeometryById(candidate, pricingShapeId);
           var rates = eligiblePolygonRates(candidate, geometryWorkType(geometry)).filter(function (rate) { return polygonPricingUnit(rate) === selectedUnit; });
           var mapping = root.UOS.ProgramModel.workTypeRateMapping(candidate, geometryWorkType(geometry));
@@ -2774,7 +2902,7 @@ var selectedSpatialFilter = null;
           mapController.updateShapeType(shapeId, newType);
         }
         if (root.UOS.ProgramApp) {
-          root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+          updateMapWorkspace(function (candidate) {
             candidate = root.UOS.WorkAreaService.updateGeometry(candidate, shapeId, {
               workTypeKey: newType,
               rateItemId: null,
@@ -2798,7 +2926,7 @@ var selectedSpatialFilter = null;
         var rateShapeId = rateSelect.getAttribute("data-shape-rate");
         var selectedRateItemId = text(rateSelect.value);
         if (!selectedRateItemId || !root.UOS.ProgramApp) return;
-        root.UOS.ProgramApp.updateWorkspace(function (candidate) {
+        updateMapWorkspace(function (candidate) {
           candidate = root.UOS.WorkAreaService.updateGeometry(candidate, rateShapeId, {
             rateItemId: selectedRateItemId,
             payload: { rateItemId: selectedRateItemId }
@@ -2839,6 +2967,7 @@ var selectedSpatialFilter = null;
         updateDraftActions();
         return;
       }
+      restoreSidebarScroll=true;
       render();
     });
   }
@@ -2854,13 +2983,13 @@ var selectedSpatialFilter = null;
     radialContext=nextRadialContext;
     updateRadialControls();
     if(pinSession && !pinSession.busy && pinSession.registerId!==mapState.selectedRegisterId)cancelPinSession();
-    var importButton=one("#moasureImportButton");if(importButton)importButton.disabled=!mapState.selectedProjectId;
+    updateSidebarControls();
     if(placementDraft){
       var activeGeometry=root.UOS.ProgramModel.workGeometryById(workspace,placementDraft.id);
       if(!activeGeometry || activeGeometry.projectId!==mapState.selectedProjectId || JSON.stringify(activeGeometry)!==placementDraft.expected)cancelPolygonPlacement();
     }
     if(pendingCameraFocusId && !(workspace.entities.applications||[]).concat(workspace.entities.events||[],workspace.entities.projects||[]).some(function(r){return r.id===pendingCameraFocusId;}))pendingCameraFocusId=null;
-    if (destination === "map" && !storedMapStateMatches(workspace, mapState)) {
+    if (destination === "map" && !pendingScopeMode && !storedMapStateMatches(workspace, mapState)) {
       persistCanonicalMapState(mapState);
       return;
     }
@@ -2902,10 +3031,27 @@ var selectedSpatialFilter = null;
 
         var enteredFromOtherTab = previousDestination !== "map";
     previousDestination = destination;
-    if(enteredFromOtherTab){expandedGeometryId=mapState.selectedGeometryId || null;panelCollapse={location:false,space:false};cameraFocusVersion++;pendingEntryZoom=true;}
+    if(enteredFromOtherTab){expandedGeometryId=mapState.selectedGeometryId || null;cameraFocusVersion++;pendingEntryZoom=true;}
 
     try {
       updateSidebarViewUI();
+      if (!root.UOSSpaceGPU && !root.maplibregl && root.UOS.ProgramRuntime) {
+        if (!mapRuntimePending) {
+          mapRuntimePending = true;
+          var loadingNotice = one("#mapNotice");
+          if (loadingNotice) { loadingNotice.hidden = false; loadingNotice.textContent = "Loading map…"; }
+          root.UOS.ProgramRuntime.ensureMap().then(function () {
+            mapRuntimePending = false;
+            if (loadingNotice) loadingNotice.hidden = true;
+            render();
+          }).catch(function (error) {
+            mapRuntimePending = false;
+            var notice = one("#mapNotice");
+            if (notice) { notice.hidden = false; notice.textContent = error.message + " Reopen Space Map to retry."; }
+          });
+        }
+        return;
+      }
       ensureMapInstance();
       var selId = selectedEventFilterId && selectedEventFilterId !== "all" ? selectedEventFilterId : "";
 
@@ -2938,6 +3084,8 @@ var selectedSpatialFilter = null;
 
       updateTogglesUI();
         if (pendingPolygonPlacementId) beginPolygonPlacement(pendingPolygonPlacementId);
+    if(pendingLocationPlacement || pendingMoasureImport && pendingMoasureImport.keys)mapController.startLocationPlacement();
+    updateSidebarControls();
       if(vertexDraft)updateVertexControls();
     } catch (err) {
       if (root.console && typeof root.console.warn === "function") root.console.warn("ProgramMapController render issue:", err);

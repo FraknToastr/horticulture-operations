@@ -4,18 +4,18 @@ const test=require("node:test");
 const source=fs.readFileSync("src/program-planner/js/program-map.js","utf8");
 const html=fs.readFileSync("src/program-planner/index.html","utf8");
 const css=fs.readFileSync("src/program-planner/space-map-editor.css","utf8");
-test("Space Map has independent sidebar grids instead of floating controls",()=>{
-  assert.match(html,/data-space-panel="location"/);assert.match(html,/data-space-panel="space"/);
+test("Space Map has a combined mode-aware sidebar instead of floating controls",()=>{
+  assert.match(html,/data-space-panel="combined"/);assert.doesNotMatch(html,/data-space-collapse=/);
   for(const id of ["moveLocationButton","removeLocationButton","undoLocationButton","spaceAcceptDraft","spaceCancelDraft"])assert.ok(html.includes('id="'+id+'"'));
   assert.doesNotMatch(html,/id="(?:floatingDrawToolbar|selectToolButton|providerSelect)"/);
   assert.doesNotMatch(html,/src="js\/map-floating-draw-toolbar/);
   assert.ok(css.includes("grid-template-columns:360px minmax(0,1fr)"));
   assert.doesNotMatch(html,/id="(?:spaceRegisterSearch|spaceRegisterSelect|spaceProjectSearch|spaceProjectSelect|toggleMapActiveOnly|toggleMapSelectedOnly)"/);
   assert.ok(source.includes("data-space-visible-all"));
-  assert.ok(css.includes("flex:3 1 0"));assert.ok(css.includes("grid-template-columns:repeat(6,minmax(0,1fr))"));
+  assert.ok(css.includes("grid-template-columns:repeat(6,minmax(0,1fr))"));
 });
-test("Geometry rows retain visibility and pricing metadata, with a temporary drawing row",()=>{
-  for(const label of ["Geometry","Job Type","Cost Type","Measure"])assert.ok(source.includes(">"+label+"<"));
+test("Geometry cards retain visibility and pricing metadata, with a temporary drawing card",()=>{
+  for(const label of ["Field","Value","Job Type","Cost Type","Measure"])assert.ok(source.includes(">"+label+"<"));
   for(const attribute of ["data-shape-visible=","data-space-expand=","data-space-draft","data-disclosure-skip"])assert.ok(source.includes(attribute));
   assert.ok(source.includes("selectedOptions[0].textContent"));
 });
@@ -23,7 +23,7 @@ test("Pin edits are drafts until an atomic and guarded Finish",()=>{
   const stage=source.slice(source.indexOf("function stagePinOperation"),source.indexOf("function finishPinSession"));
   assert.ok(stage.includes("session.history.push"));assert.ok(!stage.includes("ProgramApp.updateWorkspace"));
   const finish=source.slice(source.indexOf("function finishPinSession"),source.indexOf("function handleSpaceEditorClick"));
-  assert.equal(finish.split("ProgramApp.updateWorkspace").length-1,1);
+  assert.equal(finish.split("updateMapWorkspace").length-1,1);
   assert.ok(finish.includes("session.originalPins"));assert.ok(finish.includes("session.operations.forEach"));
   assert.ok(source.includes("showLocationNumbers"));
 });

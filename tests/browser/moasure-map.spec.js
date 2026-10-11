@@ -46,7 +46,8 @@ for(const owner of ['NSA','EVT']){
   await expect(frame.locator('[data-moasure-group]')).toHaveCount(1);
   await frame.locator('#moasureAnchorButton').click();await point(frame,.5,.5);
   const card=frame.locator('[data-shape-card-id]').first();
-  await expect(card).toContainText('Moasure Polygon Inspector');
+  await expect(card.locator('.space-editor__geometry-summary h3')).toHaveText('1. Moasure');
+    await expect(card).toContainText('Moasure Polygon Inspector');
   await expect(card).toContainText('Placement unconfirmed');
   await expect(card.locator('[data-create-shape-job]')).toBeDisabled();
   await expect(frame.locator('[data-placement-controls]')).toBeVisible();
@@ -113,8 +114,6 @@ test('Moasure import uses only selected groups and fits a narrow viewport',async
   await page.setViewportSize({width:480,height:900});
   await frame.locator('#moasureImportButton').click();
   const dialog=frame.locator('#moasureImportDialog');
-  const rect=await dialog.boundingBox();
-  expect(rect.width).toBeLessThanOrEqual(480);
   await frame.locator('#moasureCsvFile').setInputFiles({
     name:'layers.csv',mimeType:'text/csv',buffer:Buffer.from(
       'Layer,Layer-Name,Path,Point,X:cm,Y:cm\n'+
@@ -123,6 +122,8 @@ test('Moasure import uses only selected groups and fits a narrow viewport',async
   });
   const groups=frame.locator('[data-moasure-group]');
   await expect(groups).toHaveCount(2);
+  const rect=await dialog.boundingBox();
+  expect(rect.width).toBeLessThanOrEqual(480);
   await groups.first().uncheck();
   await frame.locator('#moasureAnchorButton').click();await point(frame,.6,.6);
   await expect(frame.locator('[data-shape-card-id]')).toHaveCount(1);

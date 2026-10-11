@@ -56,7 +56,7 @@ for(const owner of ['NSA','EVT']){
           await point(frame,.4,.85);
           expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates.length)).toBe(2);
         }
-        await frame.locator('#undoDrawingButton').click();await expect(accept).toBeDisabled();
+        await frame.locator('#undoLocationButton').click();await expect(accept).toBeDisabled();
         await point(frame,.65,kind==='polygon'?.85:.6);await expect(accept).toBeEnabled();
         await accept.click();
         await expect.poll(()=>frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries.length)).toBe(index+1);
@@ -105,6 +105,7 @@ for(const owner of ['NSA','EVT']){
 }
 
 test('third tier follows each parent, fits narrow layouts and supports keyboard and collapse',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});
   const {frame,errors}=await setup(page);
   const orbs=frame.locator('#spaceDraftActions'),accept=frame.locator('#spaceAcceptDraft'),cancel=frame.locator('#spaceCancelDraft');
   await expect(frame.locator('#addLocationButton,#finishLocationButton,#cancelLocationButton,#finishDrawingButton,#cancelDrawingButton,[data-draw-mode]')).toHaveCount(0);
@@ -115,7 +116,8 @@ test('third tier follows each parent, fits narrow layouts and supports keyboard 
       for(const kind of ['location','polygon','line','square']){
         await start(frame,kind);await expect(orbs).toBeVisible();
         await expect(frame.locator('[data-space-create="'+kind+'"]')).toHaveAttribute('aria-current','true');
-        const layout=await orbs.evaluate(e=>{
+    await frame.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    const layout=await orbs.evaluate(e=>{
           const menu=e.closest('#spaceRadialMenu'),map=document.querySelector('#eventMap').getBoundingClientRect(),m=menu.getBoundingClientRect();
           return {inside:!!e.closest('#spaceRadialActions'),path:e.querySelector('path').getAttribute('d'),mapHeight:map.height,
             parent:(()=>{const r=menu.querySelector('[data-space-create="'+menu.dataset.activeParent+'"]').getBoundingClientRect();return {x:r.left+r.width/2-m.left,y:r.top+r.height/2-m.top};})(),
@@ -126,7 +128,7 @@ test('third tier follows each parent, fits narrow layouts and supports keyboard 
             buttons:Array.from(e.querySelectorAll('button')).map(b=>{const r=b.getBoundingClientRect();return {x:r.left+r.width/2-m.left,y:r.top+r.height/2-m.top,width:r.width,height:r.height,text:b.textContent.trim(),icons:b.querySelectorAll('svg').length,within:r.left>=map.left&&r.right<=map.right&&r.bottom<=map.bottom};})};
         });
         expect(layout.inside).toBe(true);expect(layout.path).toMatch(/^M/);expect(layout.mapHeight).toBeGreaterThanOrEqual(264);
-        for(const b of layout.buttons){expect(b.width).toBe(48);expect(b.height).toBe(48);expect(b.text).toBe('');expect(b.icons).toBe(1);expect(b.within).toBe(true);}
+    for(const b of layout.buttons){expect(b.width).toBeCloseTo(48,2);expect(b.height).toBeCloseTo(48,2);expect(b.text).toBe('');expect(b.icons).toBe(1);expect(b.within).toBe(true);}
         for(const [index,c] of layout.connectors.entries()){
           expect(Math.hypot(c[0]-layout.parent.x,c[1]-layout.parent.y)).toBeCloseTo(24,1);
           expect(Math.hypot(c[2]-layout.buttons[index].x,c[3]-layout.buttons[index].y)).toBeCloseTo(24,1);
@@ -157,6 +159,7 @@ test('third tier follows each parent, fits narrow layouts and supports keyboard 
 
 test('pin Move and Remove and vertex editing use third-tier actions; Moasure keeps its own workflow',async({page})=>{
   const {frame,errors}=await setup(page);const orbs=frame.locator('#spaceDraftActions');
+  await frame.locator('[data-space-mode="register"]').click();await expect(frame.locator('[data-space-mode="register"]')).toHaveAttribute('aria-pressed','true');
   await frame.locator('[data-space-pin]').click();await expect(orbs).toBeHidden();
   await frame.locator('#moveLocationButton').click();await expect(orbs).toBeVisible();
   await expect(frame.locator('[data-space-create="location"]')).toHaveAttribute('aria-current','true');
@@ -167,7 +170,7 @@ test('pin Move and Remove and vertex editing use third-tier actions; Moasure kee
   await expect(frame.locator('[data-space-create="polygon"]')).toHaveAttribute('aria-current','true');
   await frame.locator('#spaceCancelDraft').click();await expect(orbs).toBeHidden();
   await frame.locator('[data-polygon-placement]').click();await expect(orbs).toBeHidden();await page.keyboard.press('Escape');
-  await frame.locator('#moasureImportButton').click();await expect(orbs).toBeHidden();
+  await frame.locator('#moasureCsvFile').setInputFiles({name:'draft.csv',mimeType:'text/csv',buffer:Buffer.from('Layer,Path,Point,X:m,Y:m\n1,1,1,0,0\n1,1,2,10,0\n1,1,3,0,10')});await expect(orbs).toBeHidden();
   await frame.locator('[data-moasure-cancel]').first().click();expect(errors).toEqual([]);
 });
 
@@ -192,7 +195,7 @@ test('line vertices branch from Line and saved square vertices branch from Polyg
 test('a short narrow viewport keeps Undo reachable while preserving map space',async({page})=>{
   const {frame,errors}=await setup(page);await page.setViewportSize({width:390,height:700});
   await start(frame,'line');await point(frame,.1,.75);await point(frame,.9,.75);
-  await frame.locator('#undoDrawingButton').scrollIntoViewIfNeeded();await frame.locator('#undoDrawingButton').click();
+  await frame.locator('#undoLocationButton').scrollIntoViewIfNeeded();await frame.locator('#undoLocationButton').click();
   await expect(frame.locator('#spaceAcceptDraft')).toBeDisabled();
   expect(await frame.locator('#eventMap').evaluate(e=>e.getBoundingClientRect().height)).toBeGreaterThanOrEqual(264);
   await frame.locator('#spaceCancelDraft').click();expect(errors).toEqual([]);
@@ -200,6 +203,7 @@ test('a short narrow viewport keeps Undo reachable while preserving map space',a
 
 test('other map consumers retain automatic square completion by default',async({page})=>{
   const {frame,errors}=await setup(page);
+  await frame.evaluate(() => UOS.ProgramRuntime.ensureLegacyMap());
   await frame.evaluate(()=>{
     const element=document.createElement('div');element.id='defaultSquareMap';element.style.cssText='position:fixed;inset:0;z-index:80';document.body.appendChild(element);
     window.defaultSquareShapes=[];

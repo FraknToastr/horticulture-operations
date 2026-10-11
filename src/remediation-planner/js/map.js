@@ -1071,8 +1071,17 @@
         });
         initializationTimer = setTimeout(function () {
           failInitialization(new Error("MapLibre initialization timed out."));
-        }, timeoutValue(config.initializationTimeoutMs, 10000));
+        }, map.isSpaceMapAdapter ? 30000 : timeoutValue(config.initializationTimeoutMs, 10000));
         map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+        map.on("unavailable", function (event) {
+          // Keep controller state and unfinished drafts intact after all backends fail.
+          ready = false;
+          clearInitializationTimer();
+          clearProviderLoadTimer();
+          if (typeof options.onUnavailable === "function") options.onUnavailable(event && event.error);
+          var unavailable = container.querySelector("#mapUnavailable");
+          if (unavailable) unavailable.hidden = false;
+        });
         map.on("load", function () {
           if (destroyed || !map) return;
           clearInitializationTimer();
@@ -1091,7 +1100,7 @@
             options.onViewportChange({ center: [center.lng, center.lat], zoom: map.getZoom(),userInitiated:Boolean(event.originalEvent) });
           }
         });
-        map.on("mousemove", function (event) {
+        function handleMapPointerMove(event) {
             if (transformLastCoordinate && transformCallback) { var next=[event.lngLat.lng,event.lngLat.lat];transformCallback({kind:"move",from:transformLastCoordinate,to:next});transformLastCoordinate=next;return; }
           if (editingShapeId && draggingVertexIndex !== null) {
             var editedShape = currentEvent && currentEvent.polygons.find(function (shape) { return shape.id === editingShapeId; });
@@ -1107,7 +1116,9 @@
           previewCoordinate = snapped([event.lngLat.lng, event.lngLat.lat], Boolean(event.originalEvent && event.originalEvent.shiftKey));
           refresh();
           notifyDraw();
-        });
+        }
+        map.on("mousemove", handleMapPointerMove);
+        map.on("touchmove", handleMapPointerMove);
         map.on("mousedown", function (event) {
             if(transformShapeId) { if(rotationHandle && event.originalEvent && rotationHandle.getElement().contains(event.originalEvent.target))return; if(shapeIdAt(event.point)===transformShapeId){transformLastCoordinate=[event.lngLat.lng,event.lngLat.lat];map.dragPan.disable();if(event.originalEvent)event.originalEvent.preventDefault();}return; }
           if (!editingShapeId || !map.getLayer("uos-edit-vertices")) return;
@@ -1150,7 +1161,6 @@
           refresh();
           if (editedShape && typeof options.onShapeEdited === "function") options.onShapeEdited(editedShape);
         });
-        map.on("touchmove",function(event){if(transformLastCoordinate && transformCallback){var next=[event.lngLat.lng,event.lngLat.lat];transformCallback({kind:"move",from:transformLastCoordinate,to:next});transformLastCoordinate=next;}});
           map.on("touchend", function () {
             if(transformLastCoordinate){transformLastCoordinate=null;map.dragPan.enable();return;}
           if (draggingVertexIndex === null) return;
@@ -1217,6 +1227,8 @@
 
     return {
       available: function () { return Boolean(map); },
+      getRendererAdapter: function () { return map; },
+      getRendererMetrics: function () { return map && map.getResourceMetrics ? map.getResourceMetrics() : { backend: "maplibre" }; },
       ready: function () { return ready; },
       destroy: destroy,
       refresh: refresh,

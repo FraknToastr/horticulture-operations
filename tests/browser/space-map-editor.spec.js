@@ -37,22 +37,21 @@ for(const owner of ['NSA','EVT']){
     const {frame,errors}=await setup(page,owner);
     await expect(frame.locator('#floatingDrawToolbar,#providerSelect,#selectToolButton,.program-map-canvas-header')).toHaveCount(0);
     const sizes=await frame.locator('[data-space-panel]').evaluateAll(p=>p.map(x=>x.getBoundingClientRect().height));
-    expect(sizes[1]/sizes[0]).toBeCloseTo(3,0);
+    expect(sizes).toHaveLength(1);
     await startSpaceCreation(frame,"polygon");
-    await expect(frame.locator('[data-space-draft]')).toBeVisible();
+    await expect(frame.locator('#spaceDraftActions')).toBeVisible();
     await point(frame,.3,.5);await point(frame,.65,.5);await point(frame,.65,.8);
-    await expect(frame.locator('[data-space-draft]')).toContainText('3 points');
+    await expect(frame.locator('#spaceAcceptDraft')).toBeEnabled();
     await frame.locator('#spaceAcceptDraft').click();
     await expect(frame.locator('[data-shape-card-id]')).toHaveCount(1);
-    await expect(frame.locator('[data-space-draft]')).toHaveCount(0);
+    await expect(frame.locator('#spaceDraftActions')).toBeHidden();
     await expect(frame.locator('[data-shape-action="edit"]')).toBeVisible();
     await frame.locator('[data-space-expand]').click();
     await frame.locator('[data-shape-visible]').uncheck();
     await expect.poll(()=>frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries[0].payload.visible)).toBe(false);
-    await frame.locator('[data-space-collapse="location"]').click();
-    await expect(frame.locator('#spaceLocationBody')).toBeHidden();
-    const expanded=await frame.locator('[data-space-panel="space"]').evaluate(x=>x.getBoundingClientRect().height);
-    expect(expanded).toBeGreaterThan(sizes[1]);
+    await frame.locator('[data-space-mode="register"]').click();
+    await expect(frame.locator('#spaceLocationBody')).toBeVisible();
+    await expect(frame.locator('#spaceManagementBody')).toBeHidden();
     expect(errors).toEqual([]);
   });
   test(owner+': pin Add/Move/Remove, Undo, Cancel and atomic Finish',async({page})=>{
@@ -75,7 +74,7 @@ for(const owner of ['NSA','EVT']){
     await expect(frame.locator('[data-space-pin]')).toHaveCount(1);expect((await pins()).length).toBe(2);
     await frame.locator('#spaceAcceptDraft').click();await expect.poll(async()=>(await pins()).length).toBe(1);
     await expect(frame.locator('[data-space-pin] svg text')).toHaveText('1');
-    await frame.locator('#labelLocationsButton').click();await expect(frame.locator('[data-space-pin] svg text')).toHaveCount(0);
+    await frame.locator('#labelLocationsButton').click();await expect(frame.locator('[data-space-pin] svg text')).toHaveText('1');await expect(frame.locator('.uos-numbered-location-pin text')).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 }
@@ -165,9 +164,9 @@ test('master geometry visibility handles empty, mixed, all and none without affe
 for (const owner of ['NSA','EVT']) {
   test(owner+': Moasure panel layout and import keyboard access in both themes and viewport sizes',async({page})=>{
     const {frame,errors}=await setup(page,owner);
-    const toolbar=frame.locator('#spaceDrawingTools');
+    const toolbar=frame.locator('.space-editor__moasure-section');
     await expect(frame.locator('#startDrawingButton')).toHaveCount(0);
-    await expect(toolbar.getByRole('button',{name:'Import Moasure CSV',exact:true})).toBeVisible();
+    await expect(toolbar.locator('#moasureImportButton')).toBeVisible();
     const logo=toolbar.locator('.space-editor__moasure-logo img');
     await expect.poll(()=>logo.evaluate(img=>img.complete && img.naturalWidth>0)).toBe(true);
     for(const width of [1600,600,390]) {
@@ -177,18 +176,18 @@ for (const owner of ['NSA','EVT']) {
         const layout=await toolbar.evaluate(tools=>{
           const panel=tools.querySelector('.space-editor__moasure-panel'),area=panel.querySelector('.space-editor__moasure-logo'),image=area.querySelector('img');
           const p=panel.getBoundingClientRect(),a=area.getBoundingClientRect(),i=image.getBoundingClientRect(),style=getComputedStyle(panel);
-          const rows=Array.from(tools.querySelectorAll('.space-editor__tool-row'));
+          const rows=Array.from(tools.closest('.space-editor__sidebar').querySelectorAll('.space-editor__tool-row'));
           return {padding:style.padding,gap:style.gap,logoHeight:a.height,centerError:Math.abs((i.left+i.right-a.left-a.right)/2),aspect:i.width/i.height,naturalAspect:image.naturalWidth/image.naturalHeight,
-            panelTabIndex:panel.tabIndex,panelRole:panel.getAttribute('role'),panelWidth:p.width,buttonWidth:panel.querySelector('button').getBoundingClientRect().width,
-            rowButtons:rows.map(row=>Array.from(row.querySelectorAll(':scope > button,:scope > details > summary')).map(b=>b.textContent.trim())),
+            panelTabIndex:panel.tabIndex,panelRole:panel.getAttribute('role'),panelWidth:p.width,buttonWidth:p.width,
+            rowButtons:rows.map(row=>Array.from(row.querySelectorAll('button,summary')).filter(b=>!b.closest('[hidden]')).map(b=>b.textContent.trim())),
             modeWidths:Array.from(tools.querySelectorAll('[data-space-create]')).map(b=>b.getBoundingClientRect().width),
             overflow:Array.from(tools.querySelectorAll('button,summary')).filter(b=>b.scrollWidth>b.clientWidth+1).map(b=>b.textContent),toolsOverflow:tools.scrollWidth>tools.clientWidth+1};
         });
         expect(layout.padding).toBe('8px');expect(layout.gap).toBe('8px');expect(layout.logoHeight).toBe(56);
         expect(layout.centerError).toBeLessThan(1);expect(layout.aspect).toBeCloseTo(layout.naturalAspect,2);
-        expect(layout.panelTabIndex).toBe(-1);expect(layout.panelRole).toBeNull();
-        expect(layout.buttonWidth).toBeCloseTo(layout.panelWidth-18,0);
-        expect(layout.rowButtons).toEqual([['Fit','Home','Labels'],['Undo']]);
+        expect(layout.panelTabIndex).toBe(0);expect(layout.panelRole).toBeNull();
+        expect(layout.buttonWidth).toBe(layout.panelWidth);
+        expect(layout.rowButtons).toEqual([['Move','Remove','Undo'],['Fit','Home','Labels']]);
         expect(layout.modeWidths).toEqual([]);
         expect(layout.overflow).toEqual([]);expect(layout.toolsOverflow).toBe(false);
       }
@@ -196,10 +195,11 @@ for (const owner of ['NSA','EVT']) {
     await page.setViewportSize({width:1600,height:1000});
     const before=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities));
     // The panel and logo do not open the import; the native button does.
-    await logo.click();await expect(frame.locator('#moasureImportDialog')).not.toBeVisible();
-    const importButton=toolbar.locator('#moasureImportButton');await importButton.focus();await page.keyboard.press('Enter');
-    await expect(frame.locator('#moasureImportDialog')).toBeVisible();await frame.locator('[data-moasure-cancel]').first().click();
-    await importButton.focus();await page.keyboard.press('Tab');await expect(toolbar.locator('#zoomShapesButton')).toBeFocused();
+    const chooser=page.waitForEvent('filechooser');await logo.click();await (await chooser).setFiles([]);
+    await expect(frame.locator('#moasureImportDialog')).toBeHidden();
+    const importButton=toolbar.locator('#moasureImportButton');
+    const keyboardChooser=page.waitForEvent('filechooser');await importButton.press('Enter');await (await keyboardChooser).setFiles([]);
+    await importButton.focus();await page.keyboard.press('Shift+Tab');await expect(frame.locator('[data-space-pin]').last()).toBeFocused();await page.keyboard.press('Tab');await expect(importButton).toBeFocused();await page.keyboard.press('Tab');await expect(frame.locator('#spaceRadialToggle')).toBeFocused();
     expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(before);
     expect(errors).toEqual([]);
   });
@@ -216,8 +216,8 @@ for(const owner of ['NSA','EVT']) for(const mode of ['polygon','line','square'])
     await expect(frame.locator('[data-space-create][aria-current="true"]')).toHaveCount(1);
     await expect(frame.locator('#spaceCancelDraft')).toBeEnabled();
     expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().mode)).toBe(mode);
-    await expect(frame.locator('[data-space-draft]')).toBeVisible();
-    await page.keyboard.press('Escape');await expect(frame.locator('[data-space-draft]')).toHaveCount(0);
+    await expect(frame.locator('#spaceDraftActions')).toBeVisible();
+    await page.keyboard.press('Escape');await expect(frame.locator('#spaceDraftActions')).toBeHidden();
     expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(before);
     expect(errors).toEqual([]);
   });

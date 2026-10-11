@@ -32,9 +32,10 @@ async function point(frame,x=.5,y=.7){
   await canvas.click({position:{x:rect.width*x,y:rect.height*y}});
 }
 async function nodesDisabled(frame,disabled){
+  const project=await frame.evaluate(()=>Boolean(UOS.ProgramMapController.canonicalMapState(UOS.ProgramApp.workspace()).selectedProjectId));
   for(const kind of ['location','polygon','line','square']){
     const node=frame.locator('[data-space-create="'+kind+'"]');
-    if(disabled)await expect(node).toBeDisabled();else await expect(node).toBeEnabled();
+    if(disabled || kind!=='location' && !project)await expect(node).toBeDisabled();else await expect(node).toBeEnabled();
   }
 }
 
@@ -48,7 +49,7 @@ for(const owner of ['NSA','EVT']){
       const node=frame.locator('[data-space-create="'+kind+'"]');await expect(node).toBeDisabled();
       await expect(node).toHaveAccessibleDescription(/Create a Project/);
     }
-    await location.click();await nodesDisabled(frame,true);
+    await location.click();await nodesDisabled(frame,false);
     await expect(frame.locator('#eventMap')).toBeFocused();await expect(hub).toHaveAttribute('aria-expanded','true');
     await point(frame);await expect(frame.locator('[data-space-pin]')).toHaveCount(2);
     expect(await frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id).length,ids.recordId)).toBe(1);
@@ -70,13 +71,14 @@ for(const owner of ['NSA','EVT']){
     for(const mode of ['polygon','line','square']){
       await nodesDisabled(frame,false);
       await frame.locator('[data-space-create="'+mode+'"]').click();
-      await expect(hub).toHaveAttribute('aria-expanded','true');await nodesDisabled(frame,true);
+      await expect(hub).toHaveAttribute('aria-expanded','true');await nodesDisabled(frame,false);
       await expect(frame.locator('[data-space-create="'+mode+'"]')).toHaveAttribute('aria-current','true');
       expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates)).toEqual([]);
-      await frame.locator('[data-space-create="location"]').evaluate(button=>button.click());
+      await frame.locator('[data-space-create="location"]').click();
+      await expect(frame.locator('#spaceSwitchDialog')).toBeVisible();await frame.locator('#spaceKeepEditing').click();
       expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().mode)).toBe(mode);
       await point(frame,.35,.6);
-      await frame.locator('#undoDrawingButton').click();
+      await frame.locator('#undoLocationButton').click();
       expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates)).toEqual([]);
       await hub.click();await expect(frame.locator('#spaceRadialActions')).toBeHidden();
       expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().mode)).toBe(mode);
@@ -103,7 +105,7 @@ for(const owner of ['NSA','EVT']){
       await page.keyboard.press('Tab');await expect(frame.getByRole('button',{name,exact:true}).filter({has:frame.locator('svg')}).and(frame.locator('[data-space-create]'))).toBeFocused();
     }
     await page.keyboard.press('Space');
-    expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().mode)).toBe('square');
+    await expect.poll(()=>frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing()?.mode)).toBe('square');
     await page.keyboard.press('Escape');await expect(hub).toHaveAttribute('aria-expanded','true');
     await page.keyboard.press('Escape');await expect(hub).toHaveAttribute('aria-expanded','false');await expect(hub).toBeFocused();
     await hub.click();
@@ -145,10 +147,10 @@ test('radial guards vertex edits, placement, unavailable maps and changed record
   await frame.locator('#spaceAcceptDraft').click();
   await expect(frame.locator('[data-shape-card-id]')).toHaveCount(1);
   const before=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities));
-  await frame.locator('[data-shape-action="edit"]').click();await nodesDisabled(frame,true);
-  await expect(frame.locator('[data-space-create="location"]')).toHaveAccessibleDescription(/Accept or cancel/);
+  await frame.locator('[data-shape-action="edit"]').click();await nodesDisabled(frame,false);
+  await expect(frame.locator('[data-space-create="location"]')).toBeEnabled();
   await frame.locator('#spaceCancelDraft').click();await nodesDisabled(frame,false);
-  await frame.locator('[data-polygon-placement]').click();await nodesDisabled(frame,true);
+  await frame.locator('[data-polygon-placement]').click();await nodesDisabled(frame,false);
   await page.keyboard.press('Escape');await nodesDisabled(frame,false);
   await expect(hub).toHaveAttribute('aria-expanded','true');
   expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(before);

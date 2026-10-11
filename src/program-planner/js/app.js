@@ -449,7 +449,8 @@
   ui.map.selectedProjectId = context.projectId || "";
   ui.map.selectedLocationId = "";
   ui.map.selectedGeometryId = "";
-  ui.map.scopeMode = context.sourceKind === "project" || context.sourceKind === "job" || context.sourceKind === "geometry" ? "projects" : "register";
+  // The map's saved mode is independent of ordinary working-item navigation.
+  ui.map.scopeMode = ui.map.scopeMode === "projects" ? "projects" : "register";
   ui.map.inspectorMode = context.sourceKind === "geometry" ? "polygon" : (ui.map.scopeMode === "projects" ? "project" : "register");
   return context;
   }
@@ -490,10 +491,10 @@
         ui.map.selectedLocationId = "";
         ui.map.inspectorMode = "project";
       } else {
-        ui.map.scopeMode = "register";
+        ui.map.scopeMode = ui.map.scopeMode === "projects" ? "projects" : "register";
         ui.map.selectedGeometryId = "";
         ui.map.selectedLocationId = "";
-        ui.map.inspectorMode = "register";
+        ui.map.inspectorMode = ui.map.scopeMode === "projects" ? "project" : "register";
       }
     }
     return context;

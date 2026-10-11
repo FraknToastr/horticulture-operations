@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
 <link rel="stylesheet" href="styles.css?v=20261009-main-launcher-v1">
-  <link rel="stylesheet" href="space-map-editor.css?v=20261009-v7">
+  <link rel="stylesheet" href="space-map-editor.css?v=20261010-gpu-map-v2">
 <link rel="stylesheet" href="scheduler-week.css?v=20261005-selected-hourly-slot-v2">
   <link rel="stylesheet" href="planner-row-header.css?v=20261008-ready-frame-row-buffers-v13">
   <link rel="stylesheet" href="register-row-header.css?v=20261009-main-launcher-v1">
@@ -296,39 +296,30 @@
           <section class="program-map-layout program-view" data-program-view="map" aria-label="Space Map" hidden>
             <div class="program-map-workspace space-editor">
               <aside class="program-map-sidebar space-editor__sidebar" aria-label="Space Map editor">
-                <section class="space-editor__panel" data-space-panel="location">
-                  <header class="space-editor__heading"><button type="button" data-space-collapse="location" aria-expanded="true" aria-controls="spaceLocationBody">▾ Location</button></header>
-                  <div id="spaceLocationBody" class="space-editor__body">
-                    <div class="space-editor__tools" role="toolbar" aria-label="Location tools">
-                      <div class="space-editor__tool-row space-editor__tool-row--two"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="moveLocationButton" disabled>Move</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="removeLocationButton" disabled>Remove</button></div>
-                      <div class="space-editor__tool-row space-editor__tool-row--one"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="undoLocationButton" disabled>Undo</button></div>
-                      <div class="space-editor__tool-row"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="fitLocationsButton">Fit</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="homeLocationsButton">Home</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="labelLocationsButton">Labels</button></div>
-                    </div>
-                    <div id="eventPickerList" class="space-editor__pins" aria-label="Location pins"></div>
-
-
-
+                <section class="space-editor__panel" data-space-panel="combined">
+                <div class="space-editor__tools" id="spaceDrawingTools" data-module-controls="map">
+                  <div class="space-editor__mode" role="group" aria-label="Map mode">
+                    <button type="button" data-space-mode="register" aria-pressed="true">Location</button>
+                    <button type="button" data-space-mode="projects" aria-pressed="false">Space Management</button>
                   </div>
-                </section>
-                <section class="space-editor__panel" data-space-panel="space">
-                  <header class="space-editor__heading"><button type="button" data-space-collapse="space" aria-expanded="true" aria-controls="spaceManagementBody">▾ Space Management</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="coordinateShapeButton">Data</button></header>
-                  <div id="spaceManagementBody" class="space-editor__body">
-                    <div id="spaceProjectEmpty"></div>
-                    <div class="space-editor__tools" id="spaceDrawingTools" role="toolbar" aria-label="Space Management tools" data-module-controls="map">
-                      <div class="space-editor__moasure-panel">
-                <div class="space-editor__moasure-logo"><img src="../shared/assets/moasure_logo.avif" alt="Moasure"></div>
-                <button type="button" class="uos-button uos-button--secondary uos-button--sm" id="moasureImportButton">Import Moasure CSV</button>
-              </div>
-
-
-              <div class="space-editor__tool-row"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="zoomShapesButton">Fit</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="resetHomeButton">Home</button><details class="program-map-menu program-map-menu--display"><summary class="uos-button uos-button--secondary uos-button--sm">Labels</summary><div class="program-map-menu__panel program-map-menu__panel--display"><div class="program-map-toggles" role="group" aria-label="Geometry labels"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapLength">Length</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapArea">Area</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapAngles">Angles</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapEdges">Edges</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapIndex">Index</button></div></div></details></div>
-                      <div class="space-editor__tool-row space-editor__tool-row--one"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="undoDrawingButton" disabled>Undo</button></div>
-                    </div>
-                    <div id="shapeList" class="space-editor__geometries" aria-label="Geometry inspector"></div>
-                  </div>
-                </section>
+                  <div class="space-editor__tool-row" role="toolbar" aria-label="Edit selected map object"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="moveLocationButton" disabled>Move</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="removeLocationButton" disabled>Remove</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="undoLocationButton" disabled>Undo</button></div>
+                  <div class="space-editor__tool-row" role="toolbar" aria-label="Map view"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="fitLocationsButton">Fit</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="homeLocationsButton">Home</button><div class="space-editor__labels"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="labelLocationsButton">Labels</button><details class="program-map-menu program-map-menu--display"><summary class="uos-button uos-button--secondary uos-button--sm">Labels</summary><div class="program-map-menu__panel program-map-menu__panel--display"><div class="program-map-toggles" role="group" aria-label="Geometry labels"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapLength">Length</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapArea">Area</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapAngles">Angles</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapEdges">Edges</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapIndex">Index</button></div></div></details></div></div>
+                  <button type="button" class="uos-button uos-button--secondary uos-button--sm" id="coordinateShapeButton">Data</button>
+                </div>
+                <div class="space-editor__body">
+                  <div id="spaceLocationBody"><div id="eventPickerList" class="space-editor__pins" aria-label="Location pins"></div></div>
+                  <div id="spaceManagementBody" hidden><div id="spaceProjectEmpty"></div><div id="shapeList" class="space-editor__geometries" aria-label="Geometry inspector"></div></div>
                 <div class="space-editor__status" id="mapToolStatus" role="status" aria-live="polite" hidden></div>
                 <div class="space-editor__status" id="mapNotice" role="status" hidden></div>
+                </div>
+              </section>
+              <section class="space-editor__moasure-section" aria-label="Moasure CSV import">
+                  <button type="button" id="moasureImportButton" class="space-editor__moasure-panel" aria-describedby="moasureDropStatus">
+                    <span class="space-editor__moasure-logo"><img src="../shared/assets/moasure_logo.avif" alt="Moasure"></span>
+                    <span>Drop Moasure CSV or click to browse</span>
+                  </button>
+                  <p id="moasureDropStatus" class="space-editor__drop-status" role="status" aria-live="polite" hidden></p>
+              </section>
               </aside>
               <div class="program-map-canvas-container space-editor__canvas">
                 <div class="space-radial" id="spaceRadialMenu">
@@ -349,6 +340,15 @@
                   </div>
                 </div>
                 <div class="program-map-canvas-inner" id="eventMap" tabindex="0" aria-label="Interactive spatial map canvas"><div class="program-map-unavailable" id="mapUnavailable" hidden><h3>Interactive map unavailable</h3><p>Coordinate entry and mapped costing remain available from Data.</p></div></div>
+                <div class="tree-layer-menu" aria-label="Tree reference layers">
+                  <div class="tree-layer-menu__actions" id="treeLayerActions" role="group" aria-label="Reference layers" hidden>
+                    <svg class="tree-layer-menu__connections" viewBox="0 0 260 166" preserveAspectRatio="none" aria-hidden="true"><path d="M130 127 35 67M130 127 130 28M130 127 225 67"/></svg>
+                    <button type="button" data-tree-layer="trees" aria-pressed="false" aria-describedby="treeStatusTrees">Trees<span id="treeStatusTrees" data-tree-status="trees">Off</span></button>
+                    <button type="button" data-tree-layer="srz" aria-pressed="false" aria-describedby="treeStatusSRZ">SRZ<span id="treeStatusSRZ" data-tree-status="srz">Off</span></button>
+                    <button type="button" data-tree-layer="tpz" aria-pressed="false" aria-describedby="treeStatusTPZ">TPZ<span id="treeStatusTPZ" data-tree-status="tpz">Off</span></button>
+                  </div>
+                  <button type="button" class="tree-layer-menu__hub" id="treeLayerHub" aria-label="Expand tree layers" aria-expanded="false" aria-controls="treeLayerActions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 5 11h3l-4 6h7v4h2v-4h7l-4-6h3Z"/></svg></button>
+                </div>
               </div>
             </div>
           </section>
@@ -1060,11 +1060,16 @@
     <div class="program-data-dialog__frame"><header><div><p class="uos-eyebrow">Workspace backup</p><h2 id="program-export-title">Choose a portable format</h2></div><button class="uos-button uos-button--secondary uos-button--icon" type="button" data-program-export-cancel aria-label="Close export options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header><div class="program-export-options"><button type="button" data-program-export-json><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM15 3v5h5M9 13h6M9 17h6"/></svg><span><strong>Workspace backup (.json)</strong><small>Complete canonical schema-v5 workspace for recovery.</small></span></button><button type="button" data-program-export-bundle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v13H3zM7 3h10v4M9 11h6M9 15h6"/></svg><span><strong>CSV + GeoJSON bundle</strong><small>Optional interchange ZIP with entity tables and spatial geometry.</small></span></button></div><footer><button class="uos-button uos-button--secondary" type="button" data-program-export-cancel>Cancel</button></footer></div>
   </dialog>
 
-  <dialog class="program-rate-dialog planner-task-dialog" id="moasureImportDialog" aria-labelledby="moasureImportTitle">
+  <dialog class="program-rate-dialog" id="spaceSwitchDialog" aria-labelledby="spaceSwitchTitle">
+          <h2 id="spaceSwitchTitle">Discard unfinished work?</h2>
+          <p>Switching will discard the current map draft.</p>
+          <div class="program-polygon-placement__actions"><button type="button" class="uos-button uos-button--secondary" id="spaceKeepEditing">Keep editing</button><button type="button" class="uos-button uos-button--primary" id="spaceDiscardSwitch">Discard and switch</button></div>
+        </dialog>
+        <dialog class="program-rate-dialog planner-task-dialog" id="moasureImportDialog" aria-labelledby="moasureImportTitle">
     <div class="planner-task-editor">
       <header class="planner-task-editor__head"><div><p class="uos-eyebrow">Space Map · Project survey</p><h2 id="moasureImportTitle">Import Moasure CSV</h2></div><button class="program-dialog__close" type="button" data-moasure-cancel aria-label="Close Moasure import">×</button></header>
       <div class="planner-task-editor__body">
-        <label class="uos-field"><span>Moasure coordinate CSV</span><input class="uos-input" type="file" id="moasureCsvFile" accept=".csv,text/csv"></label>
+        <label class="uos-field"><span>Moasure coordinate CSV</span><button type="button" class="uos-button uos-button--secondary" id="moasureReplaceFile">Choose another CSV</button><input type="file" id="moasureCsvFile" accept=".csv,text/csv" hidden tabindex="-1"></label>
         <p class="uos-field-hint">Select the outlines to import, then click the map to anchor the CSV origin. Move or rotate each outline and Save Placement before creating a Job.</p>
         <div id="moasureGroupList"></div>
         <p class="program-cost-error" id="moasureImportError" role="alert" hidden></p>
@@ -1179,8 +1184,9 @@
   <script defer src="../remediation-planner/config/metromaps-provider.js?v=20260922-wmts-fix"></script>
   <script defer src="../shared/js/suite.js?v=20261002-error-remediation-v12"></script>
   <script defer src="../shared/js/storage.js?v=20260912-empty-baseline-v1"></script>
-  <script defer src="../shared/vendor/pdfjs/pdf.min.js"></script>
-  <script defer src="../shared/js/imports.js"></script>
+  <script defer src="../shared/js/program-runtime.js?v=20261011-raster-resolution-v3"></script>
+  <script defer src="js/tree-hub.js?v=20261010-gpu-map-v2"></script>
+  <script defer src="../shared/js/imports.js?v=20261010-lazy-v1"></script>
   <script defer src="../shared/js/unified-workspace.js"></script>
   <script defer src="../shared/js/smart-import.js"></script>
   <script defer src="../shared/js/import-targets.js?v=20261009-schema-v5-import"></script>
@@ -1229,16 +1235,15 @@
   <script defer src="js/scheduler.js?v=20261008-delete-warning-guard-v3"></script>
   <script defer src="js/costing.js?v=20261009-area-pricing-v2"></script>
   <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
-  <script defer src="../shared/vendor/maplibre/maplibre-gl.js"></script>
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
-    <script defer src="../remediation-planner/js/map.js?v=20261009-space-editor-v7"></script>
-  <script defer src="js/program-map.js?v=20261009-space-editor-v7"></script>
+    <script defer src="../remediation-planner/js/map.js?v=20261010-gpu-map-v2"></script>
+  <script defer src="js/program-map.js?v=20261010-gpu-map-v2"></script>
 
 <script defer src="js/planner.js?v=20261009-main-launcher-v1"></script>
  <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>
   <script defer src="js/planner-presentation.js?v=20261008-red-delete-icon-v8"></script>
  <script defer src="js/quote-builder.js?v=20261009-main-launcher-v1"></script>
-<script defer src="js/app.js?v=20261001-planner-editor-v3"></script>
+<script defer src="js/app.js?v=20261010-map-mode-v1"></script>
   <script defer src="js/status-app.js?v=20260912-schema-v5"></script>
   <script defer src="js/status-ui.js?v=20261002-scheduler-costing-v2"></script>
   <script defer src="js/register-history-ui.js?v=20260912-register-history-v2"></script>

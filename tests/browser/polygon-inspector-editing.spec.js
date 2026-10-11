@@ -69,6 +69,8 @@ async function setup(page,owner){
     });
     await UOS.ProgramApp.navigate('map');return ids;
   },owner);
+  await frame.locator('[data-space-mode="projects"]').click();
+  await expect(frame.locator('[data-space-mode="projects"]')).toHaveAttribute('aria-pressed','true');
   await frame.locator('[data-space-expand="'+ids.geometryId+'"]').click();
   await frame.waitForFunction(()=>UOS.ProgramMapController.getMapController()?.ready());
   expect(await frame.evaluate(()=>UOS.ProgramApp.workspace().entities.jobs.length)).toBe(1);
@@ -94,9 +96,9 @@ for(const owner of ['NSA','EVT']){
     await card.locator('[data-shape-action="edit"]').click();
     await expect(frame.locator('#spaceAcceptDraft')).toBeEnabled();
     await expect(frame.locator('#spaceCancelDraft')).toBeEnabled();
-    for(const mode of ['polygon','line','square']) await expect(frame.locator('[data-space-create="'+mode+'"]')).toBeDisabled();
-    await expect(frame.locator('#undoDrawingButton')).toBeDisabled();
-    await expect(card.locator('[data-shape-action="edit"]')).toHaveText('Edit Vertices');
+    for(const mode of ['polygon','line','square']) await expect(frame.locator('[data-space-create="'+mode+'"]')).toBeEnabled();
+    await expect(frame.locator('#undoLocationButton')).toBeDisabled();
+    await expect(card.locator('[data-shape-action="edit"]')).toHaveAttribute('aria-label','Edit vertices for polygon 1');
     await editCoordinate(card);
     expect(await entities(frame)).toBe(before);
     await frame.locator('#spaceCancelDraft').click();
@@ -142,11 +144,12 @@ for(const owner of ['NSA','EVT']){
     expect(errors).toEqual([]);
   });
 
-  test(owner+': Inspector action rows, shared heights and thin outlines',async({page})=>{
+  test(owner+': Inspector icon row, shared heights and thin outlines',async({page})=>{
     const {frame,card,errors}=await setup(page,owner);
-    const labelled=card.locator('.program-shape-actions--labelled');
-    await expect(labelled.locator('button')).toHaveText(['Edit Vertices','Move / Rotate']);
-    await expect(card.locator('.program-shape-actions--icons button')).toHaveCount(4);
+    const labelled=card.locator('.program-shape-actions--icons');
+    await expect(labelled.locator('button')).toHaveCount(6);
+    await expect(labelled.locator('button')).toHaveText(['','','','','','']);
+    await expect(labelled.locator('[data-polygon-placement]')).toHaveAttribute('aria-label',/Move \/ Rotate/);
     await expect.poll(()=>card.locator('button.uos-button').evaluateAll(b=>Array.from(new Set(b.map(x=>x.getBoundingClientRect().height))))).toEqual([32]);
     await expect.poll(()=>frame.evaluate(()=>UOS.ProgramMapController.getMapController().getOperationalSnapshot().layers.length)).toBeGreaterThanOrEqual(5);
     const layers=await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getOperationalSnapshot().layers);
@@ -155,7 +158,7 @@ for(const owner of ['NSA','EVT']){
     expect(layers.find(l=>l.id==='uos-shape-selection-outline').paint['line-width']).toBe(4);
     await page.setViewportSize({width:480,height:900});
     const rows=await labelled.locator('button').evaluateAll(b=>b.map(x=>x.getBoundingClientRect().top));
-    expect(rows[0]).toBe(rows[1]);
+    expect(new Set(rows).size).toBe(1);
     await card.locator('[data-polygon-placement]').click();
     await expect(card.locator('[data-placement-controls]')).toBeVisible();
     await expect(frame.locator('#polygonPlacementToolbar')).toHaveCount(0);
