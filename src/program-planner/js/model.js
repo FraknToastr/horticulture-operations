@@ -528,6 +528,14 @@
     if (collection === "rateItems") {
       item.catalogId = text(item.catalogId) || null;
       var rateKind = text(item.kind);
+      if (item.kindSource !== "user" && item.provenance && item.provenance.migrationKind === "catalog-rate-clone") {
+        // The v3 catalog migration assigned Labour as a blanket default.
+        // Recover the established catalog grouping from the original labels.
+        var rateLabels = text(item.category) + " " + text(item.description || item.title || item.name);
+        rateKind = /sundry|misc|fee|admin|permit|traffic/i.test(rateLabels) ? "Sundry"
+          : /labou?r|crew|staff|worker|supervisor|operator|hours/i.test(rateLabels) ? "Labour"
+          : classifyRateKind(item.category, item.description || item.title || item.name, "");
+      }
         item.kind = item.kindSource === "user" && ["Labour", "Equipment", "Material", "Contractors", "Sundry"].indexOf(rateKind) >= 0
           ? rateKind : classifyRateKind(item.category || item.catalogSection, item.description || item.title || item.name, rateKind);
    item.catalogSection = item.kind;
@@ -738,6 +746,11 @@ return target;
   function canonicalizeRates(result) {
     var aliases = {}, canonical = {}, items = [];
     result.entities.rateItems.forEach(function (item) {
+      if (item.schedulerEnabled === true && item.kindSource !== "user" && item.provenance && item.provenance.migrationKind === "catalog-rate-clone" && !(item.payload && item.payload.schedulerEnabled === true) && ["Labour", "Contractors"].indexOf(item.kind) < 0) {
+        // Undo the scheduler default inferred from the migration's blanket
+        // Labour kind. Explicit settings and existing work jobs stay intact.
+        item.schedulerEnabled = false;
+      }
       if (typeof item.schedulerEnabled !== "boolean") item.schedulerEnabled = ["Labour", "Contractors"].indexOf(item.kind || item.category) >= 0;
       var oldId = text(item._legacyRateId || item.id);
       var baseId = text(item.id);
@@ -972,9 +985,10 @@ return target;
       originalRates.forEach(function (rate, index) {
         var oldId = text(rate.id) || "rate:" + index;
         var copy = clone(rate);
+        if (typeof rate.schedulerEnabled === "boolean") { copy.payload = copy.payload || {}; copy.payload.schedulerEnabled = rate.schedulerEnabled; }
         copy.id = "RATE-" + hash(owner + ":" + fy + ":" + oldId);
         copy.catalogId = catalogId;
-        copy.kind = /^(material|sundry|resource|equipment)$/i.test(text(copy.category || copy.kind)) ? "Equipment" : "Labour";
+        copy.kind = classifyRateKind(copy.category, copy.description || copy.title || copy.name, copy.kind);
         copy.provenance = provenance({ sourceApp: text(input.app), sourceVersion: 3, sourceId: oldId, importedAt: text(result.updatedAt) }, "GLOBAL");
         copy.provenance.migrationKind = "catalog-rate-clone";
         entities.rateItems.push(copy);

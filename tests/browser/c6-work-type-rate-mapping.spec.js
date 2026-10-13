@@ -395,7 +395,7 @@ test("C6-BR-09: polygon-derived Calculator controls are locked while manual cont
  await expect(frame.locator(`[data-costing-line-quantity="${lineIds.spatial}"]`)).toBeDisabled();
  await expect(frame.locator(`[data-costing-line-unit="${lineIds.spatial}"]`)).toBeDisabled();
  await expect(frame.locator(`[data-costing-line-rate="${lineIds.spatial}"]`)).toBeDisabled();
- await expect(frame.locator(`[data-costing-spatial-derived="${lineIds.spatial}"]`)).toContainText(/Derived from polygon.*Space Map/);
+  await expect(frame.locator(`[data-costing-spatial-derived="${lineIds.spatial}"]`)).toHaveCount(0);
  await expect(frame.locator(`[data-costing-line-quantity="${lineIds.manual}"]`)).toBeEnabled();
  await expect(frame.locator(`[data-costing-line-unit="${lineIds.manual}"]`)).toBeEnabled();
  await expect(frame.locator(`[data-costing-line-rate="${lineIds.manual}"]`)).toBeEnabled();
