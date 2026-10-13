@@ -9,6 +9,7 @@
   var quoteStatusFilters = [];
   var preserveProjectListUntil = 0;
   var pendingDraftSaves = 0;
+  var paymentSavePending = false;
 
 
   var state = {
@@ -393,7 +394,7 @@ function hasLifecycleAction(actions, names) {
     }
     if (revisionButton) {
       revisionButton.hidden = !hasLifecycleAction(lifecycleActions, ["createRevision", "revise"]);
-      revisionButton.disabled = false;
+      revisionButton.disabled = isSettled;
     }
     if (refreshButton) {
       refreshButton.hidden = !hasLifecycleAction(lifecycleActions, ["refreshDraftFromCurrentCosts", "refresh"]);
@@ -422,8 +423,9 @@ function hasLifecycleAction(actions, names) {
       lockNotice.className = "program-quote-financial-lock";
       lockNotice.setAttribute("data-quote-financial-lock", "");
       lockNotice.setAttribute("role", "status");
-      rootNode.insertBefore(lockNotice, rootNode.firstChild);
     }
+    var builderPane = rootNode.querySelector(".program-quote-builder-pane");
+    if (builderPane && lockNotice.parentNode !== builderPane) builderPane.insertBefore(lockNotice, builderPane.firstChild);
     lockNotice.hidden = !financialLocked;
     lockNotice.textContent = financialLocked ? "Financial values and line items are locked while this Draft has active payments. Reverse the transactions or create a new revision to change them." : "";
     Array.prototype.forEach.call(rootNode.querySelectorAll("[data-quote-audit]"), function (node) {
@@ -854,9 +856,9 @@ function renderPreview() {
     var payable = !noCustomerPayment && hasSavedQuote && ["Issued", "Accepted"].indexOf(state.status) >= 0;
     if (form) {
       Array.prototype.forEach.call(form.elements, function (input) {
-        if (input.matches("[data-payment-record]")) input.disabled = !payable;
-        else if (input.matches("[data-deposit-record]")) input.disabled = noCustomerPayment || !hasSavedQuote || state.status === "Superseded";
-        else input.disabled = noCustomerPayment || !hasSavedQuote;
+        if (input.matches("[data-payment-record]")) input.disabled = paymentSavePending || !payable;
+        else if (input.matches("[data-deposit-record]")) input.disabled = paymentSavePending || noCustomerPayment || !state.selectedEntityId || state.status === "Superseded";
+        else input.disabled = paymentSavePending || noCustomerPayment || !state.selectedEntityId || state.status === "Superseded";
       });
       var paymentDate = form.elements.paymentDate;
       if (paymentDate && !paymentDate.value) paymentDate.value = UOS.ProgramDates.today(state.workspace);
@@ -866,8 +868,9 @@ function renderPreview() {
       : payable ? "Payments and deposits are recorded against this Quote revision."
       : state.status === "Superseded" ? "Payments cannot be recorded against a superseded Quote."
       : "Deposits can be recorded now. Issue or accept the Quote before recording other payments.";
+    if (formNote && !state.quoteId && state.selectedEntityId && !noCustomerPayment) formNote.textContent = "Record a deposit to save this Draft. Issue or accept the Quote before recording other payments.";
     if (!rows) return;
-    if (!state.quoteId) { rows.innerHTML = '<tr><td colspan="6">Save the quote before recording payments.</td></tr>'; return; }
+    if (!state.quoteId) { rows.innerHTML = '<tr><td colspan="6">No payments recorded.</td></tr>'; return; }
     if (!summary.payments.length) { rows.innerHTML = '<tr><td colspan="6">No payments recorded.</td></tr>'; return; }
     rows.innerHTML = summary.payments.slice().sort(function (a, b) { return String(b.paymentDate).localeCompare(String(a.paymentDate)); }).map(function (payment) {
       var reversed = payment.status === "Reversed";
@@ -1063,10 +1066,9 @@ function renderPreview() {
     });
   }
 
-  function saveToWorkspace(guard) {
-    if (!state.selectedEntityId || !window.UOS || !window.UOS.ProgramQuotes || !window.UOS.ProgramApp || typeof window.UOS.ProgramApp.updateWorkspace !== "function") return Promise.resolve(null);
+  function quoteDraftInput() {
     var custom = state.lines.filter(function (line) { return line.sourceKind === "custom" && !line.readOnly; });
-    var draftInput = JSON.parse(JSON.stringify({
+    return JSON.parse(JSON.stringify({
         id: state.quoteId || undefined, projectId: state.selectedEntityId, quoteNumber: state.quoteNumber, revision: state.revision,
         clientName: state.clientName, address: state.address, email: state.email, preparedBy: state.preparedBy,
         quoteDate: state.quoteDate, expiryDate: state.expiryDate, discountRate: state.discountRate, contingencyRate: state.contingencyRate,
@@ -1074,6 +1076,10 @@ function renderPreview() {
       fundingMode: state.fundingMode, proposedCustomerContribution: state.proposedCustomerContribution,
       suppressCouncilDisclosure: state.suppressCouncilDisclosure
     }));
+  }
+  function saveToWorkspace(guard) {
+    if (!state.selectedEntityId || !window.UOS || !window.UOS.ProgramQuotes || !window.UOS.ProgramApp || typeof window.UOS.ProgramApp.updateWorkspace !== "function") return Promise.resolve(null);
+    var draftInput = quoteDraftInput();
     pendingDraftSaves += 1;
     return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
       if (guard) guard(workspace);
@@ -1095,6 +1101,7 @@ function renderPreview() {
   }
 
   function onInput(event) {
+    if (event.target.closest("[data-payment-form]")) return;
     if (event.target.matches("[data-quote-project-search]")) {
       quoteSearchQuery = event.target.value.trim();
       renderProjectsList();
@@ -1821,23 +1828,39 @@ function renderPreview() {
       var form = event.target.closest("[data-payment-form]");
       if (!form) return;
       event.preventDefault();
+      if (paymentSavePending || !state.selectedEntityId) return;
       var quoteId = state.quoteId;
-      if (!quoteId) return;
       var values = new FormData(form);
       var method = event.submitter && event.submitter.matches("[data-deposit-record]") ? "Paid with Deposit" : values.get("method");
+      var isDeposit = method === "Paid with Deposit";
+      if (!isDeposit && (!quoteId || ["Issued", "Accepted"].indexOf(state.status) < 0)) return ledgerError(new Error("Issue or accept the Quote before recording other payments."));
+      var draftInput = quoteDraftInput();
+      var projectId = state.selectedEntityId;
+      paymentSavePending = true;
+      renderPaymentLedger();
       window.UOS.ProgramApp.updateWorkspace(function (workspace) {
+        if (!quoteId) {
+          var existing = workspace.entities.quotes.filter(function (quote) { return quote.projectId === projectId && quote.status === "Draft"; }).sort(function (a, b) { return Number(b.revision) - Number(a.revision); })[0];
+          if (!existing) {
+            workspace = window.UOS.ProgramQuotes.saveDraft(workspace, draftInput);
+            existing = workspace.entities.quotes.filter(function (quote) { return quote.projectId === projectId && quote.status === "Draft"; }).sort(function (a, b) { return Number(b.revision) - Number(a.revision); })[0];
+          }
+          quoteId = existing.id;
+        }
         return window.UOS.ProgramQuotes.recordPayment(workspace, { quoteId: quoteId, amount: values.get("amount"), paymentDate: values.get("paymentDate"), method: method, reference: values.get("reference"), notes: values.get("notes") });
       }).then(function (workspace) {
         state.workspace = workspace || state.workspace;
         var quote = workspace && workspace.entities && (workspace.entities.quotes || []).find(function (item) { return item.id === quoteId; });
         var project = quote && (workspace.entities.projects || []).find(function (item) { return item.id === quote.projectId; });
-        var isDeposit = method === "Paid with Deposit";
-        form.reset();
-        if (quote && project) loadQuoteRecord(project, quote); else renderBuilder();
+        if (state.selectedEntityId === projectId) {
+          var currentForm = rootNode.querySelector("[data-payment-form]");
+          if (currentForm) currentForm.reset();
+          if (quote && project) loadQuoteRecord(project, quote); else renderBuilder();
+        }
         if (window.UOS && window.UOS.toast) {
           window.UOS.toast(isDeposit ? "Deposit recorded in Section 5 Payment Ledger." : "Payment recorded in Section 5 Payment Ledger.", "success");
         }
-      }).catch(ledgerError);
+      }).catch(ledgerError).finally(function () { paymentSavePending = false; renderPaymentLedger(); });
     });
 
     document.addEventListener("uos:program-ready", function (event) {

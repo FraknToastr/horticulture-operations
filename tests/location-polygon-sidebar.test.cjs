@@ -6,7 +6,7 @@ const html=fs.readFileSync("src/program-planner/index.html","utf8");
 const css=fs.readFileSync("src/program-planner/space-map-editor.css","utf8");
 test("Space Map has a combined mode-aware sidebar instead of floating controls",()=>{
   assert.match(html,/data-space-panel="combined"/);assert.doesNotMatch(html,/data-space-collapse=/);
-  for(const id of ["moveLocationButton","removeLocationButton","undoLocationButton","spaceAcceptDraft","spaceCancelDraft"])assert.ok(html.includes('id="'+id+'"'));
+  for(const id of ["moveLocationButton","removeLocationButton","spaceUndoDraft","spaceAcceptDraft","spaceCancelDraft"])assert.ok(html.includes('id="'+id+'"'));
   assert.doesNotMatch(html,/id="(?:floatingDrawToolbar|selectToolButton|providerSelect)"/);
   assert.doesNotMatch(html,/src="js\/map-floating-draw-toolbar/);
   assert.ok(css.includes("grid-template-columns:360px minmax(0,1fr)"));
@@ -15,7 +15,7 @@ test("Space Map has a combined mode-aware sidebar instead of floating controls",
   assert.ok(css.includes("grid-template-columns:repeat(6,minmax(0,1fr))"));
 });
 test("Geometry cards retain visibility and pricing metadata, with a temporary drawing card",()=>{
-  for(const label of ["Field","Value","Job Type","Cost Type","Measure"])assert.ok(source.includes(">"+label+"<"));
+  for(const label of ["Job Type","Cost Type","Measure"])assert.ok(source.includes(">"+label+"<"));
   for(const attribute of ["data-shape-visible=","data-space-expand=","data-space-draft","data-disclosure-skip"])assert.ok(source.includes(attribute));
   assert.ok(source.includes("selectedOptions[0].textContent"));
 });

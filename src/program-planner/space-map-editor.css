@@ -142,14 +142,20 @@ html[data-suite-theme="dark"] .space-editor[data-space-owner="EVT"] { --space-ac
 .space-editor__heading button:first-child { display:flex; align-items:center; gap:6px; }
 .space-editor__heading button:first-child svg { width:16px; height:16px; flex:none; }
 /* Approval branches from the active creation node. */
-.space-editor .space-radial[data-active-parent] { height:226px; }
+.space-editor .space-radial[data-active-parent] { height:270px; }
 .space-editor .space-radial__third-tier { position:absolute; inset:0; pointer-events:none; }
-.space-editor .space-radial__draft-connections { position:absolute; inset:0; z-index:1; width:100%; height:226px; fill:none; stroke:var(--space-line); stroke-width:1.5; pointer-events:none; }
+.space-editor .space-radial__draft-connections { position:absolute; inset:0; z-index:1; width:100%; height:270px; fill:none; stroke:var(--space-line); stroke-width:1.5; pointer-events:none; }
 .space-editor #spaceAcceptDraft, .space-editor #spaceCancelDraft { top:194px; }
+.space-editor #spaceUndoDraft { top:241px; }
+.space-editor [data-location-edit-controls] { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.space-editor [data-location-edit-controls][hidden], .space-editor #spaceUndoDraft[hidden] { display:none; }
+.space-editor #spaceUndoDraft:not([hidden]) { animation:space-undo-appear 220ms ease-out; }
+@keyframes space-undo-appear { from { opacity:0; } to { opacity:1; } }
+@media (prefers-reduced-motion:reduce) { .space-editor #spaceUndoDraft:not([hidden]) { animation:none; } }
 .space-editor .space-radial__approve { border-color:var(--space-active); color:var(--space-active); }
 .space-editor .space-radial__node.is-active:disabled { border:2px solid var(--space-active); color:var(--space-active); box-shadow:0 0 0 3px color-mix(in srgb,var(--space-active) 14%,transparent); }
 @media (max-width:800px) {
-  .program-map-workspace.space-editor[data-radial-session] { grid-template-rows:minmax(0,1fr) minmax(264px,1fr); }
+  .program-map-workspace.space-editor[data-radial-session] { grid-template-rows:minmax(0,1fr) minmax(308px,1fr); }
   .space-editor[data-radial-session] .space-editor__sidebar { min-height:0; }
   .space-editor[data-radial-session] [data-space-panel="space"] .space-editor__body { overflow:auto; }
   .space-editor[data-radial-session] [data-space-panel="space"] .space-editor__tools { position:static; }

@@ -33,6 +33,111 @@ async function point(frame,x=.5,y=.7){
 }
 
 async function start(frame,kind){await startSpaceCreation(frame,kind);}
+
+async function draftCoordinates(frame){return frame.evaluate(()=>{const g=UOS.ProgramMapController.getMapController().getOperationalSnapshot().features.features[0].geometry;return g.type==='Polygon'?g.coordinates[0].slice(0,-1):g.coordinates;});}
+async function dragCoordinate(page,frame,coordinate,dx=24,dy=16){
+  const pixel=await frame.evaluate(c=>UOS.ProgramMapController.getMapController().projectCoordinate(c),coordinate);
+  const canvas=await frame.locator('.maplibregl-canvas').boundingBox();
+  await page.mouse.move(canvas.x+pixel.x,canvas.y+pixel.y);await page.mouse.down();
+  await page.mouse.move(canvas.x+pixel.x+dx,canvas.y+pixel.y+dy,{steps:8});await page.mouse.up();
+}
+test('radial Undo appears on its parent spoke and smoothly separates the original approval orbs',async({page})=>{
+  const {frame,errors}=await setup(page);
+  for(const width of [1600,390]){
+    await page.setViewportSize({width,height:1000});
+    for(const kind of ['location','polygon','line','square']){
+      await start(frame,kind);const undo=frame.locator('#spaceUndoDraft');await expect(undo).toBeHidden();
+      const initial=await frame.locator('#spaceAcceptDraft').evaluate(b=>({x:parseFloat(b.style.left),y:parseFloat(b.style.top)}));
+      await point(frame,.5,.65);await expect(undo).toBeVisible();
+      const samples=await frame.evaluate(()=>new Promise(resolve=>{
+        const values=[],start=performance.now();function sample(){const b=document.querySelector('#spaceAcceptDraft');values.push([parseFloat(b.style.left),parseFloat(b.style.top)]);if(performance.now()-start<260)requestAnimationFrame(sample);else resolve(values);}requestAnimationFrame(sample);
+      }));
+      expect(new Set(samples.map(p=>p.map(n=>n.toFixed(2)).join(','))).size).toBeGreaterThan(2);
+      const geometry=await frame.evaluate(kind=>{
+        const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,w:r.width,h:r.height,left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+        const parent=rect(document.querySelector(`[data-space-create="${kind}"]`)),hub=rect(document.querySelector('#spaceRadialToggle'));
+        const orbs=['#spaceAcceptDraft','#spaceCancelDraft','#spaceUndoDraft'].map(s=>rect(document.querySelector(s))),menu=rect(document.querySelector('#spaceRadialMenu'));
+        return {cross:Math.abs((parent.x-hub.x)*(orbs[2].y-parent.y)-(parent.y-hub.y)*(orbs[2].x-parent.x))/Math.hypot(parent.x-hub.x,parent.y-hub.y),fits:orbs.every(o=>o.left>=menu.left-1 && o.right<=menu.right+1 && o.bottom<=menu.bottom+1 && o.w>=44 && o.h>=44),separated:orbs.every((o,i)=>orbs.every((p,j)=>i===j || Math.hypot(o.x-p.x,o.y-p.y)>=48)),connections:document.querySelector('#spaceDraftConnections').getAttribute('d').split('M').length-1,behind:parseInt(getComputedStyle(document.querySelector('.space-radial__draft-connections')).zIndex)<parseInt(getComputedStyle(document.querySelector('#spaceUndoDraft')).zIndex)};
+      },kind);
+      expect(geometry.cross).toBeLessThan(.1);expect(geometry).toMatchObject({fits:true,separated:true,connections:3,behind:true});
+      await undo.focus();await undo.press('Enter');await expect(undo).toBeHidden();
+      await expect.poll(()=>frame.locator('#spaceAcceptDraft').evaluate((b,p)=>Math.hypot(parseFloat(b.style.left)-p.x,parseFloat(b.style.top)-p.y),initial)).toBeLessThan(.5);
+      await frame.locator('#spaceCancelDraft').click();
+    }
+  }
+  expect(errors).toEqual([]);
+});
+for(const owner of ['NSA','EVT']){
+  test(`${owner}: radial Undo restores completed vertex edits without saving or remounting cards`,async({page})=>{
+    const {frame,errors}=await setup(page,owner);
+    await frame.locator('[data-space-mode="register"]').click();
+    await expect(frame.locator('#moveLocationButton')).toBeVisible();await expect(frame.locator('#removeLocationButton')).toBeVisible();
+    await expect(frame.locator('#undoLocationButton')).toHaveCount(0);
+    await expect(frame.locator('[data-space-mode="projects"]')).toHaveText('Space Manager');
+    await start(frame,'polygon');await point(frame,.35,.5);await point(frame,.6,.5);await point(frame,.6,.8);await point(frame,.35,.8);await frame.locator('#spaceAcceptDraft').click();
+    await expect(frame.locator('[data-shape-card-id]')).toHaveCount(1);
+    await expect(frame.locator('#moveLocationButton')).toBeHidden();await expect(frame.locator('#removeLocationButton')).toBeHidden();
+    const persisted=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries));
+    await frame.locator('[data-shape-action="edit"]').click();
+    const undo=frame.locator('#spaceUndoDraft'),card=frame.locator('[data-shape-card-id]');
+    await expect(undo).toBeHidden();const original=await draftCoordinates(frame);
+    const initial=await frame.locator('#spaceAcceptDraft').evaluate(b=>({x:parseFloat(b.style.left),y:parseFloat(b.style.top)}));
+    await dragCoordinate(page,frame,original[0]);await expect(undo).toBeEnabled();await expect(undo).toBeVisible();
+    expect(await draftCoordinates(frame)).not.toEqual(original);
+    await expect.poll(()=>frame.evaluate(()=>{
+      const center=e=>{const b=e.getBoundingClientRect();return {x:b.x+b.width/2,y:b.y+b.height/2};};
+      const hub=center(document.querySelector('#spaceRadialToggle')),parent=center(document.querySelector('[data-space-create="polygon"]')),undo=center(document.querySelector('#spaceUndoDraft'));
+      return Math.abs((parent.x-hub.x)*(undo.y-parent.y)-(parent.y-hub.y)*(undo.x-parent.x))/Math.hypot(parent.x-hub.x,parent.y-hub.y);
+    })).toBeLessThan(.1);
+    await undo.focus();await undo.press('Enter');await expect(undo).toBeHidden();expect(await draftCoordinates(frame)).toEqual(original);
+    await expect.poll(()=>frame.locator('#spaceAcceptDraft').evaluate((b,p)=>Math.hypot(parseFloat(b.style.left)-p.x,parseFloat(b.style.top)-p.y),initial)).toBeLessThan(.5);
+    const lat=card.locator('[data-coord-lat="0"]'),lng=card.locator('[data-coord-lng="0"]');
+    await lat.fill(String(Number(await lat.inputValue())+.00003));await lat.press('Tab');const latitudeEdit=await draftCoordinates(frame);
+    await lng.fill(String(Number(await lng.inputValue())+.00003));await lng.press('Tab');
+    await frame.evaluate(()=>window.undoCard=document.querySelector('[data-shape-card-id]'));
+    await card.locator('[data-space-expand]').click();await expect(card.locator('.space-editor__drawer')).toBeHidden();
+    await undo.click();expect(await draftCoordinates(frame)).toEqual(latitudeEdit);
+    expect(await frame.evaluate(()=>window.undoCard===document.querySelector('[data-shape-card-id]'))).toBe(true);
+    await undo.click();await expect(undo).toBeHidden();expect(await draftCoordinates(frame)).toEqual(original);
+    await card.locator('[data-space-expand]').click();await card.locator('[data-delete-vertex="1"]').click();
+    await frame.getByRole('dialog').getByRole('button',{name:'Remove vertex',exact:true}).click();await expect(card.locator('.rem-vertex-item')).toHaveCount(3);
+    await undo.click();await expect(card.locator('.rem-vertex-item')).toHaveCount(4);expect(await draftCoordinates(frame)).toEqual(original);
+    if(owner==='NSA'){
+      await frame.evaluate(original=>{const map=UOS.ProgramMapController.getMapController(),id=map.getEditingShapeId();for(let i=1;i<=51;i++)map.updateVertex(id,0,[original[0][0]+i*.0000001,original[0][1]],{commit:true});for(let i=0;i<50;i++)document.querySelector('#spaceUndoDraft').click();},original);
+      await expect(undo).toBeHidden();expect((await draftCoordinates(frame))[0][0]).toBe(original[0][0]+.0000001);
+      await frame.locator('#spaceCancelDraft').click();await card.locator('[data-shape-action="edit"]').click();
+    }
+    expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries))).toBe(persisted);
+    await lat.fill(String(original[0][1]+.00003));await lat.press('Tab');await frame.locator('#spaceAcceptDraft').click();
+    await expect.poll(()=>frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries[0].geometry.coordinates[0][0][1])).toBe(original[0][1]+.00003);
+    const saved=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries));
+    await card.locator('[data-shape-action="edit"]').click();await lat.fill(String(original[0][1]+.00006));await lat.press('Tab');await frame.locator('#spaceCancelDraft').click();
+    expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries))).toBe(saved);expect(errors).toEqual([]);
+  });
+
+  test(`${owner}: radial Undo reverses Moasure movement and rotation with gesture-sized history`,async({page})=>{
+    const {frame,errors}=await setup(page,owner);
+    await frame.locator('#moasureCsvFile').setInputFiles({name:'undo.csv',mimeType:'text/csv',buffer:Buffer.from('Layer,Path,Point,X:m,Y:m\n1,1,1,0,0\n1,1,2,10,0\n1,1,3,0,10')});
+    await expect(frame.locator('[data-moasure-group]')).toHaveCount(1);await frame.locator('#moasureAnchorButton').click();await point(frame,.5,.5);
+    await expect(frame.locator('[data-placement-controls]')).toBeVisible();
+    const undo=frame.locator('#spaceUndoDraft'),angle=frame.locator('[data-placement-angle]');await expect(undo).toBeHidden();
+    const original=await draftCoordinates(frame),persisted=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries));
+    const center=await frame.evaluate(()=>{const b=UOS.ProgramApp.workspace().entities.geometries[0].localPlacement;return UOS.MoasureGeometry.place(UOS.MoasureGeometry.centroid(b.type,b.coordinates),b.anchor,b.bearing);});
+    await dragCoordinate(page,frame,center);await expect(undo).toBeEnabled();expect(await draftCoordinates(frame)).not.toEqual(original);
+    await undo.click();await expect(undo).toBeHidden();expect(await draftCoordinates(frame)).toEqual(original);
+    const handle=await frame.locator('.program-map-rotation-handle').boundingBox();
+    await page.mouse.move(handle.x+handle.width/2,handle.y+handle.height/2);await page.mouse.down();await page.mouse.move(handle.x+handle.width/2+25,handle.y+handle.height/2+20,{steps:8});await page.mouse.up();
+    await expect(undo).toBeEnabled();await undo.click();await expect(undo).toBeHidden();expect(await draftCoordinates(frame)).toEqual(original);
+    await angle.fill('30');await angle.press('Tab');await angle.fill('60');await angle.press('Tab');await undo.click();await expect(angle).toHaveValue('30');await undo.click();await expect(angle).toHaveValue('0');await expect(undo).toBeHidden();
+    expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries))).toBe(persisted);
+    // A new session is independent of previous movement and rotation history.
+    await frame.locator('#spaceCancelDraft').click();await frame.locator('[data-polygon-placement]').click();await expect(undo).toBeHidden();
+    await angle.fill('45');await angle.press('Tab');await frame.locator('#spaceAcceptDraft').click();
+    await expect.poll(()=>frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries[0].localPlacement.bearing)).toBe(45);
+    await expect(frame.locator('#spaceDraftActions')).toBeHidden();expect(errors).toEqual([]);
+  });
+}
+
 for(const owner of ['NSA','EVT']){
   for(const entry of ['radial']){
     test(owner+': '+entry+' geometry creation uses third-tier Accept and Cancel',async({page})=>{
@@ -56,7 +161,7 @@ for(const owner of ['NSA','EVT']){
           await point(frame,.4,.85);
           expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates.length)).toBe(2);
         }
-        await frame.locator('#undoLocationButton').click();await expect(accept).toBeDisabled();
+        await frame.locator('#spaceUndoDraft').click();await expect(accept).toBeDisabled();
         await point(frame,.65,kind==='polygon'?.85:.6);await expect(accept).toBeEnabled();
         await accept.click();
         await expect.poll(()=>frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries.length)).toBe(index+1);
@@ -81,7 +186,7 @@ for(const owner of ['NSA','EVT']){
     for(const entry of ['radial']){
       await start(frame,'location',entry);await expect(orbs).toBeVisible();await expect(accept).toBeDisabled();
       await point(frame);await expect(accept).toBeEnabled();
-      await frame.locator('#undoLocationButton').click();await expect(accept).toBeDisabled();
+      await frame.locator('#spaceUndoDraft').click();await expect(accept).toBeDisabled();
       await cancel.click();await startSpaceCreation(frame,"location");await point(frame,.6,.75);await expect(accept).toBeEnabled();
       expect(await frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id).length,ids.recordId)).toBe(1);
       await cancel.click();await expect(orbs).toBeHidden();await expect(frame.locator('[data-space-pin]')).toHaveCount(1);
@@ -125,7 +230,7 @@ test('third tier follows each parent, fits narrow layouts and supports keyboard 
             connectors:e.querySelector('path').getAttribute('d').split('M').slice(1).map(segment=>segment.split(/[ L]+/).map(Number)),
             firstTier:menu.querySelector('.space-radial__connections path').getAttribute('d').split('M').slice(1).map(segment=>segment.split(/[ L]+/).map(Number)),
             nodes:Array.from(menu.querySelectorAll('[data-space-create]')).map(b=>{const r=b.getBoundingClientRect();return {x:r.left+r.width/2-m.left,y:r.top+r.height/2-m.top};}),
-            buttons:Array.from(e.querySelectorAll('button')).map(b=>{const r=b.getBoundingClientRect();return {x:r.left+r.width/2-m.left,y:r.top+r.height/2-m.top,width:r.width,height:r.height,text:b.textContent.trim(),icons:b.querySelectorAll('svg').length,within:r.left>=map.left&&r.right<=map.right&&r.bottom<=map.bottom};})};
+            menuWidth:m.width,buttons:Array.from(e.querySelectorAll('button')).filter(b=>!b.hidden).map(b=>{const r=b.getBoundingClientRect();return {x:r.left+r.width/2-m.left,y:r.top+r.height/2-m.top,width:r.width,height:r.height,text:b.textContent.trim(),icons:b.querySelectorAll('svg').length,within:r.left>=map.left&&r.right<=map.right&&r.bottom<=map.bottom};})};
         });
         expect(layout.inside).toBe(true);expect(layout.path).toMatch(/^M/);expect(layout.mapHeight).toBeGreaterThanOrEqual(264);
     for(const b of layout.buttons){expect(b.width).toBeCloseTo(48,2);expect(b.height).toBeCloseTo(48,2);expect(b.text).toBe('');expect(b.icons).toBe(1);expect(b.within).toBe(true);}
@@ -137,12 +242,12 @@ test('third tier follows each parent, fits narrow layouts and supports keyboard 
           expect(Math.hypot(c[0]-layout.hub.x,c[1]-layout.hub.y)).toBeCloseTo(32,1);
           expect(Math.hypot(c[2]-layout.nodes[index].x,c[3]-layout.nodes[index].y)).toBeCloseTo(24,1);
         }
-        if(kind==='location'||kind==='square'){
+        if((kind==='location'||kind==='square') && layout.menuWidth>=520){
           const dx=layout.parent.x-layout.hub.x,dy=layout.parent.y-layout.hub.y,length=Math.hypot(dx,dy);
           const rays=layout.buttons.map(b=>{const x=b.x-layout.parent.x,y=b.y-layout.parent.y,l=Math.hypot(x,y);return {x:x/l,y:y/l};});
           const x=rays[0].x+rays[1].x,y=rays[0].y+rays[1].y;
           expect((x*dx+y*dy)/(Math.hypot(x,y)*length)).toBeCloseTo(1,3);
-        }else for(const b of layout.buttons)expect(b.y).toBeCloseTo(194,0);
+        }else if(kind==='polygon'||kind==='line')for(const b of layout.buttons)expect(b.y).toBeCloseTo(194,0);
         const centres=layout.nodes.concat(layout.buttons);
         for(let i=0;i<centres.length;i++)for(let j=i+1;j<centres.length;j++)expect(Math.hypot(centres[i].x-centres[j].x,centres[i].y-centres[j].y)).toBeGreaterThanOrEqual(47.9);
         await frame.locator('#spaceRadialToggle').click();await expect(orbs).toBeHidden();
@@ -169,7 +274,7 @@ test('pin Move and Remove and vertex editing use third-tier actions; Moasure kee
   await frame.locator('[data-shape-action="edit"]').click();await expect(orbs).toBeVisible();
   await expect(frame.locator('[data-space-create="polygon"]')).toHaveAttribute('aria-current','true');
   await frame.locator('#spaceCancelDraft').click();await expect(orbs).toBeHidden();
-  await frame.locator('[data-polygon-placement]').click();await expect(orbs).toBeHidden();await page.keyboard.press('Escape');
+  await frame.locator('[data-polygon-placement]').click();await expect(orbs).toBeVisible();await expect(frame.locator('#spaceUndoDraft')).toBeHidden();await page.keyboard.press('Escape');
   await frame.locator('#moasureCsvFile').setInputFiles({name:'draft.csv',mimeType:'text/csv',buffer:Buffer.from('Layer,Path,Point,X:m,Y:m\n1,1,1,0,0\n1,1,2,10,0\n1,1,3,0,10')});await expect(orbs).toBeHidden();
   await frame.locator('[data-moasure-cancel]').first().click();expect(errors).toEqual([]);
 });
@@ -195,7 +300,7 @@ test('line vertices branch from Line and saved square vertices branch from Polyg
 test('a short narrow viewport keeps Undo reachable while preserving map space',async({page})=>{
   const {frame,errors}=await setup(page);await page.setViewportSize({width:390,height:700});
   await start(frame,'line');await point(frame,.1,.75);await point(frame,.9,.75);
-  await frame.locator('#undoLocationButton').scrollIntoViewIfNeeded();await frame.locator('#undoLocationButton').click();
+  await frame.locator('#spaceUndoDraft').scrollIntoViewIfNeeded();await frame.locator('#spaceUndoDraft').click();
   await expect(frame.locator('#spaceAcceptDraft')).toBeDisabled();
   expect(await frame.locator('#eventMap').evaluate(e=>e.getBoundingClientRect().height)).toBeGreaterThanOrEqual(264);
   await frame.locator('#spaceCancelDraft').click();expect(errors).toEqual([]);

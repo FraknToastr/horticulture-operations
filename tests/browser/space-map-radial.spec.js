@@ -53,7 +53,7 @@ for(const owner of ['NSA','EVT']){
     await expect(frame.locator('#eventMap')).toBeFocused();await expect(hub).toHaveAttribute('aria-expanded','true');
     await point(frame);await expect(frame.locator('[data-space-pin]')).toHaveCount(2);
     expect(await frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id).length,ids.recordId)).toBe(1);
-    await frame.locator('#undoLocationButton').click();await expect(frame.locator('[data-space-pin]')).toHaveCount(1);
+    await frame.locator('#spaceUndoDraft').click();await expect(frame.locator('[data-space-pin]')).toHaveCount(1);
     await frame.locator("#spaceCancelDraft").click();await startSpaceCreation(frame,"location");await point(frame,.6,.75);
     await frame.locator('#spaceAcceptDraft').click();
     await expect.poll(()=>frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id).length,ids.recordId)).toBe(2);
@@ -78,7 +78,7 @@ for(const owner of ['NSA','EVT']){
       await expect(frame.locator('#spaceSwitchDialog')).toBeVisible();await frame.locator('#spaceKeepEditing').click();
       expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().mode)).toBe(mode);
       await point(frame,.35,.6);
-      await frame.locator('#undoLocationButton').click();
+      await frame.locator('#spaceUndoDraft').click();
       expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates)).toEqual([]);
       await hub.click();await expect(frame.locator('#spaceRadialActions')).toBeHidden();
       expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().mode)).toBe(mode);

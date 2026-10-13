@@ -38,7 +38,7 @@
     var selectedVertexIndex = null;
     var draggingVertexIndex = null;
     var dragMoved = false;
-    var transformShapeId=null,transformCallback=null,transformCentre=null,transformLastCoordinate=null,rotationHandle=null,rotatingHandle=false,lastRotationAngle=0;
+    var transformShapeId=null,transformCallback=null,transformCentre=null,transformLastCoordinate=null,rotationHandle=null,rotatingHandle=false,lastRotationAngle=0,transformGestureCallback=null;
     var suppressClick = false;
     var drawing = null;
     var previewCoordinate = null;
@@ -670,7 +670,7 @@
     }
 
     function cancelPlacement() {
-      transformShapeId = null; transformCallback = null; transformCentre = null; transformLastCoordinate = null;
+      transformShapeId = null; transformCallback = null; transformCentre = null; transformLastCoordinate = null;transformGestureCallback=null;
       if (rotationHandle) rotationHandle.remove(); rotationHandle = null;
       if (map) { map.dragPan.enable(); map.getCanvas().style.cursor = ""; }
     }
@@ -690,22 +690,29 @@
       var shape=transformShape(),c=placementCentre(shape),h=rotationHandle.getLngLat();
       return Math.atan2((h.lng-c[0])*Math.cos(c[1]*Math.PI/180),h.lat-c[1])*180/Math.PI;
     }
-    function beginPlacement(id, callback, centre) {
-      cancelActiveInteraction(); transformShapeId=id; transformCallback=callback; transformCentre=centre || null; selectShape(id,false);
+    function beginPlacement(id, callback, centre, onGesture) {
+      cancelActiveInteraction(); transformShapeId=id; transformCallback=callback; transformCentre=centre || null;transformGestureCallback=onGesture || null; selectShape(id,false);
       var el=document.createElement("button");el.type="button";el.className="uos-button uos-button--secondary uos-button--icon program-map-rotation-handle";
       el.setAttribute("aria-label","Drag to rotate polygon");el.title="Drag to rotate polygon";
       el.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M20 12a8 8 0 1 0-2 6"/></svg>';
       rotationHandle=new maplibregl.Marker({element:el,draggable:true}).setLngLat([0,0]).addTo(map);
       el.setAttribute("aria-label","Drag to rotate polygon");
       updateRotationHandle();
-      rotationHandle.on("dragstart",function(){rotatingHandle=true;lastRotationAngle=rotationAngle();});
+      rotationHandle.on("dragstart",function(){rotatingHandle=true;lastRotationAngle=rotationAngle();if(transformGestureCallback)transformGestureCallback('start');});
       rotationHandle.on("drag",function(){var a=rotationAngle(),delta=a-lastRotationAngle;if(delta>180)delta-=360;if(delta<-180)delta+=360;lastRotationAngle=a;if(transformCallback)transformCallback({kind:"rotate",delta:delta});});
-      rotationHandle.on("dragend",function(){rotatingHandle=false;updateRotationHandle();});
+      rotationHandle.on("dragend",function(){rotatingHandle=false;updateRotationHandle();if(transformGestureCallback)transformGestureCallback('commit');});
       map.getCanvas().style.cursor="move";
     }
     function previewShape(id, coordinates) {
       var shape=currentEvent && currentEvent.polygons.find(function(s){return s.id===id;});
       if(!shape)return;shape.coordinates=Model.clone(coordinates);Model.refreshShape(shape);refresh();updateRotationHandle();
+    }
+    function restoreEditedShape(id, snapshot, vertexIndex) {
+      var index=currentEvent ? currentEvent.polygons.findIndex(function(shape){return shape.id===id;}) : -1;
+      if(index<0)return null;
+      var shape=Model.clone(snapshot);currentEvent.polygons[index]=shape;Model.refreshShape(shape);
+      selectedVertexIndex=Number.isInteger(vertexIndex) && vertexIndex>=0 && vertexIndex<shape.coordinates.length ? vertexIndex : null;
+      refresh();return shape;
     }
     function undoPoint() {
       if (!drawing) return;
@@ -1120,7 +1127,7 @@
         map.on("mousemove", handleMapPointerMove);
         map.on("touchmove", handleMapPointerMove);
         map.on("mousedown", function (event) {
-            if(transformShapeId) { if(rotationHandle && event.originalEvent && rotationHandle.getElement().contains(event.originalEvent.target))return; if(shapeIdAt(event.point)===transformShapeId){transformLastCoordinate=[event.lngLat.lng,event.lngLat.lat];map.dragPan.disable();if(event.originalEvent)event.originalEvent.preventDefault();}return; }
+        if(transformShapeId) { if(rotationHandle && event.originalEvent && rotationHandle.getElement().contains(event.originalEvent.target))return; if(shapeIdAt(event.point)===transformShapeId){transformLastCoordinate=[event.lngLat.lng,event.lngLat.lat];map.dragPan.disable();if(transformGestureCallback)transformGestureCallback('start');if(event.originalEvent)event.originalEvent.preventDefault();}return; }
           if (!editingShapeId || !map.getLayer("uos-edit-vertices")) return;
           var hits = vertexHits(event.point);
           if (!hits.length) return;
@@ -1134,7 +1141,7 @@
           if (event.originalEvent && typeof event.originalEvent.preventDefault === "function") event.originalEvent.preventDefault();
         });
         map.on("touchstart", function (event) {
-            if(transformShapeId) { if(rotationHandle && event.originalEvent && rotationHandle.getElement().contains(event.originalEvent.target))return; if(shapeIdAt(event.point)===transformShapeId){transformLastCoordinate=[event.lngLat.lng,event.lngLat.lat];map.dragPan.disable();}return; }
+        if(transformShapeId) { if(rotationHandle && event.originalEvent && rotationHandle.getElement().contains(event.originalEvent.target))return; if(shapeIdAt(event.point)===transformShapeId){transformLastCoordinate=[event.lngLat.lng,event.lngLat.lat];map.dragPan.disable();if(transformGestureCallback)transformGestureCallback('start');}return; }
           if (!editingShapeId || !map.getLayer("uos-edit-vertices")) return;
           var point = event.point;
           if (!point) return;
@@ -1149,7 +1156,7 @@
           refresh();
         });
         map.on("mouseup", function () {
-            if(transformLastCoordinate){transformLastCoordinate=null;map.dragPan.enable();return;}
+        if(transformLastCoordinate){transformLastCoordinate=null;map.dragPan.enable();if(transformGestureCallback)transformGestureCallback('commit');return;}
           if (draggingVertexIndex === null) return;
           var editedShape = currentEvent && currentEvent.polygons.find(function (shape) { return shape.id === editingShapeId; });
           draggingVertexIndex = null;
@@ -1162,7 +1169,7 @@
           if (editedShape && typeof options.onShapeEdited === "function") options.onShapeEdited(editedShape);
         });
           map.on("touchend", function () {
-            if(transformLastCoordinate){transformLastCoordinate=null;map.dragPan.enable();return;}
+        if(transformLastCoordinate){transformLastCoordinate=null;map.dragPan.enable();if(transformGestureCallback)transformGestureCallback('commit');return;}
           if (draggingVertexIndex === null) return;
           var editedShape = currentEvent && currentEvent.polygons.find(function (shape) { return shape.id === editingShapeId; });
           draggingVertexIndex = null;
@@ -1240,6 +1247,8 @@
       editShape: editShape,
       selectVertex: selectVertex,
       updateVertex: updateVertex,
+      restoreEditedShape: restoreEditedShape,
+      isGestureActive: function(){return Boolean(transformLastCoordinate || rotatingHandle || draggingVertexIndex!==null);},
       removeVertex: removeVertex,
       setMeasurementVisibility: setMeasurementVisibility,
       startDrawing: startDrawing,

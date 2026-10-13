@@ -6780,6 +6780,7 @@ html[data-suite-theme="dark"] .program-shape-card__measure {
 }
 
 /* Left Half: Builder Pane */
+.program-quote-financial-lock { flex:0 0 auto; margin:0; padding:8px 12px; border-bottom:1px solid var(--panel-border); background:var(--uos-surface-muted); color:var(--uos-text); font-size:12px; line-height:1.4; }
 .program-quote-builder-pane {
   display: flex;
   flex-direction: column;

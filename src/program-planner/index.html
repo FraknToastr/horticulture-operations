@@ -22,8 +22,8 @@
   <link rel="stylesheet" href="../shared/css/accessibility.css?v=20261001-modal-focus-v1">
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
-<link rel="stylesheet" href="styles.css?v=20261011-register-pending-v1">
-  <link rel="stylesheet" href="space-map-editor.css?v=20261011-edit-icon-v1">
+<link rel="stylesheet" href="styles.css?v=20261013-quote-payments-v1">
+  <link rel="stylesheet" href="space-map-editor.css?v=20261013-radial-undo-v1">
 <link rel="stylesheet" href="scheduler-week.css?v=20261005-selected-hourly-slot-v2">
   <link rel="stylesheet" href="planner-row-header.css?v=20261008-ready-frame-row-buffers-v13">
   <link rel="stylesheet" href="register-row-header.css?v=20261009-main-launcher-v1">
@@ -300,9 +300,9 @@
                 <div class="space-editor__tools" id="spaceDrawingTools" data-module-controls="map">
                   <div class="space-editor__mode" role="group" aria-label="Map mode">
                     <button type="button" data-space-mode="register" aria-pressed="true">Location</button>
-                    <button type="button" data-space-mode="projects" aria-pressed="false">Space Management</button>
+                    <button type="button" data-space-mode="projects" aria-pressed="false">Space Manager</button>
                   </div>
-                  <div class="space-editor__tool-row" role="toolbar" aria-label="Edit selected map object"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="moveLocationButton" disabled>Move</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="removeLocationButton" disabled>Remove</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="undoLocationButton" disabled>Undo</button></div>
+                  <div class="space-editor__tool-row" data-location-edit-controls role="toolbar" aria-label="Edit selected location" hidden><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="moveLocationButton" disabled>Move</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="removeLocationButton" disabled>Remove</button></div>
                   <div class="space-editor__tool-row" role="toolbar" aria-label="Map view"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="fitLocationsButton">Fit</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="homeLocationsButton">Home</button><div class="space-editor__labels"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="labelLocationsButton">Labels</button><details class="program-map-menu program-map-menu--display"><summary class="uos-button uos-button--secondary uos-button--sm">Labels</summary><div class="program-map-menu__panel program-map-menu__panel--display"><div class="program-map-toggles" role="group" aria-label="Geometry labels"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapLength">Length</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapArea">Area</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapAngles">Angles</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapEdges">Edges</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapIndex">Index</button></div></div></details></div></div>
                   <button type="button" class="uos-button uos-button--secondary uos-button--sm" id="coordinateShapeButton">Data</button>
                 </div>
@@ -335,6 +335,7 @@
                       <button type="button" class="space-radial__node space-radial__approve" id="spaceAcceptDraft" aria-label="Accept" aria-describedby="spaceAcceptDraftReason" data-uos-tooltip="Accept" data-uos-tooltip-pos="bottom" disabled><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg></button>
                       <button type="button" class="space-radial__node" id="spaceCancelDraft" aria-label="Cancel" data-uos-tooltip="Cancel" data-uos-tooltip-pos="bottom" disabled><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
                       <span class="uos-sr-only" id="spaceAcceptDraftReason"></span>
+                      <button type="button" class="space-radial__node" id="spaceUndoDraft" aria-label="Undo last draft edit" data-uos-tooltip="Undo last draft edit" data-uos-tooltip-pos="bottom" disabled hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4 4 9l5 5M4 9h10a6 6 0 0 1 0 12"/></svg></button>
                     </div>
                     <span class="uos-sr-only" id="spaceRadialLocationReason"></span><span class="uos-sr-only" id="spaceRadialPolygonReason"></span><span class="uos-sr-only" id="spaceRadialLineReason"></span><span class="uos-sr-only" id="spaceRadialSquareReason"></span>
                   </div>
@@ -1236,13 +1237,13 @@
   <script defer src="js/costing.js?v=20261011-calculator-description-v1"></script>
   <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
-    <script defer src="../remediation-planner/js/map.js?v=20261010-gpu-map-v2"></script>
-  <script defer src="js/program-map.js?v=20261011-inspector-tools-v1"></script>
+    <script defer src="../remediation-planner/js/map.js?v=20261013-edit-history-v1"></script>
+  <script defer src="js/program-map.js?v=20261013-radial-undo-v1"></script>
 
 <script defer src="js/planner.js?v=20261009-main-launcher-v1"></script>
  <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>
   <script defer src="js/planner-presentation.js?v=20261008-red-delete-icon-v8"></script>
- <script defer src="js/quote-builder.js?v=20261010-business-date-v1"></script>
+ <script defer src="js/quote-builder.js?v=20261013-quote-payments-v1"></script>
 <script defer src="js/app.js?v=20261010-map-mode-v1"></script>
   <script defer src="js/status-app.js?v=20260912-schema-v5"></script>
   <script defer src="js/status-ui.js?v=20261002-scheduler-costing-v2"></script>

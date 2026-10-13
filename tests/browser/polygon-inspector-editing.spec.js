@@ -97,7 +97,7 @@ for(const owner of ['NSA','EVT']){
     await expect(frame.locator('#spaceAcceptDraft')).toBeEnabled();
     await expect(frame.locator('#spaceCancelDraft')).toBeEnabled();
     for(const mode of ['polygon','line','square']) await expect(frame.locator('[data-space-create="'+mode+'"]')).toBeEnabled();
-    await expect(frame.locator('#undoLocationButton')).toBeDisabled();
+    await expect(frame.locator('#spaceUndoDraft')).toBeDisabled();
     await expect(card.locator('[data-shape-action="edit"]')).toHaveAttribute('aria-label','Edit vertices for polygon 1');
     await editCoordinate(card);
     expect(await entities(frame)).toBe(before);

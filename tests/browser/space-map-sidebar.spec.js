@@ -100,20 +100,20 @@ for(const owner of ['NSA','EVT']){
     await expect(frame.locator('#spaceDraftActions')).toBeHidden();
     expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(original);
     await frame.locator('[data-space-pin]').click();await frame.locator('#moveLocationButton').click();await point(frame);
-    await expect(frame.locator('#undoLocationButton')).toBeEnabled();await frame.locator('#undoLocationButton').click();
-    await expect(frame.locator('#undoLocationButton')).toBeDisabled();
+    await expect(frame.locator('#spaceUndoDraft')).toBeEnabled();await frame.locator('#spaceUndoDraft').click();
+    await expect(frame.locator('#spaceUndoDraft')).toBeDisabled();
     await mode(frame,'projects');await expect(frame.locator('#spaceSwitchDialog')).toBeHidden();
     await mode(frame,'register');await frame.locator('[data-space-pin]').click();await frame.locator('#moveLocationButton').click();await point(frame,.65,.75);
     await frame.locator('[data-space-mode="projects"]').click();await expect(frame.locator('#spaceSwitchDialog')).toBeVisible();await frame.locator('#spaceKeepEditing').click();await expect(frame.locator('[data-space-mode="register"]')).toHaveAttribute('aria-pressed','true');
     await expect(frame.locator('#spaceDraftActions')).toBeVisible();
     await frame.locator('[data-space-create="line"]').click();await expect(frame.locator('#spaceSwitchDialog')).toBeVisible();await frame.locator('#spaceDiscardSwitch').click();await expect(frame.locator('[data-space-mode="projects"]')).toHaveAttribute('aria-pressed','true');
-    await point(frame);await expect(frame.locator('#undoLocationButton')).toBeEnabled();
+    await point(frame);await expect(frame.locator('#spaceUndoDraft')).toBeEnabled();
     await frame.locator('[data-space-create="polygon"]').click();await expect(frame.locator('#spaceSwitchDialog')).toBeVisible();await frame.locator('#spaceKeepEditing').click();
     expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates.length)).toBe(1);
-    await frame.locator('#undoLocationButton').click();expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates)).toEqual([]);
+    await frame.locator('#spaceUndoDraft').click();expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates)).toEqual([]);
     await frame.locator('[data-space-mode="register"]').click();await expect(frame.locator('#spaceSwitchDialog')).toBeHidden();await expect(frame.locator('#spaceDraftActions')).toBeHidden();
     expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(original);
-    await frame.locator('[data-space-pin]').click();await frame.locator('#removeLocationButton').click();await frame.getByRole('button',{name:'Remove pin',exact:true}).click();await expect(frame.locator('[data-space-pin]')).toHaveCount(0);await frame.locator('#undoLocationButton').click();await expect(frame.locator('[data-space-pin]')).toHaveCount(1);await frame.locator('#spaceCancelDraft').click();
+    await frame.locator('[data-space-pin]').click();await frame.locator('#removeLocationButton').click();await frame.getByRole('button',{name:'Remove pin',exact:true}).click();await expect(frame.locator('[data-space-pin]')).toHaveCount(0);await frame.locator('#spaceUndoDraft').click();await expect(frame.locator('[data-space-pin]')).toHaveCount(1);await frame.locator('#spaceCancelDraft').click();
     await startSpaceCreation(frame,'location');await point(frame);await frame.locator('#spaceAcceptDraft').click();await expect.poll(()=>frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id).length,ids.recordId)).toBe(2);expect(errors).toEqual([]);
   });
   test(`${owner}: keyboard Moasure chooser, cancelled browsing, validation and drop preview`,async({page})=>{
@@ -154,7 +154,7 @@ for(const owner of ['NSA','EVT']){
     await drop(frame,[{name:'valid.csv',text:csv}]);await expect(frame.locator('#moasureImportDialog')).toBeHidden();await startSpaceCreation(frame,'location');await expect(frame.locator('[data-space-mode="register"]')).toHaveAttribute('aria-pressed','true');await frame.locator('#spaceCancelDraft').click();
     await mode(frame,'projects');await create.click();await expect(create).toHaveCount(0);await expect(frame.locator('#coordinateShapeButton')).toBeEnabled();await expect(frame.locator('#moasureImportButton')).toBeEnabled();await expect(frame.locator('#shapeList')).toBeEmpty();await expect(frame.locator('[data-space-visible-all]')).toHaveCount(0);expect(errors).toEqual([]);
   });
-  test(`${owner}: shared geometry Move and Remove target the selected outline`,async({page})=>{
+  test(`${owner}: Inspector Move and Remove target the selected outline`,async({page})=>{
     const {frame,errors}=await setup(page,owner);
     for(let i=0;i<2;i++){
       await startSpaceCreation(frame,'polygon');await point(frame,.35+i*.1,.55);await point(frame,.6+i*.1,.55);await point(frame,.6+i*.1,.8);await frame.locator('#spaceAcceptDraft').click();await expect(frame.locator('[data-shape-card-id]')).toHaveCount(i+1);
@@ -162,13 +162,13 @@ for(const owner of ['NSA','EVT']){
     const originals=await frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries);
     const row=frame.locator('[data-space-geometry]').first(),selectedId=await row.getAttribute('data-space-geometry'),other=originals.find(g=>g.id!==selectedId);
     await row.click();await expect.poll(()=>frame.evaluate(()=>UOS.ProgramMapController.canonicalMapState(UOS.ProgramApp.workspace()).selectedGeometryId)).toBe(selectedId);
-    await frame.locator('#moveLocationButton').click();await expect(frame.locator(`[data-placement-controls="${selectedId}"]`)).toBeVisible();
+    await row.locator('[data-polygon-placement]').click();await expect(frame.locator(`[data-placement-controls="${selectedId}"]`)).toBeVisible();
     await frame.locator('[data-placement-angle]').fill('45');await frame.locator('[data-cancel-placement]').click();expect(await frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries)).toEqual(originals);
-    await frame.locator('#moveLocationButton').click();await frame.locator('[data-placement-angle]').fill('45');await frame.locator('[data-save-placement]').click();await expect.poll(()=>frame.evaluate(id=>UOS.ProgramApp.workspace().entities.geometries.find(g=>g.id===id).localPlacement?.bearing,selectedId)).toBe(45);
+    await row.locator('[data-polygon-placement]').click();await frame.locator('[data-placement-angle]').fill('45');await frame.locator('[data-save-placement]').click();await expect.poll(()=>frame.evaluate(id=>UOS.ProgramApp.workspace().entities.geometries.find(g=>g.id===id).localPlacement?.bearing,selectedId)).toBe(45);
     expect(await frame.evaluate(id=>UOS.ProgramApp.workspace().entities.geometries.find(g=>g.id===id),other.id)).toEqual(other);
-    await frame.locator('#removeLocationButton').click();await expect(frame.locator('#deleteShapeDialog')).toBeVisible();await frame.locator('#cancelDeleteShapeButton').click();await expect(frame.locator('[data-shape-card-id]')).toHaveCount(2);
-    await frame.locator('#removeLocationButton').click();await frame.locator('#confirmDeleteShapeButton').click();await expect.poll(()=>frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries.map(g=>g.id))).toEqual([other.id]);
-    await expect(frame.locator('#undoLocationButton')).toBeDisabled();
+    await row.locator('[data-shape-action="delete"]').click();await expect(frame.locator('#deleteShapeDialog')).toBeVisible();await frame.locator('#cancelDeleteShapeButton').click();await expect(frame.locator('[data-shape-card-id]')).toHaveCount(2);
+    await row.locator('[data-shape-action="delete"]').click();await frame.locator('#confirmDeleteShapeButton').click();await expect.poll(()=>frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries.map(g=>g.id))).toEqual([other.id]);
+    await expect(frame.locator('#spaceUndoDraft')).toBeDisabled();
     await frame.evaluate(()=>{const map=UOS.ProgramMapController.getMapController();window.sidebarReady=map.ready;map.ready=()=>false;UOS.ProgramMapController.render();});await expect(frame.locator('#moasureImportButton')).toBeDisabled();await expect(frame.locator('#moasureDropStatus')).toContainText('unavailable');
     await frame.evaluate(()=>{UOS.ProgramMapController.getMapController().ready=window.sidebarReady;UOS.ProgramMapController.render();});await expect(frame.locator('#moasureImportButton')).toBeEnabled();expect(errors).toEqual([]);
   });

@@ -38,6 +38,83 @@ async function point(frame, x, y) {
 
 
 const path=require('node:path');
+
+async function importMoasure(frame) {
+  await frame.locator('#moasureCsvFile').setInputFiles(path.resolve('tests/fixtures/moasure/north-terrace-6.csv'));
+  await expect(frame.locator('[data-moasure-group]')).toHaveCount(1);
+  await frame.locator('#moasureAnchorButton').click();
+  await point(frame,.5,.5);
+  await expect(frame.locator('[data-placement-controls]')).toBeVisible();
+}
+
+test('Moasure tooltip follows readiness and leaves when the pointer leaves',async({page})=>{
+  const {frame,errors}=await openDrawing(page,'NSA');
+  const drop=frame.locator('#moasureImportButton');
+  await expect(drop).toBeEnabled();
+  await drop.hover();
+  await expect(frame.locator('#uos-shared-tooltip')).toHaveText('Drop Moasure CSV or click to browse');
+  await page.mouse.move(0,0);
+  await expect(frame.locator('#uos-shared-tooltip')).toBeHidden();
+  await frame.evaluate(()=>{
+    const map=UOS.ProgramMapController.getMapController();window.moasureReady=map.ready;
+    map.ready=()=>false;UOS.ProgramMapController.render();
+  });
+  await expect(drop).toBeDisabled();
+  await expect(frame.locator('#moasureDropStatus')).toContainText('unavailable');
+  await frame.evaluate(()=>{UOS.ProgramMapController.getMapController().ready=window.moasureReady;UOS.ProgramMapController.render();});
+  await expect(drop).toBeEnabled();
+  await expect(frame.locator('#moasureDropStatus')).toBeHidden();
+  await drop.click();await importMoasure(frame);
+  await drop.hover();
+  await expect(frame.locator('#uos-shared-tooltip')).toHaveText('Drop Moasure CSV or click to browse');
+  await page.mouse.move(0,0);
+  await expect(frame.locator('#uos-shared-tooltip')).toBeHidden();
+  expect(errors).toEqual([]);
+});
+
+for(const owner of ['NSA','EVT']){
+  test(`${owner}: Moasure card collapses without redraws before and after saving its anchor`,async({page})=>{
+    const {frame,errors}=await openDrawing(page,owner);
+    await frame.locator('#moasureImportButton').click();await importMoasure(frame);
+    const card=frame.locator('[data-shape-card-id]').first(),toggle=card.locator('[data-space-expand]');
+    await frame.locator('[data-placement-angle]').fill('23');
+    const before=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries));
+    const preview=await frame.evaluate(()=>JSON.stringify(UOS.ProgramMapController.getMapController().getOperationalSnapshot().features));
+    async function checkCollapse(){
+      await expect(toggle).toHaveAttribute('aria-expanded','true');
+      await frame.evaluate(()=>{
+        window.moasureCard=document.querySelector('[data-shape-card-id]');window.moasureCardMutations=0;window.moasureMapRedraws=0;
+        window.moasureCardObserver=new MutationObserver(records=>{window.moasureCardMutations+=records.length;});
+        window.moasureCardObserver.observe(document.querySelector('#shapeList'),{subtree:true,childList:true});
+        const map=UOS.ProgramMapController.getMapController();window.moasureSetEvent=map.setEvent;
+        map.setEvent=function(...args){window.moasureMapRedraws++;return window.moasureSetEvent.apply(this,args);};
+      });
+      await toggle.focus();await toggle.press('Enter');
+      await expect(toggle).toHaveAttribute('aria-expanded','false',{timeout:1500});
+      await expect(toggle).toBeFocused();
+      await expect(card.locator('.space-editor__drawer')).toBeHidden();
+      await expect(card.locator('.program-shape-actions button')).toHaveCount(6);
+      await expect(card.locator('.program-shape-actions')).toBeVisible();
+      await frame.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      expect(await frame.evaluate(()=>({sameCard:window.moasureCard===document.querySelector('[data-shape-card-id]'),mutations:window.moasureCardMutations,redraws:window.moasureMapRedraws}))).toEqual({sameCard:true,mutations:0,redraws:0});
+      await toggle.press('Enter');
+      await expect(toggle).toHaveAttribute('aria-expanded','true');
+      await expect(toggle).toBeFocused();
+      await expect(card.locator('.space-editor__drawer')).toBeVisible();
+      await frame.evaluate(()=>{window.moasureCardObserver.disconnect();UOS.ProgramMapController.getMapController().setEvent=window.moasureSetEvent;});
+    }
+    await checkCollapse();
+    expect(await frame.locator('[data-placement-angle]').inputValue()).toBe('23');
+    expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries))).toBe(before);
+    expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramMapController.getMapController().getOperationalSnapshot().features))).toBe(preview);
+    await expect(frame.locator('.program-map-canvas-container')).toHaveAttribute('data-placement-active','true');
+    await frame.locator('[data-save-placement]').click();
+    await expect.poll(()=>frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries[0].localPlacement.confirmed)).toBe(true);
+    await checkCollapse();
+    expect(errors).toEqual([]);
+  });
+}
+
 for(const owner of ['NSA','EVT']){
  test(owner+': Moasure import, rigid drag, rotation, confirmation, job creation and reload',async({page})=>{
   const {frame,errors}=await openDrawing(page,owner);

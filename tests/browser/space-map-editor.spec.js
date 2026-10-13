@@ -60,7 +60,7 @@ for(const owner of ['NSA','EVT']){
     const original=await pins();
     await startSpaceCreation(frame,"location");await point(frame);
     await expect(frame.locator('[data-space-pin]')).toHaveCount(2);expect(await pins()).toEqual(original);
-    await frame.locator('#undoLocationButton').click();await expect(frame.locator('[data-space-pin]')).toHaveCount(1);
+    await frame.locator('#spaceUndoDraft').click();await expect(frame.locator('[data-space-pin]')).toHaveCount(1);
     await frame.locator("#spaceCancelDraft").click();await startSpaceCreation(frame,"location");await point(frame,.6,.65);
     await frame.locator('#spaceCancelDraft').click();await expect(frame.locator('[data-space-pin]')).toHaveCount(1);expect(await pins()).toEqual(original);
     await startSpaceCreation(frame,"location");await point(frame,.65,.7);
@@ -176,7 +176,7 @@ for (const owner of ['NSA','EVT']) {
         const layout=await toolbar.evaluate(tools=>{
           const panel=tools.querySelector('.space-editor__moasure-panel'),area=panel.querySelector('.space-editor__moasure-logo'),image=area.querySelector('img');
           const p=panel.getBoundingClientRect(),a=area.getBoundingClientRect(),i=image.getBoundingClientRect(),style=getComputedStyle(panel);
-          const rows=Array.from(tools.closest('.space-editor__sidebar').querySelectorAll('.space-editor__tool-row'));
+          const rows=Array.from(tools.closest('.space-editor__sidebar').querySelectorAll('.space-editor__tool-row')).filter(row=>!row.hidden);
           return {padding:style.padding,gap:style.gap,logoHeight:a.height,centerError:Math.abs((i.left+i.right-a.left-a.right)/2),aspect:i.width/i.height,naturalAspect:image.naturalWidth/image.naturalHeight,
             panelTabIndex:panel.tabIndex,panelRole:panel.getAttribute('role'),panelWidth:p.width,buttonWidth:p.width,
             rowButtons:rows.map(row=>Array.from(row.querySelectorAll('button,summary')).filter(b=>!b.closest('[hidden]')).map(b=>b.textContent.trim())),
@@ -187,7 +187,7 @@ for (const owner of ['NSA','EVT']) {
         expect(layout.centerError).toBeLessThan(1);expect(layout.aspect).toBeCloseTo(layout.naturalAspect,2);
         expect(layout.panelTabIndex).toBe(0);expect(layout.panelRole).toBeNull();
         expect(layout.buttonWidth).toBe(layout.panelWidth);
-        expect(layout.rowButtons).toEqual([['Move','Remove','Undo'],['Fit','Home','Labels']]);
+        expect(layout.rowButtons).toEqual([['Move','Remove'],['Fit','Home','Labels']]);
         expect(layout.modeWidths).toEqual([]);
         expect(layout.overflow).toEqual([]);expect(layout.toolsOverflow).toBe(false);
       }
