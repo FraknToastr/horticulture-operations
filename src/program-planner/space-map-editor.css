@@ -124,6 +124,11 @@ html[data-suite-theme="dark"] .space-editor { --space-surface:#242b31; --space-f
   .space-editor .space-editor__sidebar { min-height:600px; }
 }
 
+
+.space-editor #moveLocationButton[aria-pressed="true"]{background:var(--space-active);border-color:var(--space-active);color:var(--uos-on-action,#fff);box-shadow:inset 0 0 0 1px var(--space-active)}
+.space-editor #moveLocationButton[aria-pressed="true"]:hover:not(:disabled){background:var(--space-active);border-color:var(--space-active);color:var(--uos-on-action,#fff)}
+html[data-suite-theme="dark"] .space-editor #moveLocationButton[aria-pressed="true"]{color:#102b29}
+
 .space-editor__panel[data-space-panel="location"] .space-editor__tools { position:static; }
 .space-editor .program-map-menu--display { width:100%; margin:0; }
 .space-editor__table :is(th,td) { white-space:normal; }

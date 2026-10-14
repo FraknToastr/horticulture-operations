@@ -27,6 +27,26 @@ async function mode(frame,value){await frame.locator(`[data-space-mode="${value}
 async function drop(frame,files){await frame.locator('#moasureImportButton').evaluate((box,files)=>{const dt=new DataTransfer();for(const f of files)dt.items.add(new File([f.text||''],f.name,{type:f.type||'text/csv'}));box.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:dt}));},files);}
 for(const owner of ['NSA','EVT']){
 
+  test(owner+': Location Move stays active across clicks and Undo, Approve and Cancel retain the draft contract',async({page})=>{
+    const {frame,ids,errors}=await setup(page,owner);
+    const move=frame.locator('#moveLocationButton'),accept=frame.locator('#spaceAcceptDraft'),undo=frame.locator('#spaceUndoDraft'),cancel=frame.locator('#spaceCancelDraft');
+    const saved=()=>frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id),ids.recordId);
+    const preview=()=>frame.evaluate(()=>UOS.ProgramMapController.getMapController().getLocationSnapshot().features.features[0].geometry.coordinates);
+    await frame.locator('[data-space-pin]').click();const original=await saved();
+    await expect(move).toHaveAttribute('aria-pressed','false');const normal=await move.evaluate(n=>getComputedStyle(n).backgroundColor);
+    await move.click();await expect(move).toHaveAttribute('aria-pressed','true');expect(await move.evaluate(n=>getComputedStyle(n).backgroundColor)).not.toBe(normal);
+    await point(frame,.40,.65);const first=await preview();await expect(move).toHaveAttribute('aria-pressed','true');await expect(undo).toBeEnabled();
+    await point(frame,.65,.72);const second=await preview();expect(second).not.toEqual(first);expect(await saved()).toEqual(original);
+    await undo.click();expect(await preview()).toEqual(first);await expect(move).toHaveAttribute('aria-pressed','true');
+    await undo.click();expect(await preview()).toEqual(original[0].coordinate);await expect(undo).toBeHidden();await expect(move).toHaveAttribute('aria-pressed','true');
+    await point(frame,.55,.62);await move.click();await expect(move).toHaveAttribute('aria-pressed','false');await expect(frame.locator('#spaceDraftActions')).toBeHidden();expect(await saved()).toEqual(original);expect(await preview()).toEqual(original[0].coordinate);
+    await move.click();await point(frame,.42,.68);await point(frame,.62,.76);const final=await preview();await accept.click();
+    await expect(move).toHaveAttribute('aria-pressed','false');await expect.poll(async()=>(await saved())[0].coordinate).toEqual(final);
+    await move.click();await point(frame,.38,.64);await cancel.click();await expect(move).toHaveAttribute('aria-pressed','false');expect((await saved())[0].coordinate).toEqual(final);expect(await preview()).toEqual(final);
+    await page.reload();const restored=page.frames().find(f=>f!==page.mainFrame());await restored.waitForFunction(()=>window.UOS?.ProgramApp?.snapshot().phase==='ready');expect((await restored.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id),ids.recordId))[0].coordinate).toEqual(final);expect(errors).toEqual([]);
+  });
+
+
   test(`${owner}: Location removal uses permanent confirmation and resolves unfinished edits`,async({page})=>{
     const {frame,ids,errors}=await setup(page,owner);
     await mode(frame,'register');await frame.locator('[data-space-pin]').click();
@@ -38,7 +58,7 @@ for(const owner of ['NSA','EVT']){
       return view.height>0 && edit.height>0 && view.bottom<=edit.top;
     })).toBe(true);
     await expect(move.locator('svg path')).toHaveAttribute('d','M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3');
-    const colour=await remove.locator('svg').evaluate(svg=>getComputedStyle(svg).color.match(/\d+/g).map(Number));
+    const colour=await frame.evaluate(()=>getComputedStyle(document.querySelector('#removeLocationButton svg')).color.match(/\d+/g).map(Number));
     expect(colour[0]).toBeGreaterThan(colour[1]*1.3);expect(colour[0]).toBeGreaterThan(colour[2]*1.3);
     const dialog=frame.getByRole('dialog').filter({has:frame.getByRole('button',{name:'Remove pin',exact:true})});
 

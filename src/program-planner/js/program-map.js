@@ -113,7 +113,10 @@
     var geometry=state.selectedGeometryId?root.UOS.ProgramModel.workGeometryById(workspace,state.selectedGeometryId):null;
     var valid=location?pins.some(function(pin){return pin.id===selected;}):Boolean(geometry && geometry.projectId===state.selectedProjectId);
     one('[data-location-edit-controls]').hidden=!location;
+    var moving=Boolean(location && pinSession && pendingLocationPlacement && pendingLocationPlacement.kind==='move');
     one('#moveLocationButton').disabled=!location || !ready || busy || !valid;
+    one('#moveLocationButton').setAttribute('aria-pressed',String(moving));
+    one('#moveLocationButton').classList.toggle('is-active',moving);
     one('#removeLocationButton').disabled=!location || !ready || busy || !valid;
     one('#fitLocationsButton').disabled=!ready || busy;one('#homeLocationsButton').disabled=!ready || busy;one('#labelLocationsButton').disabled=!ready || busy;
     var reason=moasureDisabledReason(),drop=one('#moasureImportButton');drop.disabled=Boolean(reason) || busy;
@@ -191,7 +194,7 @@
   function draftActionState() {
     var workspace=getWorkspace();
     if(!workspace || workspace.workspace.destination!=="map")return null;
-    if(pinSession)return {kind:"location",canUndo:!pinSession.busy && pinSession.history.length>0 && !pendingLocationPlacement,canAccept:!pinSession.busy && pinSession.operations.length>0,canCancel:!pinSession.busy,reason:pinSession.busy?"Saving locations.":"Place or change a location before accepting."};
+    if(pinSession)return {kind:"location",canUndo:!pinSession.busy && pinSession.history.length>0 && (!pendingLocationPlacement || pendingLocationPlacement.kind==="move"),canAccept:!pinSession.busy && pinSession.operations.length>0,canCancel:!pinSession.busy,reason:pinSession.busy?"Saving locations.":"Place or change a location before accepting."};
     if(vertexDraft)return {kind:vertexDraft.original.geometryKind==="square"?"square":vertexDraft.shape.geometryType==="line"?"line":"polygon",canUndo:!vertexDraft.busy && !vertexDraft.gestureActive && vertexDraft.history.length>0,canAccept:!vertexDraft.busy && !vertexDraft.gestureActive && !vertexDraft.error && !vertexDraft.invalidInput,canCancel:!vertexDraft.busy,reason:vertexDraft.busy?"Saving vertex edits.":vertexDraft.error || "Correct invalid coordinates before accepting."};
     if(placementDraft)return {kind:placementDraft.originalKind==="square"?"square":placementDraft.basis.type==="LineString"?"line":"polygon",canUndo:!placementDraft.busy && !placementDraft.gestureActive && placementDraft.history.length>0,canAccept:!placementDraft.busy && !placementDraft.gestureActive,canCancel:!placementDraft.busy,reason:placementDraft.busy?"Saving placement.":"Finish moving the polygon before accepting."};
     if(drawingState && drawingState.active)return {kind:activeDrawMode,canUndo:drawingState.points>0,canAccept:Boolean(drawingState.canFinish),canCancel:true,reason:"Add at least "+(activeDrawMode==="polygon"?3:2)+" points before accepting."};
@@ -379,7 +382,9 @@ function setMapCanvasCursor(cursor) {
     if(!state || !state.canUndo || mapBusy() || mapController.isGestureActive())return;
     if(pinSession){
       var pin=pinSession.history.pop();pinSession.workspace=pin.workspace;pinSession.selectedId=pin.selectedId;pinSession.operations.length=pin.operationCount;
-      pendingLocationPlacement=null;refreshPinPreview();
+      if(pendingLocationPlacement && pendingLocationPlacement.kind==="move" && pinSession.selectedId)pendingLocationPlacement.locationId=pinSession.selectedId;
+      else {pendingLocationPlacement=null;if(mapController)mapController.cancelActiveInteraction();}
+      refreshPinPreview();
     }else if(vertexDraft){
       var vertex=vertexDraft.history.pop();vertexDraft.lastCommitted=cloneDraft(vertex);
       selectedVertexIndex=vertex.selectedVertexIndex;
@@ -613,7 +618,7 @@ function setMapCanvasCursor(cursor) {
     var session=beginPinSession();
     pendingLocationPlacement={kind:move?"move":"add",registerId:session.registerId,locationId:move?session.selectedId:""};
     mapController.startLocationPlacement();
-    updateMapToolStatus(move?"Click the new pin position.":"Click the map to place a location.");
+    updateMapToolStatus(move?"Click the map to move the point · Approve to save, Cancel or Move to discard.":"Click the map to place a location.");
     renderEventPicker();
   }
 
@@ -775,12 +780,13 @@ function setMapCanvasCursor(cursor) {
   function stagePinCoordinate(coordinate){
     if(!pendingLocationPlacement || !coordinate)return;
     var placement=pendingLocationPlacement;
-    pendingLocationPlacement=null;
-    try{stagePinOperation(placement.kind,placement.locationId,coordinate);updateMapToolStatus("Unsaved locations · Accept to commit, Cancel to discard.");}catch(error){showError(error);}
+    if(placement.kind!=="move")pendingLocationPlacement=null;
+    try{stagePinOperation(placement.kind,placement.locationId,coordinate);updateMapToolStatus(placement.kind==="move"?"Click the map to move again · Approve to save, Undo to step back, Cancel or Move to discard.":"Unsaved locations · Accept to commit, Cancel to discard.");}catch(error){showError(error);}
   }
   function finishPinSession(){
     var session=pinSession;
     if(!session || session.busy || !session.operations.length)return;
+    var movePlacement=pendingLocationPlacement && pendingLocationPlacement.kind==="move"?Object.assign({},pendingLocationPlacement):null;
     pendingLocationPlacement=null;if(mapController)mapController.cancelActiveInteraction();
     session.busy=true;renderEventPicker();
     updateMapWorkspace(function(candidate){
@@ -793,7 +799,7 @@ function setMapCanvasCursor(cursor) {
         else updated=model.removeLocationFromRegister(updated,session.registerId,op.id);
       });
       return writeCanonicalMapState(updated,{selectedLocationId:session.selectedId,inspectorMode:"location"});
-    }).then(function(){pinSession=null;updateMapToolStatus("");render();}).catch(function(error){session.busy=false;showError(error);renderEventPicker();});
+    }).then(function(){pinSession=null;updateMapToolStatus("");render();}).catch(function(error){session.busy=false;pendingLocationPlacement=movePlacement;showError(error);refreshPinPreview();});
   }
   function handleSpaceEditorClick(event){
     var target=event.target;
@@ -804,7 +810,7 @@ function setMapCanvasCursor(cursor) {
       var state=mapViewState(getWorkspace()),id=pin.getAttribute("data-space-pin");
       var pins=root.UOS.ProgramModel.registerLocations(pinSession ? pinSession.workspace : getWorkspace(),state.selectedRegisterId);
       var location=pins.find(function(p){return p.id===id;});
-      if(pinSession){pinSession.selectedId=id;renderEventPicker();}else persistCanonicalMapState({selectedLocationId:id,inspectorMode:"location"});
+      if(pinSession){pinSession.selectedId=id;if(pendingLocationPlacement && pendingLocationPlacement.kind==="move")pendingLocationPlacement.locationId=id;renderEventPicker();}else persistCanonicalMapState({selectedLocationId:id,inspectorMode:"location"});
       if(location && mapController)mapController.zoomToLocation(location.coordinate);
       return true;
     }
@@ -843,7 +849,7 @@ function setMapCanvasCursor(cursor) {
       else if(button.id==='homeLocationsButton')mapController.resetView();
       updateSidebarControls();return true;
     }
-      if(button.id==="moveLocationButton")startSpacePinPlacement(true);
+      if(button.id==="moveLocationButton"){if(pinSession && pendingLocationPlacement && pendingLocationPlacement.kind==="move")cancelActiveMapInteraction();else startSpacePinPlacement(true);}
       else if(button.id==="removeLocationButton"){
         removeSelectedLocation();
       }else if(button.id==="fitLocationsButton")mapController.fitLocations();
@@ -2154,7 +2160,7 @@ var selectedSpatialFilter = null;
           }
         },
         onLocationSelected: function (selection) {
-          if(pinSession){pinSession.selectedId=selection.locationId;renderEventPicker();return;}
+          if(pinSession){pinSession.selectedId=selection.locationId;if(pendingLocationPlacement && pendingLocationPlacement.kind==="move")pendingLocationPlacement.locationId=selection.locationId;renderEventPicker();return;}
           if (!selection || !selection.registerId) return;
           var locationWorkspace = getWorkspace();
           var locationContext = resolveMapContext(locationWorkspace, sidebarViewMode, "register", selection.registerId);

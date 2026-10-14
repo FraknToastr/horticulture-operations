@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
 <link rel="stylesheet" href="styles.css?v=20261013-quote-payments-v1">
-  <link rel="stylesheet" href="space-map-editor.css?v=20261014-radial-location-v2">
+  <link rel="stylesheet" href="space-map-editor.css?v=20261014-location-move-v3">
  <link rel="stylesheet" href="scheduler-week.css?v=20261014-multi-day-v4">
   <link rel="stylesheet" href="planner-row-header.css?v=20261008-ready-frame-row-buffers-v13">
   <link rel="stylesheet" href="register-row-header.css?v=20261009-main-launcher-v1">
@@ -303,7 +303,7 @@
                     <button type="button" data-space-mode="projects" aria-pressed="false">Space Manager</button>
                   </div>
                   <div class="space-editor__tool-row" role="toolbar" aria-label="Map view"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="fitLocationsButton">Fit</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="homeLocationsButton">Home</button><div class="space-editor__labels"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="labelLocationsButton">Labels</button><details class="program-map-menu program-map-menu--display"><summary class="uos-button uos-button--secondary uos-button--sm">Labels</summary><div class="program-map-menu__panel program-map-menu__panel--display"><div class="program-map-toggles" role="group" aria-label="Geometry labels"><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapLength">Length</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapArea">Area</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapAngles">Angles</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapEdges">Edges</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="toggleMapIndex">Index</button></div></div></details></div></div>
-                  <div class="space-editor__tool-row" data-location-edit-controls role="toolbar" aria-label="Edit selected location" hidden><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="moveLocationButton" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>Move</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="removeLocationButton" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Remove</button></div>
+                  <div class="space-editor__tool-row" data-location-edit-controls role="toolbar" aria-label="Edit selected location" hidden><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="moveLocationButton" aria-pressed="false" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>Move</button><button type="button" class="uos-button uos-button--secondary uos-button--sm" id="removeLocationButton" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Remove</button></div>
                   <button type="button" class="uos-button uos-button--secondary uos-button--sm" id="coordinateShapeButton">Data</button>
                 </div>
                 <div class="space-editor__body">
@@ -1244,7 +1244,7 @@
   <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
     <script defer src="../remediation-planner/js/map.js?v=20261013-edit-history-v1"></script>
-  <script defer src="js/program-map.js?v=20261014-radial-location-v2"></script>
+  <script defer src="js/program-map.js?v=20261014-location-move-v3"></script>
 
 <script defer src="js/planner.js?v=20261009-main-launcher-v1"></script>
  <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>
