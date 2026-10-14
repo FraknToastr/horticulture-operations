@@ -43,7 +43,7 @@ async function dragCoordinate(page,frame,coordinate,dx=24,dy=16){
 }
 test('radial Undo appears on its parent spoke and smoothly separates the original approval orbs',async({page})=>{
   const {frame,errors}=await setup(page);
-  for(const width of [1600,390]){
+  for(const width of [1600,448,390]){
     await page.setViewportSize({width,height:1000});
     for(const kind of ['location','polygon','line','square']){
       await start(frame,kind);const undo=frame.locator('#spaceUndoDraft');await expect(undo).toBeHidden();
@@ -57,8 +57,15 @@ test('radial Undo appears on its parent spoke and smoothly separates the origina
         const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,w:r.width,h:r.height,left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
         const parent=rect(document.querySelector(`[data-space-create="${kind}"]`)),hub=rect(document.querySelector('#spaceRadialToggle'));
         const orbs=['#spaceAcceptDraft','#spaceCancelDraft','#spaceUndoDraft'].map(s=>rect(document.querySelector(s))),menu=rect(document.querySelector('#spaceRadialMenu'));
-        return {cross:Math.abs((parent.x-hub.x)*(orbs[2].y-parent.y)-(parent.y-hub.y)*(orbs[2].x-parent.x))/Math.hypot(parent.x-hub.x,parent.y-hub.y),fits:orbs.every(o=>o.left>=menu.left-1 && o.right<=menu.right+1 && o.bottom<=menu.bottom+1 && o.w>=44 && o.h>=44),separated:orbs.every((o,i)=>orbs.every((p,j)=>i===j || Math.hypot(o.x-p.x,o.y-p.y)>=48)),connections:document.querySelector('#spaceDraftConnections').getAttribute('d').split('M').length-1,behind:parseInt(getComputedStyle(document.querySelector('.space-radial__draft-connections')).zIndex)<parseInt(getComputedStyle(document.querySelector('#spaceUndoDraft')).zIndex)};
+        const dx=parent.x-hub.x,dy=parent.y-hub.y,length=Math.hypot(dx,dy),axis={x:dx/length,y:dy/length};
+        return {fan:orbs.map(o=>({depth:(o.x-parent.x)*axis.x+(o.y-parent.y)*axis.y,side:(o.x-parent.x)*axis.y-(o.y-parent.y)*axis.x})),cross:Math.abs((parent.x-hub.x)*(orbs[2].y-parent.y)-(parent.y-hub.y)*(orbs[2].x-parent.x))/Math.hypot(parent.x-hub.x,parent.y-hub.y),fits:orbs.every(o=>o.left>=menu.left-1 && o.right<=menu.right+1 && o.bottom<=menu.bottom+1 && o.w>=44 && o.h>=44),separated:orbs.every((o,i)=>orbs.every((p,j)=>i===j || Math.hypot(o.x-p.x,o.y-p.y)>=48)),connections:document.querySelector('#spaceDraftConnections').getAttribute('d').split('M').length-1,behind:parseInt(getComputedStyle(document.querySelector('.space-radial__draft-connections')).zIndex)<parseInt(getComputedStyle(document.querySelector('#spaceUndoDraft')).zIndex)};
       },kind);
+      const overlap=await frame.evaluate(()=>{
+        const nodes=[...document.querySelectorAll('#spaceRadialToggle,[data-space-create],#spaceDraftActions button')].filter(b=>!b.hidden).map(b=>b.getBoundingClientRect());
+        return nodes.some((a,i)=>nodes.some((b,j)=>i<j && Math.hypot(a.x+a.width/2-b.x-b.width/2,a.y+a.height/2-b.y-b.height/2)<(a.width+b.width)/2-.1));
+      });
+      expect(overlap).toBe(false);
+      for(const [i,side] of [-56,56,0].entries()){expect(geometry.fan[i].side).toBeCloseTo(side,1);expect(geometry.fan[i].depth).toBeCloseTo(i===2?100:65,1);}
       expect(geometry.cross).toBeLessThan(.1);expect(geometry).toMatchObject({fits:true,separated:true,connections:3,behind:true});
       await undo.focus();await undo.press('Enter');await expect(undo).toBeHidden();
       await expect.poll(()=>frame.locator('#spaceAcceptDraft').evaluate((b,p)=>Math.hypot(parseFloat(b.style.left)-p.x,parseFloat(b.style.top)-p.y),initial)).toBeLessThan(.5);
@@ -201,7 +208,7 @@ for(const owner of ['NSA','EVT']){
       await expect(orbs).toBeHidden();await expect(frame.locator('[data-space-pin]')).toHaveCount(2);
       await frame.locator('[data-space-pin]').last().click();await frame.locator('#removeLocationButton').click();
       await frame.getByRole('dialog').filter({has:frame.getByRole('button',{name:'Remove pin',exact:true})}).getByRole('button',{name:'Remove pin',exact:true}).click();
-      await expect(orbs).toBeVisible();await expect(accept).toBeEnabled();await frame.locator('#spaceAcceptDraft').click();await expect(orbs).toBeHidden();
+      await expect(orbs).toBeHidden();
       await expect.poll(()=>frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id).length,ids.recordId)).toBe(1);
     }
     expect(errors).toEqual([]);
@@ -226,7 +233,7 @@ test('third tier follows each parent, fits narrow layouts and supports keyboard 
           const menu=e.closest('#spaceRadialMenu'),map=document.querySelector('#eventMap').getBoundingClientRect(),m=menu.getBoundingClientRect();
           return {inside:!!e.closest('#spaceRadialActions'),path:e.querySelector('path').getAttribute('d'),mapHeight:map.height,
             parent:(()=>{const r=menu.querySelector('[data-space-create="'+menu.dataset.activeParent+'"]').getBoundingClientRect();return {x:r.left+r.width/2-m.left,y:r.top+r.height/2-m.top};})(),
-            hub:{x:m.width/2,y:32},
+            hub:(()=>{const r=menu.querySelector('#spaceRadialToggle').getBoundingClientRect();return {x:r.left+r.width/2-m.left,y:r.top+r.height/2-m.top};})(),
             connectors:e.querySelector('path').getAttribute('d').split('M').slice(1).map(segment=>segment.split(/[ L]+/).map(Number)),
             firstTier:menu.querySelector('.space-radial__connections path').getAttribute('d').split('M').slice(1).map(segment=>segment.split(/[ L]+/).map(Number)),
             nodes:Array.from(menu.querySelectorAll('[data-space-create]')).map(b=>{const r=b.getBoundingClientRect();return {x:r.left+r.width/2-m.left,y:r.top+r.height/2-m.top};}),
@@ -242,7 +249,7 @@ test('third tier follows each parent, fits narrow layouts and supports keyboard 
           expect(Math.hypot(c[0]-layout.hub.x,c[1]-layout.hub.y)).toBeCloseTo(32,1);
           expect(Math.hypot(c[2]-layout.nodes[index].x,c[3]-layout.nodes[index].y)).toBeCloseTo(24,1);
         }
-        if((kind==='location'||kind==='square') && layout.menuWidth>=520){
+        if(kind==='location'||kind==='square'){
           const dx=layout.parent.x-layout.hub.x,dy=layout.parent.y-layout.hub.y,length=Math.hypot(dx,dy);
           const rays=layout.buttons.map(b=>{const x=b.x-layout.parent.x,y=b.y-layout.parent.y,l=Math.hypot(x,y);return {x:x/l,y:y/l};});
           const x=rays[0].x+rays[1].x,y=rays[0].y+rays[1].y;

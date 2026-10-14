@@ -31,7 +31,7 @@
   var previousDestination = "";
   var pendingLocationPlacement = null;
   var pinSession=null, drawingState=null, expandedGeometryId=null;
-  var mapSaveCount=0, switchPending=false;
+  var mapSaveCount=0, switchPending=false, locationRemovalPending=false;
   var pendingScopeMode=null, visibleSidebarMode=null, restoreSidebarScroll=false, sidebarContext=null;
   var sidebarScroll={register:0,projects:0};
   var moasureFooterObserver=null;
@@ -73,11 +73,7 @@
     switchPending=true;updateSidebarControls();
     try {
       if(unfinishedMapWork()){
-        var discard=await new Promise(function(resolve){
-          var dialog=one('#spaceSwitchDialog');
-          dialog.addEventListener('close',function(){resolve(dialog.returnValue==='discard');},{once:true});
-          dialog.returnValue='keep';dialog.showModal();one('#spaceKeepEditing').focus();
-        });
+        var discard=await confirmDiscardMapWork();
         if(!discard || mapBusy())return false;
       }
       if(activeMapInteraction()){
@@ -100,7 +96,7 @@
   }
   function updateSidebarControls() {
     if(!one('#moasureImportButton'))return;
- var state=mapViewState(getWorkspace()),location=state.scopeMode==='register',busy=mapBusy() || switchPending,ready=Boolean(mapController && mapController.ready());
+    var state=mapViewState(getWorkspace()),location=state.scopeMode==='register',busy=mapBusy() || switchPending || locationRemovalPending,ready=Boolean(mapController && mapController.ready());
  var context=[state.ownerMode,state.selectedRegisterId,state.selectedProjectId].join(':');
  if(sidebarContext!==context){sidebarContext=context;sidebarScroll={register:0,projects:0};visibleSidebarMode=null;}
  var body=one('.space-editor__body'),changedMode=visibleSidebarMode!==state.scopeMode;
@@ -183,7 +179,7 @@
       var kind=button.getAttribute("data-space-create"),label=button.getAttribute("aria-label");
       var reason="";
       if(!ready)reason="Interactive map is unavailable or still loading.";
-      else if(mapBusy() || switchPending)reason="Wait for the current save or mode switch to finish.";
+      else if(mapBusy() || switchPending || locationRemovalPending)reason="Wait for the current save or mode switch to finish.";
       else if(kind==="location" && !state.selectedRegisterId)reason="Open a Register record to add a location.";
       else if(kind!=="location" && !state.selectedProjectId)reason="Create a Project for this record before drawing.";
       button.disabled=Boolean(reason);
@@ -211,43 +207,71 @@
   function positionRadialControls() {
     var menu=one("#spaceRadialMenu");if(!menu)return;
     var width=menu.getBoundingClientRect().width;if(!width)return;
-    // Reserve space beside the outer nodes for their outward-facing branches.
     var span=Math.min(300,Math.max(0,width-116)),hub={x:width/2,y:32};
-    var positions={location:.1367,polygon:.33,line:.67,square:.8633},parents={},connections=[];
+    var positions={location:.1367,polygon:.33,line:.67,square:.8633},parents={};
     Object.keys(positions).forEach(function(kind){
-      var parent={x:width/2+(positions[kind]-.5)*span,y:kind==="location" || kind==="square"?83:141};
-      parents[kind]=parent;one('[data-space-create="'+kind+'"]').style.left=parent.x+"px";
-      connections.push(orbConnection(hub,32,parent,24));
+      parents[kind]={x:width/2+(positions[kind]-.5)*span,y:kind==="location" || kind==="square"?83:141};
     });
-    var firstTier=one(".space-radial__connections");
-    firstTier.setAttribute("viewBox","0 0 "+width+" 180");firstTier.querySelector("path").setAttribute("d",connections.join(""));
-    if(!radialDraftKind)return;
-    var parent=parents[radialDraftKind],outer=radialDraftKind==="location" || radialDraftKind==="square";
-    var dx=parent.x-hub.x,dy=parent.y-hub.y,length=Math.hypot(dx,dy),spoke={x:dx/length,y:dy/length};
     var undo=one('#spaceUndoDraft'),showUndo=!undo.hidden;
-    var axis=showUndo || outer?spoke:{x:0,y:1};
-    var offsets=[showUndo?-56:-36,showUndo?56:36].map(function(side){return {x:side*axis.y+(showUndo?65:53)*axis.x,y:-side*axis.x+(showUndo?65:53)*axis.y};});
-    var undoDistance=spoke.x<0?Math.min(100,(parent.x-24)/-spoke.x):spoke.x>0?Math.min(100,(width-24-parent.x)/spoke.x):100;
-    offsets.push({x:undoDistance*spoke.x,y:undoDistance*spoke.y});
-    var children=offsets.map(function(offset){return {x:parent.x+offset.x,y:parent.y+offset.y};});
-    // Adapt the side branches on narrow maps; Undo always continues its spoke.
-    if(children.slice(0,2).some(function(child){return child.x<24 || child.x>width-24 || Object.keys(parents).some(function(kind){return kind!==radialDraftKind && Math.hypot(child.x-parents[kind].x,child.y-parents[kind].y)<52;});})){
-      var side=showUndo?50:36,margin=side+26,center=Math.max(margin,Math.min(width-margin,parent.x)),top=Math.max(showUndo?210:194,showUndo?children[2].y+54:194);
-      children[0]={x:center-side,y:top};children[1]={x:center+side,y:top};
+    var parent=parents[radialDraftKind],outer=radialDraftKind==="location" || radialDraftKind==="square",spoke;
+    function branchPoints(expanded){
+      var axis=expanded || outer?spoke:{x:0,y:1},depth=expanded?65:53,side=expanded?56:36;
+      return [-side,side].map(function(offset){return {x:parent.x+offset*axis.y+depth*axis.x,y:parent.y-offset*axis.x+depth*axis.y};})
+        .concat([{x:parent.x+100*spoke.x,y:parent.y+100*spoke.y}]);
     }
-    animateRadialActions(parent,children,width,showUndo);
+    if(parent){
+      var dx=parent.x-hub.x,dy=parent.y-hub.y,length=Math.hypot(dx,dy);
+      spoke={x:dx/length,y:dy/length};
+      if(outer){
+        // Reserve both fan states before Undo appears, so the parent and hub stay
+        // still throughout the approval-orb animation, even on narrow maps.
+        var reserved=branchPoints(true).concat(branchPoints(false).slice(0,2));
+        var minX=Math.min.apply(null,reserved.map(function(p){return p.x;}));
+        var maxX=Math.max.apply(null,reserved.map(function(p){return p.x;}));
+        var shift=Math.max(24-minX,Math.min(0,width-24-maxX));
+        parent.x+=shift;hub.x+=shift;
+        reserved=branchPoints(true).concat(branchPoints(false).slice(0,2));
+        // Only reflow inactive nodes when the available map width requires it.
+        Object.keys(parents).forEach(function(kind){
+          if(kind===radialDraftKind)return;
+          var original=parents[kind];
+          function fits(p){
+            return Math.hypot(p.x-hub.x,p.y-hub.y)>=56 &&
+              reserved.every(function(q){return Math.hypot(p.x-q.x,p.y-q.y)>=52;}) &&
+              Object.keys(parents).every(function(other){var q=parents[other];return other===kind || Math.hypot(p.x-q.x,p.y-q.y)>=52;});
+          }
+          if(fits(original))return;
+          var best=null,distance=Infinity;
+          for(var y=56;y<=300;y+=4)for(var x=24;x<=width-24;x+=4){
+            var candidate={x:x,y:y},delta=Math.hypot(x-original.x,y-original.y);
+            if(delta<distance && fits(candidate)){best=candidate;distance=delta;}
+          }
+          if(best)parents[kind]=best;
+        });
+      }
+    }
+    one('#spaceRadialToggle').style.left=hub.x+'px';
+    Object.keys(parents).forEach(function(kind){
+      var node=one('[data-space-create="'+kind+'"]');
+      node.style.left=parents[kind].x+'px';node.style.top=parents[kind].y+'px';
+    });
+    var height=Math.max(180,Math.ceil(Math.max.apply(null,Object.keys(parents).map(function(kind){return parents[kind].y;}))+28));
+    var firstTier=one(".space-radial__connections");
+    firstTier.style.height=height+'px';firstTier.setAttribute("viewBox","0 0 "+width+" "+height);
+    firstTier.querySelector("path").setAttribute("d",Object.keys(parents).map(function(kind){return orbConnection(hub,32,parents[kind],24);}).join(""));
+    if(parent)animateRadialActions(parent,branchPoints(showUndo),width,showUndo,height);
   }
 
-  function animateRadialActions(parent,children,width,showUndo) {
-    var signature=JSON.stringify([radialDraftKind,width,showUndo,children]);
+  function animateRadialActions(parent,children,width,showUndo,firstTierHeight) {
+    var signature=JSON.stringify([radialDraftKind,width,showUndo,children,firstTierHeight]);
     if(radialLayout && radialLayout.signature===signature)return;
     if(radialAnimationFrame)root.cancelAnimationFrame(radialAnimationFrame);
     var buttons=['#spaceAcceptDraft','#spaceCancelDraft','#spaceUndoDraft'].map(one);
     var start=buttons.map(function(button){return {x:parseFloat(button.style.left),y:parseFloat(button.style.top)};});
     var animate=radialLayout && radialLayout.kind===radialDraftKind && start.every(function(point){return Number.isFinite(point.x) && Number.isFinite(point.y);}) && !root.matchMedia('(prefers-reduced-motion: reduce)').matches;
     radialLayout={signature:signature,kind:radialDraftKind};
-    var svg=one('.space-radial__draft-connections'),height=Math.max(270,Math.ceil(Math.max(children[0].y,children[1].y,children[2].y)+28));
-    one('#spaceRadialMenu').style.height=showUndo?height+'px':'226px';svg.style.height=height+'px';svg.setAttribute('viewBox','0 0 '+width+' '+height);
+    var svg=one('.space-radial__draft-connections'),height=Math.max(firstTierHeight,showUndo?270:226,Math.ceil(Math.max.apply(null,children.slice(0,showUndo?3:2).map(function(p){return p.y;}))+28));
+    one('#spaceRadialMenu').style.height=height+'px';svg.style.height=height+'px';svg.setAttribute('viewBox','0 0 '+width+' '+height);
     function paint(progress){
       var points=children.map(function(target,index){return index===2?target:{x:start[index].x+(target.x-start[index].x)*progress,y:start[index].y+(target.y-start[index].y)*progress};});
       points.forEach(function(point,index){buttons[index].style.left=point.x+'px';buttons[index].style.top=point.y+'px';});
@@ -683,6 +707,32 @@ function setMapCanvasCursor(cursor) {
   }
 
 
+  function confirmDiscardMapWork(removing) {
+    return new Promise(function(resolve){
+      var dialog=one('#spaceSwitchDialog');
+      one('#spaceSwitchDescription').textContent=removing?'Discard the current map draft before removing this location?':'Switching will discard the current map draft.';
+      one('#spaceDiscardSwitch').textContent=removing?'Discard edits':'Discard and switch';
+      dialog.addEventListener('close',function(){resolve(dialog.returnValue==='discard');},{once:true});
+      dialog.returnValue='keep';dialog.showModal();one('#spaceKeepEditing').focus();
+    });
+  }
+
+  async function removeSelectedLocation() {
+    if(locationRemovalPending || mapBusy() || switchPending)return;
+    var state=mapViewState(getWorkspace()),registerId=state.selectedRegisterId,id=pinSession?pinSession.selectedId:state.selectedLocationId;
+    if(state.scopeMode!=='register' || !registerId || !id)return;
+    locationRemovalPending=true;updateSidebarControls();updateRadialControls();
+    try{
+      if(unfinishedMapWork() && !await confirmDiscardMapWork(true))return;
+      if(mapViewState(getWorkspace()).selectedRegisterId!==registerId || mapBusy())return;
+      cancelActiveMapInteraction();pendingMoasureImport=null;pendingPolygonPlacementId=null;
+      updateDraftActions();renderEventPicker();
+      var pins=root.UOS.ProgramModel.registerLocations(getWorkspace(),registerId);
+      if(pins.some(function(pin){return pin.id===id;}))await confirmPinRemoval(registerId,id);
+    }catch(error){showError(error);}
+    finally{locationRemovalPending=false;render();updateRadialControls();updateSidebarControls();}
+  }
+
   function beginPinSession(){
     if(pinSession)return pinSession;
     var workspace=getWorkspace(),state=canonicalMapState(workspace);
@@ -795,8 +845,7 @@ function setMapCanvasCursor(cursor) {
     }
       if(button.id==="moveLocationButton")startSpacePinPlacement(true);
       else if(button.id==="removeLocationButton"){
-        session=beginPinSession();var id=session.selectedId;
-        root.UOS.ProgramDeleteSafety.confirm({title:"Remove location pin?",message:"Remove this location from the draft? Accept commits the removal; Cancel restores it.",confirmLabel:"Remove pin",cancelLabel:"Keep pin",apply:function(guard){if(pinSession!==session || session.busy)return Promise.resolve();stagePinOperation("remove",id);session.operations[session.operations.length-1].guard=guard;return Promise.resolve();}});
+        removeSelectedLocation();
       }else if(button.id==="fitLocationsButton")mapController.fitLocations();
       else if(button.id==="homeLocationsButton")mapController.resetView();
       else if(button.id==="labelLocationsButton"){

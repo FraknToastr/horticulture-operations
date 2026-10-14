@@ -1,4 +1,6 @@
 /* A full civil day remains visible for around-the-clock depot operations. */
+@media(min-width:901px){.program-scheduler-layout,.program-register-module-host .program-scheduler-layout{grid-template-columns:360px minmax(0,1fr)!important}}
+.program-scheduler-detail [data-scheduler-detail-title]{font-size:14px;line-height:1.35}
 .program-scheduler-calendar>.program-scheduler-head{flex:0 0 auto;position:relative;z-index:30}
 .program-scheduler-calendar>.program-calendar-scroll{isolation:isolate;min-width:0}
 .program-calendar.program-calendar--week{display:block;min-width:1036px;background:var(--panel-bg,#fff);overflow:visible}
@@ -15,17 +17,53 @@
 .scheduler-week-gutter{position:sticky;left:0;z-index:10;height:1152px;background:var(--panel-bg,#fff);border-right:1px solid var(--panel-border,#dbe3ea)}
 .scheduler-week-hour-label{position:absolute;left:0;right:0;height:16px;padding:2px 4px;font-size:10px;font-weight:700;color:var(--uos-text-muted);background:var(--panel-bg,#fff);line-height:12px}
 .program-calendar--week .program-calendar__day.scheduler-week-day{position:relative;height:1152px;min-height:0;padding:0;border-right:1px solid var(--panel-border,#dbe3ea);box-sizing:border-box;overflow:visible}
-.scheduler-week-hour{height:48px;box-sizing:border-box;border-top:1px solid var(--panel-border,#dbe3ea);background:linear-gradient(to bottom,transparent 23px,color-mix(in srgb,var(--panel-border,#dbe3ea) 45%,transparent) 23px,color-mix(in srgb,var(--panel-border,#dbe3ea) 45%,transparent) 24px,transparent 24px)}
-.scheduler-week-hour:last-of-type{border-bottom:1px solid var(--panel-border,#dbe3ea)}
 .program-calendar-job.scheduler-week-job{position:absolute;box-sizing:border-box;margin:0!important;min-height:0!important;min-width:0;padding:2px 4px!important;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;font-size:11px;line-height:14px;border-radius:4px}
 /* Marching ants need a positioned card, while timed cards must stay in their slot. */
 .program-calendar.program-calendar--week .program-calendar-job.scheduler-week-job{position:absolute}
 .scheduler-week-job .program-calendar-job__title{display:block;width:100%;flex:0 0 auto}
 .scheduler-week-job .program-calendar-job__time{font-size:10px;white-space:nowrap;display:block;flex:0 0 auto;color:inherit;opacity:.9}
-.scheduler-week-job.is-short .program-calendar-job__time{display:none}
-.program-calendar-job.scheduler-week-job.is-short{padding-block:0!important;border-block-width:0}
 .scheduler-week-job:focus-visible{z-index:12;outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:-2px}
-.program-scheduler-export-action{display:flex;justify-content:center;margin-top:12px}
+.program-scheduler-inspector{display:flex;flex-direction:column}
+.program-scheduler-inspector>[data-scheduler-list-mode],.program-scheduler-inspector>[data-scheduler-detail]{flex:1 1 0;min-height:0;height:auto!important;overflow:hidden}
+.program-scheduler-outlook-panel{--outlook-surface:#f1f3f5;--outlook-field:#fff;--outlook-line:#bcc5cc;--outlook-ink:#263741;flex:none;padding:8px;border-top:1px solid var(--outlook-line);background:var(--outlook-surface)}
+html[data-suite-theme="dark"] .program-scheduler-outlook-panel{--outlook-surface:#242b31;--outlook-field:#303940;--outlook-line:#58656e;--outlook-ink:#e8eef2}
+.program-scheduler-outlook-button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;margin:0;box-sizing:border-box;width:100%;border:1px solid var(--outlook-line);border-radius:2px;background:var(--outlook-field);color:var(--outlook-ink);font:inherit;font-size:12px;text-align:center;cursor:pointer}
+.program-scheduler-outlook-button:hover,.program-scheduler-outlook-button:active{background:var(--outlook-field);border-color:var(--outlook-line);color:var(--outlook-ink);box-shadow:none;transform:none}
+.program-scheduler-outlook-button:focus-visible{outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:2px}
+.program-scheduler-outlook-button:disabled{cursor:not-allowed;opacity:.6}
+.program-scheduler-outlook-logo{display:flex;align-items:center;justify-content:center;width:100%;height:56px;border-radius:2px;background:#fff}
+.program-scheduler-outlook-logo img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}
+.scheduler-week-month{display:block;font-size:12px;font-weight:700;line-height:16px;margin-bottom:3px;color:var(--uos-text-muted)}
+.scheduler-priority-pill{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex:none;box-sizing:border-box;min-width:20px;height:20px;padding:0 4px;border:1px solid;border-radius:10px;font-size:11px;line-height:18px;font-weight:800;margin-inline-start:5px}
+.scheduler-priority--low{color:#14532d;background:#dcfce7;border-color:#86efac}
+.scheduler-priority--medium{color:#854d0e;background:#fef3c7;border-color:#fcd34d}
+.scheduler-priority--high{color:#991b1b;background:#fee2e2;border-color:#fca5a5}
+.program-calendar-job>.scheduler-priority-pill{position:absolute;right:3px;top:2px;margin:0}
+.program-calendar-job:has(>.scheduler-priority-pill) .program-calendar-job__title{padding-right:23px;box-sizing:border-box}
+.scheduler-week-day.is-editable{cursor:crosshair}
+.scheduler-week-day.is-editable:focus-visible{outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:-2px}
+.scheduler-week-day.is-editable:focus-visible:after{content:"";position:absolute;left:0;right:0;top:var(--scheduler-focused-minute,37.5%);height:24px;outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:-2px;pointer-events:none;z-index:12}
+.scheduler-week-handle{position:absolute;z-index:16;width:44px;height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:0;border-radius:0;background:transparent;color:var(--uos-brand);box-shadow:none;touch-action:none;cursor:ns-resize;padding:0}
+.scheduler-week-handle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;pointer-events:none}
+
+
+[data-week-boundary]{position:absolute;z-index:14;height:0;border-top:2px solid var(--uos-brand);pointer-events:none}
+.scheduler-week-job.is-schedule-draft{box-shadow:inset 0 0 0 2px var(--uos-brand)}
+.scheduler-week-slot{position:relative;display:flex;flex-direction:column;gap:4px;padding:4px;box-sizing:border-box;flex:none;box-shadow:inset 0 1px 0 var(--panel-border,#dbe3ea)}
+.scheduler-type-warning{position:absolute;right:26px;top:3px;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:#fef3c7;color:#854d0e;border:1px solid #fcd34d;border-radius:50%;font-weight:900;font-size:12px;line-height:14px}
+.program-calendar-job.has-type-warning .program-calendar-job__title{padding-right:43px;box-sizing:border-box}
+.scheduler-week-handle{border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--uos-brand)}
+.scheduler-week-handle:hover{background:transparent}
+.scheduler-week-handle svg{transform:translateY(var(--grip-offset-y,0));background:var(--uos-surface,#fff);border-radius:2px}
+.scheduler-week-edge-grip{display:block;width:18px;height:7px;box-sizing:border-box;border:2px solid var(--uos-brand);background:var(--uos-surface,#fff);border-radius:2px;transform:translateY(var(--grip-offset-y,0));pointer-events:none}
+.scheduler-week-day.is-editable:focus-visible:after{top:var(--scheduler-focused-top,0);height:var(--scheduler-focused-height,24px)}
+.scheduler-week-day.is-editable .scheduler-week-slot:hover{outline:1px solid color-mix(in srgb,var(--uos-brand) 50%,transparent);outline-offset:-1px}
+.scheduler-week-drag-ghost{position:absolute;left:4px;right:4px;z-index:15;box-sizing:border-box;border:3px solid var(--uos-brand);background:color-mix(in srgb,var(--uos-brand) 20%,var(--panel-bg,#fff));color:var(--uos-text);padding:5px;font-size:12px;pointer-events:none}
+.scheduler-week-job.is-drag-source{opacity:.25}
+[data-scheduler-draft-state]{font-size:12px;font-weight:700;color:var(--uos-brand)}
+[data-scheduler-placement-hint]{font-size:12px;color:var(--uos-text-muted)}
+.program-register-module-host .program-scheduler-layout>.program-scheduler-inspector{min-height:360px}
+@media(max-width:900px){.program-register-module-host .program-scheduler-layout>.program-scheduler-inspector{height:560px!important;min-height:560px!important;flex:none}.program-scheduler-inspector{min-height:560px}}
 .scheduler-outlook-options{display:grid;gap:14px}
 .scheduler-outlook-options p{margin:0;line-height:1.5}
 .scheduler-outlook-times{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -35,3 +73,76 @@
 .scheduler-outlook-options [role=alert]{color:var(--uos-danger,#b91c1c)}
 .scheduler-outlook-options button{justify-self:end}
 @media(max-width:480px){.scheduler-outlook-times{grid-template-columns:1fr}}
+
+/* One booking is one continuous block. Shared bands stack overlapping bookings. */
+.program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job{
+ position:absolute;left:6px;right:6px;width:auto;min-height:44px!important;margin:0!important;
+ padding:7px 9px!important;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;
+ border:1px solid var(--panel-border,#bcc5cc);border-radius:3px;
+ background:color-mix(in srgb,var(--uos-brand) 12%,var(--panel-bg,#fff));
+ color:var(--uos-text,#263741)!important;box-shadow:none;z-index:3;
+}
+.program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job.is-other-project{
+ background:var(--uos-surface-subtle,#f2f4f6);color:var(--uos-text,#263741)!important;
+}
+.program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job.is-selected{
+ border:3px solid var(--uos-brand);padding:5px 7px!important;
+ background:color-mix(in srgb,var(--uos-brand) 18%,var(--panel-bg,#fff));outline:0!important;box-shadow:none!important;
+}
+.program-calendar.program-calendar--week .scheduler-week-job::after,
+.program-calendar.program-calendar--week .scheduler-week-job::before{display:none!important;animation:none!important}
+.scheduler-week-day>.scheduler-week-job .program-calendar-job__title{
+ color:inherit!important;font-weight:700;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:38px;box-sizing:border-box;
+}
+.scheduler-week-day>.scheduler-week-job .program-calendar-job__time,
+.scheduler-week-job-context{color:inherit;font-size:11px;font-weight:400;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scheduler-week-overlap-band{
+ position:absolute;left:0;right:0;box-sizing:border-box;
+ border-top:1px solid var(--panel-border,#bcc5cc);border-bottom:1px solid var(--panel-border,#bcc5cc);
+ background:color-mix(in srgb,var(--uos-brand) 4%,var(--panel-bg,#fff));pointer-events:none;z-index:1;
+}
+.scheduler-week-band-label{display:block;padding:8px;font-size:10px;line-height:12px;font-weight:700;color:var(--uos-text-muted)}
+.scheduler-week-slot.is-shared-band{box-shadow:none}
+.scheduler-week-day>.scheduler-week-job.is-in-shared-band{left:8px;right:8px;background:var(--panel-bg,#fff)}
+.scheduler-week-handle{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;border-radius:0!important}
+.scheduler-week-handle:focus-visible .scheduler-week-edge-grip,
+.scheduler-week-handle:focus-visible svg{outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:2px}
+.scheduler-week-handle svg{width:18px;height:18px;box-shadow:none}
+.scheduler-week-drag-ghost{border-radius:3px}
+.program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job.is-compact{padding:4px 7px!important;gap:2px}
+.program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job.is-compact.is-selected{padding:2px 5px!important}
+.scheduler-week-job.is-compact .program-calendar-job__title{line-height:14px}
+.scheduler-week-job.is-compact .program-calendar-job__time{line-height:12px}
+.scheduler-week-job.is-compact .scheduler-week-job-context{display:none}
+
+
+/* All-day date ranges use compact, non-overlapping lanes above the time ladder. */
+.scheduler-week-head>.scheduler-all-day-rail{grid-column:2 / -1;grid-row:2;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px 0;padding:4px 0;position:relative;min-height:40px}
+.scheduler-all-day-hit{min-width:0;border-right:1px solid var(--panel-border,#dbe3ea)}
+.scheduler-all-day-rail>.scheduler-all-day-card{position:relative;z-index:2;min-width:0;margin:0 4px!important;min-height:32px;max-height:32px;padding:6px 30px 6px 8px;box-sizing:border-box;overflow:hidden}
+.scheduler-all-day-card .program-calendar-job__title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scheduler-all-day-card.continues-before{border-left-style:dashed}
+.scheduler-all-day-card.continues-after{border-right-style:dashed}
+/* Month dates remain a seven-column grid; booking lanes can span cells. */
+.program-calendar.program-calendar--month{display:block;min-width:720px;background:var(--panel-bg,#fff)}
+.scheduler-month-heading{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));position:sticky;top:0;z-index:20;background:var(--panel-bg,#fff)}
+.scheduler-month-heading>.program-calendar__weekday{position:static;text-align:center}
+.scheduler-month-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));position:relative}
+.scheduler-month-week>.scheduler-month-day{min-height:116px;padding:5px 7px;box-sizing:border-box;border-right:1px solid var(--panel-border,#dbe3ea);border-bottom:1px solid var(--panel-border,#dbe3ea);overflow:visible}
+.scheduler-month-day>.program-calendar__date{margin:0;line-height:22px}
+.scheduler-month-jobs{position:absolute;left:0;right:0;top:32px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:32px;gap:4px 0;pointer-events:none}
+.scheduler-month-jobs>.scheduler-month-card{position:relative;min-width:0;min-height:32px;margin:0 4px!important;padding:5px 28px 5px 7px;box-sizing:border-box;pointer-events:auto;overflow:hidden}
+.scheduler-month-card .program-calendar-job__title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scheduler-month-card.is-selected{position:relative}
+.scheduler-month-card.is-selected,.scheduler-all-day-card.is-selected{padding-right:72px!important}
+.scheduler-month-card.is-selected .program-calendar-job__title,.scheduler-all-day-card.is-selected .program-calendar-job__title{padding-right:0!important}
+.scheduler-month-jobs>.scheduler-month-card,.scheduler-all-day-rail>.scheduler-all-day-card{width:auto!important;max-width:none!important;justify-self:stretch}
+.scheduler-month-card.is-selected::after{display:block!important;animation:scheduler-selection-ants .8s linear infinite!important}
+.scheduler-week-handle[data-scheduler-gesture-owner]{z-index:60!important;touch-action:none}
+.scheduler-week-edge-grip.is-date-grip{width:7px;height:18px;transform:none}
+.scheduler-week-handle[data-week-handle="date-start"],.scheduler-week-handle[data-week-handle="date-end"]{cursor:ew-resize}
+.scheduler-week-handle[data-week-handle="move"]{cursor:move}
+.scheduler-date-drag-ghost{position:fixed!important;right:auto;z-index:65!important;pointer-events:none;padding:6px;overflow:hidden;white-space:normal;font-size:11px}
+.program-calendar .is-date-preview{box-shadow:inset 0 0 0 2px var(--uos-brand);background:color-mix(in srgb,var(--uos-brand) 10%,var(--panel-bg,#fff))}
+.program-calendar-job.is-drag-source{opacity:.25}
+@media(prefers-reduced-motion:reduce){.scheduler-month-card.is-selected::after{animation:none!important}}

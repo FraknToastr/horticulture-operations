@@ -172,28 +172,36 @@
     return locationId || (isGenericLocation(location) ? "" : location.toLowerCase());
   }
   function overlaps(a, b) { return a._startMs < b._endMs && a._endMs > b._startMs; }
+  function jobType(workspace, job) {
+    job = job || {}; var entities = workspace && workspace.entities || {};
+    var lines = entities.costingLines || [], geometries = entities.geometries || [], rates = entities.rateItems || [];
+    var line = lines.find(function (item) { return item.id === (job.sourceCostingLineId || (job.sourceKind === "calculator" ? job.sourceEntityId : "")); });
+    var geometry = geometries.find(function (item) { return item.id === (job.sourceGeometryId || (job.sourceKind === "space-map" ? job.sourceEntityId : "")); });
+    var payload = geometry && geometry.payload || {};
+    var workType = text(job.jobTypeKey || job.workTypeKey || job.jobType || job.workType || line && line.sourceWorkTypeKey || geometry && (geometry.workTypeKey || geometry.workType) || payload.workTypeKey || payload.workType);
+    if (workType) return { key: "work:" + workType.trim().toLowerCase(), label: workType };
+    var rateId = job.rateItemId || line && line.rateItemId, rate = rates.find(function (item) { return item.id === rateId; });
+    if (rateId) return { key: "rate:" + rateId, label: text(rate && (rate.title || rate.name || rate.description)) || text(job.title) || rateId };
+    var label = text(job.title || job.name);
+    return { key: label ? "name:" + label.toLowerCase().replace(/\s+/g, " ") : "", label: label };
+  }
   function detectConflicts(values) {
     var jobs = (Array.isArray(values) ? values : []).map(normalizeJob);
     jobs.sort(function (a, b) { return a._startMs - b._startMs; });
     var conflicts = [];
     for (var left = 0; left < jobs.length; left += 1) {
-      var a = jobs[left];
-      var aCrew = a.crewId ? a.crewId.toLowerCase() : "";
-      var aLoc = locationKey(a);
-      if (!aCrew && !aLoc) continue;
+      var a = jobs[left], aCrew = a.crewId ? a.crewId.toLowerCase() : "", aLoc = locationKey(a), aType = a._jobTypeKey || jobType(null, a).key;
       for (var right = left + 1; right < jobs.length; right += 1) {
-        var b = jobs[right];
-        if (b._startMs >= a._endMs) break;
-        if (!overlaps(a, b)) continue;
-        var bCrew = b.crewId ? b.crewId.toLowerCase() : "";
-        var bLoc = locationKey(b);
-        var sameCrew = Boolean(aCrew && aCrew === bCrew);
-        var sameLocation = Boolean(aLoc && aLoc === bLoc);
-        if (!sameCrew && !sameLocation) continue;
+        var b = jobs[right]; if (b._startMs >= a._endMs) break; if (!overlaps(a, b)) continue;
+        var sameCrew = Boolean(aCrew && aCrew === (b.crewId || "").toLowerCase());
+        var sameLocation = Boolean(aLoc && aLoc === locationKey(b));
+        var sameType = Boolean(aType && aType === (b._jobTypeKey || jobType(null, b).key));
+        if (!sameCrew && !sameLocation && !sameType) continue;
         var labels = [];
         if (sameCrew) labels.push(a.allDay || b.allDay ? "Crew Double-Booked (All-Day Job)" : "Crew Double-Booked");
         if (sameLocation) labels.push("Location Double-Booked");
-        conflicts.push({ jobIds: [a.id, b.id], crew: sameCrew, location: sameLocation, allDay: a.allDay || b.allDay, labels: labels });
+        if (sameType) labels.push("Same job type: " + (a._jobTypeLabel || jobType(null, a).label));
+        conflicts.push({ jobIds: [a.id, b.id], crew: sameCrew, location: sameLocation, sameType: sameType, allDay: a.allDay || b.allDay, labels: labels });
       }
     }
     return conflicts;
@@ -230,7 +238,7 @@
     addDays: addDays, mondayOfWeek: mondayOfWeek, weekDays: weekDays, monthGrid: monthGrid,
     normalizeJob: normalizeJob, sourceKind: sourceKind, canonicalSourceKind: canonicalSourceKind, sourceLabel: sourceLabel,
     resolveSourceRecord: resolveSourceRecord, sourceTrace: sourceTrace, duplicateSources: duplicateSources, upsertIntake: upsertIntake,
-    isGenericLocation: isGenericLocation, overlaps: overlaps, detectConflicts: detectConflicts, ownerLabel: ownerLabel, scheduleJob: scheduleJob
+    isGenericLocation: isGenericLocation, overlaps: overlaps, detectConflicts: detectConflicts, jobType: jobType, ownerLabel: ownerLabel, scheduleJob: scheduleJob
   };
   UOS.ProgramSchedulerModel = UOS.programSchedulerModel = api;
 }());

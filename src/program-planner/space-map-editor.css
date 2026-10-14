@@ -50,7 +50,7 @@ html[data-suite-theme="dark"] .space-editor { --space-surface:#242b31; --space-f
 .space-editor .space-editor__moasure-logo img { display:block; max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; }
 .space-editor .space-editor__moasure-panel > button { width:100%; }
 .space-editor .space-editor__canvas { position:relative; }
-.space-editor .space-radial { position:absolute; top:16px; left:50%; transform:translateX(-50%); width:min(416px,calc(100% - 16px)); height:180px; z-index:7; pointer-events:none; }
+.space-editor .space-radial { position:absolute; top:16px; left:50%; transform:translateX(-50%); width:min(480px,calc(100% - 16px)); height:180px; z-index:7; pointer-events:none; }
 .space-editor .space-radial__hub, .space-editor .space-radial__node { position:absolute; z-index:2; display:flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--space-line); border-radius:50%; background:var(--space-field); color:var(--space-ink); box-shadow:0 2px 8px color-mix(in srgb,var(--space-ink) 18%,transparent); cursor:pointer; pointer-events:auto; }
 .space-editor .space-radial__hub { top:0; left:50%; transform:translateX(-50%); width:64px; height:64px; border:2px solid var(--space-active); color:var(--space-active); z-index:2; }
 .space-editor .space-radial__hub svg { width:32px; height:32px; transition:transform 150ms ease; }
@@ -148,6 +148,7 @@ html[data-suite-theme="dark"] .space-editor[data-space-owner="EVT"] { --space-ac
 .space-editor #spaceAcceptDraft, .space-editor #spaceCancelDraft { top:194px; }
 .space-editor #spaceUndoDraft { top:241px; }
 .space-editor [data-location-edit-controls] { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.space-editor #removeLocationButton svg { color:var(--uos-danger,#d32f45); }
 .space-editor [data-location-edit-controls][hidden], .space-editor #spaceUndoDraft[hidden] { display:none; }
 .space-editor #spaceUndoDraft:not([hidden]) { animation:space-undo-appear 220ms ease-out; }
 @keyframes space-undo-appear { from { opacity:0; } to { opacity:1; } }

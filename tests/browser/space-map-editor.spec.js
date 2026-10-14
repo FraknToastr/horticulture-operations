@@ -71,8 +71,8 @@ for(const owner of ['NSA','EVT']){
     await frame.locator('#spaceCancelDraft').click();
     await frame.locator('#removeLocationButton').click();
     await frame.getByRole('dialog').filter({has:frame.getByRole('button',{name:'Remove pin',exact:true})}).getByRole('button',{name:'Remove pin',exact:true}).click();
-    await expect(frame.locator('[data-space-pin]')).toHaveCount(1);expect((await pins()).length).toBe(2);
-    await frame.locator('#spaceAcceptDraft').click();await expect.poll(async()=>(await pins()).length).toBe(1);
+    await expect(frame.locator('[data-space-pin]')).toHaveCount(1);await expect.poll(async()=>(await pins()).length).toBe(1);
+    await expect(frame.locator('#spaceDraftActions')).toBeHidden();
     await expect(frame.locator('[data-space-pin] svg text')).toHaveText('1');
     await frame.locator('#labelLocationsButton').click();await expect(frame.locator('[data-space-pin] svg text')).toHaveText('1');await expect(frame.locator('.uos-numbered-location-pin text')).toHaveCount(0);
     expect(errors).toEqual([]);
@@ -187,7 +187,7 @@ for (const owner of ['NSA','EVT']) {
         expect(layout.centerError).toBeLessThan(1);expect(layout.aspect).toBeCloseTo(layout.naturalAspect,2);
         expect(layout.panelTabIndex).toBe(0);expect(layout.panelRole).toBeNull();
         expect(layout.buttonWidth).toBe(layout.panelWidth);
-        expect(layout.rowButtons).toEqual([['Move','Remove'],['Fit','Home','Labels']]);
+        expect(layout.rowButtons).toEqual([['Fit','Home','Labels'],['Move','Remove']]);
         expect(layout.modeWidths).toEqual([]);
         expect(layout.overflow).toEqual([]);expect(layout.toolsOverflow).toBe(false);
       }

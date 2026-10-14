@@ -26,6 +26,53 @@ async function point(frame,x=.6,y=.7){const canvas=frame.locator('.maplibregl-ca
 async function mode(frame,value){await frame.locator(`[data-space-mode="${value}"]`).click();await expect(frame.locator(`[data-space-mode="${value}"]`)).toHaveAttribute('aria-pressed','true');await expect(frame.locator(`[data-space-mode="${value}"]`)).toBeEnabled();await frame.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));}
 async function drop(frame,files){await frame.locator('#moasureImportButton').evaluate((box,files)=>{const dt=new DataTransfer();for(const f of files)dt.items.add(new File([f.text||''],f.name,{type:f.type||'text/csv'}));box.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:dt}));},files);}
 for(const owner of ['NSA','EVT']){
+
+  test(`${owner}: Location removal uses permanent confirmation and resolves unfinished edits`,async({page})=>{
+    const {frame,ids,errors}=await setup(page,owner);
+    await mode(frame,'register');await frame.locator('[data-space-pin]').click();
+    const move=frame.locator('#moveLocationButton'),remove=frame.locator('#removeLocationButton'),orbs=frame.locator('#spaceDraftActions'),undo=frame.locator('#spaceUndoDraft');
+    const pins=()=>frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id),ids.recordId),original=await pins();
+    await expect(move).toBeVisible();
+    await expect.poll(()=>frame.evaluate(()=>{
+      const view=document.querySelector('#fitLocationsButton').getBoundingClientRect(),edit=document.querySelector('#moveLocationButton').getBoundingClientRect();
+      return view.height>0 && edit.height>0 && view.bottom<=edit.top;
+    })).toBe(true);
+    await expect(move.locator('svg path')).toHaveAttribute('d','M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3');
+    const colour=await remove.locator('svg').evaluate(svg=>getComputedStyle(svg).color.match(/\d+/g).map(Number));
+    expect(colour[0]).toBeGreaterThan(colour[1]*1.3);expect(colour[0]).toBeGreaterThan(colour[2]*1.3);
+    const dialog=frame.getByRole('dialog').filter({has:frame.getByRole('button',{name:'Remove pin',exact:true})});
+
+    // Merely entering Move is not unfinished work.
+    await move.click();await remove.click();await expect(dialog).toBeVisible();await expect(orbs).toBeHidden();
+    await dialog.getByRole('button',{name:'Cancel',exact:true}).click();await expect(remove).toBeEnabled();expect(await pins()).toEqual(original);
+
+    await move.click();await point(frame,.65,.75);await expect(undo).toBeVisible();
+    await remove.click();await expect(frame.locator('#spaceSwitchDialog')).toBeVisible();
+    await expect(frame.locator('#spaceDiscardSwitch')).toHaveText('Discard edits');
+    await frame.locator('#spaceKeepEditing').click();await expect(remove).toBeEnabled();
+    await expect(orbs).toBeVisible();await expect(undo).toBeVisible();expect(await pins()).toEqual(original);
+    await remove.click();await frame.locator('#spaceDiscardSwitch').click();
+    await expect(dialog).toBeVisible();await expect(orbs).toBeHidden();
+    await dialog.getByRole('button',{name:'Cancel',exact:true}).click();await expect(remove).toBeEnabled();expect(await pins()).toEqual(original);
+
+    // Discarding an unsaved new pin must not delete a saved pin.
+    await startSpaceCreation(frame,'location');await point(frame,.6,.75);await remove.click();await frame.locator('#spaceDiscardSwitch').click();
+    await expect(orbs).toBeHidden();await expect(dialog).toBeHidden();expect(await pins()).toEqual(original);
+    await frame.locator('[data-space-pin]').click();await remove.click();await expect(dialog).toBeVisible();
+    await frame.evaluate(async id=>UOS.ProgramApp.updateWorkspace(w=>{
+      const record=w.entities.applications.concat(w.entities.events).find(r=>r.id===id);record.title+=' changed';return w;
+    }),ids.recordId);
+    await dialog.getByRole('button',{name:'Remove pin',exact:true}).click();
+    await expect(frame.locator('.uos-toast').filter({hasText:'changed'})).toBeVisible();
+    await expect(remove).toBeEnabled();expect(await pins()).toEqual(original);await expect(orbs).toBeHidden();
+
+    await remove.click();await dialog.getByRole('button',{name:'Remove pin',exact:true}).click();
+    await expect.poll(pins).toEqual([]);await expect(orbs).toBeHidden();await expect(undo).toBeHidden();
+    await page.reload();const restored=page.frames().find(f=>f!==page.mainFrame());
+    await restored.waitForFunction(()=>window.UOS?.ProgramApp?.snapshot().phase==='ready');
+    expect(await restored.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id),ids.recordId)).toEqual([]);
+    expect(errors).toEqual([]);
+  });
   test(`${owner}: combined sidebar order, themes, saved mode and map payload filtering`,async({page})=>{
     const {frame,ids,errors}=await setup(page,owner);
     await expect(frame.locator('[data-space-panel]')).toHaveCount(1);
@@ -113,8 +160,8 @@ for(const owner of ['NSA','EVT']){
     await frame.locator('#spaceUndoDraft').click();expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates)).toEqual([]);
     await frame.locator('[data-space-mode="register"]').click();await expect(frame.locator('#spaceSwitchDialog')).toBeHidden();await expect(frame.locator('#spaceDraftActions')).toBeHidden();
     expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(original);
-    await frame.locator('[data-space-pin]').click();await frame.locator('#removeLocationButton').click();await frame.getByRole('button',{name:'Remove pin',exact:true}).click();await expect(frame.locator('[data-space-pin]')).toHaveCount(0);await frame.locator('#spaceUndoDraft').click();await expect(frame.locator('[data-space-pin]')).toHaveCount(1);await frame.locator('#spaceCancelDraft').click();
-    await startSpaceCreation(frame,'location');await point(frame);await frame.locator('#spaceAcceptDraft').click();await expect.poll(()=>frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id).length,ids.recordId)).toBe(2);expect(errors).toEqual([]);
+    await frame.locator('[data-space-pin]').click();await frame.locator('#removeLocationButton').click();await frame.getByRole('button',{name:'Remove pin',exact:true}).click();await expect(frame.locator('[data-space-pin]')).toHaveCount(0);await expect(frame.locator('#spaceDraftActions')).toBeHidden();
+    await startSpaceCreation(frame,'location');await point(frame);await frame.locator('#spaceAcceptDraft').click();await expect.poll(()=>frame.evaluate(id=>UOS.ProgramModel.registerLocations(UOS.ProgramApp.workspace(),id).length,ids.recordId)).toBe(1);expect(errors).toEqual([]);
   });
   test(`${owner}: keyboard Moasure chooser, cancelled browsing, validation and drop preview`,async({page})=>{
     const {frame,errors}=await setup(page,owner);
