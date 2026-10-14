@@ -1,0 +1,52 @@
+{
+  "source": "nsa-workspace-2026-27-schema-v5.json",
+  "output": "nsa-workspace-2026-27-area-pricing-v5.json",
+  "canonicalAreaUnit": "m²",
+  "squareMetresPerHectare": 10000,
+  "initialHectarePriceMultiplier": 2500,
+  "recovery": {
+    "version": 1,
+    "seededRateIds": [
+      "RATE-AERATION-HA",
+      "RATE-TURFING-HA",
+      "RATE-0EUIM9Z-HA",
+      "RATE-0718JEK-HA",
+      "RATE-0NXRQ7F-HA",
+      "RATE-06AN0QW-HA"
+    ],
+    "repairedRateIds": [
+      "RATE-0XOVMVY",
+      "RATE-1NFODUE",
+      "RATE-1Y866EW"
+    ],
+    "warnings": []
+  },
+  "counts": {
+    "applications": 12,
+    "costingLines": 0,
+    "events": 0,
+    "geometries": 0,
+    "jobs": 0,
+    "payments": 0,
+    "projects": 2,
+    "quoteEvents": 0,
+    "quoteLines": 0,
+    "quotes": 0,
+    "rateItems": 54,
+    "tasks": 50,
+    "catalogs": 1,
+    "paymentAllocations": 0,
+    "statusEvents": 5,
+    "statusRecommendations": 0,
+    "annualBudgets": 0,
+    "budgetEntries": 0,
+    "registerAllocations": 0,
+    "allocationEntries": 0,
+    "budgetCharges": 0,
+    "budgetChangeRequests": 0,
+    "budgetDecisions": 0,
+    "budgetCarryReviews": 0
+  },
+  "originalRatesPreserved": true,
+  "normalizationStable": true
+}

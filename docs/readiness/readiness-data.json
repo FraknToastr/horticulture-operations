@@ -1,0 +1,2788 @@
+{
+  "title": "NSA demonstration readiness",
+  "generated": "2026-10-14T08:43:49.139Z",
+  "decision": "Not ready",
+  "summary": "One confirmed application defect blocks a clean first-use import and recovery flow. The tested reload workaround succeeds; financial, storage-safety and live-map checks passed as detailed below. Local correction verified in Chromium and Windows Edge. Public GitHub build remains unchanged.",
+  "commit": "840f619adcf80bbf12020d36bb4c50d94f4f5d18",
+  "target": "https://frakntoastr.github.io/horticulture-operations/src/program-planner/nsa.html",
+  "browser": "Microsoft Edge 155.0.4283.45 — Windows, headless, 1600 × 1000",
+  "secondaryBrowser": "151.0.7922.34",
+  "input": "src/sample/nsa-workspace-2026-27-area-pricing-v5.json",
+  "inputSha256": "d3424d247bca9586f1a35a7e3e584fa18b637e0bbeb44b0e29da84122c64ec5f",
+  "baseline": {
+    "applications": 12,
+    "costingLines": 0,
+    "events": 0,
+    "geometries": 0,
+    "jobs": 0,
+    "payments": 0,
+    "projects": 2,
+    "quoteEvents": 0,
+    "quoteLines": 0,
+    "quotes": 0,
+    "rateItems": 54,
+    "tasks": 50,
+    "catalogs": 1,
+    "paymentAllocations": 0,
+    "statusEvents": 5,
+    "statusRecommendations": 0,
+    "annualBudgets": 0,
+    "budgetEntries": 0,
+    "registerAllocations": 0,
+    "allocationEntries": 0,
+    "budgetCharges": 0,
+    "budgetChangeRequests": 0,
+    "budgetDecisions": 0,
+    "budgetCarryReviews": 0
+  },
+  "counts": {
+    "passed": 105,
+    "failed": 2,
+    "blocked": 1,
+    "not run": 0
+  },
+  "assets": [
+    {
+      "path": "src/program-planner/nsa.html",
+      "remoteHash": "7abb2775802edff76e76494be4669156a0bd1207be98ce596bf17377cde2df09",
+      "localHash": "7abb2775802edff76e76494be4669156a0bd1207be98ce596bf17377cde2df09",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/app-config.js",
+      "remoteHash": "fdf225f7905248fc4a9236966133130ffa0dfec0a8f2ce243eb711119059373b",
+      "localHash": "fdf225f7905248fc4a9236966133130ffa0dfec0a8f2ce243eb711119059373b",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/index.html",
+      "remoteHash": "9a22e7a38f254911fc2ea447ad422a0cc3a30ae3245040ef1a73dadd5d6a0caf",
+      "localHash": "9a22e7a38f254911fc2ea447ad422a0cc3a30ae3245040ef1a73dadd5d6a0caf",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/planner-row-header.css",
+      "remoteHash": "8785c049fbcbe8f5e8bce9e234834787cd1a82ee7773c8591f2f9177b5a65ced",
+      "localHash": "8785c049fbcbe8f5e8bce9e234834787cd1a82ee7773c8591f2f9177b5a65ced",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/space-map-editor.css",
+      "remoteHash": "b00e0d063e5480bb34fa4fe2ab372f79f3440a4382347e7a84a187945a21420c",
+      "localHash": "b00e0d063e5480bb34fa4fe2ab372f79f3440a4382347e7a84a187945a21420c",
+      "match": true
+    },
+    {
+      "path": "src/shared/css/components.css",
+      "remoteHash": "0aa580e9fda71eb6d5bf0676f7d46256e1c96178a9ea63e5a5941cc7c6b4ad41",
+      "localHash": "0aa580e9fda71eb6d5bf0676f7d46256e1c96178a9ea63e5a5941cc7c6b4ad41",
+      "match": true
+    },
+    {
+      "path": "src/shared/css/accessibility.css",
+      "remoteHash": "1b8a49cc15a380feae34187c2723edd77977ea78fe56760fca48c0834e046116",
+      "localHash": "1b8a49cc15a380feae34187c2723edd77977ea78fe56760fca48c0834e046116",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/scheduler-week.css",
+      "remoteHash": "fb3a1454bcfab174dc791dc071071157c8079765abf5ab038468e2d2cc64ea2c",
+      "localHash": "fb3a1454bcfab174dc791dc071071157c8079765abf5ab038468e2d2cc64ea2c",
+      "match": true
+    },
+    {
+      "path": "src/shared/vendor/maplibre/maplibre-gl.css",
+      "remoteHash": "792ac997dcf6ae6f643eb4e2dee4630c85e7056526bd8fb85ffe83c67d6c41b4",
+      "localHash": "792ac997dcf6ae6f643eb4e2dee4630c85e7056526bd8fb85ffe83c67d6c41b4",
+      "match": true
+    },
+    {
+      "path": "src/shared/css/themes.css",
+      "remoteHash": "7074508bd39256aff09ca9860c899a3979abf9c99c7937d26b6b670a0d1d8391",
+      "localHash": "7074508bd39256aff09ca9860c899a3979abf9c99c7937d26b6b670a0d1d8391",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/status-v5.css",
+      "remoteHash": "5955ffdaf2ac9eca5c70b32926460f6caca6bf96a7c1dbfc711ec4e830df61b0",
+      "localHash": "5955ffdaf2ac9eca5c70b32926460f6caca6bf96a7c1dbfc711ec4e830df61b0",
+      "match": true
+    },
+    {
+      "path": "src/shared/css/tokens.css",
+      "remoteHash": "0d47fc9e23cdc02d6a1266d0ba68f1578300567bf9771cc1700f8d2fa8f1ea22",
+      "localHash": "0d47fc9e23cdc02d6a1266d0ba68f1578300567bf9771cc1700f8d2fa8f1ea22",
+      "match": true
+    },
+    {
+      "path": "src/shared/css/shell.css",
+      "remoteHash": "29d9eb5f8da94202597360ee733dace317d5064672df4024aef0a22004f50a90",
+      "localHash": "29d9eb5f8da94202597360ee733dace317d5064672df4024aef0a22004f50a90",
+      "match": true
+    },
+    {
+      "path": "src/shared/css/reset.css",
+      "remoteHash": "0e862afab7e1c2af5ecfe44cb8ca9cf9fcce5c7f3ba626598342a1dfe7b06d3d",
+      "localHash": "0e862afab7e1c2af5ecfe44cb8ca9cf9fcce5c7f3ba626598342a1dfe7b06d3d",
+      "match": true
+    },
+    {
+      "path": "src/shared/assets/outlook calendar icon.svg",
+      "remoteHash": "3ca803df65f49a5b74e3809ba3615035a790e1d0ba957176ec84208d03b04689",
+      "localHash": "3ca803df65f49a5b74e3809ba3615035a790e1d0ba957176ec84208d03b04689",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/budget-layout.css",
+      "remoteHash": "af6698b11069a00594a435ce7331c8fedb2e1f109226d9b772063142e7284ea0",
+      "localHash": "af6698b11069a00594a435ce7331c8fedb2e1f109226d9b772063142e7284ea0",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/reports.css",
+      "remoteHash": "da45d63a371813d1c71f4ff638488f0344fd9efadc5d13cf6655a1a20e610861",
+      "localHash": "da45d63a371813d1c71f4ff638488f0344fd9efadc5d13cf6655a1a20e610861",
+      "match": true
+    },
+    {
+      "path": "src/shared/assets/uos-logo-forward-dark.svg",
+      "remoteHash": "2b9fbbd22bd0614d9b72d43a05284c15a2a530c9829c54a87a0ce74a9a8c637a",
+      "localHash": "2b9fbbd22bd0614d9b72d43a05284c15a2a530c9829c54a87a0ce74a9a8c637a",
+      "match": true
+    },
+    {
+      "path": "src/shared/assets/uos-logo-forward.svg",
+      "remoteHash": "9f155b869752d1ba0252560e1ae4dd9be8c54e3ee3abffa6dc9c1fbaa15d3d27",
+      "localHash": "9f155b869752d1ba0252560e1ae4dd9be8c54e3ee3abffa6dc9c1fbaa15d3d27",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/planner-editor.css",
+      "remoteHash": "a3cba397a310938a5d2ca768831cb0c16d5c0dd6c0380b4b40104ff4b372348c",
+      "localHash": "a3cba397a310938a5d2ca768831cb0c16d5c0dd6c0380b4b40104ff4b372348c",
+      "match": true
+    },
+    {
+      "path": "src/shared/assets/uos-logo-dot-column.svg",
+      "remoteHash": "d77aeb6668f1dcf7ae61f9bcae54659eb4eccf55fdb3b736e53327fa6a6bb978",
+      "localHash": "d77aeb6668f1dcf7ae61f9bcae54659eb4eccf55fdb3b736e53327fa6a6bb978",
+      "match": true
+    },
+    {
+      "path": "src/shared/assets/moasure_logo.avif",
+      "remoteHash": "63464d67824914844db578eca671c02a9bbecf816dd49dcd33bb5b4104e5fc6d",
+      "localHash": "63464d67824914844db578eca671c02a9bbecf816dd49dcd33bb5b4104e5fc6d",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/register-row-header.css",
+      "remoteHash": "daae1c2d71c5abf02378e552c7373d5bd340c987abe12c20811f1615d62ab7e0",
+      "localHash": "daae1c2d71c5abf02378e552c7373d5bd340c987abe12c20811f1615d62ab7e0",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/styles.css",
+      "remoteHash": "e927ee4892322d1c500a7621eb413a274dcf3b5aab3da5270826e75047b25b02",
+      "localHash": "e927ee4892322d1c500a7621eb413a274dcf3b5aab3da5270826e75047b25b02",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/drawer-floor.css",
+      "remoteHash": "09e52464e24f6bc1bf82d06e4dc57baa9d7655221bd68d054fa03ae1e9d51525",
+      "localHash": "09e52464e24f6bc1bf82d06e4dc57baa9d7655221bd68d054fa03ae1e9d51525",
+      "match": true
+    },
+    {
+      "path": "src/shared/css/print.css",
+      "remoteHash": "24ce926b186ac9cc476d6ec96a4e7c9f82d8ee8e0fa4b25a35f9b45d58297c84",
+      "localHash": "24ce926b186ac9cc476d6ec96a4e7c9f82d8ee8e0fa4b25a35f9b45d58297c84",
+      "match": true
+    },
+    {
+      "path": "src/remediation-planner/config/metromaps-provider.js",
+      "remoteHash": "cc73c25c2a661aa1f67fe9e60a17d15a94f6e3f6f05cb843d604f4d98c1a84bc",
+      "localHash": "cc73c25c2a661aa1f67fe9e60a17d15a94f6e3f6f05cb843d604f4d98c1a84bc",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/import-targets.js",
+      "remoteHash": "976d6e659163dfab69ff85d053cd9eef21d3e8bee3a735bb4e3bd47c450946b7",
+      "localHash": "976d6e659163dfab69ff85d053cd9eef21d3e8bee3a735bb4e3bd47c450946b7",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/tree-hub.js",
+      "remoteHash": "84e52815f7dea7e5d5db4a3d4faf824477b71a4945ba13079b864517c7d604a3",
+      "localHash": "84e52815f7dea7e5d5db4a3d4faf824477b71a4945ba13079b864517c7d604a3",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/rate-library.js",
+      "remoteHash": "29552d9ceec7b3678efaf2342126f03250923133c4386cddd11fb4ee82b23515",
+      "localHash": "29552d9ceec7b3678efaf2342126f03250923133c4386cddd11fb4ee82b23515",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/program-runtime.js",
+      "remoteHash": "5775a6068955d31ceed691d388aa1ad76e21e80b0ef2ea620b4c6d24e12476be",
+      "localHash": "5775a6068955d31ceed691d388aa1ad76e21e80b0ef2ea620b4c6d24e12476be",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/privacy.js",
+      "remoteHash": "956aa3f3d2a661bcb5f4896fad7d118c4a6cea90f15b8723a6edff55a5699ac9",
+      "localHash": "956aa3f3d2a661bcb5f4896fad7d118c4a6cea90f15b8723a6edff55a5699ac9",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/smart-import.js",
+      "remoteHash": "f7a1d90e66632ed52439174774ca4cb9deee6326d3664478c5d5b5c3a146ad69",
+      "localHash": "f7a1d90e66632ed52439174774ca4cb9deee6326d3664478c5d5b5c3a146ad69",
+      "match": true
+    },
+    {
+      "path": "src/remediation-planner/config/map-providers.js",
+      "remoteHash": "b47a26a381229411f622801895638f8bdeca9146d140f85fe366dc3395e66b30",
+      "localHash": "b47a26a381229411f622801895638f8bdeca9146d140f85fe366dc3395e66b30",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/status-model.js",
+      "remoteHash": "478824189669406687854b30ff6f65e9e9e74e2fadfd16a857af7b32e02d307d",
+      "localHash": "478824189669406687854b30ff6f65e9e9e74e2fadfd16a857af7b32e02d307d",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/scheduler-model.js",
+      "remoteHash": "a26c07bc471be3bb7d8a0a70deecba6f2313e273c1989fc0c8bcbc167b38db74",
+      "localHash": "a26c07bc471be3bb7d8a0a70deecba6f2313e273c1989fc0c8bcbc167b38db74",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/status-health.js",
+      "remoteHash": "79c9042312f4e84ff9db280357f1e79175ba9cad5000e5a2ce18783a9142d218",
+      "localHash": "79c9042312f4e84ff9db280357f1e79175ba9cad5000e5a2ce18783a9142d218",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/storage.js",
+      "remoteHash": "f5aab5e4040e59445ead07f1c84888645c852742bc7c3afcad865ad81aece86c",
+      "localHash": "f5aab5e4040e59445ead07f1c84888645c852742bc7c3afcad865ad81aece86c",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/xlsx-reader.js",
+      "remoteHash": "796da0e1e393ee4baef077d97b8906ef2f8e4a56a1f281188445a7abe3d0bccf",
+      "localHash": "796da0e1e393ee4baef077d97b8906ef2f8e4a56a1f281188445a7abe3d0bccf",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/unified-workspace.js",
+      "remoteHash": "14a3011e8cd6bb805cc8258e78fbd38f97183af7e5557aff7fe0454cd5e464d4",
+      "localHash": "14a3011e8cd6bb805cc8258e78fbd38f97183af7e5557aff7fe0454cd5e464d4",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/imports.js",
+      "remoteHash": "084898f4392ebe6b24de1578e06030b8699c228149b591a6d4863dbaf9480619",
+      "localHash": "084898f4392ebe6b24de1578e06030b8699c228149b591a6d4863dbaf9480619",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/work-area-service.js",
+      "remoteHash": "6887e24417ddd86750fcf3e0b5a1b6a60a5f6da1cabec37b8ed19a994e1aa607",
+      "localHash": "6887e24417ddd86750fcf3e0b5a1b6a60a5f6da1cabec37b8ed19a994e1aa607",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/budget-governance.js",
+      "remoteHash": "ca38b0db1f07c812cf156f7d53ae7ae970f12cf7c20c82b4a43d5f7e57cc671b",
+      "localHash": "ca38b0db1f07c812cf156f7d53ae7ae970f12cf7c20c82b4a43d5f7e57cc671b",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/map-costing.js",
+      "remoteHash": "b698f79f82467292a9493312caaf6bd091539ff50d5cb0035df645e4b468872b",
+      "localHash": "b698f79f82467292a9493312caaf6bd091539ff50d5cb0035df645e4b468872b",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/product-contracts.js",
+      "remoteHash": "e171e7b30f64a66c8bd24e2fafd46e43d7717b0c1a38431553af99ef9ddaa83d",
+      "localHash": "e171e7b30f64a66c8bd24e2fafd46e43d7717b0c1a38431553af99ef9ddaa83d",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/quote-model.js",
+      "remoteHash": "8bdf4ed73f860ae7ee5d9a4deafb69160ab34baa2ae6e6ed6c92155c21b13490",
+      "localHash": "8bdf4ed73f860ae7ee5d9a4deafb69160ab34baa2ae6e6ed6c92155c21b13490",
+      "match": true
+    },
+    {
+      "path": "src/shared/js/suite.js",
+      "remoteHash": "87cacac9cc2eee1f3ef96d4ef2a86b19a46b0d0eda5221448332027a43d2e125",
+      "localHash": "87cacac9cc2eee1f3ef96d4ef2a86b19a46b0d0eda5221448332027a43d2e125",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/moasure-geometry.js",
+      "remoteHash": "18b3fac633972a1b612618a4beea8c51e5f19681e69c8ce5be562f05c2c428f3",
+      "localHash": "18b3fac633972a1b612618a4beea8c51e5f19681e69c8ce5be562f05c2c428f3",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/default-rate-catalog.js",
+      "remoteHash": "7bc60f8232599a8176ec7d3d82797cc9e49205edbb889565607c5a1d652f660b",
+      "localHash": "7bc60f8232599a8176ec7d3d82797cc9e49205edbb889565607c5a1d652f660b",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/data-workspace.js",
+      "remoteHash": "edbf7a3670cabe0ea3134bff1a8762fe5cb6609904953eefd7569d3210826ccf",
+      "localHash": "edbf7a3670cabe0ea3134bff1a8762fe5cb6609904953eefd7569d3210826ccf",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/observability.js",
+      "remoteHash": "3462f9f1bd91d94af4d69e54629f7256d0b0abf0f35597f1ecd67cf3a8174680",
+      "localHash": "3462f9f1bd91d94af4d69e54629f7256d0b0abf0f35597f1ecd67cf3a8174680",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/budget-model.js",
+      "remoteHash": "a9a47b79b4ba90ba2d4da8eead0c2767cd9104c5d3a359af0578fe037d5edee8",
+      "localHash": "a9a47b79b4ba90ba2d4da8eead0c2767cd9104c5d3a359af0578fe037d5edee8",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/status.js",
+      "remoteHash": "a20ed7bb114101e9b3734335132472c45fce48b00d914c0420a6234846d5f32e",
+      "localHash": "a20ed7bb114101e9b3734335132472c45fce48b00d914c0420a6234846d5f32e",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/funding-model.js",
+      "remoteHash": "5f5b833fb45cf1653324d17b178b89d4ffb973ce8aaf3e0a0211f017a3b890cb",
+      "localHash": "5f5b833fb45cf1653324d17b178b89d4ffb973ce8aaf3e0a0211f017a3b890cb",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/storage.js",
+      "remoteHash": "cea3b8e4b37e7ff78e8846d152295632fbc7f5a3e52be3d2f88262c6391c5051",
+      "localHash": "cea3b8e4b37e7ff78e8846d152295632fbc7f5a3e52be3d2f88262c6391c5051",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/data-health.js",
+      "remoteHash": "43732a8ae2848710d0347128a2dc1001867db6691f973f5d3481e2f88ca19126",
+      "localHash": "43732a8ae2848710d0347128a2dc1001867db6691f973f5d3481e2f88ca19126",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/planner-presentation.js",
+      "remoteHash": "7a5dbeaa01092f36046aa83f8fa97cc322670ccb8c9380e4875f93797703f246",
+      "localHash": "7a5dbeaa01092f36046aa83f8fa97cc322670ccb8c9380e4875f93797703f246",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/migration.js",
+      "remoteHash": "980fb3396d9b5945847b66e692fd8ae028856caf94a39f5cae8b9a2c7f6eae86",
+      "localHash": "980fb3396d9b5945847b66e692fd8ae028856caf94a39f5cae8b9a2c7f6eae86",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/planner-model.js",
+      "remoteHash": "cf234cbb6554a0710b318291e0ad82332939c0567fc19ca194bf9813525afa4c",
+      "localHash": "cf234cbb6554a0710b318291e0ad82332939c0567fc19ca194bf9813525afa4c",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/status-ui.js",
+      "remoteHash": "2ecd16d5d05e5c99359c8d88fb8081b896ce70136d9bcf292c4b9aab5133b95a",
+      "localHash": "2ecd16d5d05e5c99359c8d88fb8081b896ce70136d9bcf292c4b9aab5133b95a",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/register.js",
+      "remoteHash": "dcd99d8bdb57eaa9bfbb340df391915a752f61fc06fa3684260d196ce368745b",
+      "localHash": "dcd99d8bdb57eaa9bfbb340df391915a752f61fc06fa3684260d196ce368745b",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/register-history-ui.js",
+      "remoteHash": "fbaf9197479d19e1192fd22a60a7c8932c4adfcc6f50eb5e5c954e1f5437577a",
+      "localHash": "fbaf9197479d19e1192fd22a60a7c8932c4adfcc6f50eb5e5c954e1f5437577a",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/status-app.js",
+      "remoteHash": "41288514af807805f945327154c2eccb0a86340c5af1888a63f13fa5fd1906af",
+      "localHash": "41288514af807805f945327154c2eccb0a86340c5af1888a63f13fa5fd1906af",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/app.js",
+      "remoteHash": "d7a67b3dce8f1f05b248f14ab7dc062e102451a993ce218590a6dbd6d521c686",
+      "localHash": "d7a67b3dce8f1f05b248f14ab7dc062e102451a993ce218590a6dbd6d521c686",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/planner.js",
+      "remoteHash": "86af166926e388af72d2b7dde5e20aa99b0bbf5d007e8cac70d9763c7dee2ccc",
+      "localHash": "86af166926e388af72d2b7dde5e20aa99b0bbf5d007e8cac70d9763c7dee2ccc",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/quote-builder.js",
+      "remoteHash": "4757d52af2de97022682fecbf65c74c65ee1d385f5f1f0ba59df804a944b59a1",
+      "localHash": "4757d52af2de97022682fecbf65c74c65ee1d385f5f1f0ba59df804a944b59a1",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/delete-safety.js",
+      "remoteHash": "69173b629ee7f05c8830fe8f43773377128e558bee4cdca783bd860e500028f6",
+      "localHash": "69173b629ee7f05c8830fe8f43773377128e558bee4cdca783bd860e500028f6",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/costing.js",
+      "remoteHash": "0bdc3fdf9891b5362d62e25407edf7e8a75b1462691e7b6e1c7370a29606cac0",
+      "localHash": "0bdc3fdf9891b5362d62e25407edf7e8a75b1462691e7b6e1c7370a29606cac0",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/planner-section-headers.js",
+      "remoteHash": "d6dfb5d560bae83cbddb37c22ec389ad866d64d0013e729d10d26bc84b01c23c",
+      "localHash": "d6dfb5d560bae83cbddb37c22ec389ad866d64d0013e729d10d26bc84b01c23c",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/costing-model.js",
+      "remoteHash": "4f38ef257d4cc3d4bae3cb74b91f819393901ce90cc808cc5d218ee609d44196",
+      "localHash": "4f38ef257d4cc3d4bae3cb74b91f819393901ce90cc808cc5d218ee609d44196",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/disclosure-rows.js",
+      "remoteHash": "558106374855683185fd14c31b3fb533233d65664ecb61026fc695822e9f2e29",
+      "localHash": "558106374855683185fd14c31b3fb533233d65664ecb61026fc695822e9f2e29",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/costing-accessibility.js",
+      "remoteHash": "48fd1221142dfe4a53a14734b49c63979f41eacad28838c2a3165a94c959daa2",
+      "localHash": "48fd1221142dfe4a53a14734b49c63979f41eacad28838c2a3165a94c959daa2",
+      "match": true
+    },
+    {
+      "path": "src/remediation-planner/js/map.js",
+      "remoteHash": "0aed0cec1f7c680e50c2a4528aa659ba1a83a3ed0af0e9954cedc02999af405f",
+      "localHash": "0aed0cec1f7c680e50c2a4528aa659ba1a83a3ed0af0e9954cedc02999af405f",
+      "match": true
+    },
+    {
+      "path": "src/remediation-planner/js/model.js",
+      "remoteHash": "80d56701383caaca6e1d9833eb58e968657c6bcf65ae20716000038cf8fed554",
+      "localHash": "80d56701383caaca6e1d9833eb58e968657c6bcf65ae20716000038cf8fed554",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/dashboard.js",
+      "remoteHash": "9d7f46093fbdeabaf4ac00703f709b3740a3e86172a82a15e228f1c70692ef5a",
+      "localHash": "9d7f46093fbdeabaf4ac00703f709b3740a3e86172a82a15e228f1c70692ef5a",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/scheduler-week-editor.js",
+      "remoteHash": "52e4fda1551f08b85ec93a8ad12a4d7ff4d3fd6b948abc075d54b7ea7e8483f2",
+      "localHash": "52e4fda1551f08b85ec93a8ad12a4d7ff4d3fd6b948abc075d54b7ea7e8483f2",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/reports-model.js",
+      "remoteHash": "1bc2c9267ca4f1575e141ea550bbd45a44d0e880ae9fef95219b6c6b1e2bff73",
+      "localHash": "1bc2c9267ca4f1575e141ea550bbd45a44d0e880ae9fef95219b6c6b1e2bff73",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/scheduler-calendar-tools.js",
+      "remoteHash": "7a51d036f65d11bbdfcdbc4588a1add54fd484ea9b0fefa87525222a9a47e12f",
+      "localHash": "7a51d036f65d11bbdfcdbc4588a1add54fd484ea9b0fefa87525222a9a47e12f",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/reports.js",
+      "remoteHash": "2b6cf4aa3475fd04574c3433bd9df36c12f988db9669e342e0f188fcdcd63e98",
+      "localHash": "2b6cf4aa3475fd04574c3433bd9df36c12f988db9669e342e0f188fcdcd63e98",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/register-open-project-fix.js",
+      "remoteHash": "90fc273503de6188de82f1c7745875d996105d9febbb67ae685354dc5254cb3f",
+      "localHash": "90fc273503de6188de82f1c7745875d996105d9febbb67ae685354dc5254cb3f",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/card-visibility.js",
+      "remoteHash": "059790a1bba8acdffa34c543b7d4e602810e58fa6d761a91f8439118261a2f35",
+      "localHash": "059790a1bba8acdffa34c543b7d4e602810e58fa6d761a91f8439118261a2f35",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/data-settings.js",
+      "remoteHash": "6e64d03f6bb444cb6034402b414fc6e6ee79b5fcdb26d292dfef6797af8ac9a4",
+      "localHash": "6e64d03f6bb444cb6034402b414fc6e6ee79b5fcdb26d292dfef6797af8ac9a4",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/budget.js",
+      "remoteHash": "2111408aed70e3e7c0a6efda2bfad31367434d21ff65c1da35dfd00ba20277cd",
+      "localHash": "2111408aed70e3e7c0a6efda2bfad31367434d21ff65c1da35dfd00ba20277cd",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/drawer-workspace.js",
+      "remoteHash": "fa0dd4f0fd69129691892d1f7644edcbe24cc5fc3b15bf78d1f94dc08b52220f",
+      "localHash": "fa0dd4f0fd69129691892d1f7644edcbe24cc5fc3b15bf78d1f94dc08b52220f",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/scheduler.js",
+      "remoteHash": "45735da923c88a8b9c7bd825535c92620d0b45213d68e34df40c483b2c74a0e0",
+      "localHash": "45735da923c88a8b9c7bd825535c92620d0b45213d68e34df40c483b2c74a0e0",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/program-map.js",
+      "remoteHash": "590e8d11dd861855de2e91124528ec61b82fd1caffe6f23a80ee2d34340c2be0",
+      "localHash": "590e8d11dd861855de2e91124528ec61b82fd1caffe6f23a80ee2d34340c2be0",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/js/model.js",
+      "remoteHash": "8ddfe4ea1602316af3767ba607df24b97945412f5b9905d08e10d237571d9df2",
+      "localHash": "8ddfe4ea1602316af3767ba607df24b97945412f5b9905d08e10d237571d9df2",
+      "match": true
+    },
+    {
+      "path": "src/shared/assets/uos-grid-arrow-favicon.svg",
+      "remoteHash": "22f8d48484747bd671883716907166b5808f415fc1db6a8b5160b56c22e4990b",
+      "localHash": "22f8d48484747bd671883716907166b5808f415fc1db6a8b5160b56c22e4990b",
+      "match": true
+    },
+    {
+      "path": "src/program-planner/events.html",
+      "remoteHash": "577c5af3a5ef18ade332a8aa37465314c00c3c017832b822c3ea82e5c8b5752e",
+      "localHash": "577c5af3a5ef18ade332a8aa37465314c00c3c017832b822c3ea82e5c8b5752e",
+      "match": true
+    },
+    {
+      "path": "src/shared/vendor/space-map/renderer.js",
+      "remoteHash": "67a6aaf48835e8a29a6b3471f2c31dcf45feb29709ea90183a8442110f027afb",
+      "localHash": "67a6aaf48835e8a29a6b3471f2c31dcf45feb29709ea90183a8442110f027afb",
+      "match": true
+    },
+    {
+      "path": "src/shared/vendor/space-map/tree-loader.js",
+      "remoteHash": "d1ac1c6fc7c2edb5b262077d1edfaed39f8179fbffe6cf256270150eca0fc68a",
+      "localHash": "d1ac1c6fc7c2edb5b262077d1edfaed39f8179fbffe6cf256270150eca0fc68a",
+      "match": true
+    },
+    {
+      "path": "src/shared/vendor/space-map/tree-worker.js",
+      "remoteHash": "ce5ea219f05d273642993dc078f7affd4b7706da676c85c8317c6064f3e6a97f",
+      "localHash": "ce5ea219f05d273642993dc078f7affd4b7706da676c85c8317c6064f3e6a97f",
+      "match": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "WS01",
+      "title": "Converted dataset integrity",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Expected counts, unique IDs, valid model, stable normalization and linked project/task records.",
+      "observed": {
+        "counts": {
+          "applications": 12,
+          "costingLines": 0,
+          "events": 0,
+          "geometries": 0,
+          "jobs": 0,
+          "payments": 0,
+          "projects": 2,
+          "quoteEvents": 0,
+          "quoteLines": 0,
+          "quotes": 0,
+          "rateItems": 54,
+          "tasks": 50,
+          "catalogs": 1,
+          "paymentAllocations": 0,
+          "statusEvents": 5,
+          "statusRecommendations": 0,
+          "annualBudgets": 0,
+          "budgetEntries": 0,
+          "registerAllocations": 0,
+          "allocationEntries": 0,
+          "budgetCharges": 0,
+          "budgetChangeRequests": 0,
+          "budgetDecisions": 0,
+          "budgetCarryReviews": 0
+        },
+        "inputSha256": "d3424d247bca9586f1a35a7e3e584fa18b637e0bbeb44b0e29da84122c64ec5f"
+      },
+      "durationMs": 378,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS02",
+      "title": "Import preview cancellation",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Real file input previews current-year file; Cancel preserves stored and active data.",
+      "observed": {
+        "preview": "STAGED IMPORT\n\nReview before applying\nWarnings\nMatched by JSON key inspection and exact schema discriminators.\n\nNo workspace data changes until Apply import succeeds.\n\nCancel\nApply import",
+        "unchanged": true,
+        "countsShown": false
+      },
+      "durationMs": 1087,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS03",
+      "title": "Apply current-year file through Settings",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "All expected entities import and Data Health has no errors.",
+      "observed": {
+        "counts": {
+          "applications": 12,
+          "costingLines": 0,
+          "events": 0,
+          "geometries": 0,
+          "jobs": 0,
+          "payments": 0,
+          "projects": 2,
+          "quoteEvents": 0,
+          "quoteLines": 0,
+          "quotes": 0,
+          "rateItems": 54,
+          "tasks": 50,
+          "catalogs": 1,
+          "paymentAllocations": 0,
+          "statusEvents": 5,
+          "statusRecommendations": 0,
+          "annualBudgets": 0,
+          "budgetEntries": 0,
+          "registerAllocations": 0,
+          "allocationEntries": 0,
+          "budgetCharges": 0,
+          "budgetChangeRequests": 0,
+          "budgetDecisions": 0,
+          "budgetCarryReviews": 0
+        },
+        "health": "0 errors · 57 warnings · 14 enforced product contracts checked"
+      },
+      "durationMs": 1493,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS04",
+      "title": "Reload and second-tab persistence",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Imported entity content survives reload and a second tab.",
+      "observed": "All entity collections retained with identical business content.",
+      "durationMs": 598,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS05",
+      "title": "JSON download and fresh-context recovery",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Actual downloaded JSON restores complete imported entity content.",
+      "observed": {
+        "artifact": "artifacts\\workspace-backup.json",
+        "sha256": "9896c3b4f31dc6e79c128f37454013739a732352f71c0d957d6da46f50463293"
+      },
+      "durationMs": 2641,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS06",
+      "title": "JSON drop import",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Dropping the latest file stages it; cancellation preserves active data.",
+      "observed": "Drop staged preview; cancel retained baseline.",
+      "durationMs": 385,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS07",
+      "title": "Malformed JSON import rejection",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Unsafe file cannot replace active or stored data.",
+      "observed": "The selected JSON is malformed: Expected property name or '}' in JSON at position 1 (line 1 column 2). No data was changed.",
+      "durationMs": 2088,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS08",
+      "title": "Wrong app import rejection",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Unsafe file cannot replace active or stored data.",
+      "observed": "The JSON content does not match a supported import signature. No data was changed.",
+      "durationMs": 2216,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS09",
+      "title": "Unsupported schema import rejection",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Unsafe file cannot replace active or stored data.",
+      "observed": "The JSON content does not match a supported import signature. No data was changed.",
+      "durationMs": 2217,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS10",
+      "title": "Temporary clear and restore",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Clear Session Data removes memory data but Restore Stored Data recovers it.",
+      "observed": "Session cleared; stored entity content restored.",
+      "durationMs": 3365,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "DZ01",
+      "title": "Required backup, Cancel, Escape and reopen",
+      "group": "Dangerzone",
+      "status": "passed",
+      "expected": "Cancel retains data; reopening and Escape reset the required-backup gate.",
+      "observed": "All cancellation and backup gates passed.",
+      "durationMs": 3901,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "faults-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "DZ02",
+      "title": "Stale backup cannot delete newer revision",
+      "group": "Dangerzone",
+      "status": "passed",
+      "expected": "UI deletion refuses an older backed-up revision after a second-tab save.",
+      "observed": {
+        "backedUpRevision": 2,
+        "message": "Failed to delete stored workspace: Workspace changed before this mutation could be committed. Reload and retry."
+      },
+      "durationMs": 6264,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "DZ03",
+      "title": "Delete, reload, then restore without the reload workaround",
+      "group": "Dangerzone",
+      "status": "failed",
+      "expected": "Canonical/recovery state is removed, stale tabs cannot resurrect it, EVT is preserved, actual backup restores and can save.",
+      "observed": "Deletion removed the canonical, verified, migration and legacy records. Restore Stored Data and a stale tab did not resurrect them; EVT data was unchanged. After reloading the empty app, direct reimport of the downloaded backup failed with the same revision mismatch as COLD01. DZ04 subsequently restored that exact backup using the tested reload workaround and saved another change.",
+      "durationMs": 22983,
+      "environment": "Hosted • Windows Edge",
+      "severity": "blocker",
+      "artifact": "edge/workspace-results.json",
+      "evidence": "edge/artifacts/DZ03.png",
+      "notes": "One composite scenario: the deletion/isolation assertions passed; the final direct recovery assertion failed. This is the same underlying defect as COLD01, not a second independent defect."
+    },
+    {
+      "id": "WS11",
+      "title": "CSV/GeoJSON bundle download and recovery",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "Alternative export is a valid ZIP and reimports supported entity content.",
+      "observed": {
+        "counts": {
+          "applications": 12,
+          "events": 0,
+          "projects": 2,
+          "jobs": 0,
+          "tasks": 50,
+          "catalogs": 1,
+          "costingLines": 0,
+          "rateItems": 54,
+          "geometries": 0,
+          "quotes": 0,
+          "quoteLines": 0,
+          "payments": 0,
+          "paymentAllocations": 0,
+          "quoteEvents": 0,
+          "statusEvents": 5,
+          "statusRecommendations": 0,
+          "annualBudgets": 0,
+          "budgetEntries": 0,
+          "registerAllocations": 0,
+          "allocationEntries": 0,
+          "budgetCharges": 0,
+          "budgetChangeRequests": 0,
+          "budgetDecisions": 0,
+          "budgetCarryReviews": 0
+        },
+        "sha256": "e892ba445fc08ce99108e0fee0bd13b9bf355a7067ff4091a5bc4bd0d7722f53"
+      },
+      "durationMs": 4035,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "WS12",
+      "title": "Stale import preview",
+      "group": "Workspace",
+      "status": "passed",
+      "expected": "A second-tab save prevents stale preview from overwriting newer records.",
+      "observed": "Workspace changed before this mutation could be committed. Reload and retry.",
+      "durationMs": 3906,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "DEP01",
+      "title": "Published asset parity",
+      "group": "Deployment",
+      "status": "passed",
+      "expected": "All inspected same-repository deployed assets match local source bytes.",
+      "observed": {
+        "checked": 89,
+        "matched": true
+      },
+      "durationMs": 1,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "DEP02",
+      "title": "Workspace runtime errors",
+      "group": "Deployment",
+      "status": "passed",
+      "expected": "Workspace lifecycle does not produce unhandled browser exceptions.",
+      "observed": "No unhandled page errors during workspace scenarios.",
+      "durationMs": 6,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "DEMO01",
+      "title": "Register and Planner converted records",
+      "group": "Register / Planner",
+      "status": "passed",
+      "expected": "Both projects and completed Planner tasks retain their converted relationships.",
+      "observed": {
+        "projects": 2,
+        "tasks": 50,
+        "completed": 1
+      },
+      "durationMs": 1478,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "demo-edge-retest/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "COST01",
+      "title": "Converted Cost Library categories and scheduler flags",
+      "group": "Cost Library",
+      "status": "passed",
+      "expected": "Material items remain Material and do not offer Scheduler creation.",
+      "observed": {
+        "groups": {
+          "Labour": 7,
+          "Sundry": 6,
+          "Material": 38,
+          "Contractors": 2,
+          "Equipment": 1
+        },
+        "materialSchedulerEnabled": 0
+      },
+      "durationMs": 25,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "demo-edge-retest/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "COST02",
+      "title": "Add converted hourly rate and check amount",
+      "group": "Calculator",
+      "status": "passed",
+      "expected": "Two hours at $80 produce $160 before GST and $176 including 10% GST.",
+      "observed": {
+        "quantity": 2,
+        "rate": 80,
+        "subtotal": 160,
+        "gst": 16,
+        "total": 176,
+        "linkedJob": true
+      },
+      "durationMs": 2071,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "demo-edge-retest/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "QUOTE01",
+      "title": "Initial Customer deposit and funding changes",
+      "group": "Quotes / Payments",
+      "status": "passed",
+      "expected": "Deposit works without toggling; reverse releases lock; Council disables payment; mixed balance reconciles.",
+      "observed": {
+        "gross": 176,
+        "initialDeposit": 20,
+        "initialBalance": 156,
+        "mixedCustomerGross": 66,
+        "mixedDeposit": 15,
+        "mixedBalance": 51,
+        "reversed": true
+      },
+      "durationMs": 7223,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "demo-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "QUOTE02",
+      "title": "Issue, payment, full settlement and reversals",
+      "group": "Quotes / Payments",
+      "status": "passed",
+      "expected": "Issued quote accepts $44 then $132; reversing both restores $176 unpaid.",
+      "observed": {
+        "payments": [
+          44,
+          132
+        ],
+        "settled": true,
+        "reversedBalance": 176
+      },
+      "durationMs": 5848,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "demo-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "SCH01",
+      "title": "Converted-rate job direct calendar placement",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "Draft job opens editor; 09:00 click creates 09:00–09:30 with handles and no modal.",
+      "observed": "Direct 30-minute placement has no modal.",
+      "durationMs": 1056,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "demo-edge-retest/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "MAP01",
+      "title": "Hosted map and polygon drawing",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "Live map becomes ready; polygon clicks form a stored closed geometry after Approve.",
+      "observed": {
+        "geometries": 1,
+        "type": "Polygon"
+      },
+      "durationMs": 2853,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "demo-edge-retest/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "MAP02",
+      "title": "Moasure CSV and collapse",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "Repository Moasure sample imports; unsaved-anchor collapse is stable and remains collapsed.",
+      "observed": {
+        "groupCount": 1,
+        "collapseStateStable": true,
+        "anchorSaved": true
+      },
+      "durationMs": 2064,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "moasure-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "REC01",
+      "title": "Worked-example backup recovery",
+      "group": "Recovery",
+      "status": "passed",
+      "expected": "Downloaded backup retains all created geometry, costs, jobs, quotes and reversed payments.",
+      "observed": {
+        "counts": {
+          "applications": 12,
+          "costingLines": 1,
+          "events": 0,
+          "geometries": 1,
+          "jobs": 1,
+          "payments": 4,
+          "projects": 2,
+          "quoteEvents": 1,
+          "quoteLines": 1,
+          "quotes": 1,
+          "rateItems": 54,
+          "tasks": 50,
+          "catalogs": 1,
+          "paymentAllocations": 0,
+          "statusEvents": 6,
+          "statusRecommendations": 0,
+          "annualBudgets": 0,
+          "budgetEntries": 0,
+          "registerAllocations": 0,
+          "allocationEntries": 0,
+          "budgetCharges": 0,
+          "budgetChangeRequests": 0,
+          "budgetDecisions": 0,
+          "budgetCarryReviews": 0
+        },
+        "sha256": "e9e028cfe4f5838dad98e9f980595be2b5f8ae0aec309d560ad801fdf7af3947",
+        "backup": "artifacts\\worked-example-backup.json"
+      },
+      "durationMs": 2365,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "demo-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "COLD01",
+      "title": "Fresh-profile import and recovery workaround",
+      "group": "Import",
+      "status": "failed",
+      "expected": "A fresh browser profile imports the latest workspace on the first attempt.",
+      "observed": "First import failed: Workspace changed before this mutation could be committed. Reload and retry.\n\ntrue !== false\n",
+      "durationMs": 3260,
+      "environment": "Hosted • Windows Edge",
+      "severity": "blocker",
+      "artifact": "faults-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Confirmed in Linux Chromium and Windows Edge. Fresh profile: memory revision 0, durable revision 1 after opening Settings. After reloading, both are revision 1 and import succeeds at revision 2."
+    },
+    {
+      "id": "DZ04",
+      "title": "Downloaded Dangerzone backup restores after reload workaround",
+      "group": "Recovery",
+      "status": "passed",
+      "expected": "The actual backup from deletion restores all business entities and permits a subsequent save.",
+      "observed": {
+        "sha256": "24f87e9f180366a6949d5afe65e3c2f64f66f1067f5b0d4a7b829c9e3b41782d",
+        "entitiesRestored": true,
+        "subsequentSave": true,
+        "workaround": "Reload before import"
+      },
+      "durationMs": 1864,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "faults-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "FAULT01",
+      "title": "Aborted import write transaction",
+      "group": "Storage faults",
+      "status": "passed",
+      "expected": "An actual IndexedDB transaction abort does not replace canonical or verified data or report success.",
+      "observed": {
+        "message": "Browser storage transaction failed",
+        "canonicalPreserved": true
+      },
+      "durationMs": 2675,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "faults-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "FAULT02",
+      "title": "Aborted deletion transaction",
+      "group": "Storage faults",
+      "status": "passed",
+      "expected": "Failure partway through the delete transaction preserves the complete canonical/recovery pair.",
+      "observed": {
+        "message": "Failed to delete stored workspace: Uncaught exception in event handler.",
+        "canonicalAndRecoveryPreserved": true
+      },
+      "durationMs": 3442,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "faults-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "FAULT03",
+      "title": "Damaged-startup backup retains damaged data",
+      "group": "Storage faults",
+      "status": "passed",
+      "expected": "Recovery mode backs up the raw damaged revision before deliberate deletion.",
+      "observed": {
+        "rawDamagedSnapshotPreserved": true,
+        "deletedAfterBackup": true,
+        "sha256": "899a7d5718e4875b59a4778e34f8f5e7bd56e3d42f849d460e575f160aa89ee3"
+      },
+      "durationMs": 3286,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "faults-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "HEALTH01",
+      "title": "Inspect imported health warnings",
+      "group": "Data health",
+      "status": "passed",
+      "expected": "Imported workspace has no relationship errors; warnings are recorded for review.",
+      "observed": {
+        "errors": 0,
+        "warnings": 57,
+        "warningCodes": {
+          "STATUS_MIGRATION_READINESS": 1,
+          "FUNDING_OPERATIONAL_AMOUNT_MISSING": 2,
+          "RATE_LEGACY_CATALOG_ACTIVE": 54
+        }
+      },
+      "durationMs": 1746,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "faults-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "FINAL01",
+      "title": "Prepare original-data Edge profile and restart",
+      "group": "Demonstration preparation",
+      "status": "passed",
+      "expected": "A dedicated profile retains the original converted entities across a real browser process restart.",
+      "observed": {
+        "path": "C:\\Users\\n0rt\\AppData\\Local\\Temp\\nsa-demo-original-1791954235081",
+        "browser": "155.0.4283.45",
+        "backup": "artifacts\\original-demo-recovery.json",
+        "sha256": "37290099d60800117680ee218e8d8c2a7cb61c74fa2db05c5f44c3449dc8cbaf",
+        "counts": {
+          "applications": 12,
+          "costingLines": 0,
+          "events": 0,
+          "geometries": 0,
+          "jobs": 0,
+          "payments": 0,
+          "projects": 2,
+          "quoteEvents": 0,
+          "quoteLines": 0,
+          "quotes": 0,
+          "rateItems": 54,
+          "tasks": 50,
+          "catalogs": 1,
+          "paymentAllocations": 0,
+          "statusEvents": 5,
+          "statusRecommendations": 0,
+          "annualBudgets": 0,
+          "budgetEntries": 0,
+          "registerAllocations": 0,
+          "allocationEntries": 0,
+          "budgetCharges": 0,
+          "budgetChangeRequests": 0,
+          "budgetDecisions": 0,
+          "budgetCarryReviews": 0
+        }
+      },
+      "durationMs": 4516,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "faults-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "REG02",
+      "title": "Create a project from an unlinked imported record",
+      "group": "Register / Planner",
+      "status": "passed",
+      "expected": "Create Project in Space Manager creates one correctly linked project.",
+      "observed": "Created one project linked to the selected previously unlinked imported application.",
+      "durationMs": 3603,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "live-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "FAULT04",
+      "title": "Simulated quota exhaustion",
+      "group": "Storage faults",
+      "status": "passed",
+      "expected": "Quota failure cannot report a successful import or alter stored business content.",
+      "observed": {
+        "message": "Readiness simulated browser quota exhaustion",
+        "canonicalPreserved": true,
+        "injection": "QuotaExceededError at the commit interface; not an actual disk-fill test"
+      },
+      "durationMs": 2702,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "live-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "LIVE01",
+      "title": "Live MetroMap pan and zoom",
+      "group": "Live services",
+      "status": "passed",
+      "expected": "Real aerial tile responses continue after mouse pan and zoom; renderer camera and tile keys change.",
+      "observed": {
+        "responsesBefore": 3,
+        "responsesAfter": 28,
+        "zoomBefore": 14,
+        "zoomAfter": 15,
+        "metrics": {
+          "backend": "webgpu",
+          "referenceGpuBytes": 0,
+          "tiles": 48,
+          "canvasPixels": 957609,
+          "pixelRatio": 1,
+          "referenceLayers": []
+        }
+      },
+      "durationMs": 3808,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "live-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "LIVE02",
+      "title": "Live tree layers and lazy hub",
+      "group": "Live services",
+      "status": "passed",
+      "expected": "Opening hub makes no service requests; enabled layers render service data at zoom 17 and free buffers when disabled.",
+      "observed": {
+        "serviceRequests": 20,
+        "metrics": {
+          "renderer": {
+            "backend": "webgpu",
+            "referenceGpuBytes": 2691960,
+            "tiles": 68,
+            "canvasPixels": 957609,
+            "pixelRatio": 1,
+            "referenceLayers": [
+              "trees",
+              "srz",
+              "tpz"
+            ]
+          },
+          "tree": {
+            "enabled": {
+              "trees": true,
+              "srz": true,
+              "tpz": true
+            },
+            "visible": true,
+            "metrics": {
+              "requests": 20,
+              "active": 0,
+              "peakRequests": 4,
+              "cacheBytes": 4800780,
+              "staleResults": 0,
+              "worker": true,
+              "enabled": {
+                "trees": true,
+                "srz": true,
+                "tpz": true
+              }
+            }
+          }
+        },
+        "disabledBuffersFreed": true,
+        "cameraSetup": "Camera API sets service location and threshold; hub/toggles use UI"
+      },
+      "durationMs": 5775,
+      "environment": "Hosted • Windows Edge",
+      "severity": "none",
+      "artifact": "live-edge/workspace-results.json",
+      "evidence": null,
+      "notes": "Reload after navigating to Settings before import: first navigation creates stored revision 1 while memory stays at revision 0. Cold import failure is recorded separately."
+    },
+    {
+      "id": "REG038",
+      "title": "imported legacy rates appear in each of the five Cost Library menus",
+      "group": "Cost Library",
+      "status": "passed",
+      "expected": "imported legacy rates appear in each of the five Cost Library menus",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1105,
+      "artifact": "regression-results.json",
+      "source": "cost-library-legacy-grouping.spec.js:4",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG039",
+      "title": "NSA: default Customer permits a first deposit without toggling funding",
+      "group": "Quotes / Payments",
+      "status": "passed",
+      "expected": "NSA: default Customer permits a first deposit without toggling funding",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 7356,
+      "artifact": "regression-results.json",
+      "source": "quote-payment-funding-workflow.spec.js:67",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG040",
+      "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+      "group": "Quotes / Payments",
+      "status": "passed",
+      "expected": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1250,
+      "artifact": "regression-results.json",
+      "source": "quote-payment-funding-workflow.spec.js:108",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG041",
+      "title": "EVT: default Customer permits a first deposit without toggling funding",
+      "group": "Quotes / Payments",
+      "status": "passed",
+      "expected": "EVT: default Customer permits a first deposit without toggling funding",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 6474,
+      "artifact": "regression-results.json",
+      "source": "quote-payment-funding-workflow.spec.js:67",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG042",
+      "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+      "group": "Quotes / Payments",
+      "status": "passed",
+      "expected": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1167,
+      "artifact": "regression-results.json",
+      "source": "quote-payment-funding-workflow.spec.js:108",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG043",
+      "title": "first-deposit failure keeps data and retry records one payment despite repeated submits",
+      "group": "Quotes / Payments",
+      "status": "passed",
+      "expected": "first-deposit failure keeps data and retry records one payment despite repeated submits",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1569,
+      "artifact": "regression-results.json",
+      "source": "quote-payment-funding-workflow.spec.js:120",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG044",
+      "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+      "group": "Quotes / Payments",
+      "status": "passed",
+      "expected": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1774,
+      "artifact": "regression-results.json",
+      "source": "quote-payment-funding-workflow.spec.js:147",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG045",
+      "title": "holding a date handle at the week edge pages once and Cancel restores the original period",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "holding a date handle at the week edge pages once and Cancel restores the original period",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1937,
+      "artifact": "regression-results.json",
+      "source": "scheduler-multi-day.spec.js:39",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG046",
+      "title": "Month timed extension confirms conversion; keyboard cancellation leaves hours intact",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "Month timed extension confirms conversion; keyboard cancellation leaves hours intact",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1594,
+      "artifact": "regression-results.json",
+      "source": "scheduler-multi-day.spec.js:48",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG047",
+      "title": "NSA: move preserves hours; side handles convert only after confirmation and Save",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "NSA: move preserves hours; side handles convert only after confirmation and Save",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2266,
+      "artifact": "regression-results.json",
+      "source": "scheduler-multi-day.spec.js:67",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG048",
+      "title": "EVT: move preserves hours; side handles convert only after confirmation and Save",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "EVT: move preserves hours; side handles convert only after confirmation and Save",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2217,
+      "artifact": "regression-results.json",
+      "source": "scheduler-multi-day.spec.js:67",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG049",
+      "title": "Month single-row spans, cross-row linked cards, date resizing and keyboard movement",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "Month single-row spans, cross-row linked cards, date resizing and keyboard movement",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1559,
+      "artifact": "regression-results.json",
+      "source": "scheduler-multi-day.spec.js:85",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG050",
+      "title": "radial Undo appears on its parent spoke and smoothly separates the original approval orbs",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "radial Undo appears on its parent spoke and smoothly separates the original approval orbs",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 12574,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:44",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG051",
+      "title": "NSA: radial Undo restores completed vertex edits without saving or remounting cards",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "NSA: radial Undo restores completed vertex edits without saving or remounting cards",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 9240,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:78",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG052",
+      "title": "NSA: radial Undo reverses Moasure movement and rotation with gesture-sized history",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "NSA: radial Undo reverses Moasure movement and rotation with gesture-sized history",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 6132,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:125",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG053",
+      "title": "EVT: radial Undo restores completed vertex edits without saving or remounting cards",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "EVT: radial Undo restores completed vertex edits without saving or remounting cards",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 8335,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:78",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG054",
+      "title": "EVT: radial Undo reverses Moasure movement and rotation with gesture-sized history",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "EVT: radial Undo reverses Moasure movement and rotation with gesture-sized history",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 5847,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:125",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG055",
+      "title": "NSA: radial geometry creation uses third-tier Accept and Cancel",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "NSA: radial geometry creation uses third-tier Accept and Cancel",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 8333,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:150",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG056",
+      "title": "NSA: Location actions stage pins and mirror saving states",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "NSA: Location actions stage pins and mirror saving states",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 3343,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:190",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG057",
+      "title": "EVT: radial geometry creation uses third-tier Accept and Cancel",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "EVT: radial geometry creation uses third-tier Accept and Cancel",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 8357,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:150",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG058",
+      "title": "EVT: Location actions stage pins and mirror saving states",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "EVT: Location actions stage pins and mirror saving states",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 3209,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:190",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG059",
+      "title": "third tier follows each parent, fits narrow layouts and supports keyboard and collapse",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "third tier follows each parent, fits narrow layouts and supports keyboard and collapse",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 12833,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:219",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG060",
+      "title": "pin Move and Remove and vertex editing use third-tier actions; Moasure keeps its own workflow",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "pin Move and Remove and vertex editing use third-tier actions; Moasure keeps its own workflow",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 3681,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:272",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG061",
+      "title": "line vertices branch from Line and saved square vertices branch from Polygon",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "line vertices branch from Line and saved square vertices branch from Polygon",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 4534,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:289",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG062",
+      "title": "a short narrow viewport keeps Undo reachable while preserving map space",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "a short narrow viewport keeps Undo reachable while preserving map space",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1916,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:307",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG063",
+      "title": "other map consumers retain automatic square completion by default",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "other map consumers retain automatic square completion by default",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1456,
+      "artifact": "regression-results.json",
+      "source": "space-map-draft-actions.spec.js:316",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG064",
+      "title": "orphaned status event opens Settings recovery; retry remains usable and preserves raw data",
+      "group": "Workspace recovery",
+      "status": "passed",
+      "expected": "orphaned status event opens Settings recovery; retry remains usable and preserves raw data",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 762,
+      "artifact": "regression-results.json",
+      "source": "startup-status-recovery.spec.js:34",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG065",
+      "title": "Danger zone backs up the damaged stored revision before deliberate deletion",
+      "group": "Workspace recovery",
+      "status": "passed",
+      "expected": "Danger zone backs up the damaged stored revision before deliberate deletion",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 697,
+      "artifact": "regression-results.json",
+      "source": "startup-status-recovery.spec.js:54",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG066",
+      "title": "recovery deletion keeps a newer damaged revision when its backup becomes stale",
+      "group": "Workspace recovery",
+      "status": "passed",
+      "expected": "recovery deletion keeps a newer damaged revision when its backup becomes stale",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 744,
+      "artifact": "regression-results.json",
+      "source": "startup-status-recovery.spec.js:71",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG067",
+      "title": "workspace backup is primary, deletion requires it, and no browser editing takeover is rendered",
+      "group": "Workspace recovery",
+      "status": "passed",
+      "expected": "workspace backup is primary, deletion requires it, and no browser editing takeover is rendered",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 532,
+      "artifact": "regression-results.json",
+      "source": "workspace-backup-recovery.spec.js:25",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG068",
+      "title": "stale revision cannot delete a newer workspace",
+      "group": "Workspace recovery",
+      "status": "passed",
+      "expected": "stale revision cannot delete a newer workspace",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 540,
+      "artifact": "regression-results.json",
+      "source": "workspace-backup-recovery.spec.js:78",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG069",
+      "title": "revision-fenced deletion clears canonical, recovery, migration, and legacy workspace state together",
+      "group": "Workspace recovery",
+      "status": "passed",
+      "expected": "revision-fenced deletion clears canonical, recovery, migration, and legacy workspace state together",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 271,
+      "artifact": "regression-results.json",
+      "source": "workspace-backup-recovery.spec.js:109",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG070",
+      "title": "Moasure tooltip follows readiness and leaves when the pointer leaves",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "Moasure tooltip follows readiness and leaves when the pointer leaves",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2592,
+      "artifact": "additional-regressions.json",
+      "source": "moasure-map.spec.js:50",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG071",
+      "title": "NSA: Moasure card collapses without redraws before and after saving its anchor",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "NSA: Moasure card collapses without redraws before and after saving its anchor",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2408,
+      "artifact": "additional-regressions.json",
+      "source": "moasure-map.spec.js:76",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG072",
+      "title": "EVT: Moasure card collapses without redraws before and after saving its anchor",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "EVT: Moasure card collapses without redraws before and after saving its anchor",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2278,
+      "artifact": "additional-regressions.json",
+      "source": "moasure-map.spec.js:76",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG073",
+      "title": "NSA: Moasure import, rigid drag, rotation, confirmation, job creation and reload",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "NSA: Moasure import, rigid drag, rotation, confirmation, job creation and reload",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 7832,
+      "artifact": "additional-regressions.json",
+      "source": "moasure-map.spec.js:119",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG074",
+      "title": "NSA: invalid Moasure CSV is rejected without creating polygons",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "NSA: invalid Moasure CSV is rejected without creating polygons",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1321,
+      "artifact": "additional-regressions.json",
+      "source": "moasure-map.spec.js:179",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG075",
+      "title": "EVT: Moasure import, rigid drag, rotation, confirmation, job creation and reload",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "EVT: Moasure import, rigid drag, rotation, confirmation, job creation and reload",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 7990,
+      "artifact": "additional-regressions.json",
+      "source": "moasure-map.spec.js:119",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG076",
+      "title": "EVT: invalid Moasure CSV is rejected without creating polygons",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "EVT: invalid Moasure CSV is rejected without creating polygons",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1351,
+      "artifact": "additional-regressions.json",
+      "source": "moasure-map.spec.js:179",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG077",
+      "title": "Moasure import uses only selected groups and fits a narrow viewport",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "Moasure import uses only selected groups and fits a narrow viewport",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1581,
+      "artifact": "additional-regressions.json",
+      "source": "moasure-map.spec.js:189",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG078",
+      "title": "NSA 1440: full-day stacked week, overnight fragments and preserved scrolling",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "NSA 1440: full-day stacked week, overnight fragments and preserved scrolling",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1231,
+      "artifact": "additional-regressions.json",
+      "source": "scheduler-hourly-outlook.spec.js:44",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG079",
+      "title": "NSA 390: full-day stacked week, overnight fragments and preserved scrolling",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "NSA 390: full-day stacked week, overnight fragments and preserved scrolling",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1056,
+      "artifact": "additional-regressions.json",
+      "source": "scheduler-hourly-outlook.spec.js:44",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG080",
+      "title": "EVT 1440: full-day stacked week, overnight fragments and preserved scrolling",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "EVT 1440: full-day stacked week, overnight fragments and preserved scrolling",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1113,
+      "artifact": "additional-regressions.json",
+      "source": "scheduler-hourly-outlook.spec.js:44",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG081",
+      "title": "EVT 390: full-day stacked week, overnight fragments and preserved scrolling",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "EVT 390: full-day stacked week, overnight fragments and preserved scrolling",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1025,
+      "artifact": "additional-regressions.json",
+      "source": "scheduler-hourly-outlook.spec.js:44",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG082",
+      "title": "NSA: cancel, all-day download and conversion to saved timed job",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "NSA: cancel, all-day download and conversion to saved timed job",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1530,
+      "artifact": "additional-regressions.json",
+      "source": "scheduler-hourly-outlook.spec.js:64",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG083",
+      "title": "EVT: cancel, all-day download and conversion to saved timed job",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "EVT: cancel, all-day download and conversion to saved timed job",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1405,
+      "artifact": "additional-regressions.json",
+      "source": "scheduler-hourly-outlook.spec.js:64",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG084",
+      "title": "failed persistence prevents downloads and retains edited times for correction",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "failed persistence prevents downloads and retains edited times for correction",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 764,
+      "artifact": "additional-regressions.json",
+      "source": "scheduler-hourly-outlook.spec.js:103",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG085",
+      "title": "timed export protects location, prevents duplicate submissions and does not repeat status events",
+      "group": "Scheduler",
+      "status": "passed",
+      "expected": "timed export protects location, prevents duplicate submissions and does not repeat status events",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1070,
+      "artifact": "additional-regressions.json",
+      "source": "scheduler-hourly-outlook.spec.js:119",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG086",
+      "title": "local-file entry draws reference layers, full radial connectors and raster camera gestures",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "local-file entry draws reference layers, full radial connectors and raster camera gestures",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 3523,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:28",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG087",
+      "title": "NSA: radial polygon preview draws complete dashed edges on webgpu",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "NSA: radial polygon preview draws complete dashed edges on webgpu",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1506,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:61",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG088",
+      "title": "EVT: radial polygon preview draws complete dashed edges on webgl",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "EVT: radial polygon preview draws complete dashed edges on webgl",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1739,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:61",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG089",
+      "title": "NSA: GPU adapter loads on demand, retains drawing on backend loss",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "NSA: GPU adapter loads on demand, retains drawing on backend loss",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2292,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:86",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG090",
+      "title": "EVT: GPU adapter loads on demand, retains drawing on backend loss",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "EVT: GPU adapter loads on demand, retains drawing on backend loss",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2206,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:86",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG091",
+      "title": "webgl: tree hub is independent, threshold gated, worker renders service holes and deduplicates cells",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "webgl: tree hub is independent, threshold gated, worker renders service holes and deduplicates cells",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2420,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:104",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG092",
+      "title": "webgpu: tree hub is independent, threshold gated, worker renders service holes and deduplicates cells",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "webgpu: tree hub is independent, threshold gated, worker renders service holes and deduplicates cells",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2711,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:104",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG093",
+      "title": "GPU Moasure placement moves without changing saved geometry",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "GPU Moasure placement moves without changing saved geometry",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2777,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:137",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG094",
+      "title": "pin movement survives all backend losses without changing saved locations",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "pin movement survives all backend losses without changing saved locations",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1811,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:158",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG095",
+      "title": "software WebGPU renders GPU points and preserves the draft when its device is lost",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "software WebGPU renders GPU points and preserves the draft when its device is lost",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1681,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:174",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG096",
+      "title": "transfer limits subdivide cells; hidden maps abort service loading and retain toggles",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "transfer limits subdivide cells; hidden maps abort service loading and retain toggles",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2124,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:185",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG097",
+      "title": "tree outage clears only the reference layer and stops automatic retries",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "tree outage clears only the reference layer and stops automatic retries",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2053,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:201",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG098",
+      "title": "tree malformed clears only the reference layer and stops automatic retries",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "tree malformed clears only the reference layer and stops automatic retries",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1916,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:201",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG099",
+      "title": "tree response-budget clears only the reference layer and stops automatic retries",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "tree response-budget clears only the reference layer and stops automatic retries",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 1971,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:201",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG100",
+      "title": "tree point-budget clears only the reference layer and stops automatic retries",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "tree point-budget clears only the reference layer and stops automatic retries",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2724,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:201",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG101",
+      "title": "local launcher webgpu replaces raster tiles at native display resolution",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "local launcher webgpu replaces raster tiles at native display resolution",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 4556,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:220",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG102",
+      "title": "local launcher webgl replaces raster tiles at native display resolution",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "local launcher webgl replaces raster tiles at native display resolution",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 6027,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:220",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG103",
+      "title": "pan, zoom, resize and raster tiles align with the same geographic projection",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "pan, zoom, resize and raster tiles align with the same geographic projection",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 757,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:284",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "REG104",
+      "title": "late worker results cannot replace the latest viewport",
+      "group": "Space Map",
+      "status": "passed",
+      "expected": "late worker results cannot replace the latest viewport",
+      "observed": "All assertions in the existing regression passed. Synthetic fixtures and service stubs are used where defined by the test.",
+      "environment": "Local • Chromium",
+      "severity": "none",
+      "durationMs": 2360,
+      "artifact": "additional-regressions.json",
+      "source": "space-map-gpu.spec.js:303",
+      "notes": "Supplementary regression against local application source. Tested deployed assets matched local bytes; this does not replace the hosted Edge scenarios."
+    },
+    {
+      "id": "MODEL01",
+      "title": "Area pricing model checks",
+      "group": "Model contracts",
+      "status": "passed",
+      "severity": "none",
+      "environment": "Local • Node",
+      "expected": "Area pricing model assertions pass.",
+      "observed": "Selected model test file passed; the three-file Node run reported 3 tests, 3 passed, 0 failed.",
+      "artifact": "model-checks.tap"
+    },
+    {
+      "id": "MODEL02",
+      "title": "Import signatures model checks",
+      "group": "Model contracts",
+      "status": "passed",
+      "severity": "none",
+      "environment": "Local • Node",
+      "expected": "Import signatures model assertions pass.",
+      "observed": "Selected model test file passed; the three-file Node run reported 3 tests, 3 passed, 0 failed.",
+      "artifact": "model-checks.tap"
+    },
+    {
+      "id": "MODEL03",
+      "title": "Workspace sanitation model checks",
+      "group": "Model contracts",
+      "status": "passed",
+      "severity": "none",
+      "environment": "Local • Node",
+      "expected": "Workspace sanitation model assertions pass.",
+      "observed": "Selected model test file passed; the three-file Node run reported 3 tests, 3 passed, 0 failed.",
+      "artifact": "model-checks.tap"
+    },
+    {
+      "id": "SIGN01",
+      "title": "Uninterrupted headed client demonstration rehearsal",
+      "group": "Sign-off",
+      "status": "blocked",
+      "severity": "blocker",
+      "environment": "Windows Edge • headed",
+      "expected": "Complete the final demonstration sequence in a visible Edge window at the client presentation display settings.",
+      "observed": "Not signed off. Edge scenarios used real Windows Edge in headless mode at 1600 × 1000. The confirmed first-use import/recovery blocker remains unfixed; a continuous headed rehearsal on the presentation display is still required after correction.",
+      "notes": "Do not infer human visual approval or a clean first-use workflow from automated passes."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F01",
+      "severity": "blocker",
+      "title": "First import fails in a fresh profile or after deleted-workspace reload",
+      "status": "Fixed locally; public build not updated",
+      "expected": "Opening Settings and applying a valid workspace should succeed without a browser reload.",
+      "observed": "Settings navigation writes durable revision 1 while in-memory revision stays 0. Apply import fails with “Workspace changed before this mutation could be committed. Reload and retry.” The same failure was reproduced after permanent deletion and reload.",
+      "steps": [
+        "Open the published NSA URL in a clean browser profile.",
+        "Open Data and Settings.",
+        "Choose the area-pricing v5 JSON and click Apply import.",
+        "Observe the dialog remains open and Save failed appears.",
+        "Reload the page, reopen Settings and import the same file: it succeeds."
+      ],
+      "impact": "Blocks a smooth first-use import or recovery demonstration. No loss of the source file or downloaded backup was observed.",
+      "workaround": "Open Settings, reload the page, then select and apply the JSON. Verified in Chromium and Edge. This is an operational workaround, not a fix.",
+      "scenarios": [
+        "COLD01",
+        "DZ03",
+        "DZ04"
+      ],
+      "evidence": "artifacts/WS07.png",
+      "recommendation": "Obtain separate publication authorization, verify deployed source, then repeat immediate import, deletion/recovery and the headed demonstration."
+    },
+    {
+      "id": "F02",
+      "severity": "warning",
+      "title": "Converted workspace has 57 data-health warnings",
+      "status": "Recorded for demonstration preparation",
+      "expected": "Make inherited data limitations visible before the demonstration.",
+      "observed": "0 relationship errors; 54 legacy-catalog warnings, 2 missing Council Operational Amount warnings and 1 pending status-migration readiness review.",
+      "steps": [
+        "Import the converted file using the verified workaround.",
+        "Open Data and Settings and click Run checks."
+      ],
+      "impact": "Do not present status automation as enabled or Council operational funding as already configured. These are inherited data warnings, not failed financial arithmetic.",
+      "workaround": "Use the customer-funded rehearsal path unless the relevant configuration is explicitly reviewed and updated.",
+      "scenarios": [
+        "HEALTH01"
+      ],
+      "recommendation": "Review migration readiness and the two Council funding amounts before demonstrating those behaviours."
+    },
+    {
+      "id": "F03",
+      "severity": "note",
+      "title": "Import preview does not display entity counts",
+      "status": "Observed UI limitation",
+      "expected": "The testing plan called for checking counts in the preview.",
+      "observed": "The preview shows a signature-inspection message and Apply/Cancel controls, but not the 12 / 2 / 50 / 54 entity counts. Counts were verified after applying and against the input independently.",
+      "steps": [
+        "Choose the converted JSON in Settings.",
+        "Inspect the staged import dialog before applying."
+      ],
+      "impact": "The operator cannot reconcile entity counts from the preview itself.",
+      "workaround": "Use the report baseline and post-import record checks.",
+      "scenarios": [
+        "WS02",
+        "WS03"
+      ],
+      "recommendation": "Consider count visibility separately; this report does not introduce a UI change."
+    }
+  ],
+  "warnings": {
+    "errors": 0,
+    "warnings": 57,
+    "warningCodes": {
+      "STATUS_MIGRATION_READINESS": 1,
+      "FUNDING_OPERATIONAL_AMOUNT_MISSING": 2,
+      "RATE_LEGACY_CATALOG_ACTIVE": 54
+    }
+  },
+  "demoProfile": {
+    "path": "C:\\Users\\n0rt\\AppData\\Local\\Temp\\nsa-demo-original-1791954235081",
+    "browser": "155.0.4283.45",
+    "backup": "artifacts\\original-demo-recovery.json",
+    "sha256": "37290099d60800117680ee218e8d8c2a7cb61c74fa2db05c5f44c3449dc8cbaf",
+    "counts": {
+      "applications": 12,
+      "costingLines": 0,
+      "events": 0,
+      "geometries": 0,
+      "jobs": 0,
+      "payments": 0,
+      "projects": 2,
+      "quoteEvents": 0,
+      "quoteLines": 0,
+      "quotes": 0,
+      "rateItems": 54,
+      "tasks": 50,
+      "catalogs": 1,
+      "paymentAllocations": 0,
+      "statusEvents": 5,
+      "statusRecommendations": 0,
+      "annualBudgets": 0,
+      "budgetEntries": 0,
+      "registerAllocations": 0,
+      "allocationEntries": 0,
+      "budgetCharges": 0,
+      "budgetChangeRequests": 0,
+      "budgetDecisions": 0,
+      "budgetCarryReviews": 0
+    }
+  },
+  "recovery": [
+    "Keep the original area-pricing v5 file and the verified original-demo-recovery.json backup accessible before presenting.",
+    "Use the dedicated prepared Edge profile; the existing working browser profile was not changed.",
+    "If importing into a fresh profile or after deletion: open Settings, reload, then choose the JSON and apply it. Confirm 12 applications, 2 projects, 50 tasks and 54 rates.",
+    "For Dangerzone demonstration, use a separate disposable profile. Download and keep the required backup before confirming deletion. Never use the prepared demonstration profile as the deletion target.",
+    "After deletion, Restore Stored Data must not bring the workspace back. Restore from the actual downloaded JSON using the reload workaround, then verify counts and a subsequent save.",
+    "If any import or save fails, stop entering data. Keep the original file and backups, record the displayed error, reload and repeat only the verified recovery route."
+  ],
+  "demo": [
+    "Launch the prepared original-data Edge profile and confirm Register totals. Do not demonstrate a clean-profile first import without acknowledging the blocker.",
+    "Open an existing project in Planner, expand its sections and show retained task completion. Create another project only in a disposable rehearsal copy.",
+    "Open Calculator: use the $80/hour rate, quantity 2; expected subtotal $160, GST $16, total $176.",
+    "Open Quotes: record a $20 deposit, show $156 remaining, then reverse it. Demonstrate Council/Customer switching only after reversal. Mixed customer contribution $60 produces $66 gross; a $15 deposit leaves $51.",
+    "Issue the customer quote in the disposable copy. Record $44 then $132 to settle $176; reverse both and confirm $176 remains unpaid.",
+    "Show the draft job in Scheduler, click the 09:00 slot and show 09:00–09:30 with handles. Multi-day, Month view and Outlook behaviours passed the listed supplementary regressions.",
+    "Show polygon drawing and the Moasure sample. Expand before editing/saving the anchor; collapse should retain the action buttons. Pan/zoom the live aerial map; tree layers require zoom 16/17.",
+    "Download a complete JSON backup. Keep the prepared original-data profile clean; do the worked example and deletion in disposable copies."
+  ],
+  "suites": [
+    {
+      "file": "regression-results.json",
+      "stats": {
+        "startTime": "2026-10-14T04:41:46.571Z",
+        "duration": 101205.012,
+        "expected": 32,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "file": "additional-regressions.json",
+      "stats": {
+        "startTime": "2026-10-14T05:00:08.135Z",
+        "duration": 57578.515,
+        "expected": 35,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "limits": [
+    "Navigation revision correction applied and verified locally. No commit or publication performed; the recorded commit and asset parity describe the original public baseline.",
+    "The tests used isolated contexts and a dedicated original-data profile; no existing user workspace was deleted.",
+    "Storage quota was simulated at the commit interface; import and deletion aborts used actual IndexedDB transaction aborts.",
+    "Software GPU, transfer-limit, stale-response and budget-exhaustion checks used controlled regression fixtures. Live Edge separately fetched MetroMap and ArcGIS data and checked GPU resource limits.",
+    "Preliminary selector/fixture errors were corrected and retested. Superseded harness failures are retained in local artifacts but are not counted as application defects.",
+    "Imported rate grouping was verified as Labour 7, Sundry 6, Material 38, Contractors 2 and Equipment 1; Material Scheduler-enabled count was 0. The earlier raw-file concern was not reproduced after normalisation.",
+    "A headed presentation-display rehearsal remains blocked; automated tests cannot establish future network availability.",
+    "The focused Playwright invocation cleared the default output directory. Baseline reports and Edge evidence were restored from preserved Windows copies; some original Linux raw artifacts are no longer available."
+  ],
+  "reportFiles": [
+    "nsa-demo-readiness-report.md",
+    "nsa-demo-readiness-report.html"
+  ],
+  "localCorrection": {
+    "verified": true,
+    "scope": "Local source only. The published baseline below remains unchanged: 105 passed, 2 failed, 1 blocked.",
+    "runs": [
+      {
+        "platform": "linux",
+        "browser": "151.0.7922.34",
+        "sourceSha256": "157112935bda019bfeca183b0f0daa4afa5fb4352d4402b5e154338f705ba976",
+        "inputSha256": "d3424d247bca9586f1a35a7e3e584fa18b637e0bbeb44b0e29da84122c64ec5f",
+        "finished": "2026-10-14T09:02:18.788Z",
+        "scenarios": [
+          {
+            "id": "FIX-nsa",
+            "title": "nsa fresh import and permanent-delete recovery",
+            "group": "Local fix",
+            "expected": "Immediate import succeeds without reload; actual Dangerzone backup restores after deletion and reload.",
+            "status": "passed",
+            "observed": {
+              "immediateImport": true,
+              "downloadSha256": "c9306fd5b2c2a3ccda98d63f9227956133959b76a74ea47438bab4e29c95e1d5",
+              "recoveryAndSave": true
+            },
+            "durationMs": 1665
+          },
+          {
+            "id": "FIX-events",
+            "title": "events fresh import and permanent-delete recovery",
+            "group": "Local fix",
+            "expected": "Immediate import succeeds without reload; actual Dangerzone backup restores after deletion and reload.",
+            "status": "passed",
+            "observed": {
+              "immediateImport": true,
+              "downloadSha256": "262fda6e441cc61ab7ac563c24d9b7cd3d3deb317ede78e7826e0693617fd7f4",
+              "recoveryAndSave": true
+            },
+            "durationMs": 1328
+          },
+          {
+            "id": "FIX-QUEUE",
+            "title": "Queued navigation, business edits and deletion",
+            "group": "Local fix",
+            "expected": "Latest business content and eager destination survive; queued navigation cannot recreate deleted data.",
+            "status": "passed",
+            "observed": {
+              "before": {
+                "revision": 1,
+                "memory": 1,
+                "destination": "register",
+                "ids": [
+                  "NSA-APP-QUEUE"
+                ]
+              },
+              "cleared": true
+            },
+            "durationMs": 409
+          },
+          {
+            "id": "FIX-STALE",
+            "title": "Second-tab stale import and deletion",
+            "group": "Local fix",
+            "expected": "A real newer business revision rejects stale imports and stale deletion.",
+            "status": "passed",
+            "observed": [
+              "WorkspaceRevisionConflictError",
+              "WorkspaceRevisionConflictError"
+            ],
+            "durationMs": 646
+          },
+          {
+            "id": "FIX-FAIL",
+            "title": "Failed navigation persistence",
+            "group": "Local fix",
+            "expected": "A rejected storage write never advances the memory revision or reports Saved.",
+            "status": "passed",
+            "observed": {
+              "revision": 0,
+              "durableAbsent": true
+            },
+            "durationMs": 222
+          }
+        ],
+        "evidence": "local-fix/workspace-results.json"
+      },
+      {
+        "platform": "win32",
+        "browser": "155.0.4283.45",
+        "sourceSha256": "157112935bda019bfeca183b0f0daa4afa5fb4352d4402b5e154338f705ba976",
+        "inputSha256": "d3424d247bca9586f1a35a7e3e584fa18b637e0bbeb44b0e29da84122c64ec5f",
+        "finished": "2026-10-14T09:03:32.226Z",
+        "scenarios": [
+          {
+            "id": "FIX-nsa",
+            "title": "nsa fresh import and permanent-delete recovery",
+            "group": "Local fix",
+            "expected": "Immediate import succeeds without reload; actual Dangerzone backup restores after deletion and reload.",
+            "status": "passed",
+            "observed": {
+              "immediateImport": true,
+              "downloadSha256": "d532502e28331bc17a862eb71a1feee92b93a477c271a7212918c9a5999df849",
+              "recoveryAndSave": true
+            },
+            "durationMs": 4106
+          },
+          {
+            "id": "FIX-events",
+            "title": "events fresh import and permanent-delete recovery",
+            "group": "Local fix",
+            "expected": "Immediate import succeeds without reload; actual Dangerzone backup restores after deletion and reload.",
+            "status": "passed",
+            "observed": {
+              "immediateImport": true,
+              "downloadSha256": "a36bd0f743fec71317238657e30fbd72ff43db65414f73d58f6e61d96c8b4828",
+              "recoveryAndSave": true
+            },
+            "durationMs": 3598
+          },
+          {
+            "id": "FIX-QUEUE",
+            "title": "Queued navigation, business edits and deletion",
+            "group": "Local fix",
+            "expected": "Latest business content and eager destination survive; queued navigation cannot recreate deleted data.",
+            "status": "passed",
+            "observed": {
+              "before": {
+                "revision": 1,
+                "memory": 1,
+                "destination": "register",
+                "ids": [
+                  "NSA-APP-QUEUE"
+                ]
+              },
+              "cleared": true
+            },
+            "durationMs": 381
+          },
+          {
+            "id": "FIX-STALE",
+            "title": "Second-tab stale import and deletion",
+            "group": "Local fix",
+            "expected": "A real newer business revision rejects stale imports and stale deletion.",
+            "status": "passed",
+            "observed": [
+              "WorkspaceRevisionConflictError",
+              "WorkspaceRevisionConflictError"
+            ],
+            "durationMs": 584
+          },
+          {
+            "id": "FIX-FAIL",
+            "title": "Failed navigation persistence",
+            "group": "Local fix",
+            "expected": "A rejected storage write never advances the memory revision or reports Saved.",
+            "status": "passed",
+            "observed": {
+              "revision": 0,
+              "durableAbsent": true
+            },
+            "durationMs": 292
+          }
+        ],
+        "evidence": "local-fix-edge/workspace-results.json"
+      }
+    ]
+  },
+  "quoteCorrection": {
+    "verified": true,
+    "generated": "2026-10-14T14:03:02.785Z",
+    "scope": "Local source only; no commit or publication.",
+    "changes": [
+      "Payment controls no longer invoke automatic card scrolling when clicked or focused.",
+      "Ledger action controls remain stable through Quote refreshes; reversal guards prevent duplicate dialogs and reject empty reasons.",
+      "Reversal evidence resolves by payment ID and displays its stored timestamp. Missing historical actor information remains Not recorded.",
+      "Dialog close and successful reversal return focus to the payment control without scrolling."
+    ],
+    "limitation": "The initially disabled Customer deposit button was not reproduced in the current local source. Fresh-entry and reopened-workspace checks passed without changing funding. Existing funding eligibility rules were preserved.",
+    "runs": [
+      {
+        "file": "quote-focused/results.json",
+        "passed": 8,
+        "scenarios": [
+          {
+            "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+            "status": "passed"
+          },
+          {
+            "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+            "status": "passed"
+          },
+          {
+            "title": "NSA: default Customer permits a first deposit without toggling funding",
+            "status": "passed"
+          },
+          {
+            "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+            "status": "passed"
+          },
+          {
+            "title": "EVT: default Customer permits a first deposit without toggling funding",
+            "status": "passed"
+          },
+          {
+            "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+            "status": "passed"
+          },
+          {
+            "title": "first-deposit failure keeps data and retry records one payment despite repeated submits",
+            "status": "passed"
+          },
+          {
+            "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "quote-status-focus/results.json",
+        "passed": 2,
+        "scenarios": [
+          {
+            "title": "operator dialog is keyboard dismissible and restores focus",
+            "status": "passed"
+          },
+          {
+            "title": "reason narratives stay out of the drawer until the reason button opens its modal",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "quote-file-edge/results.json",
+        "passed": 2,
+        "scenarios": [
+          {
+            "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+            "status": "passed"
+          },
+          {
+            "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+            "status": "passed"
+          }
+        ]
+      }
+    ],
+    "hashes": {
+      "src/program-planner/js/quote-builder.js": "d3150bb39f254d5ab395e8990036d72880653cab82dbe085d8c23890aa676ae3",
+      "src/program-planner/js/card-visibility.js": "828af8876ce52d4d204efa58b95d16bd2f6db5cbc3645b55c09d62e71fb03fd5",
+      "src/program-planner/js/status-ui.js": "cdd3d8c8520abf31d83f15f7a3323603a7aad21050117c2e9efc1e45ba37e7c3",
+      "src/program-planner/js/register.js": "3ecc668e89f0fae8302ec095284bbd1972f527f652785ee0cad1c53a0c8bf695"
+    }
+  }
+}

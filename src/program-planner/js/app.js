@@ -1012,6 +1012,7 @@ function resetStartupWorkspace(workspace) {
       return new Promise(function (resolve) { setTimeout(resolve, 0); });
     }).then(function () {
       if (state.phase !== "ready" || !state.workspace) return null;
+      if (state.isSessionCleared) return state.workspace;
       /* Clone the latest workspace only when this queued persistence step runs.
          Do not reuse the earlier navigation snapshot: business edits may have
          happened while this operation was waiting. */
@@ -1025,7 +1026,17 @@ function resetStartupWorkspace(workspace) {
       prepareWorkingContextForDestination(latest, next);
       latest.workspace.destination = next;
       latest = UOS.ProgramModel.normalize(latest);
-   return UOS.ProgramStorage.saveValidated(latest).then(function () {
+      var baseRevision = Number(latest.workspaceRevision || 0);
+      return UOS.ProgramStorage.saveValidated(latest, null, {
+        baseRevision: baseRevision,
+        mutationKind: "navigation"
+      }).then(function (saved) {
+        // Navigation is painted eagerly. Reconcile only the revision so an
+        // earlier save cannot replace a newer destination or business edit.
+        if (state.isSessionCleared) return state.workspace;
+        if (state.workspace && Number(state.workspace.workspaceRevision || 0) === baseRevision) {
+          state.workspace.workspaceRevision = saved.workspaceRevision;
+        }
         programStatus("Saved", "ready");
         return state.workspace;
       }).catch(saveFailed);

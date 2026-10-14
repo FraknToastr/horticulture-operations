@@ -118,7 +118,10 @@ function hasLifecycleAction(actions, names) {
     return Promise.resolve(false);
   }
 
+  var reversalPending = false;
   function reversePaymentWithReason(paymentId) {
+    if (reversalPending) return Promise.resolve(null);
+    reversalPending = true;
     var dialogs = window.UOS && window.UOS.dialogs;
     var reasonField = document.createElement("label");
     reasonField.className = "program-payment-reversal-field";
@@ -134,6 +137,16 @@ function hasLifecycleAction(actions, names) {
           { label: "Reverse payment", value: true, danger: true }
         ] })
       : Promise.resolve(window.confirm("Reverse this payment?") ? true : false);
+    var reversalModal = reasonField.closest(".uos-modal");
+    if (reversalModal) reversalModal.addEventListener("click", function (event) {
+      if (!event.target.closest(".uos-button--danger")) return;
+      textarea.setCustomValidity(text(textarea.value) ? "" : "Enter a reversal reason.");
+      if (!textarea.reportValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
+    textarea.addEventListener("input", function () { textarea.setCustomValidity(""); });
     return confirmation.then(function (confirmed) {
       if (!confirmed) return null;
       var reason = text(textarea.value || (typeof window.prompt === "function" ? window.prompt("Reason for reversal") : ""));
@@ -147,7 +160,15 @@ function hasLifecycleAction(actions, names) {
         if (quote && project) loadQuoteRecord(project, quote); else renderBuilder();
         if (window.UOS && window.UOS.toast) window.UOS.toast("Payment reversal recorded in Section 5 Payment Ledger.", "success");
       });
-    }).catch(ledgerError);
+    }).catch(ledgerError).finally(function () {
+      reversalPending = false;
+      // Saving remounts the drawer on the next animation frame. Resolve the
+      // replacement control after that mount, rather than focusing a hidden node.
+      window.requestAnimationFrame(function () {
+        var target = rootNode && rootNode.querySelector('[data-payment-reason-id="' + CSS.escape(paymentId) + '"], [data-payment-reverse="' + CSS.escape(paymentId) + '"]');
+        if (target && target.getClientRects().length && !document.querySelector("dialog[open], .uos-modal-backdrop")) target.focus({ preventScroll: true });
+      });
+    });
   }
 
   function cleanDescription(desc) {
@@ -316,7 +337,11 @@ function hasLifecycleAction(actions, names) {
     if (document.activeElement !== input) input.value = value || "";
   }
 
+  var paymentPointerActive = false, paymentRenderDeferred = false;
   function renderBuilder() {
+    // A redraw between pointer-down and click can cancel the browser's click
+    // even when the pressed node survives. Finish the gesture first.
+    if (paymentPointerActive) { paymentRenderDeferred = true; return; }
     if (quoteSectionNavigation) quoteSectionNavigation.schedule();
     // Drawer transitions may replace the form node while persistence is in flight.
     rootNode = document.querySelector("[data-program-view='quotes']") || rootNode;
@@ -870,15 +895,21 @@ function renderPreview() {
       : "Deposits can be recorded now. Issue or accept the Quote before recording other payments.";
     if (formNote && !state.quoteId && state.selectedEntityId && !noCustomerPayment) formNote.textContent = "Record a deposit to save this Draft. Issue or accept the Quote before recording other payments.";
     if (!rows) return;
-    if (!state.quoteId) { rows.innerHTML = '<tr><td colspan="6">No payments recorded.</td></tr>'; return; }
-    if (!summary.payments.length) { rows.innerHTML = '<tr><td colspan="6">No payments recorded.</td></tr>'; return; }
-    rows.innerHTML = summary.payments.slice().sort(function (a, b) { return String(b.paymentDate).localeCompare(String(a.paymentDate)); }).map(function (payment) {
+    function setRows(markup) {
+      // Keep action buttons alive during unrelated Quote refreshes.
+      if (rows._paymentRowsMarkup === markup) return;
+      rows.innerHTML = markup;
+      rows._paymentRowsMarkup = markup;
+    }
+    if (!state.quoteId) { setRows('<tr><td colspan="6">No payments recorded.</td></tr>'); return; }
+    if (!summary.payments.length) { setRows('<tr><td colspan="6">No payments recorded.</td></tr>'); return; }
+    setRows(summary.payments.slice().sort(function (a, b) { return String(b.paymentDate).localeCompare(String(a.paymentDate)); }).map(function (payment) {
       var reversed = payment.status === "Reversed";
-      var reason = reversed && payment.reversalReason ? '<small class="program-payment-ledger__reason">' + esc(payment.reversalReason) + '</small>' : '';
+      var reason = reversed && payment.reversalReason ? '<button type="button" class="program-status-reason-button" data-payment-reason-id="' + esc(payment.id) + '" aria-label="View payment reversal reason" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg></button>' : '';
       var formatDate = window.UOS && window.UOS.imports && window.UOS.imports.formatDate;
       var paymentDateLabel = formatDate ? formatDate(payment.paymentDate) : (payment.paymentDate || "—");
       return '<tr' + (reversed ? ' class="is-reversed"' : '') + '><td>' + esc(paymentDateLabel) + '</td><td>' + esc(payment.reference || "—") + '</td><td>' + esc(payment.method) + '</td><td>' + money(payment.amount) + '</td><td>' + esc(payment.status) + reason + '</td><td>' + (reversed ? '—' : '<button type="button" class="uos-button uos-button--secondary uos-button--sm" data-payment-reverse="' + esc(payment.id) + '">Reverse</button>') + '</td></tr>';
-    }).join("");
+    }).join(""));
   }
 
   function projectQuoteHistory() {
@@ -1194,6 +1225,15 @@ function renderPreview() {
     return UOS.dialogs.open({ title: "Issue Quote", node: node, modalClass: "program-quote-issue-dialog", actions: [{ label: "Cancel", value: false }, { label: "Issue quote", value: true, primary: true }] });
   }
   function onClick(event) {
+    // Payment actions belong to the ledger, even inside a project drawer.
+    var paymentReverse = event.target.closest("[data-payment-reverse]");
+    if (paymentReverse) {
+      event.preventDefault();
+      event.stopPropagation();
+      reversePaymentWithReason(paymentReverse.getAttribute("data-payment-reverse"));
+      return;
+    }
+    if (event.target.closest("[data-payment-reason-id]")) return;
     if (event.target.closest("[data-use-suggested-contribution]")) {
       if (["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0 || state.quoteId && UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return;
       state.proposedCustomerContribution = suggestedCustomerAmount();
@@ -1332,11 +1372,7 @@ function renderPreview() {
       return;
     }
     var saveBtn = event.target.closest("[data-quote-save]");
-    var reverseBtn = event.target.closest("[data-payment-reverse]");
-
-    if (reverseBtn) {
-      reversePaymentWithReason(reverseBtn.getAttribute("data-payment-reverse"));
-    } else if (removeBtn) {
+    if (removeBtn) {
       removeLineItem(removeBtn.getAttribute("data-remove-line"));
     } else if (addBtn) {
       addLineItem("Adjustment", "Quote adjustment", "item", 1, 0);
@@ -1822,6 +1858,22 @@ function renderPreview() {
     document.addEventListener("click", function (event) {
       if (event.target.closest("[data-program-view='quotes']")) onClick(event);
     }, true);
+    document.addEventListener("pointerdown", function (event) {
+      if (event.button !== 0) return;
+      paymentPointerActive = Boolean(event.target.closest("[data-payment-reverse], [data-payment-reason-id]"));
+    }, true);
+    function releasePaymentPointer() {
+      if (!paymentPointerActive) return;
+      paymentPointerActive = false;
+      window.requestAnimationFrame(function () {
+        if (!paymentRenderDeferred) return;
+        paymentRenderDeferred = false;
+        renderBuilder();
+      });
+    }
+    document.addEventListener("pointerup", releasePaymentPointer, true);
+    document.addEventListener("pointercancel", releasePaymentPointer, true);
+    window.addEventListener("blur", releasePaymentPointer);
     document.addEventListener("uos:privacy-changed", renderBuilder);
     document.addEventListener("submit", function (event) {
       if (!event.target.closest("[data-program-view='quotes']")) return;

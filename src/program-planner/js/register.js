@@ -2534,6 +2534,8 @@
         readControls();
         return;
       }
+      // Nested module controls are not Register row-selection gestures.
+      if (event.target.closest('[data-program-view="quotes"]')) return;
       var row = event.target.closest("[data-register-record]");
       if (row) {
         var registerKey = row.getAttribute("data-disclosure-key") || "register:" + row.getAttribute("data-register-record");

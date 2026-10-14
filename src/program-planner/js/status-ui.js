@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  var UOS = window.UOS = window.UOS || {}, renderPending = false, focusReturns = new WeakMap(), lifecycleTargetId = "", legacyReasons = {};
+  var UOS = window.UOS = window.UOS || {}, renderPending = false, focusReturns = new WeakMap(), lifecycleTargetId = "";
   document.documentElement.classList.add("program-status-v5");
   function text(value) { return String(value == null ? "" : value).trim(); }
   function esc(value) { return text(value).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -22,7 +22,7 @@
   function showModal(dialog, returnTarget, fallbackSelector) {
     focusReturns.set(dialog, { node: returnTarget || document.activeElement, fallbackSelector: fallbackSelector || "" });
     if (!dialog.open) dialog.showModal();
-    setTimeout(function () { var first = dialog.querySelector("input, textarea, button, [tabindex='0'], [tabindex='-1']"); if (first) first.focus(); }, 0);
+    setTimeout(function () { var first = dialog.querySelector("input, textarea, button, [tabindex='0'], [tabindex='-1']"); if (dialog.open && first) first.focus({ preventScroll: true }); }, 0);
   }
   function closeModal(dialog) {
     if (!dialog) return;
@@ -30,7 +30,7 @@
     var target = focusReturns.get(dialog), node = target && target.node;
     if ((!node || !node.isConnected) && target && target.fallbackSelector) node = document.querySelector(target.fallbackSelector);
     focusReturns.delete(dialog);
-    if (node && node.focus) node.focus();
+    if (node && node.focus) node.focus({ preventScroll: true });
   }
   function ensureOperator() {
     if (operator()) return Promise.resolve(operator());
@@ -95,7 +95,6 @@
     if (dataView && !dataView.querySelector("[data-status-automation-card]")) dataView.insertAdjacentHTML("afterbegin", '<section class="program-island program-status-automation" data-status-automation-card><header><div><p class="uos-eyebrow">Status governance</p><h3>Guarded automation</h3></div><label class="program-status-pause"><input type="checkbox" data-status-automation><span>Enable deterministic status automation</span></label></header><p data-status-readiness></p><button class="uos-button uos-button--secondary uos-button--sm" type="button" data-status-bulk-approve>Approve all retrospective recommendations</button></section>');
     var toggle = document.querySelector("[data-status-automation]"); if (toggle) toggle.checked = Boolean(ws.statusControl && ws.statusControl.automationEnabled);
     var readiness = document.querySelector("[data-status-readiness]"); if (readiness) { var report = ws.migration && ws.migration.statusReadiness; readiness.textContent = report ? (report.status === "ready" ? "Migration readiness reviewed by " + report.reviewedBy + ". " : "Migration readiness review required. Automation starts paused. ") + report.unknownStatusCount + " unrecognised status value(s)." : "Automation applies only to new causal signals; resuming does not replay missed transitions."; }
-    document.querySelectorAll(".program-payment-ledger__reason").forEach(function (node, index) { var id = "payment-reason-" + index + "-" + text(node.textContent).length; legacyReasons[id] = { action: "Payment reversed", reason: text(node.textContent), actor: "Not recorded", timestamp: "Not recorded" }; node.outerHTML = '<button type="button" class="program-status-reason-button" data-legacy-reason-id="' + id + '" aria-label="View payment reversal reason"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg></button>'; });
   }
   function lifecycleTriggerHtml(found) {
     return '<button type="button" class="uos-button uos-button--secondary uos-button--sm program-status-lifecycle-open program-status-lifecycle-review" data-status-lifecycle-open="' + esc(found.record.id) + '" aria-haspopup="dialog" aria-controls="statusLifecycleDialog" aria-label="Review governed lifecycle for ' + esc(found.record.title || found.record.name || found.record.eventName || found.record.id) + '">Review</button>';
@@ -198,7 +197,18 @@
   }
   function render() { if (renderPending) return; renderPending = true; requestAnimationFrame(function () { renderPending = false; renderQueue(); attachGovernedControls(); renderLifecycleDialog(); }); }
   function showReason(id) { var ws = workspace(), event = (ws.entities.statusEvents || []).find(function (item) { return item.id === id; }); if (!event || !event.reason) return; var dialog = document.querySelector("[data-status-reason-dialog]"); dialog.querySelector("[data-status-reason-action]").textContent = event.action; dialog.querySelector("[data-status-reason-text]").textContent = event.reason; dialog.querySelector("[data-status-reason-actor]").textContent = event.actor || "Not recorded"; dialog.querySelector("[data-status-reason-time]").textContent = new Date(event.timestamp).toLocaleString("en-AU"); showModal(dialog); }
-  function showLegacyReason(id) { var value = legacyReasons[id]; if (!value) return; var dialog = document.querySelector("[data-status-reason-dialog]"); dialog.querySelector("[data-status-reason-action]").textContent = value.action; dialog.querySelector("[data-status-reason-text]").textContent = value.reason; dialog.querySelector("[data-status-reason-actor]").textContent = value.actor; dialog.querySelector("[data-status-reason-time]").textContent = value.timestamp; showModal(dialog); }
+  function showPaymentReason(id, trigger) {
+    var ws = workspace();
+    var payment = ws && (ws.entities.payments || []).find(function (item) { return item.id === id; });
+    if (!payment || payment.status !== "Reversed" || !payment.reversalReason) return;
+    var dialog = document.querySelector("[data-status-reason-dialog]");
+    dialog.querySelector("[data-status-reason-action]").textContent = "Payment reversed";
+    dialog.querySelector("[data-status-reason-text]").textContent = payment.reversalReason;
+    dialog.querySelector("[data-status-reason-actor]").textContent = payment.reversedBy || "Not recorded";
+    var timestamp = payment.reversedAt && new Date(payment.reversedAt);
+    dialog.querySelector("[data-status-reason-time]").textContent = timestamp && !isNaN(timestamp.getTime()) ? timestamp.toLocaleString("en-AU") : "Not recorded";
+    showModal(dialog, trigger, '[data-payment-reason-id="' + CSS.escape(id) + '"]');
+  }
   function bind() {
     dialogMarkup();
     ensureLifecycleDialog();
@@ -221,11 +231,16 @@
       confirmTransition(id, requested).catch(function (error) { render(); if (error.message.indexOf("cancelled") < 0) announce(error.message); });
     }, true);
     document.addEventListener("click", function (event) {
-      var command = event.target.closest("[data-status-command]"), recommendation = event.target.closest("[data-status-recommendation]"), reason = event.target.closest("[data-status-reason-id]"), legacyReason = event.target.closest("[data-legacy-reason-id]"), close = event.target.closest("[data-status-reason-close]"), lifecycleOpen = event.target.closest("[data-status-lifecycle-open]"), lifecycleClose = event.target.closest("[data-status-lifecycle-close]");
+      var paymentReason = event.target.closest("[data-payment-reason-id]");
+      if (paymentReason) {
+        event.preventDefault();
+        showPaymentReason(paymentReason.getAttribute("data-payment-reason-id"), paymentReason);
+        return;
+      }
+      var command = event.target.closest("[data-status-command]"), recommendation = event.target.closest("[data-status-recommendation]"), reason = event.target.closest("[data-status-reason-id]"), close = event.target.closest("[data-status-reason-close]"), lifecycleOpen = event.target.closest("[data-status-lifecycle-open]"), lifecycleClose = event.target.closest("[data-status-lifecycle-close]");
       if (lifecycleOpen) { openLifecycle(lifecycleOpen.getAttribute("data-status-lifecycle-open"), lifecycleOpen); return; }
       if (lifecycleClose) { closeLifecycle(); return; }
       if (reason) { showReason(reason.getAttribute("data-status-reason-id")); return; }
-      if (legacyReason) { showLegacyReason(legacyReason.getAttribute("data-legacy-reason-id")); return; }
       if (close) { closeModal(close.closest("dialog")); return; }
       if (command) { var host = command.closest("[data-status-controls-for]"); confirmTransition(host.getAttribute("data-status-controls-for"), command.getAttribute("data-status-command")).catch(function (error) { if (error.message.indexOf("cancelled") < 0) announce(error.message); }); return; }
       if (recommendation) { ensureOperator().then(function (actor) { return UOS.ProgramApp.resolveStatusRecommendation(recommendation.getAttribute("data-status-recommendation"), recommendation.getAttribute("data-status-decision"), { actor: actor }); }).then(function () { announce("Status recommendation reviewed."); }).catch(function (error) { if (error.message.indexOf("cancelled") < 0) announce(error.message); }); }

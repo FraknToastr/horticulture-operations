@@ -177,7 +177,7 @@
   function focusedCard(target) {
     if (!target || typeof target.closest !== "function") return null;
     // Native focus handles document fields; list alignment would move the editor.
-    if (target.closest(".program-quote-builder-table")) return null;
+    if (target.closest(".program-quote-builder-table, .program-payment-ledger")) return null;
     return target.closest(CARD_SELECTOR) || target.closest(".is-selected, [data-register-record], [data-event-card-id], [data-shape-card-id], [data-planner-project-id], [data-costing-project-id], [data-scheduler-project], [data-scheduler-job]");
   }
 
