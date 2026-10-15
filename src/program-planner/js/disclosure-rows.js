@@ -185,8 +185,8 @@ function emitDrawerMotionStart(drawer, expanded) {
       drawer: drawer,
       expanded: expanded,
       motion: drawer.getAttribute("data-disclosure-motion") || (drawer.tagName === "TR" ? "register" : "mini"),
-      duration: DRAWER_MOTION_DURATION,
-      easing: DRAWER_MOTION_EASING
+      duration: drawer.tagName === "TR" ? 300 : DRAWER_MOTION_DURATION,
+      easing: drawer.tagName === "TR" ? "cubic-bezier(0.333333, 0, 0.666667, 1)" : DRAWER_MOTION_EASING
     }
   }));
 }
@@ -241,6 +241,16 @@ function setDrawerState(drawer, expanded, animateMotion) {
       return;
     }
 
+  // Register owns a separate reveal shell: never animate the hard-floor host.
+  var workspace = UOS.ProgramDrawerWorkspace;
+  if (animateMotion && drawer.tagName === "TR" && !prefersReducedMotion() &&
+      workspace && workspace.animateDrawer && workspace.animateDrawer(drawer, expanded, function (shell) {
+        finishDrawerMotion(drawer, shell, expanded);
+      })) {
+    emitDrawerMotionStart(drawer, expanded);
+    return;
+  }
+  if (drawer.tagName === "TR" && workspace && workspace.finishDrawerMotion) workspace.finishDrawerMotion();
   cancelDrawerMotion(drawer, target);
 
   /* DOM enhancement and workspace rerenders synchronise state without motion.
@@ -667,7 +677,7 @@ function runAfterOpen(key, callback) {
     sync: function () { syncAll(false); },
     afterOpen: runAfterOpen,
     motion: {
-      register: { duration: DRAWER_MOTION_DURATION, easing: DRAWER_MOTION_EASING },
+ register: { duration: 300, easing: "cubic-bezier(0.333333, 0, 0.666667, 1)" },
       mini: { duration: DRAWER_MOTION_DURATION, easing: DRAWER_MOTION_EASING }
     }
   };

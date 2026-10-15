@@ -33,6 +33,7 @@ test("record modules cannot scroll the outer Register drawer or move its hard fl
     await child.waitForFunction((name) => document.body.getAttribute("data-drawer-module") === name, moduleName);
     await expect(host).toBeVisible();
     await page.waitForTimeout(150);
+    await child.waitForFunction(() => !Array.from(document.querySelectorAll('.program-register-drawer-row')).some(row => row._uosDisclosureAnimation));
 
     const before = await child.evaluate((id) => {
       const drawer = document.querySelector(`[data-register-drawer-record="${CSS.escape(id)}"]`);

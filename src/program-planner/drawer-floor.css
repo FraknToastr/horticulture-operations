@@ -1,4 +1,10 @@
 /* PC-018/PC-019: one floor and one outer-scroll rule for every Register drawer. */
+.program-register-motion-shell {
+  /* Reveal the fixed-size workspace without resizing its map/calendar/content. */
+  overflow: hidden;
+  overflow-anchor: none;
+}
+
 body[data-register-drawer-open] .program-register-main-pane > .program-table-wrap {
   overflow-y: hidden !important;
   overscroll-behavior: none;

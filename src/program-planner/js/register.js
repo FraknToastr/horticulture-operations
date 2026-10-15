@@ -591,7 +591,10 @@
           '</div>' +
         '</div>' +
         '<div class="program-register-module-host" data-register-module-host hidden></div>';
-      drawerCell.appendChild(drawerHost);
+      var motionShell = document.createElement("div");
+      motionShell.className = "program-register-motion-shell";
+      motionShell.appendChild(drawerHost);
+      drawerCell.appendChild(motionShell);
       drawerRow.appendChild(drawerCell);
 
       fragment.appendChild(summaryRow);

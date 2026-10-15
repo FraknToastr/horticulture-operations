@@ -16,6 +16,113 @@
   var positionedRow = null;
   var positionedKey = "";
   var lockedFloorHeight = null;
+  var registerMotion = null;
+  var preparingMotion = false;
+
+  // Only the outer reveal shell changes size. The existing floor calculations
+  // below remain the authority for the inner workspace and settled scroll.
+  function animateDrawer(drawer, expanded, complete) {
+    var shell = drawer.querySelector(".program-register-motion-shell");
+    var frame = tableFrame();
+    if (!shell || !frame) return false;
+    var motion = registerMotion;
+    if (!motion) {
+      motion = registerMotion = { entries: [], frame: frame, raf: 0,
+        width: global.innerWidth, height: global.innerHeight };
+    }
+    global.cancelAnimationFrame(motion.raf);
+    motion.startScroll = frame.scrollTop;
+    motion.entries.forEach(function (entry) {
+      entry.startHeight = entry.shell.getBoundingClientRect().height;
+    });
+    var entry = motion.entries.find(function (item) { return item.drawer === drawer; });
+    if (!entry) {
+      entry = { drawer: drawer, shell: shell, host: shell.firstElementChild,
+        startHeight: drawer.hidden ? 0 : shell.getBoundingClientRect().height };
+      motion.entries.push(entry);
+    }
+    entry.expanded = expanded;
+    entry.complete = complete;
+    drawer.hidden = false;
+    drawer.classList.toggle("is-disclosure-closing", !expanded);
+    // Disclosure synchronisation recognises this handle and leaves motion alone.
+    drawer._uosDisclosureAnimation = { cancel: function () { finishRegisterMotion(); } };
+    shell.style.height = entry.startHeight + "px";
+    motion.raf = global.requestAnimationFrame(function () { prepareRegisterMotion(motion); });
+    return true;
+  }
+
+  function prepareRegisterMotion(motion) {
+    if (registerMotion !== motion) return;
+    if (motion.entries.some(function (entry) { return !entry.drawer.isConnected; })) {
+      finishRegisterMotion();
+      return;
+    }
+    preparingMotion = true;
+    // Measure the final layout once, with outgoing rows removed. All changes
+    // are restored before paint; no second floor-sizing algorithm is involved.
+    motion.entries.forEach(function (entry) {
+      entry.floor = entry.host.style.getPropertyValue("--program-drawer-max-height");
+      entry.shell.style.removeProperty("height");
+      // The legacy closing class deliberately overrides [hidden]. Remove it
+      // while measuring so an outgoing record cannot inflate the destination.
+      entry.drawer.classList.remove("is-disclosure-closing");
+      entry.drawer.hidden = !entry.expanded;
+    });
+    if (activeRegisterRow()) {
+      positionedRow = null;
+      syncOpenDrawer();
+      motion.endScroll = motion.frame.scrollTop;
+    } else {
+      motion.endScroll = tableScrollOrigin === null ? motion.startScroll : tableScrollOrigin;
+    }
+    motion.entries.forEach(function (entry) {
+      entry.endHeight = entry.expanded ? entry.shell.getBoundingClientRect().height : 0;
+      if (!entry.expanded && entry.floor) entry.host.style.setProperty("--program-drawer-max-height", entry.floor);
+      entry.drawer.hidden = false;
+      entry.drawer.classList.toggle("is-disclosure-closing", !entry.expanded);
+      entry.shell.style.height = entry.startHeight + "px";
+    });
+    motion.frame.scrollTop = motion.startScroll;
+    lockedScrollTop = motion.frame.scrollTop;
+    preparingMotion = false;
+    motion.started = performance.now();
+    motion.raf = global.requestAnimationFrame(function tick(now) {
+      if (registerMotion !== motion) return;
+      if (motion.entries.some(function (entry) { return !entry.drawer.isConnected; })) {
+        finishRegisterMotion();
+        return;
+      }
+      var progress = Math.min(1, (now - motion.started) / 300);
+      // Smoothstep gives one shared ease-in/out clock to reveal and scrolling.
+      var eased = progress * progress * (3 - 2 * progress);
+      motion.entries.forEach(function (entry) {
+        entry.shell.style.height = (entry.startHeight + (entry.endHeight - entry.startHeight) * eased) + "px";
+      });
+      motion.frame.scrollTop = motion.startScroll + (motion.endScroll - motion.startScroll) * eased;
+      lockedScrollTop = motion.frame.scrollTop;
+      if (progress === 1) finishRegisterMotion();
+      else motion.raf = global.requestAnimationFrame(tick);
+    });
+  }
+
+  function finishRegisterMotion() {
+    var motion = registerMotion;
+    if (!motion) return;
+    global.cancelAnimationFrame(motion.raf);
+    registerMotion = null;
+    motion.entries.forEach(function (entry) {
+      entry.shell.style.removeProperty("height");
+      entry.drawer.hidden = !entry.expanded;
+      entry.drawer._uosDisclosureAnimation = null;
+      entry.drawer.classList.remove("is-disclosure-closing");
+    });
+    positionedRow = null;
+    syncOpenDrawer();
+    motion.entries.forEach(function (entry) {
+      if (entry.drawer.isConnected) entry.complete(entry.shell);
+    });
+  }
 
   var quotePosition = null;
   var costingPosition = null;
@@ -239,6 +346,7 @@
 
   // One viewport floor applies to native Register details and every mounted module.
   function applyViewportFloor(target) {
+    if (registerMotion && !preparingMotion) return;
     var drawers = target ? [target] : Array.prototype.slice.call(document.querySelectorAll("[data-register-drawer-record]"));
     drawers.forEach(function (drawer) {
       var row = drawer.closest("tr");
@@ -301,6 +409,7 @@
   }
 
   function syncOpenDrawer() {
+    if (registerMotion && !preparingMotion) return;
     var frame = tableFrame();
     if (!frame) return;
     var row = activeRegisterRow();
@@ -349,7 +458,14 @@
     }, { passive: true });
     document.addEventListener("uos:disclosure-open", onDisclosureChange);
     document.addEventListener("uos:disclosure-close", onDisclosureChange);
-    global.addEventListener("resize", function () { positionOpenRow(true); fitBudgetFloor(); });
+    global.addEventListener("resize", function () {
+      // Map mounting also dispatches resize. Only an actual viewport change
+      // should interrupt a reveal and recalculate its hard floor.
+      if (registerMotion && registerMotion.width === global.innerWidth && registerMotion.height === global.innerHeight) return;
+      finishRegisterMotion();
+      positionOpenRow(true);
+      fitBudgetFloor();
+    });
     document.addEventListener("uos:workspace-changed", function (event) { requestSync(event.detail && event.detail.workspace, false); });
     var body = document.querySelector("[data-register-table-body]");
     if (body && global.MutationObserver) new MutationObserver(function () {
@@ -381,6 +497,7 @@
   }
 
   UOS.ProgramDrawerWorkspace = {
+    animateDrawer: animateDrawer, finishDrawerMotion: finishRegisterMotion,
     modules: KEYS.slice(), isModule: isModule, moduleKey: moduleKey,
     sync: sync, requestSync: requestSync, applyViewportFloor: applyViewportFloor, captureQuotePosition: captureQuotePosition, restoreQuotePosition: restoreQuotePosition, captureCostingPosition: captureCostingPosition, restoreCostingPosition: restoreCostingPosition
   };
