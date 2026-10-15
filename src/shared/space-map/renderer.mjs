@@ -316,10 +316,10 @@ export class Map {
         objects.push(this.makePoints(shifted(p.points), p.highlight ? 6 : 2, p.highlight ? '#ffde59' : '#ffffff', 1, p.highlight ? 35 : 30));
       }
       for (const batch of p.batches || []) {
-        objects.push(this.makeMesh(shifted(batch.fill), { color: batch.color, opacity: p.highlight ? .12 : .35 }, p.highlight ? 31 : id === 'tpz' ? 10 : 20));
-        for (const stroke of p.highlight ? [{color:'#10233f',width:6,order:32},{color:'#ffde59',width:3,order:33}] : [{color:'#ffffff',width:1,order:id === 'tpz' ? 11 : 21}]) {
+ objects.push(this.makeMesh(shifted(batch.fill), { color: batch.color, opacity: .25 }, p.highlight ? 31 : id === 'tpz' ? 10 : 20));
+ for (const stroke of p.highlight ? [{color:'#10233f',width:6,order:32},{color:'#ffde59',width:3,order:33}] : [{color:'#ffffff',width:.5,order:id === 'tpz' ? 11 : 21}]) {
         const geometry = new BufferGeometry(); geometry.setAttribute('position', new Float32BufferAttribute(shifted(batch.outlineBase), 3)); geometry.setAttribute('edgeOffset', new Float32BufferAttribute(batch.outlineOffset, 2));
-        const material = new MeshBasicNodeMaterial({ color: stroke.color, opacity: p.highlight ? 1 : .5, transparent: true, depthTest: false, depthWrite: false, side: DoubleSide }); material.positionNode = positionLocal.add(vec3(attribute('edgeOffset', 'vec2').mul(this.outlineScale).mul(stroke.width), 0));
+ const material = new MeshBasicNodeMaterial({ color: stroke.color, opacity: p.highlight ? 1 : .25, transparent: true, depthTest: false, depthWrite: false, side: DoubleSide }); material.positionNode = positionLocal.add(vec3(attribute('edgeOffset', 'vec2').mul(this.outlineScale).mul(stroke.width), 0));
         const outline = new Mesh(geometry, material); outline.renderOrder = stroke.order; this.scene.add(outline); objects.push(outline);
         }
       }
