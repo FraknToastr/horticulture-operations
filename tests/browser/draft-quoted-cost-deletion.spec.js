@@ -44,6 +44,7 @@ for (const owner of ['NSA', 'EVT']) {
     expect(checks.removed).toEqual({ lines: 0, quoteLines: 0, subtotal: 0, contribution: 200, mode: 'mixed' });
     expect(checks.originalLines).toBe(1);
     await child.locator('[data-program-destination="costing"]').click();
+    await child.locator('[data-calculator-quote]').selectOption('');
     await child.locator(`[data-costing-remove="${owner}-COST-DRAFT-DELETE"]`).click();
     await child.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
     await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(0);
@@ -60,6 +61,12 @@ for (const owner of ['NSA', 'EVT']) {
     await expect(child.locator('[data-costing-error]')).toContainText('Quotes protect');
     await child.evaluate(async () => { await window.UOS.ProgramApp.updateWorkspace(ws => ws); });
     await expect(child.locator('[data-costing-error]')).toBeVisible();
+    await expect(child.locator('[data-costing-error]')).toContainText('Quotes protect');
+    await child.locator('[data-costing-error-close]').click();
+    await expect(child.locator('[data-costing-error]')).toBeHidden();
+    await child.evaluate(async () => { await window.UOS.ProgramApp.updateWorkspace(ws => ws); });
+    await expect(child.locator('[data-costing-error]')).toBeHidden();
+    await child.locator(`[data-costing-remove="${owner}-COST-PROTECTED"]`).click();
     await expect(child.locator('[data-costing-error]')).toContainText('Quotes protect');
   });
 }

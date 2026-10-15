@@ -40,6 +40,8 @@ async function dragRows(page,f,kind,rows,dx=0){
 }
 test('edge and move handles edit drafts without changing the day; Escape cancels a gesture',async({page})=>{
  const {frame:f,ids,errors}=await setup(page);await focus(f,ids.morning);const original=await f.evaluate(()=>UOS.ProgramApp.workspace().entities.jobs);
+ const moveBox=await handle(f,'move').boundingBox(),pillBox=await f.locator('.scheduler-week-job.is-selected .scheduler-priority-pill').first().boundingBox();
+ expect(moveBox.x+moveBox.width).toBeLessThanOrEqual(pillBox.x-3);
  await dragRows(page,f,'start',1);await expect(form(f).locator('[name=startTime]')).toHaveValue('09:30');
  await dragRows(page,f,'end',1);await expect(form(f).locator('[name=endTime]')).toHaveValue('11:00');
  await dragRows(page,f,'move',1);await expect(form(f).locator('[name=startTime]')).toHaveValue('10:00');await expect(form(f).locator('[name=endTime]')).toHaveValue('11:30');await expect(form(f).locator('[name=startDate]')).toHaveValue('2026-10-05');

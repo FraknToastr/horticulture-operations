@@ -40,6 +40,8 @@ html[data-suite-theme="dark"] .program-scheduler-outlook-panel{--outlook-surface
 .scheduler-priority--high{color:#991b1b;background:#fee2e2;border-color:#fca5a5}
 .program-calendar-job>.scheduler-priority-pill{position:absolute;right:3px;top:2px;margin:0}
 .program-calendar-job:has(>.scheduler-priority-pill) .program-calendar-job__title{padding-right:23px;box-sizing:border-box}
+.program-calendar-job.has-schedule-handles .program-calendar-job__title{padding-right:52px;box-sizing:border-box}
+.program-calendar-job.has-schedule-handles:has(>.scheduler-priority-pill) .program-calendar-job__title{padding-right:76px}
 .scheduler-week-day.is-editable{cursor:crosshair}
 .scheduler-week-day.is-editable:focus-visible{outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:-2px}
 .scheduler-week-day.is-editable:focus-visible:after{content:"";position:absolute;left:0;right:0;top:var(--scheduler-focused-minute,37.5%);height:24px;outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:-2px;pointer-events:none;z-index:12}

@@ -70,6 +70,7 @@
     }
     function enhance() {
       updateStatus(); if (gesture || pending) return; clearControls();
+      root.querySelectorAll('.has-schedule-handles').forEach(function (node) { node.classList.remove('has-schedule-handles'); });
       var enabled = eligible();
       root.querySelectorAll(".scheduler-week-day").forEach(function (day) {
         day.classList.toggle("is-editable", Boolean(enabled)); day.tabIndex = enabled ? 0 : -1;
@@ -78,10 +79,13 @@
       if (!enabled) return;
       var job = currentJob(); if (!job || job._unscheduled) return;
       var nodes = jobCards(); if (!nodes.length) return;
+      nodes.forEach(function (node) { node.classList.add('has-schedule-handles'); });
       var first = nodes[0].getBoundingClientRect(), last = nodes[nodes.length - 1].getBoundingClientRect();
       addControl("date-start", first, first.left + 2, first.top + first.height / 2);
       addControl("date-end", last, last.right - 2, last.top + last.height / 2);
-      addControl("move", first, first.right - (job.allDay || !options.context().week ? 56 : 30), first.top + Math.min(first.height / 2, 40));
+      var priority = nodes[0].querySelector('.scheduler-priority-pill');
+      var moveX = priority ? priority.getBoundingClientRect().left - 26 : first.right - 30;
+      addControl("move", first, moveX, first.top + Math.min(first.height / 2, 40));
       if (options.context().week && tools.dayInterval(job)) {
         addControl("start", first, first.left + first.width / 2, first.top);
         addControl("end", last, last.left + last.width / 2, last.bottom);

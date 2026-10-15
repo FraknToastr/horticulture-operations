@@ -1,0 +1,32 @@
+.program-calculator-quote-picker { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; padding:8px 12px; border-bottom:1px solid var(--panel-border); }
+.program-calculator-quote-picker label { flex:1 1 260px; margin:0; }
+.program-calculator-quote-picker p { flex:1 1 220px; margin:0; font-size:12px; color:var(--uos-text-muted); }
+.program-calculator-excluded > div { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:4px 0; }
+.program-calculator-excluded h4 { margin:0 0 6px; }
+.program-calculator-quote-totals { display:none; }
+.is-quote-view .program-calculator-quote-totals { display:block; }
+.is-quote-view .program-cost-adjustments,
+.is-quote-view [data-costing-total-label="preliminaries"], .is-quote-view [data-costing-total="preliminaries"],
+.is-quote-view [data-costing-total-label="margin"], .is-quote-view [data-costing-total="margin"] { display:none; }
+.program-cost-error--dismissible { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.program-cost-error--dismissible[hidden] { display:none; }
+.program-cost-error--dismissible button { flex:none; width:44px; height:44px; border:0; background:transparent; color:inherit; font-size:24px; cursor:pointer; }
+.space-editor__geometry-card[data-card-size="minimal"] .space-editor__fields th,
+.space-editor__geometry-card[data-card-size="minimal"] .space-editor__fields tr:nth-child(n+2),
+.space-editor__geometry-card[data-card-size="minimal"] > .program-shape-actions { display:none; }
+.space-editor__geometry-card[data-card-size="minimal"] .space-editor__fields td { padding:8px 12px; font-weight:600; }
+.space-editor__card-list-controls { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.space-editor__card-list-controls .space-editor__visibility { margin:0; }
+.space-editor__card-list-controls button { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:44px; padding:4px 6px; border:0; background:transparent; color:var(--space-ink); font:inherit; font-size:12px; cursor:pointer; }
+.space-editor__card-list-controls button:disabled { opacity:.5; cursor:default; }
+.tree-details-panel { position:absolute; z-index:14; bottom:0; left:0; right:0; height:120px; box-sizing:border-box; padding:20px 48px 18px 20px; border-top:2px solid var(--space-line); background:var(--space-field,#fff); color:var(--space-ink,#10233f); box-shadow:0 -4px 18px #10233f26; transform:translateY(100%); visibility:hidden; transition:transform 180ms ease,visibility 0s 180ms; }
+.tree-details-panel.is-open { transform:translateY(0); visibility:visible; transition-delay:0s; }
+.tree-details-panel dl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:center; gap:20px; height:100%; max-width:800px; margin:0 auto; text-align:center; }
+.tree-details-panel dt { font-size:12px; font-weight:600; margin-bottom:6px; }
+.tree-details-panel dd { margin:0; font-size:clamp(18px,2.5vw,30px); font-weight:800; line-height:1.2; }
+.tree-details-panel .tree-details-panel__risk { font-size:clamp(14px,1.8vw,22px); }
+.tree-details-panel__risk::before { content:''; display:inline-block; width:12px; height:12px; margin-right:6px; border-radius:50%; border:1px solid #10233f66; background:var(--tree-risk-color,#64748b); }
+.tree-details-panel__close { position:absolute; right:4px; top:4px; width:44px; height:44px; border:0; background:transparent; color:inherit; font-size:24px; cursor:pointer; }
+.space-editor .has-tree-details .tree-layer-menu, .has-tree-details > .tree-layer-menu { bottom:134px; }
+.tree-layer-menu { transition:bottom 180ms ease; }
+@media(prefers-reduced-motion:reduce) { .tree-details-panel,.tree-layer-menu { transition:none; } }

@@ -117,6 +117,7 @@ for(const owner of ['NSA','EVT']){
     await expect(card.locator('.space-editor__fields thead')).toHaveCount(0);
     await expect(card.locator('.program-shape-actions')).toBeVisible();
     await expect(card.locator('.space-editor__drawer')).toBeHidden();
+    await card.locator('[data-space-expand]').click();await expect(card).toHaveAttribute('data-card-size','minimal');
     await card.locator('[data-space-expand]').click();await expect(card.locator('.program-shape-actions')).toBeVisible();
     await expect.poll(()=>frame.evaluate(()=>{
       const card=document.querySelector('.space-editor__geometry-card');
@@ -146,7 +147,7 @@ for(const owner of ['NSA','EVT']){
       await frame.evaluate(t=>document.documentElement.dataset.suiteTheme=t,theme);
       const layout=await frame.locator('.space-editor').evaluate(editor=>{
         const sidebar=editor.querySelector('.space-editor__sidebar');
-        const nodes=['.space-editor__mode','#moveLocationButton','#fitLocationsButton','#coordinateShapeButton','#shapeList','#moasureImportButton'].map(s=>editor.querySelector(s).getBoundingClientRect());
+        const nodes=['.space-editor__mode','#moveLocationButton','#fitLocationsButton','#coordinateShapeButton','#shapeList','#moasureImportButton'].map(s=>editor.querySelector(s).getBoundingClientRect()).filter(r=>r.width && r.height);
         return {width:sidebar.getBoundingClientRect().width,background:getComputedStyle(sidebar).backgroundColor,tops:nodes.map(r=>r.top),rows:[...editor.querySelectorAll('.space-editor__tool-row')].map(r=>[...r.children].map(b=>b.getBoundingClientRect().width))};
       });expect(layout.width).toBe(360);expect(layout.background).toBe(theme==='dark'?'rgb(36, 43, 49)':'rgb(241, 243, 245)');
       expect(layout.tops).toEqual([...layout.tops].sort((a,b)=>a-b));for(const row of layout.rows)expect(Math.max(...row)-Math.min(...row)).toBeLessThan(1);
@@ -287,7 +288,7 @@ for(const owner of ['NSA','EVT']){
     const focused=await last.locator('[data-shape-action="delete"]').boundingBox();expect(focused.y+focused.height).toBeLessThanOrEqual(geometry.footerTop-7);
     await bottom();await mode(frame,'register');await expect.poll(async()=>Math.abs((await metrics()).scroll-location.scroll)).toBeLessThan(1);
     await mode(frame,'projects');await expect.poll(async()=>Math.abs((await metrics()).scroll-geometry.scroll)).toBeLessThan(1);
-    await frame.locator('[data-space-expand]').last().click();await expect(last.locator('.space-editor__drawer')).toBeVisible();expect((await metrics()).footerTop).toBe(location.footerTop);
+    await frame.locator('[data-space-expand]').last().click();await frame.locator('[data-space-expand]').last().click();await expect(last.locator('.space-editor__drawer')).toBeVisible();expect((await metrics()).footerTop).toBe(location.footerTop);
     await page.setViewportSize({width:480,height:900});await expect.poll(()=>last.locator('.program-shape-actions button').evaluateAll(buttons=>Math.min(...buttons.map(b=>b.getBoundingClientRect().width)))).toBeGreaterThanOrEqual(44);
     await expect.poll(()=>last.locator('.program-shape-actions button').evaluateAll(buttons=>new Set(buttons.map(b=>b.getBoundingClientRect().top)).size)).toBe(1);
     expect(errors).toEqual([]);

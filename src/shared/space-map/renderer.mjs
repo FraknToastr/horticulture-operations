@@ -306,17 +306,22 @@ export class Map {
     return hits;
   }
   setReferenceLayer(id, payload) { if (payload?.signature && this.reference.get(id)?.payload.signature === payload.signature) return; this.clearReferenceLayer(id); if (payload) this.reference.set(id, { payload, dirty: true }); this.syncLegacyReference(); this.invalidate(); }
-  clearReferenceLayer(id) { this.reference.delete(id); this.disposeObject(`reference-${id}`); if (this.legacy) for (const suffix of ['points', 'fill', 'outline']) { const layer = `reference-${id}-${suffix}`; if (this.legacy.getLayer(layer)) this.legacy.removeLayer(layer); } if (this.legacy?.getSource(`reference-${id}`)) this.legacy.removeSource(`reference-${id}`); this.invalidate(); }
+  clearReferenceLayer(id) { this.reference.delete(id); this.disposeObject(`reference-${id}`); if (this.legacy) for (const suffix of ['points', 'fill', 'outline', 'casing']) { const layer = `reference-${id}-${suffix}`; if (this.legacy.getLayer(layer)) this.legacy.removeLayer(layer); } if (this.legacy?.getSource(`reference-${id}`)) this.legacy.removeSource(`reference-${id}`); this.invalidate(); }
   renderReference() {
     for (const [id, ref] of this.reference) {
       if (!ref.dirty) continue; ref.dirty = false; this.disposeObject(`reference-${id}`); const objects = [], p = ref.payload, offset = [p.origin[0] - this.origin[0], p.origin[1] - this.origin[1]];
       const shifted = array => { const out = new Float32Array(array); for (let i = 0; i < out.length; i += 3) { out[i] += offset[0]; out[i + 1] += offset[1]; } return out; };
-      if (p.points?.length) objects.push(this.makePoints(shifted(p.points), 2, '#ffffff', 1, 30));
+      if (p.points?.length) {
+        if (p.highlight) objects.push(this.makePoints(shifted(p.points), 9, '#10233f', 1, 34));
+        objects.push(this.makePoints(shifted(p.points), p.highlight ? 6 : 2, p.highlight ? '#ffde59' : '#ffffff', 1, p.highlight ? 35 : 30));
+      }
       for (const batch of p.batches || []) {
-        objects.push(this.makeMesh(shifted(batch.fill), { color: batch.color, opacity: .35 }, id === 'tpz' ? 10 : 20));
+        objects.push(this.makeMesh(shifted(batch.fill), { color: batch.color, opacity: p.highlight ? .12 : .35 }, p.highlight ? 31 : id === 'tpz' ? 10 : 20));
+        for (const stroke of p.highlight ? [{color:'#10233f',width:6,order:32},{color:'#ffde59',width:3,order:33}] : [{color:'#ffffff',width:1,order:id === 'tpz' ? 11 : 21}]) {
         const geometry = new BufferGeometry(); geometry.setAttribute('position', new Float32BufferAttribute(shifted(batch.outlineBase), 3)); geometry.setAttribute('edgeOffset', new Float32BufferAttribute(batch.outlineOffset, 2));
-        const material = new MeshBasicNodeMaterial({ color: '#ffffff', opacity: .5, transparent: true, depthTest: false, depthWrite: false, side: DoubleSide }); material.positionNode = positionLocal.add(vec3(attribute('edgeOffset', 'vec2').mul(this.outlineScale), 0));
-        const outline = new Mesh(geometry, material); outline.renderOrder = id === 'tpz' ? 11 : 21; this.scene.add(outline); objects.push(outline);
+        const material = new MeshBasicNodeMaterial({ color: stroke.color, opacity: p.highlight ? 1 : .5, transparent: true, depthTest: false, depthWrite: false, side: DoubleSide }); material.positionNode = positionLocal.add(vec3(attribute('edgeOffset', 'vec2').mul(this.outlineScale).mul(stroke.width), 0));
+        const outline = new Mesh(geometry, material); outline.renderOrder = stroke.order; this.scene.add(outline); objects.push(outline);
+        }
       }
       this.objects.set(`reference-${id}`, objects);
     }

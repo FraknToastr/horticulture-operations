@@ -10,6 +10,58 @@
   var costingNeedsRender = true;
   var costingRenderQueued = false;
   var renderedCosting = {};
+  var quoteViews = Object.create(null);
+  function calculatorQuoteView(workspace) {
+    workspace = workspace || state.workspace;
+    var quotes = (workspace && workspace.entities.quotes || []).filter(function (q) { return q.projectId === state.selectedProjectId; }).slice().sort(function (a, b) {
+      return text(b.auditRootNumber || b.auditNumber).localeCompare(text(a.auditRootNumber || a.auditNumber)) || Number(b.revision || 1) - Number(a.revision || 1) || text(b.updatedAt).localeCompare(text(a.updatedAt));
+    });
+    var newest = quotes[0] && quotes[0].id || '', saved = quoteViews[state.selectedProjectId];
+    if (!saved || saved.newest !== newest) saved = quoteViews[state.selectedProjectId] = { id: newest, newest: newest };
+    if (saved.id && !quotes.some(function (q) { return q.id === saved.id; })) saved.id = newest;
+    var quote = quotes.find(function (q) { return q.id === saved.id; }) || null;
+    var locked = Boolean(quote && (quote.status !== 'Draft' || root.UOS.ProgramQuotes.commerciallyLocked(workspace, quote.id)));
+    return { quote: quote, quotes: quotes, locked: locked };
+  }
+  function renderQuotePicker(view) {
+    var select = one('[data-calculator-quote]');
+    if (!select) return;
+    clear(select);
+    var current = root.document.createElement('option'); current.value = ''; current.textContent = 'Current Project work'; select.appendChild(current);
+    view.quotes.forEach(function (q) { var option = root.document.createElement('option'); option.value = q.id; option.textContent = (q.auditNumber || q.quoteNumber) + ' · Revision ' + q.revision + ' · ' + q.status + (q.archived ? ' · Archived' : ''); select.appendChild(option); });
+    select.value = view.quote ? view.quote.id : '';
+    select.disabled = !state.selectedProjectId;
+    setText('[data-calculator-quote-status]', view.quote ? (view.locked ? 'Read-only quote. Select an unpaid Draft or Current Project work to add or change items.' : 'Unpaid Draft. Removing an item excludes it from this Draft only.') : 'Current Project work. Saved quote history is retained.');
+    var excluded = one('[data-calculator-excluded]'); if (excluded) {
+      clear(excluded);
+      var ids = view.quote && view.quote.excludedCostingLineIds || [];
+      var heading = root.document.createElement('h4'); heading.textContent = 'Excluded items (' + ids.length + ')'; excluded.appendChild(heading);
+      ids.forEach(function (id) {
+        var line = entities('costingLines').find(function (item) { return item.id === id; });
+        var row = root.document.createElement('div'), label = root.document.createElement('span'); label.textContent = line ? title(line) : 'Source item no longer available'; row.appendChild(label);
+        var restore = root.document.createElement('button'); restore.type = 'button'; restore.className = 'uos-button uos-button--secondary uos-button--sm'; restore.textContent = 'Restore'; restore.setAttribute('data-calculator-restore', id); restore.disabled = view.locked || !line; row.appendChild(restore); excluded.appendChild(row);
+      });
+      excluded.hidden = !view.quote;
+    }
+    all('[data-costing-preliminaries],[data-costing-margin]').forEach(function (input) { input.disabled = Boolean(view.quote); });
+    all('[data-costing-add-rate]').forEach(function (button) {
+      var rate = entities('rateItems').find(function (item) { return item.id === button.getAttribute('data-costing-add-rate'); });
+      button.disabled = view.locked || !rate || !active(rate) || !state.selectedProjectId;
+      if (view.locked) button.title = 'Select an unpaid Draft or Current Project work to add items.';
+    });
+  }
+  function requireCalculatorEditable() {
+    if (calculatorQuoteView().locked) throw new Error('Select an unpaid Draft or Current Project work to add or change items.');
+  }
+  function changeDraftMembership(id, included) {
+    var view = calculatorQuoteView(), projectId = state.selectedProjectId;
+    if (!view.quote || view.locked) return Promise.resolve(null);
+    var quoteId = view.quote.id;
+    return mutate(function (api, workspace) {
+      if (state.selectedProjectId !== projectId) throw new Error('The selected Project changed.');
+      return root.UOS.ProgramQuotes.setDraftCostingLineIncluded(workspace, quoteId, id, included);
+    });
+  }
 function text(value) { return String(value == null ? "" : value).trim(); }
 function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnProperty.call(value, key); }
   function clone(value) { return value === undefined ? undefined : JSON.parse(JSON.stringify(value)); }
@@ -70,7 +122,7 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     table.style.minWidth = "calc(" + (columnWidth + stateWidth + 364) + "px + 4 * var(--commercial-frame-height, 34px) + 32px)";
   }
   function currentJob() { return entities("jobs").find(function (job) { return job.id === state.jobId; }) || null; }
-  function showError(error) { state.error = error ? (error.message || String(error)) : ""; var node = one("[data-costing-error]"); if (!node) return; node.textContent = state.error; node.hidden = !state.error; }
+  function showError(error) { state.error = error ? (error.message || String(error)) : ""; var node = one("[data-costing-error]"); if (!node) return; var message = node.querySelector('[data-costing-error-message]') || node; message.textContent = state.error; node.hidden = !state.error; }
   function svg(kind) {
     var namespace = ["http:", "", "www.w3.org", "2000", "svg"].join("/"), node = root.document.createElementNS(namespace, "svg");
     var paths = kind === "trash" ? ["M3 6h18", "M8 6V4h8v2", "M19 6l-1 15H6L5 6", "M10 11v6", "M14 11v6"]
@@ -586,7 +638,14 @@ function button(label, kind, attribute, value) { var node = root.document.create
     var job = currentJob();
     if (job && (!selectedProject || job.projectId !== selectedProject.id)) job = null;
 
+    var view = calculatorQuoteView();
+    renderQuotePicker(view);
     var lines = selectedProject ? entities("costingLines").filter(function (line) { return line.projectId === selectedProject.id; }) : [];
+    if (view.quote) lines = entities('quoteLines').filter(function (line) { return line.quoteId === view.quote.id; }).map(function (line) {
+      var source = entities('costingLines').find(function (item) { return item.id === line.costingLineId; });
+      return Object.assign({}, line, { id: line.costingLineId || line.id, title: line.description, unitRate: line.unitRate, estimatedTotal: line.total,
+        sourceKind: source ? source.sourceKind : line.sourceKind, quoteCustom: !line.costingLineId || !source });
+    });
 
     var body = one("[data-costing-lines]"); if (!body) return; clear(body);
     var calcTitle = job ? jobLabel(job) : (selectedProject ? title(selectedProject) : "Select a job");
@@ -601,10 +660,10 @@ function button(label, kind, attribute, value) { var node = root.document.create
     var displayDate = displayJob && (displayJob.startDate || payload.date);
     var formatDate = root.UOS && root.UOS.imports && root.UOS.imports.formatDate;
     [["id", displayJob && displayJob.id], ["name", selectedProject ? title(selectedProject) : jobLabel(displayJob)], ["location", displayJob && (displayJob.location || payload.location)], ["date", formatDate ? formatDate(displayDate) : (text(displayDate) || "—")]].forEach(function (entry) { setText('[data-costing-meta="' + entry[0] + '"]', text(entry[1]) || "—"); });
-    lines.sort(function (a, b) { var ar = entities("rateItems").find(function (item) { return item.id === a.rateItemId; }); var br = entities("rateItems").find(function (item) { return item.id === b.rateItemId; }); return rateSection(ar).localeCompare(rateSection(br)); });
+    lines.sort(function (a, b) { var ar = view.quote ? a : entities("rateItems").find(function (item) { return item.id === a.rateItemId; }); var br = view.quote ? b : entities("rateItems").find(function (item) { return item.id === b.rateItemId; }); return rateSection(ar).localeCompare(rateSection(br)); });
     var currentKind = "";
     lines.forEach(function (line) {
-      var lineRate = entities("rateItems").find(function (item) { return item.id === line.rateItemId; }); var lineKind = model().lineKind(state.workspace, line);
+      var lineRate = entities("rateItems").find(function (item) { return item.id === line.rateItemId; }); var lineKind = view.quote ? text(line.kind) || 'Sundry' : model().lineKind(state.workspace, line);
  if (lineKind !== currentKind) {
    currentKind = lineKind;
    var groupRow = root.document.createElement("tr");
@@ -668,7 +727,11 @@ function button(label, kind, attribute, value) { var node = root.document.create
         calendar.classList.add("program-calculator-calendar");
         rail.appendChild(calendar);
       }
-      rail.appendChild(button("Remove " + title(line), "trash", "data-costing-remove", line.id));
+      var remove = button((view.quote ? 'Exclude from this Draft: ' : 'Remove ') + title(line), 'trash', 'data-costing-remove', line.id);
+      remove.disabled = view.locked || Boolean(line.quoteCustom);
+      if (line.quoteCustom) remove.title = 'Manage custom adjustments in Quotes';
+      rail.appendChild(remove);
+      if (view.locked || line.quoteCustom) [quantityInput, unitSelect, rateInput].forEach(function (input) { input.disabled = true; });
       action.appendChild(rail);
       [name, source, quantity, unitTd, rate, total, action].forEach(function (cell) { row.appendChild(cell); }); body.appendChild(row);
     });
@@ -681,6 +744,16 @@ function button(label, kind, attribute, value) { var node = root.document.create
  setText('[data-costing-total="margin"]', money(result.margin));
  setText('[data-costing-total="gst"]', money(result.gst));
     setText('[data-costing-total="grand"]', money(result.grandTotal));
+    var footer = one('[data-costing-totals-footer]');
+    if (footer) footer.classList.toggle('is-quote-view', Boolean(view.quote));
+    if (view.quote) {
+      var snapshot = root.UOS.ProgramQuotes.quoteSnapshot(state.workspace, view.quote.id);
+      setText('[data-costing-total="subtotal"]', money(view.quote.subtotal));
+      setText('[data-costing-total="gst"]', money(view.quote.gst));
+      setText('[data-costing-total="grand"]', money(view.quote.grandTotal));
+      setText('[data-calculator-quote-discount]', money(view.quote.discountAmount));
+      setText('[data-calculator-quote-contingency]', money(root.UOS.ProgramQuotes.totals(snapshot.lines, view.quote.discountRate, view.quote.contingencyRate, view.quote.discountAmount).contingency));
+    }
     if (position) drawerUI.restoreCostingPosition(position);
   }
   function renderCategories() {
@@ -725,7 +798,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
     }
     var full = costingNeedsRender || !incremental;
     var inputs = {};
-    ["projects", "applications", "events", "jobs", "costingLines", "rateItems", "catalogs", "geometries"].forEach(function (name) { inputs[name] = JSON.stringify(entities(name)); });
+    ["projects", "applications", "events", "jobs", "costingLines", "rateItems", "catalogs", "geometries", "quotes", "quoteLines", "payments", "paymentAllocations"].forEach(function (name) { inputs[name] = JSON.stringify(entities(name)); });
     inputs.workTypes = JSON.stringify(state.workspace.referenceData && state.workspace.referenceData.shared && state.workspace.referenceData.shared.workTypeRateItems || {});
     var drawerUI = root.UOS.ProgramDrawerWorkspace, position = drawerUI && drawerUI.captureCostingPosition();
     var privacy = root.UOS.ProgramPrivacy, privacyEnabled = privacy && typeof privacy.isEnabled === "function" && privacy.isEnabled();
@@ -747,7 +820,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
     }
     var mappedKey = JSON.stringify([inputs.geometries, inputs.rateItems, inputs.workTypes]);
     if (full || mappedKey !== renderedCosting.mapped) { renderMapped(); renderedCosting.mapped = mappedKey; }
-    var calculatorKey = JSON.stringify([state.mode, state.selectedProjectId, state.jobId, state.preliminaries, state.margin, inputs.projects, inputs.jobs, inputs.costingLines, inputs.rateItems]);
+    var calculatorKey = JSON.stringify([state.mode, state.selectedProjectId, state.jobId, state.preliminaries, state.margin, inputs.projects, inputs.jobs, inputs.costingLines, inputs.rateItems, inputs.quotes, inputs.quoteLines, inputs.payments, inputs.paymentAllocations]);
     if (full || calculatorKey !== renderedCosting.calculator) { renderCalculator(); renderedCosting.calculator = calculatorKey; }
     renderCalculatorTools();
     updatePillPicker();
@@ -762,24 +835,32 @@ function button(label, kind, attribute, value) { var node = root.document.create
   function persist(mutator) { var app = root.UOS && root.UOS.ProgramApp; if (!app || !app.updateWorkspace) return Promise.resolve(null); return app.updateWorkspace(mutator); }
   function mutate(operation) { if (!state.workspace) return Promise.resolve(null); showError(null); return persist(function (workspace) { return operation(model(), workspace); }).then(function (saved) { if (saved) root.setTimeout(function () { update(root.UOS.ProgramApp.workspace()); }, 0); return saved; }).catch(function (error) { showError(error); return null; }); }
   function addRate(id, areaInput) {
+    try { requireCalculatorEditable(); } catch (error) { showError(error); return Promise.resolve(null); }
+    var selectedQuoteId = calculatorQuoteView().quote && calculatorQuoteView().quote.id;
     var project = entities("projects").find(function (item) { return item.id === state.selectedProjectId; });
     if (!project) { showError(new Error("Select an existing Delivery Project before adding a rate item.")); return; }
     var rateItem = entities("rateItems").find(function (rate) { return rate.id === id; });
     var isArea = root.UOS.ProgramModel.isSpatiallyCompatibleRate(rateItem);
     if (isArea && !areaInput) {
       var dialog = one("[data-costing-area-dialog]"), form = one("[data-costing-area-form]");
-      form.reset(); form.dataset.rateId = id; form.dataset.projectId = project.id;
+      form.reset(); form.dataset.rateId = id; form.dataset.projectId = project.id; form.dataset.quoteId = selectedQuoteId || '';
       setText("[data-costing-area-rate]", title(rateItem) + " — " + money(rateItem.unitRate) + " per " + rateItem.unit);
       dialog.showModal(); form.elements.area.focus(); return Promise.resolve(null);
     }
     var measurements = { quantity: 1, areaSqM: 1, lengthM: 1, volumeM3: 1, massKg: 1, hours: 1, workers: 1 };
     if (isArea) {
       if (areaInput.projectId !== project.id) { showError(new Error("The selected Project changed. Add the area again.")); return Promise.resolve(null); }
+      if (hasOwn(areaInput, 'quoteId') && areaInput.quoteId !== (selectedQuoteId || '')) { showError(new Error('The selected Quote changed. Add the area again.')); return Promise.resolve(null); }
       measurements.areaSqM = Number(areaInput.area) * (areaInput.unit === "ha" ? 10000 : 1);
     }
     var operationId = root.crypto && root.crypto.randomUUID ? root.crypto.randomUUID() : String(Date.now()) + ":" + Math.random();
     return mutate(function (api, workspace) {
       var result = api.createWork(workspace, project.id, id, measurements, { operationId: operationId });
+      if (selectedQuoteId) {
+        var previousIds = new Set(workspace.entities.costingLines.map(function (line) { return line.id; }));
+        var addedIds = result.entities.costingLines.filter(function (line) { return line.projectId === project.id && !previousIds.has(line.id); }).map(function (line) { return line.id; });
+        result = root.UOS.ProgramQuotes.syncDraftCostingLines(result, selectedQuoteId, addedIds);
+      }
       result.workspace.costing = Object.assign({}, result.workspace.costing, { selectedProjectId: project.id, section: state.section, mode: state.mode });
       return result;
     }).then(function (saved) {
@@ -788,6 +869,8 @@ function button(label, kind, attribute, value) { var node = root.document.create
     });
   }
   function updateLine(id) {
+    try { requireCalculatorEditable(); } catch (error) { showError(error); return; }
+    var quoteId = calculatorQuoteView().quote && calculatorQuoteView().quote.id;
     var quantity = one('[data-costing-line-quantity="' + id + '"]'), rate = one('[data-costing-line-rate="' + id + '"]'), unit = one('[data-costing-line-unit="' + id + '"]');
     mutate(function (api, workspace) {
       var changes = { quantity: quantity ? quantity.value : undefined, unitRate: rate ? rate.value : undefined, unit: unit ? unit.value : undefined };
@@ -796,14 +879,17 @@ function button(label, kind, attribute, value) { var node = root.document.create
       var geometry = geometryId && (workspace.entities.geometries || []).find(function (item) { return item.id === geometryId; });
       if (geometry) {
         if (!root.UOS.WorkAreaService || typeof root.UOS.WorkAreaService.syncGeometry !== "function") throw new Error("WorkAreaService is unavailable.");
-        return root.UOS.WorkAreaService.syncGeometry(workspace, geometry.id);
+        var synced = root.UOS.WorkAreaService.syncGeometry(workspace, geometry.id);
+        return quoteId ? root.UOS.ProgramQuotes.syncDraftCostingLines(synced, quoteId, [id]) : synced;
       }
       var nextUnit = text(changes.unit).toLowerCase();
       void nextUnit;
-      return api.updateLine(workspace, id, changes);
+      var updated = api.updateLine(workspace, id, changes);
+      return quoteId ? root.UOS.ProgramQuotes.syncDraftCostingLines(updated, quoteId, [id]) : updated;
     });
   }
   function previewCalculatorTotals() {
+    if (calculatorQuoteView().quote) return;
     var subtotal = 0;
     all("[data-costing-lines] tr").forEach(function (row) {
       var quantity = row.querySelector("[data-costing-line-quantity]");
@@ -829,7 +915,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
     var lines = entities("costingLines").filter(function (line) { return line.projectId === state.selectedProjectId; });
     all("[data-calculator-delete-kind]").forEach(function (button) {
       var kind = button.getAttribute("data-calculator-delete-kind");
-      button.disabled = Boolean(busy) || !lines.some(function (line) { return kind === "All" || model().lineKind(state.workspace, line) === kind; });
+      button.disabled = Boolean(calculatorQuoteView().quote) || Boolean(busy) || !lines.some(function (line) { return kind === "All" || model().lineKind(state.workspace, line) === kind; });
     });
     bulkResult(state.bulkMessages && state.bulkMessages[state.selectedProjectId] || "");
   }
@@ -844,6 +930,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
     return result.deletedIds.length + " items eligible for deletion. " + result.retained.length + " protected items will be retained. " + result.affectedJobIds.length + " linked jobs will be deleted. " + result.affectedGeometryIds.length + " mapped work items will be affected." + (reasons.length ? "\n" + reasons.join("\n") : "");
   }
   function bulkDelete(kind) {
+    if (calculatorQuoteView().quote) return Promise.resolve(null);
     if (state.bulkDeleteBusy) return Promise.resolve(null);
     var app = root.UOS.ProgramApp, projectId = state.selectedProjectId, opener = root.document.activeElement;
     if (!projectId) return Promise.resolve(null);
@@ -882,6 +969,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
   }
 
 function confirmCalculatorLineRemoval(lineId) {
+  if (calculatorQuoteView().quote) return changeDraftMembership(lineId, false);
  var app = root.UOS.ProgramApp, workspace = app.workspace();
  var line = (workspace.entities.costingLines || []).find(function (item) { return item.id === lineId; });
  if (!line) return removeCalculatorLine(lineId);
@@ -1092,6 +1180,7 @@ function update(workspace) {
   }
   function saveUi() { return persist(function (workspace) { var project = (workspace.entities.projects || []).find(function (item) { return item.id === state.selectedProjectId; }); workspace.workspace.costing = { jobId: state.jobId || null, section: state.section, mode: state.mode, selectedProjectId: project ? project.id : "" }; workspace.workspace.selectedProjectId = project ? project.id : ""; workspace.workspace.selectedEntityId = project ? (project.applicationId || project.eventId || project.id) : ""; if (project) workspace.workspace.ownerMode = project.owner; workspace.workspace.planner = workspace.workspace.planner || {}; workspace.workspace.planner.selectedProjectId = project ? project.id : ""; return workspace; }).catch(function (error) { showError(error); return null; }); }
 function saveAdjustments(source) {
+  if (calculatorQuoteView().quote) return Promise.resolve(null);
   var calculator = source && source.closest ? source.closest("[data-program-view='costing']") : null;
   var preliminariesInput = source && source.matches("[data-costing-preliminaries]") ? source : (calculator && calculator.querySelector("[data-costing-preliminaries]")) || one("[data-costing-preliminaries]");
   var marginInput = source && source.matches("[data-costing-margin]") ? source : (calculator && calculator.querySelector("[data-costing-margin]")) || one("[data-costing-margin]");
@@ -1133,14 +1222,26 @@ function bind() {
     areaForm.addEventListener("submit", function (event) {
       event.preventDefault(); if (!areaForm.reportValidity()) return;
       var submit = areaForm.querySelector('[type="submit"]'); submit.disabled = true;
-      Promise.resolve(addRate(areaForm.dataset.rateId, { area: areaForm.elements.area.value, unit: areaForm.elements.areaUnit.value, projectId: areaForm.dataset.projectId })).then(function (saved) { if (saved) areaDialog.close(); }).finally(function () { submit.disabled = false; });
+      Promise.resolve(addRate(areaForm.dataset.rateId, { area: areaForm.elements.area.value, unit: areaForm.elements.areaUnit.value, projectId: areaForm.dataset.projectId, quoteId: areaForm.dataset.quoteId })).then(function (saved) { if (saved) areaDialog.close(); }).finally(function () { submit.disabled = false; });
     });
  if (root.MutationObserver) new root.MutationObserver(sizeCategoryColumn).observe(root.document.documentElement, { attributes: true, attributeFilter: ["data-suite-font"] });
  if (root.document.fonts) {
    root.document.fonts.ready.then(sizeCategoryColumn);
    root.document.fonts.addEventListener("loadingdone", sizeCategoryColumn);
  }
- var toolsToggle = one("[data-costing-tools-toggle]"), toolsDrawer = one("[data-costing-tools]");
+    root.document.addEventListener('change', function (event) {
+      if (!event.target.matches('[data-calculator-quote]')) return;
+      var saved = quoteViews[state.selectedProjectId];
+      if (saved) saved.id = event.target.value;
+      showError(null); renderCalculator(); renderCalculatorTools();
+    });
+    root.document.addEventListener('click', function (event) {
+      var close = event.target.closest('[data-costing-error-close]');
+      if (close) { showError(null); var picker = one('[data-calculator-quote]'); if (picker) picker.focus({preventScroll:true}); }
+      var restore = event.target.closest('[data-calculator-restore]');
+      if (restore && !restore.disabled) changeDraftMembership(restore.getAttribute('data-calculator-restore'), true);
+    });
+    var toolsToggle = one("[data-costing-tools-toggle]"), toolsDrawer = one("[data-costing-tools]");
  if (toolsToggle && toolsDrawer) {
  toolsToggle.addEventListener("click", function () {
  var opening = toolsDrawer.hidden;

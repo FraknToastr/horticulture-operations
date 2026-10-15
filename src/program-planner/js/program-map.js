@@ -30,7 +30,34 @@
   var cameraFocusVersion=0,pendingEntryZoom=false,pendingMoasureImport=null,placementDraft=null;
   var previousDestination = "";
   var pendingLocationPlacement = null;
-  var pinSession=null, drawingState=null, expandedGeometryId=null;
+  var pinSession=null, drawingState=null;
+  var geometryCardLevels=Object.create(null);
+  function geometryCardLevel(id){return geometryCardLevels[id]||'summary';}
+  function expandGeometryCard(id){if(id)geometryCardLevels[id]='full';}
+  function syncGeometryCardSizes(){
+    all('[data-space-geometry]').forEach(function(card){
+      var id=card.getAttribute('data-space-geometry'),level=geometryCardLevel(id);
+      var toggle=card.querySelector('[data-space-expand]'),drawer=card.querySelector('.space-editor__drawer');
+      card.setAttribute('data-card-size',level);
+      if(drawer)drawer.hidden=level!=='full';
+      if(toggle){
+        var next=level==='full'?'Show summary':level==='summary'?'Show Job Type only':'Expand fully';
+        toggle.setAttribute('aria-expanded',String(level==='full'));
+        toggle.setAttribute('aria-label',next+'. Current size: '+level);
+        toggle.setAttribute('title',next);
+        var arrow=toggle.querySelector('svg path');
+        if(arrow)arrow.setAttribute('d',level==='minimal'?'m5 9 7 7 7-7':level==='summary'?'m5 17 7-7 7 7M5 10l7-7 7 7':'m5 15 7-7 7 7');
+      }
+    });
+    var collapseAll=one('[data-space-collapse-all]');
+    if(collapseAll){
+      var cards=all('[data-space-geometry]'),hasFull=cards.some(function(card){return geometryCardLevel(card.getAttribute('data-space-geometry'))==='full';});
+      var hasSummary=cards.some(function(card){return geometryCardLevel(card.getAttribute('data-space-geometry'))==='summary';});
+      collapseAll.disabled=!hasFull&&!hasSummary;
+      var message=hasFull?'Collapse all fully expanded cards to summary':hasSummary?'Collapse all cards to Job Type only':'All cards are fully collapsed';
+      collapseAll.setAttribute('aria-label',message);collapseAll.setAttribute('title',message);
+    }
+  }
   var mapSaveCount=0, switchPending=false, locationRemovalPending=false;
   var pendingScopeMode=null, visibleSidebarMode=null, restoreSidebarScroll=false, sidebarContext=null;
   var sidebarScroll={register:0,projects:0};
@@ -473,7 +500,7 @@ function setMapCanvasCursor(cursor) {
     if(!geometry)throw new Error("Select a valid polygon before editing.");
     var shape=convertToEventShapes([geometry])[0];
     vertexDraft={id:id,original:JSON.parse(JSON.stringify(geometry)),expected:JSON.stringify(geometry),shape:JSON.parse(JSON.stringify(shape)),error:null,busy:false,history:[],lastCommitted:{shape:JSON.parse(JSON.stringify(shape)),selectedVertexIndex:null}};
-    editingShapeId=id;selectedShapeId=id;expandedGeometryId=id;
+    editingShapeId=id;selectedShapeId=id;expandGeometryCard(id);
     renderShapeCards();mapController.editShape(id);updateVertexControls();
   }
 
@@ -556,7 +583,7 @@ function setMapCanvasCursor(cursor) {
     cancelPolygonPlacement();pendingLocationPlacement=null;pendingMoasureImport=null;editingShapeId=null;
     var basis=root.UOS.WorkAreaService.placementBasis(geometry);
     placementDraft={id:id,expected:JSON.stringify(geometry),basis:basis,originalBasis:JSON.stringify(basis),originalKind:geometry.geometryKind,history:[],lastCommitted:JSON.parse(JSON.stringify(basis))};
-    expandedGeometryId=id;
+    expandGeometryCard(id);
     one(".program-map-canvas-container").setAttribute("data-placement-active","true");
     mapController.resize();
     if(options.zoom!==false)mapController.zoomToShape(id);
@@ -814,21 +841,19 @@ function setMapCanvasCursor(cursor) {
       if(location && mapController)mapController.zoomToLocation(location.coordinate);
       return true;
     }
+    var collapseAll=target.closest('[data-space-collapse-all]');
+    if(collapseAll){
+      var cards=all('[data-space-geometry]'),hasFull=cards.some(function(card){return geometryCardLevel(card.getAttribute('data-space-geometry'))==='full';});
+      cards.forEach(function(card){var id=card.getAttribute('data-space-geometry'),level=geometryCardLevel(id);if(level==='full')geometryCardLevels[id]='summary';else if(!hasFull&&level==='summary')geometryCardLevels[id]='minimal';});
+      syncGeometryCardSizes();return true;
+    }
     var expand=target.closest("[data-space-expand]"), summary=target.closest("[data-space-geometry]");
     if(expand){
       // Disclosure is local UI state. Keep card nodes, focus and unfinished edits
       // intact instead of reselecting geometry or remounting the map/sidebar.
-      expandedGeometryId=expand.getAttribute('aria-expanded')==='true'?null:expand.getAttribute('data-space-expand');
-      all('[data-space-geometry]').forEach(function(card){
-        var open=card.getAttribute('data-space-geometry')===expandedGeometryId;
-        var toggle=card.querySelector('[data-space-expand]'),drawer=card.querySelector('.space-editor__drawer');
-        if(drawer)drawer.hidden=!open;
-        if(toggle){
-          toggle.setAttribute('aria-expanded',String(open));
-          toggle.setAttribute('aria-label',toggle.getAttribute('aria-label').replace(/^(Expand|Collapse)/,open?'Collapse':'Expand'));
-          var arrow=toggle.querySelector('svg path');if(arrow)arrow.setAttribute('d',open?'m5 9 7 7 7-7':'m9 5 7 7-7 7');
-        }
-      });
+      var cardId=expand.getAttribute('data-space-expand'),level=geometryCardLevel(cardId);
+      geometryCardLevels[cardId]=level==='full'?'summary':level==='summary'?'minimal':'full';
+      syncGeometryCardSizes();
       return true;
     }
     if(summary && !target.closest("input,select,button,a")){
@@ -1554,7 +1579,7 @@ function setMapCanvasCursor(cursor) {
       var actions=card.querySelector('.program-shape-actions');actions.remove();
       var rateSelect=card.querySelector("[data-shape-rate]");
       var rateLabel=rateSelect && rateSelect.value && rateSelect.selectedOptions[0] ? rateSelect.selectedOptions[0].textContent : "Not selected";
-      var open=expandedGeometryId===shape.id;
+      var open=geometryCardLevel(shape.id)==='full';
       var title=geometry.moasureSurvey?'Moasure':'Event Space';
       return '<article class="space-editor__geometry-card'+(selectedShapeId===shape.id?' is-selected':'')+(editingShapeId===shape.id?' is-editing':'')+'" data-shape-card-id="'+esc(shape.id)+'" data-space-geometry="'+esc(shape.id)+'" data-disclosure-skip aria-label="'+esc(title)+' '+(index+1)+'">'+
         '<header class="space-editor__geometry-summary"><input type="checkbox" data-shape-visible="'+esc(shape.id)+'"'+(shape.visible?' checked':'')+' aria-label="Show geometry '+(index+1)+'"><h3>'+(index+1)+'. '+title+'</h3><button type="button" data-space-expand="'+esc(shape.id)+'" aria-expanded="'+Boolean(open)+'" aria-controls="spaceDrawer'+index+'" aria-label="Expand geometry '+(index+1)+'"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="'+(open?'m5 9 7 7 7-7':'m9 5 7 7-7 7')+'"/></svg></button></header>'+
@@ -1562,9 +1587,10 @@ function setMapCanvasCursor(cursor) {
         actions.outerHTML+'<div class="space-editor__drawer" id="spaceDrawer'+index+'"'+(open?'':' hidden')+'>'+card.outerHTML+'</div></article>';
     }).join("");
     var draft=drawingState && drawingState.active ? '<article class="space-editor__geometry-card" data-space-draft><header class="space-editor__geometry-summary"><h3>Event Space · Drawing</h3></header><p>Draft · '+drawingState.points+' points · '+esc(drawingState.measurementSummary || "0 points")+'. Accept to save, Cancel to discard.</p></article>' : '';
-    container.innerHTML=(shapes.length ? '<label class="space-editor__visibility"><input type="checkbox" data-space-visible-all aria-label="Show all geometries">All geometries</label>' : '')+draft+rows;
+    container.innerHTML=(shapes.length ? '<div class="space-editor__card-list-controls"><label class="space-editor__visibility"><input type="checkbox" data-space-visible-all aria-label="Show all geometries">All geometries</label><button type="button" data-space-collapse-all title="Collapse all cards"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m5 17 7-7 7 7M5 10l7-7 7 7"/></svg><span>Collapse all</span></button></div>' : '')+draft+rows;
     var master=container.querySelector('[data-space-visible-all]'), count=shapes.filter(function(shape){return shape.visible;}).length;
     if(master){master.checked=count===shapes.length;master.indeterminate=count>0 && count<shapes.length;}
+    syncGeometryCardSizes();
     addSpaceControlIcons(container);
 
   }
@@ -2118,7 +2144,7 @@ var selectedSpatialFilter = null;
           if (notice) notice.textContent = "Aerial imagery is unavailable. The offline grid is active.";
         },
         onShapeSelected: function (shapeId) {
-        expandedGeometryId=shapeId;
+        expandGeometryCard(shapeId);
           var workspace = getWorkspace();
           if(vertexDraft && shapeId!==vertexDraft.id)cancelVertexEditing();
           if (!shapeId) {
@@ -2202,7 +2228,7 @@ var selectedSpatialFilter = null;
               var created = (updated.entities.geometries || []).find(function (geometry) { return !beforeIds[geometry.id]; });
               var projectContext = resolveMapContext(updated, sidebarViewMode, "projects", project.id);
               if (created) {
-                expandedGeometryId=created.id;
+                expandGeometryCard(created.id);
                 updated = writeCanonicalMapState(updated, {
                   scopeMode: "projects",
                   selectedRegisterId: projectContext.registerId || "",
@@ -3193,7 +3219,7 @@ var selectedSpatialFilter = null;
 
         var enteredFromOtherTab = previousDestination !== "map";
     previousDestination = destination;
-    if(enteredFromOtherTab){expandedGeometryId=mapState.selectedGeometryId || null;cameraFocusVersion++;pendingEntryZoom=true;}
+    if(enteredFromOtherTab){if(mapState.selectedGeometryId&&!geometryCardLevels[mapState.selectedGeometryId])expandGeometryCard(mapState.selectedGeometryId);cameraFocusVersion++;pendingEntryZoom=true;}
 
     try {
       updateSidebarViewUI();
@@ -3266,6 +3292,7 @@ var selectedSpatialFilter = null;
     init: function () { bindEvents(); render(); },
     render: render,
     getMapController: function () { return mapController; },
+    canInspectReferences: function () { return !activeMapInteraction() && !mapBusy(); },
     setCameraFocusIntent: function (id) { cameraFocusVersion++;pendingCameraFocusId = id ? String(id) : null; },
     focusRecord: function (id) {
       if (!id) return;

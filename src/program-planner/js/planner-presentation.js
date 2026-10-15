@@ -31,7 +31,7 @@
       var draft = linked && !scheduled;
       var operational = path.hasAttribute("data-planner-draft-job");
       var jobLabel = scheduled ? "Scheduled Job — open in Scheduler" : draft ? "Draft Planner Job — open in Scheduler" : operational ? "Operational task — create draft Job in Scheduler" : "Reminder task";
-      iconButton(path, jobLabel, scheduled ? scheduledIcon : draft ? calendarIcon : inertIcon);
+      iconButton(path, jobLabel, scheduled ? scheduledIcon : draft || operational ? calendarIcon : inertIcon);
       path.setAttribute("data-planner-job-state", scheduled ? "scheduled" : draft ? "draft" : operational ? "operational" : "inert");
       iconButton(info, "View task information", '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6m0-10v.1"></path></svg>');
       iconButton(edit, "Edit task", editIcon);

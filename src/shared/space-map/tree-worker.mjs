@@ -1,4 +1,5 @@
 import { polygonBuffers, mercator, validCoordinate, outlineBuffers } from './geometry.mjs';
+import { featureBounds } from './reference-picking.mjs';
 
 const CACHE_LIMIT = 32 * 1024 * 1024, GPU_LIMIT = 16 * 1024 * 1024;
 const cache = new Map(), layerSizes = new Map(); let cacheBytes = 0;
@@ -46,9 +47,12 @@ export function processMessage(message) {
     cache.set(message.key, { layer, features: json.features, bytes }); cacheBytes += bytes;
     return { type, token, cacheBytes, count: json.features.length };
   }
-  if (type !== 'build') fail('Unknown tree worker operation');
+  if (type !== 'build' && type !== 'selection') fail('Unknown tree worker operation');
   const unique = new Map();
-  for (const key of message.keys) {
+  if (type === 'selection') {
+    for (const f of message.features) { validate(f, f.geometry.type === 'Point' ? 'trees' : 'srz'); unique.set(f.geometry.type+':'+f.properties.__referenceLayer+':'+f.properties.OBJECTID, f); }
+  }
+  for (const key of message.keys || []) {
     const cell = cache.get(key); if (!cell) return { type, token, missing: true, cacheBytes };
     cache.delete(key); cache.set(key, cell);
     for (const f of cell.features) if (visible(f, message.bounds)) unique.set(String(f.properties.OBJECTID), f);
@@ -58,8 +62,8 @@ export function processMessage(message) {
   const origin = message.origin, points = [], groups = new Map(), features = []; let vertexCount = 0, gpuBytes = 0;
   for (const original of unique.values()) {
     const f = structuredClone(original); features.push(f);
-    if (layer === 'trees') { const p = mercator(f.geometry.coordinates); points.push(p[0] - origin[0], p[1] - origin[1], 0); continue; }
-    const riskColor = message.colors[String(f.properties.risk)] || message.defaultColor;
+    if (f.geometry.type === 'Point') { const p = mercator(f.geometry.coordinates); points.push(p[0] - origin[0], p[1] - origin[1], 0); continue; }
+    const riskColor = type === 'selection' ? '#ffde59' : message.colors[String(f.properties.risk)] || message.defaultColor;
     f.properties.__riskColor = riskColor;
     if (!groups.has(riskColor)) groups.set(riskColor, { color: riskColor, fill: [], outlineBase: [], outlineOffset: [], ringCount: 0 });
     const group = groups.get(riskColor);
@@ -70,21 +74,21 @@ export function processMessage(message) {
       const outline = outlineBuffers(buffers.rings, origin);
       append(group.fill, buffers.vertices); append(group.outlineBase, outline.base); append(group.outlineOffset, outline.offset); group.ringCount += buffers.rings.length;
       gpuBytes += buffers.vertices.length * 4;
-      gpuBytes += (outline.base.length + outline.offset.length) * 4;
+      gpuBytes += (outline.base.length + outline.offset.length) * 4 * (type === 'selection' ? 2 : 1);
       if (gpuBytes > GPU_LIMIT) fail('Tree GPU budget exhausted', true);
     }
   }
-  gpuBytes += points.length * 4;
+  gpuBytes += points.length * 4 * (type === 'selection' ? 2 : 1);
   const previous = layerSizes.get(layer); layerSizes.set(layer, { gpuBytes, vertexCount });
   const combinedBytes = [...layerSizes.values()].reduce((n, item) => n + item.gpuBytes, 0), combinedVertices = [...layerSizes.values()].reduce((n, item) => n + item.vertexCount, 0);
   if (combinedBytes > GPU_LIMIT || combinedVertices > 500000) { if (previous) layerSizes.set(layer, previous); else layerSizes.delete(layer); fail('Combined tree rendering budget exhausted', true); }
-  return { type, layer, token, cacheBytes, payload: { origin, signature: signature(features, layer === 'trees' ? 0 : message.tolerance), points: new Float32Array(points), batches: [...groups.values()].map(g => ({ color: g.color, fill: new Float32Array(g.fill), outlineBase: new Float32Array(g.outlineBase), outlineOffset: new Float32Array(g.outlineOffset), ringCount: g.ringCount })), geojson: { type: 'FeatureCollection', features }, gpuBytes, vertexCount, count: unique.size } };
+  return { type, layer, token, cacheBytes, payload: { origin, highlight: type === 'selection', hitBounds: new Float64Array(features.flatMap(featureBounds)), signature: signature(features, layer === 'trees' ? 0 : message.tolerance), points: new Float32Array(points), batches: [...groups.values()].map(g => ({ color: g.color, fill: new Float32Array(g.fill), outlineBase: new Float32Array(g.outlineBase), outlineOffset: new Float32Array(g.outlineOffset), ringCount: g.ringCount })), geojson: { type: 'FeatureCollection', features }, gpuBytes, vertexCount, count: unique.size } };
 }
 
 if (typeof self !== 'undefined' && typeof self.postMessage === 'function') self.onmessage = ({ data }) => {
   try {
     const result = processMessage(data), transfers = [];
-    if (result.payload) { transfers.push(result.payload.points.buffer); for (const batch of result.payload.batches) transfers.push(batch.fill.buffer, batch.outlineBase.buffer, batch.outlineOffset.buffer); }
+    if (result.payload) { transfers.push(result.payload.points.buffer, result.payload.hitBounds.buffer); for (const batch of result.payload.batches) transfers.push(batch.fill.buffer, batch.outlineBase.buffer, batch.outlineOffset.buffer); }
     self.postMessage(result, transfers);
   } catch (error) { self.postMessage({ type: 'error', token: data.token, layer: data.layer, message: error.message || 'Tree geometry allocation failed', limit: !!error.limit || error instanceof RangeError }); }
 };

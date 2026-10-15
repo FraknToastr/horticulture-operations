@@ -562,6 +562,7 @@
       item.actualCost = item.actualCost == null || item.actualCost === "" ? null : Math.max(0, amount(item.actualCost));
     }
     if (collection === "quotes") {
+      item.excludedCostingLineIds = Array.from(new Set((Array.isArray(item.excludedCostingLineIds) ? item.excludedCostingLineIds : []).map(text).filter(Boolean)));
       item.quoteNumber = text(item.quoteNumber) || item.id;
       item.auditNumber = text(item.auditNumber);
       item.auditRootNumber = text(item.auditRootNumber);

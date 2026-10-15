@@ -1,4 +1,5 @@
 import { installLegacyReference } from './legacy-reference.mjs';
+import { pickReference, sameReference, featureBounds } from './reference-picking.mjs';
 const SERVICE = 'https://services.arcgis.com/BzylpWnjWP0tW4nL/arcgis/rest/services/Forestree_TPZ_and_SRZ/FeatureServer';
 const LAYERS = { trees: { service: 0, zoom: 16 }, srz: { service: 1, zoom: 17 }, tpz: { service: 2, zoom: 17 } };
 const MAX_RESPONSE = 4 * 1024 * 1024;
@@ -7,6 +8,31 @@ export class TreeLayers {
     installLegacyReference(map);
     this.map = map; this.service = options.service || SERVICE; this.workerUrl = options.workerUrl; this.createWorker = options.createWorker || (() => new Worker(this.workerUrl, { type: 'module', name: 'space-map-tree-geometry' })); this.workerGeneration = 0; this.status = options.onStatus || (() => {}); this.failed = new Map();
     this.enabled = { trees: false, srz: false, tpz: false }; this.visible = false; this.revision = 0; this.controllers = new Set(); this.queue = []; this.active = 0; this.sequence = 0; this.pending = new Map(); this.cells = new Map(); this.metadata = new Map(); this.metrics = { requests: 0, active: 0, peakRequests: 0, cacheBytes: 0, staleResults: 0 }; this.renderKeys = new Map();
+    this.payloads = new Map(); this.selected = null; this.selectionRevision = 0; this.onSelection = options.onSelection || (() => {});
+  }
+  pick(point, radius) { return pickReference(this.map, this.payloads, point, radius); }
+  clearSelection() {
+    this.selectionRevision++; this.selected = null; this.map.clearReferenceLayer('selection'); this.onSelection(null);
+    if (this.worker) this.work({type:'clear',layer:'selection'}).catch(() => {});
+  }
+  select(hit) { this.selected = hit; this.refreshSelection(); }
+  async refreshSelection() {
+    const selected = this.selected; if (!selected) return;
+    const generation = ++this.selectionRevision, related = [], seen = new Set();
+    const append = (layer, feature) => { const key=layer+':'+feature.properties.OBJECTID; if(!seen.has(key)){seen.add(key);related.push({...feature,properties:{...feature.properties,__referenceLayer:layer}});} };
+    append(selected.layer, selected.feature);
+    for (const [layer,payload] of this.payloads) for (const feature of payload.geojson.features) if (sameReference(selected,{layer,feature})) append(layer,feature);
+    const properties = {...selected.feature.properties};
+    for (const feature of related) for (const field of ['tpz','srz','risk']) if (properties[field] == null || properties[field] === '') properties[field] = feature.properties[field];
+    const serviceColors = this.metadata.get('srz')?.colors || this.metadata.get('tpz')?.colors || {'High':'#ca0020','Low/Acceptable':'#0571b0','Moderate':'#f4a582'};
+    this.onSelection({layer:selected.layer,properties,riskColor:serviceColors[properties.risk] || '#64748b'});
+    try {
+      const bounds=featureBounds(selected.feature), center=[(bounds[0]+bounds[2])/2,(bounds[1]+bounds[3])/2], lat=center[1]*Math.PI/180;
+      const origin=[center[0]/360*40075016.68557849,Math.log(Math.tan(Math.PI/4+lat/2))*40075016.68557849/(2*Math.PI)];
+      const result=await this.work({type:'selection',layer:'selection',features:related,origin,tolerance:40075016.68557849/(512*2**this.map.getZoom())*.2});
+      if (generation !== this.selectionRevision || !this.selected) return;
+      this.map.setReferenceLayer('selection',result.payload);
+    } catch(error) { if(generation===this.selectionRevision) this.clearSelection(); }
   }
   async ensureWorker() {
     if (this.worker) return this.worker;
@@ -26,11 +52,14 @@ export class TreeLayers {
     if (worker !== this.worker) throw new DOMException('Obsolete tree worker', 'AbortError');
     return new Promise((resolve, reject) => { const timer = setTimeout(() => { this.pending.delete(token); const error = new Error('Tree geometry processing timed out'); error.permanent = true; reject(error); }, 8000); this.pending.set(token, { resolve, reject, timer }); worker.postMessage({ ...message, token }, transfer); });
   }
-  stopWorker(error = new DOMException('Obsolete tree request', 'AbortError')) { this.workerGeneration++; this.workerPending = null; this.worker?.terminate(); this.worker = null; for (const task of this.pending.values()) { clearTimeout(task.timer); task.reject(error); } this.pending.clear(); this.cells.clear(); this.renderKeys.clear(); this.metrics.cacheBytes = 0; }
+  stopWorker(error = new DOMException('Obsolete tree request', 'AbortError')) { this.workerGeneration++; this.workerPending = null; this.worker?.terminate(); this.worker = null; for (const task of this.pending.values()) { clearTimeout(task.timer); task.reject(error); } this.pending.clear(); this.cells.clear(); this.renderKeys.clear(); this.payloads.clear(); if(this.selected)this.clearSelection(); this.metrics.cacheBytes = 0; }
   cancel() { for (const c of this.controllers) c.abort(); this.controllers.clear(); for (const item of this.queue.splice(0)) item.reject(new DOMException('Obsolete viewport', 'AbortError')); }
   cancelLayer(layer) { for (const c of this.controllers) if (c.layer === layer) c.abort(); const remaining = []; for (const item of this.queue) { if (item.layer === layer) item.reject(new DOMException('Layer request cancelled', 'AbortError')); else remaining.push(item); } this.queue = remaining; }
   update(enabled, visible) {
     const previous = this.enabled; this.enabled = { ...enabled }; this.visible = visible; this.revision++; const revision = this.revision; clearTimeout(this.timer); this.cancel();
+    if (this.selected && (!visible || !this.enabled[this.selected.layer] || this.map.getZoom() < LAYERS[this.selected.layer].zoom)) this.clearSelection();
+    for (const id of Object.keys(LAYERS)) if (!this.enabled[id] || !visible || this.map.getZoom() < LAYERS[id].zoom) this.payloads.delete(id);
+    if (this.selected && Object.keys(LAYERS).some(id => this.enabled[id] !== previous[id])) this.refreshSelection();
     for (const id of Object.keys(LAYERS)) if (!this.enabled[id] || !previous[id]) this.failed.delete(id);
     for (const id of Object.keys(LAYERS)) {
       if (!this.enabled[id]) { this.map.clearReferenceLayer(id); this.renderKeys.delete(id); if (previous[id] && this.worker) this.work({ type: 'clear', layer: id }).catch(() => {}); for (const [key] of this.cells) if (key.startsWith(id + ':')) this.cells.delete(key); this.status(id, 'Off'); }
@@ -86,7 +115,7 @@ export class TreeLayers {
     const key = `${id}:${cell.key}`; if (this.cells.has(key)) return this.cells.get(key);
     this.cellCounts[id] = (this.cellCounts[id] || 0) + 1;
     if (this.cellCounts[id] > 512) throw Object.assign(new Error('Viewport subdivision budget exhausted'), { limit: true });
-    const [xmin, ymin, xmax, ymax] = cell.bounds, params = new URLSearchParams({ f: 'geojson', where: '1=1', outFields: id === 'trees' ? 'OBJECTID' : 'OBJECTID,risk', returnGeometry: 'true', outSR: '4326', inSR: '4326', geometryType: 'esriGeometryEnvelope', geometry: JSON.stringify({ xmin, ymin, xmax, ymax, spatialReference: { wkid: 4326 } }), spatialRel: 'esriSpatialRelIntersects' });
+    const [xmin, ymin, xmax, ymax] = cell.bounds, params = new URLSearchParams({ f: 'geojson', where: '1=1', outFields: 'OBJECTID,asset_id,tpz,srz,risk', returnGeometry: 'true', outSR: '4326', inSR: '4326', geometryType: 'esriGeometryEnvelope', geometry: JSON.stringify({ xmin, ymin, xmax, ymax, spatialReference: { wkid: 4326 } }), spatialRel: 'esriSpatialRelIntersects' });
     const buffer = await this.fetchBytes(`${this.service}/${LAYERS[id].service}/query?${params}`, revision, id);
     if (!this.valid(revision, id)) throw new DOMException('Obsolete viewport', 'AbortError');
     const result = await this.work({ type: 'cell', layer: id, key, buffer }, [buffer]);
@@ -119,10 +148,12 @@ export class TreeLayers {
         let result = await this.work({ type: 'build', layer: id, keys, origin, bounds, tolerance: 40075016.68557849 / (512 * 2 ** this.map.getZoom()) * .2, ...colors });
         if (result.missing) { for (const cell of cells) this.cells.delete(`${id}:${cell.key}`); throw Object.assign(new Error('Tree cache budget exhausted; zoom closer to view'), { limit: true }); }
         if (!this.valid(revision, id)) { this.metrics.staleResults++; return; }
-        this.map.setReferenceLayer(id, result.payload); this.renderKeys.set(id, renderKey); this.status(id, `${result.payload.count.toLocaleString()} visible`);
+        this.payloads.set(id,result.payload); this.map.setReferenceLayer(id, result.payload); this.renderKeys.set(id, renderKey); this.status(id, `${result.payload.count.toLocaleString()} visible`);
+        if(this.selected) this.refreshSelection();
       } catch (error) {
         if (!this.valid(revision, id) || error.name === 'AbortError') return;
         this.map.clearReferenceLayer(id); this.renderKeys.delete(id); this.status(id, error.limit ? 'Zoom closer to view' : 'Service unavailable. Toggle layer to retry.');
+        this.payloads.delete(id); if(this.selected?.layer===id)this.clearSelection();
         this.failed.set(id, { limit: !!error.limit, zoom: this.map.getZoom() });
         this.cancelLayer(id);
         if (this.worker) this.work({ type: 'clear', layer: id }).catch(() => {});
@@ -130,6 +161,6 @@ export class TreeLayers {
       }
     }));
   }
-  destroy() { clearTimeout(this.timer); this.revision++; this.cancel(); this.stopWorker(); for (const id of Object.keys(LAYERS)) this.map.clearReferenceLayer(id); }
+  destroy() { clearTimeout(this.timer); this.revision++; this.clearSelection(); this.payloads.clear(); this.cancel(); this.stopWorker(); for (const id of Object.keys(LAYERS)) this.map.clearReferenceLayer(id); }
   getMetrics() { return { ...this.metrics, worker: !!this.worker, enabled: { ...this.enabled } }; }
 }

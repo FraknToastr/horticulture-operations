@@ -1211,7 +1211,9 @@
             if (typeof options.onLocationSelected === "function") options.onLocationSelected(selectedLocation);
             return;
           }
-          selectShape(shapeIdAt(event.point), true);
+          var workShapeId = shapeIdAt(event.point);
+          if (!workShapeId && !editingShapeId && root.UOS && root.UOS.TreeHub && root.UOS.TreeHub.inspect(event, map)) return;
+          selectShape(workShapeId, true);
         });
         map.on("sourcedata", function (event) {
           if (event && event.sourceId === "uos-basemap" && event.isSourceLoaded) confirmProviderLoaded();

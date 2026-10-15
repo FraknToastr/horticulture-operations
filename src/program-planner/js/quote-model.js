@@ -164,6 +164,9 @@ function valueOrExisting(input, name, existing) {
     : input.suppressCouncilDisclosure === true;
   if (fundingMode !== "mixed") suppressCouncilDisclosure = false;
   if (financialLock && (fundingMode !== (existing.fundingMode || null) || (input.proposedCustomerContribution !== undefined && money(proposed) !== money(existing.proposedCustomerContribution)) || suppressCouncilDisclosure !== Boolean(existing && existing.suppressCouncilDisclosure))) throw new Error("Reverse active payments and payment allocations before changing the funding arrangement, customer contribution or Council PDF disclosure.");
+  var exclusions = Array.from(new Set((input.excludedCostingLineIds === undefined ? existing && existing.excludedCostingLineIds || [] : input.excludedCostingLineIds).map(text).filter(Boolean)));
+  var syncIds = Array.from(new Set((input.syncCostingLineIds || []).map(text).filter(Boolean)));
+  if (financialLock && (input.excludedCostingLineIds !== undefined || syncIds.length)) throw new Error("Reverse active payments and payment allocations before changing Draft items.");
   var lines;
   if (financialLock) lines = [];
   else if (!existing || input.refreshCosts === true) {
@@ -176,6 +179,17 @@ function valueOrExisting(input, name, existing) {
   } else {
     lines = currentQuoteLines(result, existing.id);
   }
+    lines = lines.filter(function (line) { return !line.costingLineId || exclusions.indexOf(line.costingLineId) < 0; });
+    if (syncIds.length) {
+      var currentSources = inheritProject(result, project.id);
+      syncIds.forEach(function (id) {
+        if (exclusions.indexOf(id) >= 0) return;
+        var source = currentSources.find(function (line) { return line.costingLineId === id; });
+        if (!source) throw new Error("Costing item does not belong to this Quote's Project.");
+        lines = lines.filter(function (line) { return line.costingLineId !== id; });
+        lines.push(source);
+      });
+    }
     var requestedDiscountRate = input.discountRate === undefined && existing ? existing.discountRate : input.discountRate;
     var requestedDiscountAmount = input.discountAmount === undefined && existing ? existing.discountAmount : input.discountAmount;
     var calculated = totals(lines, requestedDiscountRate, input.contingencyRate === undefined && existing ? existing.contingencyRate : input.contingencyRate, requestedDiscountAmount);
@@ -186,6 +200,7 @@ function valueOrExisting(input, name, existing) {
     var quote = {
       id: quoteId, owner: project.owner, type: "quote", projectId: project.id, quoteNumber: quoteNumber, revision: revision,
       auditNumber: auditNumber, auditRootNumber: auditRootNumber, rootQuoteId: rootQuoteId, previousQuoteId: previousQuoteId,
+      excludedCostingLineIds: exclusions,
     clientName: text(valueOrExisting(input, "clientName", existing)), address: text(valueOrExisting(input, "address", existing)), phone: text(valueOrExisting(input, "phone", existing)), email: text(valueOrExisting(input, "email", existing)), preparedBy: text(valueOrExisting(input, "preparedBy", existing)),
     quoteDate: text(valueOrExisting(input, "quoteDate", existing)), expiryDate: text(valueOrExisting(input, "expiryDate", existing)), discountRate: calculated.discountRate, discountAmount: calculated.discount,
     contingencyRate: Math.max(0, Number(valueOrExisting(input, "contingencyRate", existing)) || 0), scopeNotes: text(valueOrExisting(input, "scopeNotes", existing)), terms: text(valueOrExisting(input, "terms", existing)),
@@ -222,7 +237,23 @@ function valueOrExisting(input, name, existing) {
  return model().normalize(result);
  }
 
- function refreshDraftFromCurrentCosts(inputWorkspace, quoteId, options) {
+  function setDraftCostingLineIncluded(inputWorkspace, quoteId, costingLineId, included) {
+    var result = workspace(inputWorkspace), quote = find(result.entities.quotes, text(quoteId), "Quote");
+    if (quote.status !== "Draft" || commerciallyLocked(result, quote.id)) throw new Error("Select an unpaid Draft to change its items.");
+    var source = find(result.entities.costingLines, text(costingLineId), "Costing line");
+    if (source.projectId !== quote.projectId) throw new Error("Costing item does not belong to this Quote's Project.");
+    var exclusions = (quote.excludedCostingLineIds || []).filter(function (id) { return id !== source.id; });
+    if (!included) exclusions.push(source.id);
+    return saveDraft(result, { id: quote.id, projectId: quote.projectId, excludedCostingLineIds: exclusions, syncCostingLineIds: included ? [source.id] : [] });
+  }
+
+  function syncDraftCostingLines(inputWorkspace, quoteId, ids) {
+    var result = workspace(inputWorkspace), quote = find(result.entities.quotes, text(quoteId), "Quote");
+    if (quote.status !== "Draft" || commerciallyLocked(result, quote.id)) throw new Error("Select an unpaid Draft to change its items.");
+    return saveDraft(result, { id: quote.id, projectId: quote.projectId, syncCostingLineIds: ids });
+  }
+
+  function refreshDraftFromCurrentCosts(inputWorkspace, quoteId, options) {
   options = object(options) ? options : {};
   if (options.confirmed !== true) throw new Error("Refreshing a Quote from current costs requires explicit confirmation.");
   var result = workspace(inputWorkspace);
@@ -350,6 +381,7 @@ function valueOrExisting(input, name, existing) {
     return saveDraft(result, {
       projectId: source.projectId, quoteNumber: source.quoteNumber, revision: Math.max(1, Number(source.revision) || 1) + 1,
       auditRootNumber: source.auditRootNumber, rootQuoteId: source.rootQuoteId || source.id, previousQuoteId: source.id,
+      excludedCostingLineIds: source.excludedCostingLineIds || [],
       clientName: source.clientName, address: source.address, phone: source.phone, email: source.email, preparedBy: source.preparedBy,
       quoteDate: UOS.ProgramDates.today(result), expiryDate: source.expiryDate,
       discountRate: source.discountRate, discountAmount: source.discountAmount, contingencyRate: source.contingencyRate, scopeNotes: source.scopeNotes, terms: source.terms, customLines: adjustments,
@@ -491,6 +523,8 @@ function recordPayment(inputWorkspace, input) {
 
   UOS.ProgramQuotes = { statuses: STATUSES.slice(), paymentMethods: PAYMENT_METHODS.slice(), inheritProject: inheritProject, evaluateReadiness: evaluateReadiness, commerciallyLocked: function (inputWorkspace, quoteId) { return commerciallyLocked(workspace(inputWorkspace), text(quoteId)); }, saveDraft: saveDraft, updateDraft: saveDraft, refreshDraftFromCurrentCosts: refreshDraftFromCurrentCosts, commercialProjection: commercialProjection, setStatus: setStatus, issue: issue, accept: accept, decline: decline, createRevision: createRevision, lifecycleActions: lifecycleActions, projectQuotes: projectQuotes, quoteRoots: quoteRoots, quoteSnapshot: quoteSnapshot, quoteViewModel: quoteViewModel, recordPayment: recordPayment, reversePayment: reversePayment, paymentSummary: paymentSummary, deletionImpact: deletionImpact, removeQuote: removeQuote, totals: totals };
   UOS.ProgramQuotes.customerAmounts = customerAmounts;
+  UOS.ProgramQuotes.setDraftCostingLineIncluded = setDraftCostingLineIncluded;
+  UOS.ProgramQuotes.syncDraftCostingLines = syncDraftCostingLines;
   UOS.ProgramQuotes.suggestedContribution = suggestedContribution;
   UOS.ProgramQuotes.agreementStatus = agreementStatus;
 }());

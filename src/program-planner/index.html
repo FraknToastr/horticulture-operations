@@ -24,7 +24,8 @@
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
 <link rel="stylesheet" href="styles.css?v=20261013-quote-payments-v1">
   <link rel="stylesheet" href="space-map-editor.css?v=20261014-location-move-v3">
- <link rel="stylesheet" href="scheduler-week.css?v=20261014-multi-day-v4">
+  <link rel="stylesheet" href="client-demo-fixes.css?v=20261015-v1">
+  <link rel="stylesheet" href="scheduler-week.css?v=20261015-handle-spacing-v1">
   <link rel="stylesheet" href="planner-row-header.css?v=20261008-ready-frame-row-buffers-v13">
   <link rel="stylesheet" href="register-row-header.css?v=20261009-main-launcher-v1">
   <link rel="stylesheet" href="status-v5.css?v=20260913-status-history-review-v1">
@@ -350,6 +351,10 @@
                   </div>
                   <button type="button" class="tree-layer-menu__hub" id="treeLayerHub" aria-label="Expand tree layers" aria-expanded="false" aria-controls="treeLayerActions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 5 11h3l-4 6h7v4h2v-4h7l-4-6h3Z"/></svg></button>
                 </div>
+                <section class="tree-details-panel" id="treeDetailsPanel" role="region" aria-label="Selected tree protection measurements" aria-hidden="true" inert>
+                  <button type="button" class="tree-details-panel__close" data-tree-details-close aria-label="Close tree details">×</button>
+                  <dl aria-live="polite"><div><dt>TPZ radius</dt><dd data-tree-detail="tpz">Not recorded</dd></div><div><dt>SRZ radius</dt><dd data-tree-detail="srz">Not recorded</dd></div><div><dt>Risk</dt><dd class="tree-details-panel__risk" data-tree-detail="risk">Not recorded</dd></div></dl>
+                </section>
               </div>
             </div>
           </section>
@@ -473,7 +478,9 @@
                 <div class="program-costing-title"><div><p class="uos-eyebrow">Resource Calculator</p><h3 id="costing-title">Assigned Rate Items</h3></div></div>
                 <button class="program-cost-tools-toggle uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-tools-toggle aria-expanded="false" aria-controls="calculatorTools" aria-label="Show Resource Calculator tools"><span>Tools</span><svg class="program-cost-tools-toggle__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
               </header>
+              <div class="program-calculator-quote-picker"><label class="uos-field"><span>Quote / revision</span><select class="uos-select" data-calculator-quote aria-label="Quote / revision"></select></label><p data-calculator-quote-status role="status"></p></div>
               <div class="program-calculator-tools" id="calculatorTools" data-calculator-tools hidden>
+                <section class="program-calculator-excluded" data-calculator-excluded hidden aria-label="Excluded Draft items"></section>
                 <div class="program-calculator-tools__actions">
                   <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-delete-kind="All">Delete All</button>
                   <button class="uos-button uos-button--secondary uos-button--sm" type="button" data-calculator-delete-kind="Labour">Delete Labour Items</button>
@@ -491,9 +498,10 @@
               <footer class="program-cost-totals" data-costing-totals-footer>
                 <div class="program-cost-adjustments"><label><span>Preliminaries</span><span class="program-percent-input"><input type="number" min="0" max="100" step="0.1" value="0" data-costing-preliminaries aria-label="Preliminaries percentage"><b>%</b></span></label><label><span>Margin</span><span class="program-percent-input"><input type="number" min="0" max="100" step="0.1" value="0" data-costing-margin aria-label="Margin percentage"><b>%</b></span></label></div>
                 <dl><div><dt>Subtotal</dt><dd data-costing-total="subtotal">$0.00</dd></div><div><dt data-costing-total-label="preliminaries">Preliminaries (0%)</dt><dd data-costing-total="preliminaries">$0.00</dd></div><div><dt data-costing-total-label="margin">Margin (0%)</dt><dd data-costing-total="margin">$0.00</dd></div><div><dt>GST (10%)</dt><dd data-costing-total="gst">$0.00</dd></div></dl>
+                <dl class="program-calculator-quote-totals"><div><dt>Discount</dt><dd data-calculator-quote-discount>$0.00</dd></div><div><dt>Contingency</dt><dd data-calculator-quote-contingency>$0.00</dd></div></dl>
                 <div class="program-grand-total"><span>AUD grand total</span><strong data-costing-total="grand">$0.00</strong></div>
               </footer>
-              <p class="program-cost-error" data-costing-error role="alert" hidden></p>
+              <div class="program-cost-error program-cost-error--dismissible" data-costing-error role="alert" hidden><span data-costing-error-message></span><button type="button" data-costing-error-close aria-label="Dismiss Calculator message">×</button></div>
             </section>
           </section>
 
@@ -1190,8 +1198,8 @@
   <script defer src="../remediation-planner/config/metromaps-provider.js?v=20260922-wmts-fix"></script>
   <script defer src="../shared/js/suite.js?v=20261002-error-remediation-v12"></script>
   <script defer src="../shared/js/storage.js?v=20260912-empty-baseline-v1"></script>
-  <script defer src="../shared/js/program-runtime.js?v=20261011-drawing-dashes-v1"></script>
-  <script defer src="js/tree-hub.js?v=20261010-gpu-map-v2"></script>
+  <script defer src="../shared/js/program-runtime.js?v=20261015-tree-details-v1"></script>
+  <script defer src="js/tree-hub.js?v=20261015-tree-details-v1"></script>
   <script defer src="../shared/js/imports.js?v=20261010-lazy-v1"></script>
   <script defer src="../shared/js/unified-workspace.js"></script>
   <script defer src="../shared/js/smart-import.js"></script>
@@ -1202,7 +1210,7 @@
   <script defer src="js/privacy.js?v=20261005-quote-address"></script>
  <script defer src="js/status.js?v=20261005-named-task-history-v1"></script>
   <script defer src="js/default-rate-catalog.js?v=20261009-area-pricing-v2"></script>
-  <script defer src="js/model.js?v=20261011-catalog-scheduler-flags-v1"></script>
+  <script defer src="js/model.js?v=20261015-quote-membership-v1"></script>
   <script defer src="js/budget-model.js?v=20260928-budget-v1"></script>
   <script defer src="js/budget-governance.js?v=20261010-business-date-v1"></script>
   <script defer src="js/status-model.js?v=20261001-job-delete-v1"></script>
@@ -1210,7 +1218,7 @@
   <script defer src="js/costing-model.js?v=20261010-business-date-v1"></script>
   <script defer src="js/moasure-geometry.js?v=20261009-moasure-v1"></script>
   <script defer src="js/work-area-service.js?v=20261009-moasure-v1"></script>
-  <script defer src="js/quote-model.js?v=20261010-business-date-v1"></script>
+  <script defer src="js/quote-model.js?v=20261015-quote-membership-v1"></script>
   <script defer src="js/funding-model.js?v=20261001-quote-funding-v1"></script>
   <script defer src="js/data-health.js?v=20260912-schema-v5"></script>
   <script defer src="js/status-health.js?v=20260912-schema-v5"></script>
@@ -1238,17 +1246,17 @@
   <script defer src="js/scheduler-model.js?v=20261014-multi-day-v4"></script>
  <script defer src="js/planner-model.js?v=20261005-named-task-history-v1"></script>
  <script defer src="js/scheduler-calendar-tools.js?v=20261014-multi-day-v4"></script>
-  <script defer src="js/scheduler-week-editor.js?v=20261014-multi-day-v4"></script>
+  <script defer src="js/scheduler-week-editor.js?v=20261015-handle-spacing-v1"></script>
   <script defer src="js/scheduler.js?v=20261014-multi-day-v4"></script>
-  <script defer src="js/costing.js?v=20261011-calculator-description-v1"></script>
+  <script defer src="js/costing.js?v=20261015-quote-views-v1"></script>
   <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
-    <script defer src="../remediation-planner/js/map.js?v=20261013-edit-history-v1"></script>
-  <script defer src="js/program-map.js?v=20261014-location-move-v3"></script>
+  <script defer src="../remediation-planner/js/map.js?v=20261015-tree-details-v1"></script>
+  <script defer src="js/program-map.js?v=20261015-card-sizes-v1"></script>
 
-<script defer src="js/planner.js?v=20261009-main-launcher-v1"></script>
+<script defer src="js/planner.js?v=20261015-purpose-icons-v1"></script>
  <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>
-  <script defer src="js/planner-presentation.js?v=20261008-red-delete-icon-v8"></script>
+  <script defer src="js/planner-presentation.js?v=20261015-purpose-icons-v1"></script>
  <script defer src="js/quote-builder.js?v=20261013-quote-payments-v1"></script>
 <script defer src="js/app.js?v=20261010-map-mode-v1"></script>
   <script defer src="js/status-app.js?v=20260912-schema-v5"></script>

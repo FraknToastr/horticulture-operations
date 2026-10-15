@@ -50,6 +50,7 @@ test("Planner modal governs task fields and hands one Draft Planner Job to Sched
     return task.id;
   });
   await frame.locator('[data-planner-section-toggle="PLANNING AND APPROVAL"][aria-expanded="false"]').click();
+  await expect(frame.locator(`[data-planner-draft-job="${taskId}"] svg rect`)).toHaveCount(1);
   await frame.locator(`[data-planner-draft-job="${taskId}"]`).click();
 
   await expect(frame.locator('[data-program-view="scheduler"]')).toBeVisible();
