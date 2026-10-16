@@ -48,7 +48,8 @@
     var providerLoadTimer = null;
     var initializationTimer = null;
     var destroyed = false;
-    var measurementMarkers = [], placingLocation = false;
+    var measurementMarkers = [], measurementPool = [], placingLocation = false;
+    var pointerFrame = 0, pendingPointer = null;
     var locationMarkers=[],showLocationNumbers=true;
     var labelPlacements = [];
     var showLengthLabels = false;
@@ -253,14 +254,17 @@
     function clearMeasurementMarkers() {
       measurementMarkers.forEach(function (marker) { marker.remove(); });
       measurementMarkers = [];
+      measurementPool.forEach(function (marker) { marker.remove(); }); measurementPool = [];
       labelPlacements = [];
     }
 
     function addMeasurementMarker(kind, coordinate, text) {
       var indexMarker = kind === "index" || kind === "index-border";
       if (!map || !Model.coordinateValid(coordinate) || (!indexMarker && measurementMarkers.length >= MAX_MEASUREMENT_LABELS) || typeof maplibregl.Marker !== "function") return;
-      var element = document.createElement("span");
-      element.className = "rem-map-measure-label rem-map-measure-label--" + kind;
+      var reused = measurementPool.shift();
+      var element = reused ? reused.getElement() : document.createElement("span");
+      Array.from(element.classList).forEach(function (name) { if (name.indexOf("rem-map-measure-label--") === 0) element.classList.remove(name); });
+      element.classList.add("rem-map-measure-label", "rem-map-measure-label--" + kind);
       element.dataset.measureKind = kind;
       element.textContent = text;
       element.setAttribute("aria-hidden", "true");
@@ -289,7 +293,12 @@
         return clearance > best.clearance ? { shift: candidate, clearance: clearance } : best;
       }, { shift: shifts[0], clearance: -1 }).shift;
       var markerOffset = [baseOffset[0] + shift[0], baseOffset[1] + shift[1]];
-      var marker = new maplibregl.Marker({ element: element, anchor: offsetLabel ? "bottom" : "center", offset: markerOffset }).setLngLat(coordinate).addTo(map);
+      var anchor = offsetLabel ? "bottom" : "center";
+      var marker = reused && reused.getElement().dataset.measureAnchor === anchor ? reused : null;
+      if (reused && !marker) reused.remove();
+      if (!marker) marker = new maplibregl.Marker({ element: element, anchor: anchor, offset: markerOffset }).addTo(map);
+      element.dataset.measureAnchor = anchor;
+      marker.setOffset(markerOffset).setLngLat(coordinate);
       measurementMarkers.push(marker);
       var centre = placementCentre(shift);
       labelPlacements.push({ x: centre.x, y: centre.y, width: width, height: height, kind: kind });
@@ -339,8 +348,8 @@
     }
 
     function refreshMeasurementMarkers() {
-      clearMeasurementMarkers();
-      if (!map || !ready) return;
+      measurementPool = measurementMarkers; measurementMarkers = []; labelPlacements = [];
+      if (!map || !ready) { clearMeasurementMarkers(); return; }
       var selected = currentEvent && currentEvent.polygons.find(function (shape) { return shape.id === selectedShapeId; });
       if (selected && !drawing) {
         Model.refreshShape(selected);
@@ -374,6 +383,7 @@
           if (coordinate) addMeasurementMarker(large ? "index-border" : "index", coordinate, String(index + 1));
         });
       }
+      measurementPool.forEach(function (marker) { marker.remove(); }); measurementPool = [];
     }
 
     function addOperationalLayers() {
@@ -467,19 +477,20 @@
       }
     }
 
-    function refresh() {
+    function refresh(only) {
+      var enabled = function (name) { return !only || only.indexOf(name) >= 0; };
       if (!map || !ready) return;
       var grid = map.getSource("uos-grid");
       var shapes = map.getSource("uos-shapes");
       var draft = map.getSource("uos-draft");
       var edit = map.getSource("uos-edit-vertices");
       var location = map.getSource("uos-location");
-      if (grid) grid.setData(gridFeatures());
-      if (shapes) shapes.setData(shapeFeatures());
-      if (draft) draft.setData(draftFeatures());
-      if (edit) edit.setData(editFeatures());
-      if (location) location.setData(locationFeatures());
-      renderNumberedLocations();
+      if (grid && enabled("grid")) grid.setData(gridFeatures());
+      if (shapes && enabled("shapes")) shapes.setData(shapeFeatures());
+      if (draft && enabled("draft")) draft.setData(draftFeatures());
+      if (edit && enabled("edit")) edit.setData(editFeatures());
+      if (location && enabled("location")) location.setData(locationFeatures());
+      if (enabled("location")) renderNumberedLocations();
       refreshMeasurementMarkers();
     }
 
@@ -514,19 +525,25 @@
 
 
     function renderNumberedLocations(){
-      if(!options.numberedLocations)return;
-      locationMarkers.forEach(function(marker){marker.remove();});locationMarkers=[];
-      if(!map || !maplibregl.Marker)return;
-      locationFeatures().features.forEach(function(feature,index){
-        var element=document.createElement("button");
-        element.type="button";element.className="uos-numbered-location-pin";
-        var number=feature.properties.index+1;
-        element.setAttribute("aria-label","Location "+number);
-        element.style.cssText="background:none;border:0;padding:0;width:38px;height:48px;cursor:pointer";
-        element.innerHTML=pinSymbol(number,showLocationNumbers,feature.properties.owner);
-        element.addEventListener("click",function(event){event.stopPropagation();if(typeof options.onLocationSelected==="function")options.onLocationSelected({locationId:feature.properties.id,registerId:feature.properties.sourceRecordId});});
-        locationMarkers.push(new maplibregl.Marker({element:element,anchor:"bottom"}).setLngLat(feature.geometry.coordinates).addTo(map));
+      if(!options.numberedLocations || !map || !maplibregl.Marker)return;
+      var old = new Map(locationMarkers.map(function(marker){return [marker.getElement().dataset.locationKey, marker];}));
+      locationMarkers = locationFeatures().features.map(function(feature){
+        var key = feature.properties.id, marker = old.get(key);
+        old.delete(key);
+        var element = marker ? marker.getElement() : document.createElement("button");
+        if (!marker) {
+          element.type="button";element.className="uos-numbered-location-pin";
+          element.dataset.locationKey=key;
+          element.style.cssText="background:none;border:0;padding:0;width:38px;height:48px;cursor:pointer";
+          element.addEventListener("click",function(event){event.stopPropagation();if(typeof options.onLocationSelected==="function")options.onLocationSelected({locationId:element.dataset.locationKey,registerId:element.dataset.registerId});});
+          marker = new maplibregl.Marker({element:element,anchor:"bottom"}).addTo(map);
+        }
+        var number=feature.properties.index+1, symbol=pinSymbol(number,showLocationNumbers,feature.properties.owner);
+        element.setAttribute("aria-label","Location "+number); element.dataset.registerId=feature.properties.sourceRecordId;
+        if(element._pinSymbol !== symbol){element.innerHTML=symbol;element._pinSymbol=symbol;}
+        return marker.setLngLat(feature.geometry.coordinates);
       });
+      old.forEach(function(marker){marker.remove();});
     }
     function fitCoordinates(coordinates){
       if(!map || !coordinates.length)return false;
@@ -848,7 +865,7 @@
       activeProviderId = "offline";
       pendingProviderId = "offline";
       if (map) map.setGlyphs(typeof config.glyphs === "string" && config.glyphs ? config.glyphs : null);
-      if (typeof options.onProviderFailure === "function") options.onProviderFailure(id, detail || "Tile loading failed.");
+      if (typeof options.onProviderFailure === "function") options.onProviderFailure(id, "Tile loading failed.");
       if (typeof options.onProviderChange === "function") options.onProviderChange("offline");
     }
 
@@ -987,6 +1004,7 @@
     }
 
     function destroy() {
+      if (pointerFrame) root.cancelAnimationFrame(pointerFrame); pointerFrame = 0; pendingPointer = null;
       locationMarkers.forEach(function(marker){marker.remove();});locationMarkers=[];
       cancelPlacement();
       destroyed = true;
@@ -1101,7 +1119,7 @@
           } catch (error) {  failInitialization(error); }
         });
         map.on("moveend", function (event) {
-          refresh();
+          refresh(["grid"]);
           if (typeof options.onViewportChange === "function") {
             var center = map.getCenter();
             options.onViewportChange({ center: [center.lng, center.lat], zoom: map.getZoom(),userInitiated:Boolean(event.originalEvent) });
@@ -1121,11 +1139,24 @@
           }
           if (!drawing) return;
           previewCoordinate = snapped([event.lngLat.lng, event.lngLat.lat], Boolean(event.originalEvent && event.originalEvent.shiftKey));
-          refresh();
+          refresh(["draft"]);
           notifyDraw();
         }
-        map.on("mousemove", handleMapPointerMove);
-        map.on("touchmove", handleMapPointerMove);
+        function flushPointerMove() {
+          if (pointerFrame) root.cancelAnimationFrame(pointerFrame); pointerFrame = 0;
+          var event = pendingPointer; pendingPointer = null;
+          if (event && !destroyed) handleMapPointerMove(event);
+        }
+        function queuePointerMove(event) {
+          if (!drawing && draggingVertexIndex === null && !transformLastCoordinate) return;
+          pendingPointer = event;
+          if (!pointerFrame) pointerFrame = root.requestAnimationFrame(flushPointerMove);
+        }
+        map.on("mousemove", queuePointerMove);
+        map.on("touchmove", queuePointerMove);
+        map.on("mouseup", flushPointerMove);
+        map.on("touchend", flushPointerMove);
+        map.on("click", flushPointerMove);
         map.on("mousedown", function (event) {
         if(transformShapeId) { if(rotationHandle && event.originalEvent && rotationHandle.getElement().contains(event.originalEvent.target))return; if(shapeIdAt(event.point)===transformShapeId){transformLastCoordinate=[event.lngLat.lng,event.lngLat.lat];map.dragPan.disable();if(transformGestureCallback)transformGestureCallback('start');if(event.originalEvent)event.originalEvent.preventDefault();}return; }
           if (!editingShapeId || !map.getLayer("uos-edit-vertices")) return;

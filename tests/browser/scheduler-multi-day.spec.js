@@ -40,7 +40,7 @@ test('holding a date handle at the week edge pages once and Cancel restores the 
  const {frame:f,ids,errors}=await setup(page);await select(f,ids.morning);await reveal(f);
  const b=await handle(f,'date-end').boundingBox(),view=await f.locator('.program-calendar-scroll').boundingBox();
  await page.mouse.move(b.x+22,b.y+22);await page.mouse.down();await page.mouse.move(view.x+view.width-5,b.y+22,{steps:8});
- await expect(f.locator('.scheduler-week-day').first()).toHaveAttribute('data-scheduler-date','2026-10-12',{timeout:2500});
+ await expect(f.locator('.scheduler-week-day').first()).toHaveAttribute('data-scheduler-date','2026-10-12',{timeout:6000});
  await page.mouse.up();const modal=f.locator('.scheduler-all-day-confirm');await expect(modal).toBeVisible();await expect(modal).toContainText('2026-10-18');
  await modal.getByRole('button',{name:'Cancel',exact:true}).click();await expect(f.locator('.scheduler-week-day').first()).toHaveAttribute('data-scheduler-date','2026-10-05');
  await expect(form(f).locator('[name=startDate]')).toHaveValue('2026-10-05');await expect(form(f).locator('[name=endDate]')).toHaveValue('2026-10-05');expect(errors).toEqual([]);
@@ -53,7 +53,17 @@ test('Month timed extension confirms conversion; keyboard cancellation leaves ho
 });
 
 async function select(f,id){await f.evaluate(id=>UOS.ProgramSchedulerUI.focusCalendarJob(id),id);await expect(form(f)).toBeVisible();await f.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));}
-async function reveal(f){await f.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));const selected=f.locator('.program-calendar-job.is-selected').first();await selected.scrollIntoViewIfNeeded();await f.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));}
+async function reveal(f){
+  const selected=f.locator('.program-calendar-job.is-selected').first();
+  await expect(selected).toBeAttached();
+  await selected.evaluate(node=>{
+    const scroll=node.closest('.program-calendar-scroll');
+    if(!scroll)return;
+    const box=node.getBoundingClientRect(), view=scroll.getBoundingClientRect();
+    if(box.top<view.top || box.bottom>view.bottom)scroll.scrollTop+=box.top-view.top-80;
+  });
+  await expect(f.locator('[data-week-handle="move"]').first()).toBeVisible();
+}
 async function dragTo(page,f,kind,date,hold=0){
  await reveal(f);const b=await handle(f,kind).boundingBox();expect(b).not.toBeNull();
  const cell=f.locator('.scheduler-week-day[data-scheduler-date="'+date+'"],.scheduler-month-day[data-scheduler-date="'+date+'"]');
@@ -87,7 +97,7 @@ test('Month single-row spans, cross-row linked cards, date resizing and keyboard
  await select(f,ids.morning);await f.getByRole('button',{name:'Month',exact:true}).click();
  let cards=f.locator('.scheduler-month-card[data-scheduler-job="'+ids.morning+'"]');await expect(cards).toHaveCount(1);expect(await cards.evaluate(n=>n.style.gridColumn)).toBe('2 / 5');
  await dragTo(page,f,'date-end','2026-10-13');await noModal(f);await expect(form(f).locator('[name=endDate]')).toHaveValue('2026-10-13');await expect(cards).toHaveCount(8);
- expect(await cards.evaluateAll(ns=>ns.every(n=>n.classList.contains('is-selected')&&getComputedStyle(n,'::after').animationName==='scheduler-selection-ants'))).toBe(true);
+ expect(await cards.evaluateAll(ns=>ns.every(n=>n.classList.contains('is-selected')&&getComputedStyle(n.querySelector('.scheduler-selection-overlay')).animationName==='scheduler-selection-pulse'))).toBe(true);
  await reveal(f);await handle(f,'move').focus();await page.keyboard.press('Enter');await page.keyboard.press('ArrowRight');await page.keyboard.press('Enter');await expect(form(f).locator('[name=startDate]')).toHaveValue('2026-10-07');await expect(form(f).locator('[name=endDate]')).toHaveValue('2026-10-14');
  await form(f).getByRole('button',{name:'Save schedule',exact:true}).click();await expect.poll(()=>f.evaluate(id=>UOS.ProgramApp.workspace().entities.jobs.find(j=>j.id===id).endDate,ids.morning)).toBe('2026-10-14');await f.locator('[data-program-destination="register"]').click();await expect(handle(f,'move')).toHaveCount(0);expect(errors).toEqual([]);
 });

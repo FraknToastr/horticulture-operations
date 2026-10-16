@@ -49,11 +49,14 @@
   --uos-header-height: 64px;
   --uos-command-height: 40px;
   --uos-control-height: 34px;
+  --uos-disclosure-size: 30px;
   --uos-row-height: 34px;
   --uos-panel-header-height: 40px;
   --uos-rail-width: 220px;
   --uos-rail-collapsed: 64px;
   --uos-inspector-width: 450px;
+  --uos-focus: var(--uos-info);
+  --uos-primary: var(--uos-action);
   --uos-focus-width: 2px;
   --uos-focus-offset: 2px;
   --uos-focus-clearance: max(8px, calc(var(--uos-focus-width) + var(--uos-focus-offset)));

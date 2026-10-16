@@ -83,17 +83,39 @@
       var first = nodes[0].getBoundingClientRect(), last = nodes[nodes.length - 1].getBoundingClientRect();
       addControl("date-start", first, first.left + 2, first.top + first.height / 2);
       addControl("date-end", last, last.right - 2, last.top + last.height / 2);
-      var priority = nodes[0].querySelector('.scheduler-priority-pill');
-      var moveX = priority ? priority.getBoundingClientRect().left - 26 : first.right - 30;
-      addControl("move", first, moveX, first.top + Math.min(first.height / 2, 40));
+      var accessories = nodes[0].querySelector('.scheduler-card-accessories');
+      var moveX = accessories ? accessories.getBoundingClientRect().left + 22 : first.right - 24;
+      addControl("move", first, moveX, first.top + Math.min(first.height / 2, 22));
       if (options.context().week && tools.dayInterval(job)) {
         addControl("start", first, first.left + first.width / 2, first.top);
         addControl("end", last, last.left + last.width / 2, last.bottom);
       }
-      var viewport = root.querySelector(".program-calendar-scroll").getBoundingClientRect();
+      var scroller = root.querySelector(".program-calendar-scroll"), viewport = scroller.getBoundingClientRect();
+      var bounds = { top: viewport.top + scroller.clientTop, left: viewport.left + scroller.clientLeft,
+        right: viewport.left + scroller.clientLeft + scroller.clientWidth, bottom: viewport.top + scroller.clientTop + scroller.clientHeight };
+      var header = root.querySelector(options.context().week ? ".scheduler-week-head" : ".scheduler-month-heading");
+      if (header) {
+        if (options.context().week && job.allDay) {
+          var rail = root.querySelector(".scheduler-all-day-rail").getBoundingClientRect();
+          bounds.top = Math.max(bounds.top, rail.top); bounds.bottom = Math.min(bounds.bottom, rail.bottom);
+        } else bounds.top = Math.max(bounds.top, header.getBoundingClientRect().bottom);
+      }
+      var gutter = options.context().week && root.querySelector(".scheduler-week-gutter");
+      if (gutter) bounds.left = Math.max(bounds.left, gutter.getBoundingClientRect().right);
       controls.forEach(function (node) {
-        var rect = node.getBoundingClientRect();
-        if (rect.bottom < viewport.top || rect.top > viewport.bottom || rect.right < viewport.left || rect.left > viewport.right) node.hidden = true;
+        var rect = node.getBoundingClientRect(), left = bounds.left, right = bounds.right;
+        // Side grips keep their outer target area without covering card symbols.
+        var edgeCard = node.dataset.weekHandle === "date-start" ? nodes[0] : node.dataset.weekHandle === "date-end" ? nodes[nodes.length - 1] : null;
+        var rail = edgeCard && edgeCard.querySelector(".scheduler-card-accessories");
+        if (rail) {
+          var railBox = rail.getBoundingClientRect();
+          if (rect.top < railBox.bottom && rect.bottom > railBox.top) {
+            if (node.dataset.weekHandle === "date-end") left = Math.max(left, railBox.right + 2);
+            else if (rect.right > railBox.left) right = Math.min(right, railBox.left - 2);
+          }
+        }
+        node.hidden = rect.bottom <= bounds.top || rect.top >= bounds.bottom || rect.right <= left || rect.left >= right;
+        node.style.clipPath = "inset(" + Math.max(0, bounds.top - rect.top) + "px " + Math.max(0, rect.right - right) + "px " + Math.max(0, rect.bottom - bounds.bottom) + "px " + Math.max(0, left - rect.left) + "px)";
       });
     }
     function sync() {
@@ -164,9 +186,14 @@
         var day = root.querySelector('.scheduler-week-day[data-scheduler-date="' + job.startDate + '"]');
         var range = tools.dayInterval(job);
         if (day && range && !job.allDay) {
-          var dayBox = day.getBoundingClientRect(); left = dayBox.left + 6; width = dayBox.width - 12;
-          top = dayBox.top + tools.pixelAtMinute(options.layout(), range.start) + 4;
-          height = Math.max(44, tools.pixelAtMinute(options.layout(), range.end) - tools.pixelAtMinute(options.layout(), range.start) - 8);
+          var dayBox = day.getBoundingClientRect();
+          var jobs = options.calendarJobs().map(function (entry) { return entry.id === g.job.id ? Object.assign({}, entry, job) : entry; });
+          var segment = tools.daySegments(jobs, job.startDate).find(function (entry) { return entry.job.id === g.job.id; });
+          var lanes = segment ? segment.lanes : 1, lane = segment ? segment.lane : 0;
+          left = dayBox.left + dayBox.width * lane / lanes + 6 / lanes + 2;
+          width = dayBox.width / lanes - 12 / lanes - 4;
+          top = dayBox.top + tools.pixelAtMinute(options.layout(), range.start) + 2;
+          height = Math.max(1, tools.pixelAtMinute(options.layout(), range.end) - tools.pixelAtMinute(options.layout(), range.start) - 4);
         } else {
           var cells = Array.from(root.querySelectorAll(".scheduler-all-day-hit")).filter(function (node) { return node.dataset.schedulerHitDate >= dates.startDate && node.dataset.schedulerHitDate <= dates.endDate; });
           if (cells.length) { var a = cells[0].getBoundingClientRect(), b = cells[cells.length - 1].getBoundingClientRect(); left = a.left + 4; width = b.right - a.left - 8; top = a.top; height = 32; }
@@ -214,8 +241,11 @@
         var top = rect.top + (root.querySelector(".scheduler-week-head")?.getBoundingClientRect().height || 0);
         if (g.clientY < top + 28) scroller.scrollTop -= 10;
         else if (g.clientY > rect.bottom - 28) scroller.scrollTop += 10;
-        if (edge && ((edge < 0 && scroller.scrollLeft > 0) || (edge > 0 && scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1))) {
-          scroller.scrollLeft += edge * 12; g.edge = 0; g.edgeSince = now;
+        var previousLeft = scroller.scrollLeft;
+        if (edge) scroller.scrollLeft += edge * 12;
+        // Reserved scrollbar gutters can make scrollWidth overstate the reachable edge.
+        if (edge && Math.abs(scroller.scrollLeft - previousLeft) > .5) {
+          g.edge = 0; g.edgeSince = now;
         } else if (edge && g.kind !== "start" && g.kind !== "end") {
           if (g.edge !== edge) { g.edge = edge; g.edgeSince = now; }
           if (now - g.edgeSince >= (g.paged ? 750 : 600)) {
@@ -367,6 +397,7 @@
       } else if (!gesture && !pending) enhance();
     }).observe(root);
     return {
+      retainDraft: function () { remember(); if (gesture) finishGesture(true, false); clearControls(); },
       sync: sync, enhance: enhance, previewJobs: previewJobs,
       canLeave: function () { if (pending) return false; if (gesture) finishGesture(true, false); var entry = remember(); if (entry && !dirty(entry)) drafts.delete(options.context().jobId); return true; },
       beforeRender: function () { if (paging) return; if (pending && options.context().jobId !== pending.job.id) { pending = null; var modal = document.querySelector('.scheduler-all-day-confirm')?.closest('.uos-modal-backdrop'); if (modal) UOS.dialogs.close(modal, false); options.finishPeriod(false); } if (gesture) finishGesture(true, false); },

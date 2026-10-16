@@ -8,6 +8,7 @@
 
  var state = { workspace: null, section: "Labour", query: "", category: "all", rateSort: "description", rateSortDirection: "asc", jobId: "", preliminaries: 0, margin: 0, pendingAdjustments: null, editRateId: "", editorOpener: null, mode: "applications", selectedProjectId: "", bound: false };
   var costingNeedsRender = true;
+  var costingChangeId = 0, costingCollectionRevisions = null;
   var costingRenderQueued = false;
   var renderedCosting = {};
   var quoteViews = Object.create(null);
@@ -133,7 +134,7 @@ function hasOwn(value, key) { return Boolean(value) && Object.prototype.hasOwnPr
     paths.forEach(function (data) { var path = root.document.createElementNS(namespace, "path"); path.setAttribute("d", data); node.appendChild(path); });
     return node;
   }
-function button(label, kind, attribute, value) { var node = root.document.createElement("button"); node.type = "button"; node.className = "uos-button uos-button--secondary uos-button--icon"; node.setAttribute("aria-label", label); node.setAttribute(attribute, value); if (kind === "calendar" || kind === "calendar-tick") {
+function button(label, kind, attribute, value) { var node = root.document.createElement("button"); node.type = "button"; node.className = "uos-button uos-button--secondary uos-button--icon"; node.setAttribute("aria-label", label); node.setAttribute("data-uos-tooltip", label); node.title = label; node.setAttribute(attribute, value); if (kind === "calendar" || kind === "calendar-tick") {
       var icon = root.document.createElementNS("http://www.w3.org/2000/svg", "svg");
       icon.setAttribute("viewBox", "0 0 24 24"); icon.setAttribute("aria-hidden", "true");
       icon.innerHTML = '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18' + (kind === "calendar-tick" ? 'M8 16l2.5 2.5L16.5 13' : '') + '"/>';
@@ -347,7 +348,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
         ? "Adds manually to the Resource Calculator; also available through mapped polygons."
         : "";
       add.disabled = !canAdd;
-      if (reason) add.title = reason;
+      if (reason) { add.title = reason; add.setAttribute("data-uos-tooltip", reason); }
 
       var edit = button("Edit " + rateTitle, "edit", "data-costing-edit-rate", rate.id);
       var remove = button("Delete " + rateTitle, "trash", "data-costing-delete-rate", rate.id);
@@ -384,7 +385,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
       catalogCount.setAttribute("aria-label", values.length + (values.length === 1 ? " rate item" : " rate items"));
     }
   }
-  function decorateCatalogAccessibility() { all("[data-costing-catalog-body] tr").forEach(function (row) { var cells = row.querySelectorAll("td"); if (cells.length < 5) return; var description = cells[0].querySelector("strong"), category = cells[1].querySelector(".program-category-pill"), status = cells[4].querySelector(".program-rate-state"); if (description) { var value = text(description.textContent); description.setAttribute("data-uos-tooltip", value); description.setAttribute("aria-label", value); } if (category) { var categoryValue = category.getAttribute("data-category-full-label") || text(category.textContent); category.setAttribute("data-uos-tooltip", "Category: " + categoryValue); category.setAttribute("aria-label", "Category: " + categoryValue); } if (status) { var statusValue = text(status.textContent); status.setAttribute("data-uos-tooltip", "State: " + statusValue); status.setAttribute("aria-label", "State: " + statusValue); } }); }
+
   function jobLabel(job) { return job ? (title(job) || job.id) : "No job selected"; }
   function getCostingProjects(targetOwner) {
     if (root.UOS && root.UOS.ProgramModel && typeof root.UOS.ProgramModel.getProjects === "function") {
@@ -798,7 +799,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
     }
     var full = costingNeedsRender || !incremental;
     var inputs = {};
-    ["projects", "applications", "events", "jobs", "costingLines", "rateItems", "catalogs", "geometries", "quotes", "quoteLines", "payments", "paymentAllocations"].forEach(function (name) { inputs[name] = JSON.stringify(entities(name)); });
+    ["projects", "applications", "events", "jobs", "costingLines", "rateItems", "catalogs", "geometries", "quotes", "quoteLines", "payments", "paymentAllocations"].forEach(function (name) { inputs[name] = costingCollectionRevisions ? "revision:" + (costingCollectionRevisions[name] || 0) : JSON.stringify(entities(name)); });
     inputs.workTypes = JSON.stringify(state.workspace.referenceData && state.workspace.referenceData.shared && state.workspace.referenceData.shared.workTypeRateItems || {});
     var drawerUI = root.UOS.ProgramDrawerWorkspace, position = drawerUI && drawerUI.captureCostingPosition();
     var privacy = root.UOS.ProgramPrivacy, privacyEnabled = privacy && typeof privacy.isEnabled === "function" && privacy.isEnabled();
@@ -815,7 +816,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
       renderCatalogControls();
       renderCategories();
       renderCatalog();
-      decorateCatalogAccessibility();
+
       renderedCosting.catalog = JSON.stringify([state.section, state.query, state.category, state.rateSort, state.rateSortDirection, state.selectedProjectId, projectExists, Boolean(currentJob()), inputs.rateItems, inputs.catalogs, inputs.workTypes]);
     }
     var mappedKey = JSON.stringify([inputs.geometries, inputs.rateItems, inputs.workTypes]);
@@ -833,7 +834,7 @@ function button(label, kind, attribute, value) { var node = root.document.create
     costingNeedsRender = false;
   }
   function persist(mutator) { var app = root.UOS && root.UOS.ProgramApp; if (!app || !app.updateWorkspace) return Promise.resolve(null); return app.updateWorkspace(mutator); }
-  function mutate(operation) { if (!state.workspace) return Promise.resolve(null); showError(null); return persist(function (workspace) { return operation(model(), workspace); }).then(function (saved) { if (saved) root.setTimeout(function () { update(root.UOS.ProgramApp.workspace()); }, 0); return saved; }).catch(function (error) { showError(error); return null; }); }
+  function mutate(operation) { if (!state.workspace) return Promise.resolve(null); showError(null); return persist(function (workspace) { return operation(model(), workspace); }).catch(function (error) { showError(error); return null; }); }
   function addRate(id, areaInput) {
     try { requireCalculatorEditable(); } catch (error) { showError(error); return Promise.resolve(null); }
     var selectedQuoteId = calculatorQuoteView().quote && calculatorQuoteView().quote.id;
@@ -863,9 +864,6 @@ function button(label, kind, attribute, value) { var node = root.document.create
       }
       result.workspace.costing = Object.assign({}, result.workspace.costing, { selectedProjectId: project.id, section: state.section, mode: state.mode });
       return result;
-    }).then(function (saved) {
-      if (saved) root.setTimeout(function () { update(root.UOS.ProgramApp.workspace()); }, 0);
-      return saved;
     });
   }
   function updateLine(id) {
@@ -882,8 +880,6 @@ function button(label, kind, attribute, value) { var node = root.document.create
         var synced = root.UOS.WorkAreaService.syncGeometry(workspace, geometry.id);
         return quoteId ? root.UOS.ProgramQuotes.syncDraftCostingLines(synced, quoteId, [id]) : synced;
       }
-      var nextUnit = text(changes.unit).toLowerCase();
-      void nextUnit;
       var updated = api.updateLine(workspace, id, changes);
       return quoteId ? root.UOS.ProgramQuotes.syncDraftCostingLines(updated, quoteId, [id]) : updated;
     });
@@ -1142,7 +1138,10 @@ function removeCalculatorLine(lineId, guard) {
       form.reset();
     } catch (error) { showError(error); }
   }
-function update(workspace) {
+function update(workspace, change) {
+  if (change && change.changeId && change.changeId === costingChangeId) return;
+  if (change && change.changeId) costingChangeId = change.changeId;
+  costingCollectionRevisions = change && change.collectionRevisions || null;
   var ui = workspace && workspace.workspace || {}, costing = ui.costing || {};
   var hasOuterProject = hasOwn(ui, "selectedProjectId");
   var hasCostingProject = hasOwn(costing, "selectedProjectId");
@@ -1470,8 +1469,7 @@ root.document.addEventListener("click", function (event) {
       workspace = app && typeof app.workspace === "function" ? app.workspace() : null;
     }
     if (!workspace || !workspace.workspace) return;
-    if (workspace.workspace.destination !== "costing") { costingNeedsRender = true; return; }
-    update(workspace);
+    update(workspace, detail);
   });
   root.document.addEventListener("uos:workspace-changed", function (event) {
     var detail = event.detail || {};
@@ -1481,8 +1479,8 @@ root.document.addEventListener("click", function (event) {
       workspace = app && typeof app.workspace === "function" ? app.workspace() : null;
     }
     if (!workspace || !workspace.workspace) return;
-    // Keep linked Job indicators current even while Scheduler is the active view.
-    update(workspace);
+    // Older integrations may publish only changed; normal paired events share changeId.
+    update(workspace, detail);
   });
   }
   if (root.document) { if (root.document.readyState === "loading") root.document.addEventListener("DOMContentLoaded", bind, { once: true }); else bind(); }

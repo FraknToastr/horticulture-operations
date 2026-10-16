@@ -419,6 +419,70 @@
     source.importedAt = text(source.importedAt);
     return source;
   }
+  var EVENT_REFERENCE_FIELDS = ["jobId", "job_id", "jobNumber", "job_number", "job", "eventNumber"];
+  function eventLegacyReferences(item) {
+    var references = {}, payload = object(item.payload) ? item.payload : {};
+    EVENT_REFERENCE_FIELDS.forEach(function (field) {
+      if (Object.prototype.hasOwnProperty.call(item, field)) references[field] = clone(item[field]);
+      if (Object.prototype.hasOwnProperty.call(payload, field)) {
+        if (!references.payload) references.payload = {};
+        references.payload[field] = clone(payload[field]);
+      }
+    });
+    return references;
+  }
+  function eventLegacyReference(item) {
+    var payload = object(item.payload) ? item.payload : {};
+    for (var index = 0; index < EVENT_REFERENCE_FIELDS.length; index += 1) {
+      var values = [item[EVENT_REFERENCE_FIELDS[index]], payload[EVENT_REFERENCE_FIELDS[index]]];
+      for (var valueIndex = 0; valueIndex < values.length; valueIndex += 1) {
+        var value = values[valueIndex];
+        if ((typeof value === "string" || typeof value === "number" && Number.isFinite(value)) && text(value)) return text(value);
+      }
+    }
+    return "";
+  }
+  function canonicalizeEventIdentity(result) {
+    var events = result.entities.events.filter(function (item) { return item.owner === "EVT"; });
+    var counts = Object.create(null), assigned = Object.create(null), recordIds = Object.create(null);
+    events.forEach(function (item) {
+      recordIds[item.id] = item.id;
+      var candidate = item.eventIdentityVersion === 1 && object(item.eventIdentityMigration)
+        ? text(item.eventIdentityMigration.legacyReference) : eventLegacyReference(item);
+      if (candidate) counts[candidate] = (counts[candidate] || 0) + 1;
+      if (item.eventIdentityVersion === 1) {
+        if (text(item.eventAuditId)) assigned[text(item.eventAuditId)] = item.id;
+      }
+    });
+    events.forEach(function (item) {
+      if (item.eventIdentityVersion === 1) return;
+      var candidate = eventLegacyReference(item), reason = "record-id-missing-reference";
+      if (candidate) {
+        if (counts[candidate] > 1) reason = "record-id-duplicate-reference";
+        else if (assigned[candidate] || recordIds[candidate] && recordIds[candidate] !== item.id) reason = "record-id-conflicting-reference";
+        else reason = "legacy-reference";
+      }
+      item.eventAuditId = reason === "legacy-reference" ? candidate : item.id;
+      item.eventIdentityVersion = 1;
+      item.eventIdentityMigration = {
+        version: 1,
+        reason: reason,
+        originalReferences: eventLegacyReferences(item),
+        legacyReference: candidate,
+        assignedEventAuditId: item.eventAuditId
+      };
+      assigned[item.eventAuditId] = item.id;
+    });
+  }
+  function normalizeEventDates(item) {
+    var payload = object(item.payload) ? item.payload : {};
+    [["bumpInDate", "eventBumpInDate", "bump_in_date", "event_bump_in_date"], ["bumpOutDate", "eventBumpOutDate", "bump_out_date", "event_bump_out_date"]].forEach(function (fields) {
+      for (var index = 0; index < fields.length; index += 1) {
+        if (Object.prototype.hasOwnProperty.call(item, fields[index])) { item[fields[0]] = text(item[fields[index]]); return; }
+        if (Object.prototype.hasOwnProperty.call(payload, fields[index])) { item[fields[0]] = text(payload[fields[index]]); return; }
+      }
+    });
+  }
   function normalizeEntity(raw, collection, index) {
     if (!object(raw)) throw new Error(collection + " record " + (index + 1) + " must be an object.");
     var item = clone(raw);
@@ -435,6 +499,12 @@
       item.id = item.id.replace(/^(?:NSA|EVT)-RATE-/, "RATE-");
       if (item.id.indexOf("RATE-") !== 0) item.id = stableId("", type, item.provenance.sourceId, [item.category, item.description || item.title, item.unit].join("|"));
     } else if (item.id.indexOf(inferredOwner + "-") !== 0 && !(inferredOwner === "EVT" && item.id.indexOf("event-") === 0)) throw new Error(item.id + " does not match owner " + inferredOwner + ".");
+
+    if (collection === "events" && item.owner === "EVT") {
+      item.councilEventNumber = text(item.councilEventNumber);
+      if (Object.prototype.hasOwnProperty.call(item, "eventAuditId")) item.eventAuditId = text(item.eventAuditId);
+      normalizeEventDates(item);
+    }
     
     if (collection === "events" || collection === "applications") {
       var payload = object(item.payload) ? item.payload : {};
@@ -1102,6 +1172,7 @@ return target;
       if (!Array.isArray(values)) throw new Error("entities." + collection + " must be an array.");
       result.entities[collection] = values.map(function (item, index) { return normalizeEntity(item, collection, index); });
     });
+    canonicalizeEventIdentity(result);
     result.entities.annualBudgets.forEach(function (budget) {
       var first = Number(text(budget.financialYear).slice(0, 4));
       if (Number.isInteger(first) && first > 1900) {
@@ -1372,6 +1443,21 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
     });
   }
   function validateDate(value) { return !value || /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value + "T00:00:00Z")); }
+  function validEventDate(value) {
+    if (value === undefined || value === null || value === "") return true;
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    var date = new Date(value + "T00:00:00Z");
+    return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  }
+  function validateEventDates(event) {
+    if (!event || event.owner && event.owner !== "EVT" || event.type && event.type !== "event") return [];
+    var errors = [];
+    var bumpIn = event.bumpInDate, bumpOut = event.bumpOutDate;
+    if (!validEventDate(bumpIn)) errors.push("Event Bump-in must be a valid date in YYYY-MM-DD format.");
+    if (!validEventDate(bumpOut)) errors.push("Event Bump-out must be a valid date in YYYY-MM-DD format.");
+    if (!errors.length && bumpIn && bumpOut && bumpOut < bumpIn) errors.push("Event Bump-out cannot be before Event Bump-in.");
+    return errors;
+  }
   function validateTime(value) { return !value || /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value); }
   function spatialInvariantViolations(workspace) {
     var violations = [];
@@ -1437,6 +1523,18 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
       var forbiddenReference = ACTIVE_OWNER === "NSA" ? "EVT" : "NSA";
       if (object(workspace.referenceData) && Object.prototype.hasOwnProperty.call(workspace.referenceData, forbiddenReference)) errors.push("referenceData." + forbiddenReference + " is not allowed in the " + WORKSPACE_KIND + " workspace.");
     }
+    var eventAuditIds = Object.create(null);
+    (workspace.entities.events || []).forEach(function (item) {
+      if (item.owner !== "EVT") return;
+      validateEventDates(item).forEach(function (error) { errors.push(item.id + ": " + error); });
+      if (item.eventIdentityVersion === 1) {
+        var auditId = text(item.eventAuditId);
+        if (!auditId) errors.push(item.id + " requires an Event ID.");
+        else if (eventAuditIds[auditId]) errors.push(item.id + ' duplicates immutable Event ID "' + auditId + '".');
+        else eventAuditIds[auditId] = item.id;
+        if (object(item.eventIdentityMigration) && item.eventIdentityMigration.assignedEventAuditId !== undefined && item.eventIdentityMigration.assignedEventAuditId !== auditId) errors.push(item.id + " Event ID is immutable.");
+      }
+    });
     function reference(item, field, collections, requiredOwner) {
       var id = text(item[field]);
       if (!id) return;
@@ -1722,6 +1820,7 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
 
   var RECORD_COLLECTIONS = ["applications", "events"];
   var RECORD_EDITABLE_FIELDS = ["title", "category", "priority", "startDate", "endDate", "crewId"];
+  var EVENT_EDITABLE_FIELDS = ["councilEventNumber", "bumpInDate", "bumpOutDate"];
   function recordCollectionForType(type) {
     return type === "application" ? "applications" : type === "event" ? "events" : "";
   }
@@ -1789,7 +1888,7 @@ result.referenceData = mergeDefaults(object(result.referenceData) ? result.refer
     });
     if (!match) throw new Error('Application or event "' + wanted + '" was not found.');
     Object.keys(changes).forEach(function (field) {
-      if (RECORD_EDITABLE_FIELDS.indexOf(field) < 0) throw new Error('Record field "' + field + '" is not editable.');
+      if (RECORD_EDITABLE_FIELDS.indexOf(field) < 0 && !(match.type === "event" && match.owner === "EVT" && EVENT_EDITABLE_FIELDS.indexOf(field) >= 0)) throw new Error('Record field "' + field + '" is not editable.');
       match[field] = field === "crewId" ? text(changes[field]) || null : text(changes[field]);
     });
     output.updatedAt = timestamp(at);
@@ -2464,9 +2563,11 @@ supportedPolygonWorkTypes: SUPPORTED_POLYGON_WORK_TYPES,
  eligibleSpatialRatesForWorkType: eligibleSpatialRatesForWorkType,
     checklistTemplates: checklistTemplates,
     stableId: stableId, normalize: normalize, isNormalized: isNormalized, validate: validate, assertValid: assertValid, fromV1: fromV1,
+    validateEventDates: validateEventDates,
     finances: finances, exportJson: exportJson, importJson: importJson,
     recordSummary: recordSummary, findRecord: findRecord, resolveLegacyEntity: resolveLegacyEntity,
     updateRecord: updateRecord, recordEditableFields: RECORD_EDITABLE_FIELDS.slice(),
+    eventEditableFields: EVENT_EDITABLE_FIELDS.slice(),
     getRegisterEntities: getRegisterEntities, getProjects: getProjects, promoteRegisterRecord: promoteRegisterRecord,
     registerDeletionImpact: registerDeletionImpact, deleteRegisterRecord: deleteRegisterRecord, deleteJob: deleteJob,
     repairNatureProjectScope: repairNatureProjectScope, repairLegacyGeometryDuplicates: repairLegacyGeometryDuplicates, repairGeneratedPlaceholderJobs: repairGeneratedPlaceholderJobs,

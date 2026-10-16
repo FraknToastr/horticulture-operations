@@ -93,7 +93,7 @@ test("NSA Planner shortcut retains every Register row header and dates use DD/MM
       scrollTop: outer.scrollTop
     };
   });
-  await expect.poll(async () => (await openGeometry()).offset).toBeGreaterThanOrEqual(-1);
+  await expect.poll(async () => Math.abs((await openGeometry()).offset)).toBeLessThanOrEqual(1);
   const plannerGeometry = await openGeometry();
   expect(plannerGeometry.offset).toBeLessThanOrEqual(1);
   expect(plannerGeometry.rowCount).toBeGreaterThanOrEqual(5);

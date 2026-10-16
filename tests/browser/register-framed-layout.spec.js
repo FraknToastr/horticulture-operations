@@ -34,11 +34,11 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
     const table = child.locator('.program-register-table');
     const row = child.locator(`tr[data-register-record="${ids[0]}"]`);
     await expect(row).toBeVisible();
-    await expect(table.locator('thead th')).toHaveText(['Expand / Collapse', owner === 'NSA' ? /^Receipt[↕↑↓]$/ : /^Event Number[↕↑↓]$/, 'App Id', 'Title / Name', 'Location', 'Status', /^Received[↕↑↓]$/, 'Project', 'Budget', 'Actions']);
-    await expect(row.locator('.program-register-table__app-id-cell')).toHaveText(ids[0]);
+    await expect(table.locator('thead th')).toHaveText(['Expand / Collapse', ...(owner === 'NSA' ? [/^Receipt[↕↑↓]$/, 'App Id'] : ['Event ID', /^Council Event Number[↕↑↓]$/]), 'Title / Name', 'Location', 'Status', /^Received[↕↑↓]$/, 'Project', 'Budget', 'Actions']);
+    await expect(row.locator('.program-register-table__app-id-cell')).toHaveText(owner === 'NSA' ? ids[0] : 'E-1');
     await expect(row.locator('.program-register-table__title-cell')).toHaveText('Compact name');
     await expect(child.locator(`tr[data-register-record="${ids[2]}"] .program-register-table__title-cell`)).toHaveText(owner === 'NSA' ? 'Untitled application' : 'Untitled event');
-    await expect(row.locator('td > .commercial-value-frame')).toHaveCount(8);
+    await expect(row.locator('td > .commercial-value-frame')).toHaveCount(owner==='EVT'?10:8);
   await expect(row.locator('.program-register-project-state')).toHaveText('Not Created');
   expect(await row.locator('.program-register-project-state').evaluate(node => getComputedStyle(node).backgroundColor)).toBe('rgb(248, 255, 188)');
     await expect(row.locator('.program-status-pill > *, .program-register-project-state > *')).toHaveCount(0);
@@ -49,7 +49,7 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
     expect(headerFills[0]).toBe(owner === 'NSA' ? 'rgb(4, 120, 87)' : 'rgb(3, 105, 161)');
     expect(await table.locator('thead th').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).color === 'rgb(255, 255, 255)'))).toBe(true);
     const usedFill = await row.locator('.is-current-module').first().evaluate(node => getComputedStyle(node).backgroundColor);
-    expect(await row.locator('td:not(.program-register-table__actions-cell)').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).backgroundColor))).toEqual(Array(9).fill(usedFill));
+    expect(await row.locator('td:not(.program-register-table__actions-cell)').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).backgroundColor))).toEqual(Array(owner==='EVT'?11:9).fill(usedFill));
     const expectRailBackgrounds = async () => {
       const fills = await table.locator('.program-register-summary-row').evaluateAll(nodes => nodes.map(node => ({
         expected: node.matches(':hover,:focus-within,:focus-visible,.is-selected,.is-being-edited,.is-navigation-focus,.is-disclosure-open,[aria-selected="true"]') ? getComputedStyle(node).backgroundColor : 'rgb(255, 255, 255)',
@@ -93,7 +93,7 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1600, 1024, 600]) for (
     await row.locator('.program-register-table__reference-cell').hover();
     const highlighted = await row.evaluate(node => Array.from(node.querySelectorAll('.commercial-value-frame')).map(x => getComputedStyle(x).borderTopColor));
     expect(new Set(highlighted).size).toBe(1);
-    expect(highlighted[0]).toBe('rgb(74, 222, 128)');
+    expect(highlighted[0]).toBe(owner==='EVT'?'rgb(29, 78, 216)':'rgb(74, 222, 128)');
     await expectRailBackgrounds();
     expect(await railAppearance()).toEqual(neutralRail);
     for (const frame of await row.locator('.commercial-value-frame').evaluateAll(nodes => nodes.map(node => ({ width: getComputedStyle(node).borderWidth, shadow: getComputedStyle(node).boxShadow })))) {

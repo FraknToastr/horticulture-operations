@@ -31,8 +31,8 @@
     var record = rows(ws, "applications").concat(rows(ws, "events")).find(function (row) { return row.id === registerId; });
     if (!record) return { registerId: "", referenceNumber: "", referenceNumberStatus: "not applicable" };
     var raw = record.raw || {}, payload = record.payload || {};
-    var keys = record.owner === "EVT" ? ["jobId", "job_id", "jobNumber", "job_number", "job", "eventNumber"] : ["receipt", "receiptNumber"];
-    var number = record.owner === "EVT" ? record.jobId : record.receipt;
+    var keys = record.owner === "EVT" ? ["eventAuditId"] : ["receipt", "receiptNumber"];
+    var number = record.owner === "EVT" ? record.eventAuditId || record.id : record.receipt;
     keys.some(function (key) { if (!text(number)) number = raw[key] || payload[key]; return Boolean(text(number)); });
     return { registerId: record.id, referenceNumber: text(number), referenceNumberStatus: text(number) ? "captured" : "missing at event time" };
   }

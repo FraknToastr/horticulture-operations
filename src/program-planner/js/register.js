@@ -108,6 +108,7 @@
       kind: collection === "events" ? "Event" : "Application",
       name: summary && summary.title || first(item, ["name", "title", "eventName", "applicantName"]) || text(item.id) || "Untitled record",
       namePrivacyField: (function () {
+        if (owner === "EVT") return "";
         var displayed = summary && summary.title || first(item, ["name", "title", "eventName", "applicantName"]);
         var applicant = first(item, ["customerName", "applicantName", "contactName", "clientName", "contactPerson"]);
         return displayed && applicant && text(displayed) === text(applicant) ? "applicantName" : "";
@@ -118,6 +119,8 @@
       crew: summary && summary.crewId || first(item, ["crew", "crewName", "crewId"]) || "Unassigned",
       location: first(item, ["location", "site", "address"]) || "Unassigned",
       financialYear: first(item, ["financialYear", "financialyear", "financial_year", "fy", "season"]) || defaultFy,
+      eventAuditId: owner === "EVT" ? text(item.eventAuditId || item.id) : "",
+      councilEventNumber: owner === "EVT" ? text(item.councilEventNumber) : "",
       statusHistory: clone(rawHist),
       raw: clone(item)
     };
@@ -139,6 +142,7 @@
   function registerDisplayName(record) {
     if (!record) return "";
     var source = record.raw || record;
+    if (record.owner === "EVT" || source.owner === "EVT") return record.name;
     var applicant = first(source, ["customerName", "applicantName", "contactName", "clientName", "contactPerson"]);
     var semanticField = record.namePrivacyField || (applicant && text(record.name) === text(applicant) ? "applicantName" : "");
     return privacyDisplay(record.name, semanticField);
@@ -166,7 +170,7 @@
       var matchCrew = (!filters.crew || filters.crew === "all" || record.crew === filters.crew);
       var queryTokens = text(filters.query).toLocaleLowerCase("en-AU").split(/\s+/).filter(Boolean);
       var searchable = [
-        record.id, record.owner, record.ownerLabel, record.kind, record.name, record.location,
+        record.id, record.eventAuditId, record.councilEventNumber, record.owner, record.ownerLabel, record.kind, record.name, record.location,
         record.date, record.priority, record.status, record.crew, record.financialYear,
         first(record.raw, ["jobId", "job_id", "jobNumber", "job_number", "eventNumber"]),
         first(record.raw, ["receipt", "receiptNumber"]),
@@ -179,7 +183,7 @@
     var direction = settings.sortDirection === "desc" ? -1 : 1;
     function reference(record) {
       return record.owner === "EVT"
-        ? first(record.raw, ["jobId", "job_id", "jobNumber", "job_number", "job", "eventNumber"])
+        ? record.councilEventNumber
         : first(record.raw, ["receipt", "receiptNumber"]);
     }
     function compareText(left, right) {
@@ -191,8 +195,9 @@
     return result.slice().sort(function (left, right) {
       if (sort === "priority") return (priorityRank(left.priority) - priorityRank(right.priority)) * direction || left.name.localeCompare(right.name);
       if (sort === "name") return compareText(left.name, right.name);
-      if (sort === "id") return compareText(left.id, right.id);
+      if (sort === "id") return compareText(left.eventAuditId || left.id, right.eventAuditId || right.id);
       if (sort === "receipt") return compareText(reference(left), reference(right)) || compareText(left.name, right.name);
+      if (sort === "bumpInDate" || sort === "bumpOutDate") return compareText(text(left.raw[sort]),text(right.raw[sort])) || compareText(left.name,right.name);
       return compareText(left.date, right.date) || compareText(left.name, right.name);
     });
   }
@@ -205,7 +210,7 @@
       selectedId: text(saved.selectedEntityId) || null,
       mode: inspector.mode === "detail" ? "detail" : "list",
       scrollTop: Math.max(0, Number(inspector.scrollTop) || 0),
-      sort: ["date", "receipt", "priority", "name", "id"].indexOf(register.sort) >= 0 ? register.sort : "date",
+      sort: ["date", "receipt", "priority", "name", "id", "bumpInDate", "bumpOutDate"].indexOf(register.sort) >= 0 ? register.sort : "date",
       sortDirection: register.sortDirection === "desc" ? "desc" : "asc",
       filters: {
         ownership: ["NSA", "EVT"].indexOf(filters.ownership) >= 0 ? filters.ownership : "all",
@@ -366,6 +371,10 @@
     }) || null;
   }
 
+  function eventDateLabel(value) {
+    var match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(text(value));
+    return match ? match[3]+"/"+match[2]+"/"+match[1] : "—";
+  }
   function patchRegisterSummary(record) {
     var row = record && registerSummaryRow(record.id);
     if (!row) return;
@@ -377,7 +386,7 @@
     var toggle = row.querySelector("[data-disclosure-toggle]");
     var formattedDate = (window.UOS && window.UOS.imports && window.UOS.imports.formatDate) ? window.UOS.imports.formatDate(record.date) : (record.date || "—");
     var refVal = record.owner === "EVT"
-      ? record.jobId || first(record.raw, ["jobId", "job_id", "jobNumber", "job_number", "job", "eventNumber"]) || "—"
+      ? record.councilEventNumber || "—"
       : record.receipt || first(record.raw, ["receipt", "receiptNumber"]) || "—";
     var displayName = registerDisplayName(record) === record.id ? "—" : registerDisplayName(record);
     if (title) { title.textContent = displayName; title.title = displayName; }
@@ -385,6 +394,7 @@
     if (reference) { reference.textContent = refVal; reference.title = refVal; }
     if (status) status.innerHTML = statusPillHtml(record.status, true);
     if (received) { received.textContent = formattedDate; received.title = formattedDate; }
+    ["bumpInDate","bumpOutDate"].forEach(function(key){var cell=row.querySelector('[data-register-event-date-cell="'+key+'"] .commercial-value-frame');if(cell){cell.textContent=eventDateLabel(record.raw[key]);cell.title=cell.textContent;}});
     if (toggle) toggle.setAttribute("aria-label", "Toggle details for " + displayName);
     measureRegisterColumns(row.closest("table"));
   }
@@ -427,8 +437,13 @@
     function fit() {
       if (!table.isConnected) return;
       var width = Math.max(scroller.clientWidth, table._registerCompactWidth + 192);
-      table.style.setProperty("--register-table-width", width + "px");
-      table.style.setProperty("--register-flex-width", (width - table._registerCompactWidth) / 2 + "px");
+      var flex=(width-table._registerCompactWidth)/2;
+      var dates=table.dataset.eventDates==="true" ? 2*(parseFloat(table.style.getPropertyValue("--register-received-width"))+8) : 0;
+      var title=Math.max(96,flex-dates);
+      table.style.setProperty("--register-table-width", (width+Math.max(0,dates-(flex-96)))+"px");
+      table.style.setProperty("--register-flex-width",flex+"px");
+      table.style.setProperty("--register-title-width",title+"px");
+      table.style.setProperty("--register-location-width",flex+"px");
     }
     fit();
     if (!table._registerSizeObserver && window.ResizeObserver) {
@@ -443,7 +458,8 @@
     if ((state.filters.statuses || []).length && normalized === "status") return true;
     if (state.sort === "name" && /^(applicantname|name|title)$/.test(normalized)) return true;
     if (state.sort === "priority" && normalized === "priority") return true;
-    if (state.sort === "receipt" && /^(receipt|receiptnumber|jobid|job_id|jobnumber|eventnumber)$/.test(normalized)) return true;
+    if (state.sort === "receipt" && /^(receipt|receiptnumber|councileventnumber)$/.test(normalized)) return true;
+    if (state.sort === "bumpInDate" || state.sort === "bumpOutDate") return normalized === state.sort.toLowerCase();
     return state.sort === "date" && /^(date|datereceived|statusdate)$/.test(normalized);
   }
 
@@ -485,13 +501,34 @@
     var refHeaderNode = document.querySelector('[data-register-sort-label="receipt"]');
     if (refHeaderNode) {
       if (state.filters.ownership === "EVT") {
-        refHeaderNode.textContent = "Event Number";
+        refHeaderNode.textContent = "Council Event Number";
       } else if (state.filters.ownership === "NSA") {
         refHeaderNode.textContent = "Receipt";
       } else {
         refHeaderNode.textContent = "Ref / Receipt";
       }
     }
+    var idHeaderNode = document.querySelector(".program-register-table thead .program-register-table__app-id-col");
+    if (idHeaderNode) idHeaderNode.textContent = state.filters.ownership === "EVT" ? "Event ID" : "App Id";
+    var eventIdentifiersFirst = state.filters.ownership === "EVT";
+    tbody.closest('table').dataset.eventDates=String(eventIdentifiersFirst);
+    var registerTable=tbody.closest('table');
+    if(!eventIdentifiersFirst)registerTable.querySelectorAll('[data-register-event-date]').forEach(function(node){node.remove();});
+    else if(!registerTable.querySelector('[data-register-event-date]')){
+      var dateColumns='',dateHeaders='';
+      [['bumpInDate','Bump-in'],['bumpOutDate','Bump-out']].forEach(function(entry){
+        dateColumns+='<col class="program-register-table__event-date-col" data-register-event-date>';
+        dateHeaders+='<th scope="col" class="program-register-table__event-date-col" data-register-event-date data-register-sort-header="'+entry[0]+'"><button type="button" class="program-register-table__sort" data-register-table-sort="'+entry[0]+'"><span>'+entry[1]+'</span><span class="program-register-table__sort-icon" aria-hidden="true">↕</span></button></th>';
+      });
+      registerTable.querySelector('colgroup .program-register-table__received-col').insertAdjacentHTML('afterend',dateColumns);
+      registerTable.querySelector('thead .program-register-table__received-col').insertAdjacentHTML('afterend',dateHeaders);
+    }
+    ["colgroup", "thead tr"].forEach(function (selector) {
+      var group = tbody.closest("table").querySelector(selector);
+      var reference = group && group.querySelector(".program-register-table__reference-col");
+      var identifier = group && group.querySelector(".program-register-table__app-id-col");
+      if (reference && identifier) group.insertBefore(eventIdentifiersFirst ? identifier : reference, eventIdentifiersFirst ? reference : identifier);
+    });
     document.querySelectorAll("[data-register-sort-header]").forEach(function (header) {
       var key = header.getAttribute("data-register-sort-header");
       var active = state.sort === key;
@@ -504,7 +541,7 @@
       if (virtualScrollCleanup) { virtualScrollCleanup(); virtualScrollCleanup = null; }
       clear(tbody);
       var emptyRow = document.createElement("tr");
-      emptyRow.innerHTML = '<td colspan="9" class="program-map-empty">No applications or events match current filters.</td>';
+      emptyRow.innerHTML = '<td colspan="'+(eventIdentifiersFirst?12:10)+'" class="program-map-empty">No applications or events match current filters.</td>';
       tbody.appendChild(emptyRow);
       return;
     }
@@ -529,7 +566,7 @@
 
       var formattedDate = (window.UOS && window.UOS.imports && window.UOS.imports.formatDate) ? window.UOS.imports.formatDate(record.date) : (record.date || "—");
       var refVal = record.owner === "EVT"
-        ? record.jobId || first(record.raw, ["jobId", "job_id", "jobNumber", "job_number", "job", "eventNumber"]) || "—"
+        ? record.councilEventNumber || "—"
         : record.receipt || first(record.raw, ["receipt", "receiptNumber"]) || "—";
 
       var displayName = registerDisplayName(record) === record.id ? "—" : registerDisplayName(record);
@@ -542,13 +579,15 @@
         var label = text(value) || "—";
         return '<' + tag + ' class="commercial-value-frame" title="' + esc(label) + '">' + esc(label) + '</' + tag + '>';
       }
+      var referenceCell = '<td class="program-register-table__reference-cell">' + valueFrame(refVal) + '</td>';
+      var identifierCell = '<td class="program-register-table__app-id-cell">' + valueFrame(record.eventAuditId || record.id) + '</td>';
       summaryRow.innerHTML = '<td class="program-register-table__toggle-cell">' + toggleHtml + '</td>' +
-        '<td class="program-register-table__reference-cell">' + valueFrame(refVal) + '</td>' +
-        '<td class="program-register-table__app-id-cell">' + valueFrame(record.id) + '</td>' +
+        (eventIdentifiersFirst ? identifierCell + referenceCell : referenceCell + identifierCell) +
         '<td class="program-register-table__title-cell">' + valueFrame(displayName, "strong") + '</td>' +
         '<td class="program-register-table__location-cell">' + valueFrame(record.location) + '</td>' +
         '<td class="program-register-table__status-cell">' + statusPillHtml(record.status, true) + '</td>' +
         '<td class="program-register-table__received-cell">' + valueFrame(formattedDate) + '</td>' +
+        (eventIdentifiersFirst ? ['bumpInDate','bumpOutDate'].map(function(key){return '<td class="program-register-table__event-date-cell" data-register-event-date-cell="'+key+'">'+valueFrame(eventDateLabel(record.raw[key]))+'</td>';}).join('') : '') +
         '<td class="program-register-table__project-cell"><span class="commercial-value-frame program-register-project-state ' + (linkedProject ? 'is-created' : 'is-not-created') + '">' + projectState + '</span></td>' +
         '<td class="program-register-table__budget-cell">' + valueFrame(budgetAmountLabel(record)) + '</td>' +
         '<td class="program-register-table__actions-cell">' + buildMiniToolbarHtml(record.id, record, true) + '</td>';
@@ -567,7 +606,7 @@
       drawerRow.hidden = true;
 
       var drawerCell = document.createElement("td");
-      drawerCell.colSpan = 10;
+      drawerCell.colSpan = eventIdentifiersFirst ? 12 : 10;
       var drawerHost = document.createElement("div");
       drawerHost.className = "program-register-drawer";
       drawerHost.setAttribute("data-register-drawer-record", record.id);
@@ -676,7 +715,7 @@
         var linkedProj = buildLinkedProject(state.workspace, record);
         var projId = record.projectId || (linkedProj ? linkedProj.id : "");
         var regIdMeta = document.createElement("span"); regIdMeta.className = "program-register-row__meta"; regIdMeta.style.fontWeight = "700"; regIdMeta.style.color = "#334155";
-        regIdMeta.textContent = "Register ID: " + record.id;
+        regIdMeta.textContent = record.owner === "EVT" ? "Event ID: " + record.eventAuditId : "Register ID: " + record.id;
 
         var projIdMeta = null;
         if (projId) {
@@ -752,6 +791,7 @@
     if (type === "readonly" || type === "text-readonly") {
       detail.textContent = currentVal;
       detail.className = "program-register-readonly-value";
+      detail.setAttribute("data-register-readonly-key", keyName);
       row.appendChild(term);
       row.appendChild(detail);
       list.appendChild(row);
@@ -934,9 +974,19 @@
 
     inputNode.setAttribute("data-register-edit-key", keyName);
     inputNode.setAttribute("data-register-edit-id", record.id);
+    inputNode.setAttribute("aria-label", label);
+    if (keyName === "bumpInDate" || keyName === "bumpOutDate") {
+      var errorId = "register-date-error-" + record.id.replace(/[^a-zA-Z0-9_-]/g, "-") + "-" + keyName;
+      var dateError = document.createElement("p");
+      dateError.id = errorId;
+      dateError.className = "uos-field-error";
+      dateError.setAttribute("data-register-date-error", "");
+      dateError.setAttribute("role", "alert");
+      dateError.hidden = true;
+      inputNode.setAttribute("aria-describedby", errorId);
+    }
     var isProtectedNumber = inputNode.tagName === "INPUT" && inputNode.type === "text" && (
-      (record.owner === "NSA" && (keyName === "receipt" || keyName === "receiptNumber")) ||
-      (record.owner === "EVT" && (keyName === "jobId" || keyName === "job_id" || keyName === "jobNumber" || keyName === "eventNumber"))
+      record.owner === "NSA" && (keyName === "receipt" || keyName === "receiptNumber")
     );
     if (isProtectedNumber) {
       var protectedWrap = document.createElement("div");
@@ -976,6 +1026,7 @@
     } else {
       detail.appendChild(inputNode);
     }
+    if (dateError) detail.appendChild(dateError);
     row.appendChild(term);
     row.appendChild(detail);
     list.appendChild(row);
@@ -1038,29 +1089,18 @@
   }
 
   function handleOpenProject(projectId) {
-    if (!projectId) return;
-    var app = typeof window !== "undefined" && window.UOS && window.UOS.ProgramApp;
-    if (!app || typeof app.updateWorkspace !== "function") return;
-    /* Establish the new Register context before queuing the durable mutation.
-       A pending table-state save must never restore a previously opened
-       Project's Register while this new record is being committed. */
-    state.selectedId = uid;
+    var app = window.UOS && window.UOS.ProgramApp;
+    if (!projectId || !app || typeof app.navigateWithContext !== "function") return;
+    var workspace = app.workspace();
+    var project = workspace.entities.projects.find(function (item) { return item.id === projectId; });
+    if (!project) return;
+    // Establish the originating Register identity before any queued UI save.
+    state.selectedId = project.applicationId || project.eventId || "";
     state.mode = "detail";
-    app.updateWorkspace(function (candidate) {
-      candidate.workspace = candidate.workspace || {};
-      candidate.workspace.selectedEntityId = projectId;
-      candidate.workspace.selectedProjectId = projectId;
-      candidate.workspace.planner = candidate.workspace.planner || {};
-      candidate.workspace.planner.selectedProjectId = projectId;
-      candidate.workspace.destination = "planner";
-      return candidate;
-    }).then(function () {
-      if (app && typeof app.navigate === "function") {
-        app.navigate("planner");
-      }
+    return app.navigateWithContext("planner", projectId).catch(function (error) {
+      if (window.UOS.toast) window.UOS.toast(error.message || "The Project could not be opened.", "error");
     });
   }
-
   function handleCreateProject(record) {
     if (!record) return;
     var app = typeof window !== "undefined" && window.UOS && window.UOS.ProgramApp;
@@ -1364,7 +1404,7 @@
     eventGroup.innerHTML = '<h4 class="program-register-nsa-summary__title">Event</h4>';
     var eventList = document.createElement("dl");
     eventGroup.appendChild(eventList);
-    ["name", "jobId", "id", "applicationDate", "address", "applicantName", "email", "phone"].forEach(function (key) { fieldInto(eventList, key); });
+    ["name", "eventAuditId", "councilEventNumber", "applicationDate", "address", "applicantName", "email", "phone"].forEach(function (key) { fieldInto(eventList, key); });
     fieldInto(eventList, "notes", "Notes");
     if (eventList.lastElementChild) eventList.lastElementChild.setAttribute("data-register-event-notes", "");
     summary.appendChild(eventGroup);
@@ -1397,7 +1437,7 @@
     summary.appendChild(projectGroup);
 
     var delivery = section("Delivery Details", "program-register-nsa-section--delivery");
-    ["actionedBy", "commencementDate", "completionDate", "deliveryDetails", "completionDetails"].forEach(function (key) { fieldInto(delivery.list, key); });
+    ["actionedBy", "bumpInDate", "bumpOutDate", "commencementDate", "completionDate", "deliveryDetails", "completionDetails"].forEach(function (key) { fieldInto(delivery.list, key); });
     summary.appendChild(delivery.node);
 
     var timeline = document.createElement("section");
@@ -1466,7 +1506,8 @@
       row.setAttribute("data-register-budget-row", "allocation");
       row.setAttribute("data-register-budget-fy", financialYear);
       if (hasApprovedCarryForward) row.setAttribute("data-register-carry-forward", "approved");
-      row.innerHTML = '<span data-register-allocation-fy>FY ' + esc(financialYear.replace("-", "/")) + '</span>'
+      var financialYearLabel = financialYear.replace(/^(\d{4})-(\d{2})$/, function (_, start) { return start + "/" + (Number(start) + 1); }).replace("-", "/");
+      row.innerHTML = '<span data-register-allocation-fy>' + esc(financialYearLabel) + '</span>'
         + '<strong data-register-allocation-amount>' + Number(balance ? balance.allocated : 0).toLocaleString("en-AU", { style: "currency", currency: "AUD" }) + '</strong>';
       allocationTable.appendChild(row);
     });
@@ -1594,12 +1635,8 @@
         var phoneVal = first(record.raw, ["phone", "phoneNumber", "telephone", "mobile", "contactPhone"]);
         addField("Phone Number", phoneVal, "phone", "text");
 
-        addField("ID", record.id, "id", "readonly");
-
-        var linkedProjForJob = buildLinkedProject(state.workspace, record);
-        var jobNumVal = record.jobId || first(record.raw, ["jobId", "job_id", "jobNumber", "job_number", "job", "eventNumber"]) || (linkedProjForJob && linkedProjForJob.id) || "—";
-        var jobNumLabel = record.owner === "EVT" ? "Event Number" : "Job Number";
-        addField(jobNumLabel, jobNumVal === "—" ? "" : jobNumVal, "jobId", "text");
+        addField("Event ID", record.eventAuditId, "eventAuditId", "readonly");
+        addField("Council Event Number", record.councilEventNumber, "councilEventNumber", "text");
 
         var eventNotesVal = first(record.raw, ["notes", "comments", "description", "requestReason", "details"]);
         addField("Notes / comments", eventNotesVal, "notes", "textarea");
@@ -1608,6 +1645,8 @@
         addField("Site diagram", first(record.raw, ["sketchOrDiagram", "hasSketchOrDiagram", "siteDiagram", "diagram"]), "sketchOrDiagram", "pill-slider");
         addField("Scope", first(record.raw, ["scope", "remediationScope"]), "scope", "textarea");
         addField("Actioned by", first(record.raw, ["actionedBy", "actionedByAndDate"]), "actionedBy", "text");
+        addField("Event Bump-in", first(record.raw, ["bumpInDate"]), "bumpInDate", "date");
+        addField("Event Bump-out", first(record.raw, ["bumpOutDate"]), "bumpOutDate", "date");
         addField("Commenced", first(record.raw, ["commencementDate"]), "commencementDate", "date");
         addField("Completed", first(record.raw, ["completionDate"]), "completionDate", "date");
         addField("CoA / contractor delivery details", first(record.raw, ["deliveryDetails"]), "deliveryDetails", "textarea");
@@ -1632,7 +1671,8 @@
           "allocations", "allocation", "costallocations", "joballocations", "costingallocations",
           "polygons", "polygon", "geometry", "geometries", "shapes", "spatialpolygons",
           "quote", "quotes", "quoted", "quotetotal", "quoteamount", "estimate", "estimatedquote", "statushistory",
-          "season", "financialyear", "financial_year", "fy", "id", "jobid", "job_id", "jobnumber", "job_number",
+          "season", "financialyear", "financial_year", "fy", "id", "jobid", "job_id", "jobnumber", "job_number", "eventnumber",
+          "eventidentityversion", "eventidentitymigration", "eventauditid", "councileventnumber",
           "notes", "description", "details", "comments", "requestreason",
           "sketchordiagram", "hassketchordiagram", "sketch", "diagram",
           "applicantname", "contactname", "customername", "name",
@@ -1912,7 +1952,9 @@
         park: "Unassigned Site",
         status: "received",
         season: "26-27",
-        jobNumber: "",
+        councilEventNumber: "",
+        bumpInDate: "",
+        bumpOutDate: "",
         date: timestampStr.substring(0, 10),
         dateReceived: timestampStr.substring(0, 10),
         allocations: [],
@@ -2049,6 +2091,12 @@
     if (localPatch && !localPatch.requiresRender) {
       var patchedRecord = state.records.find(function (record) { return record.id === localPatch.recordId; });
       if (patchedRecord) patchRegisterSummary(patchedRecord);
+      if (patchedRecord && (localPatch.key === "bumpInDate" || localPatch.key === "bumpOutDate")) {
+        var toolbarApp = window.UOS.ProgramApp;
+        var destination = text(workspace.workspace.destination) || "register";
+        toolbarApp.syncToolbarPrerequisites(registerSummaryRow(patchedRecord.id),
+          toolbarApp.shortcutContextForWorkspace(destination, workspace, patchedRecord.id));
+      }
       return;
     }
     renderList();
@@ -2102,9 +2150,17 @@
       return null;
     });
   }
+  function showDateError(editInput, message) {
+    var host = editInput.closest("dd");
+    var error = host && host.querySelector("[data-register-date-error]");
+    editInput.setCustomValidity(message || "");
+    editInput.setAttribute("aria-invalid", String(Boolean(message)));
+    if (error) { error.textContent = message || ""; error.hidden = !message; }
+  }
+
   function handleFieldEdit(editInput) {
     var key = editInput.getAttribute("data-register-edit-key");
-    if (key === "status" || key === "statusDate") return;
+    if (key === "status" || key === "statusDate" || key === "eventAuditId" || key === "id") return;
     var id = editInput.getAttribute("data-register-edit-id") || state.selectedId;
     var val;
     if (editInput.hasAttribute("data-register-value")) {
@@ -2116,6 +2172,18 @@
     }
     var record = state.records.find(function (r) { return r.id === id; });
     if (!record || !key) return;
+    if (key === "bumpInDate" || key === "bumpOutDate") {
+      if (record.owner !== "EVT") return;
+      var proposed = Object.assign({}, record.raw);
+      proposed[key] = val;
+      var dateErrors = window.UOS.ProgramModel.validateEventDates(proposed);
+      showDateError(editInput, dateErrors.join(" "));
+      if (dateErrors.length) return;
+      var dateScope = editInput.closest(".program-register-event-detail");
+      if (dateScope) dateScope.querySelectorAll('[data-register-edit-key="bumpInDate"], [data-register-edit-key="bumpOutDate"]').forEach(function (input) {
+        if (input === editInput || input.value === text(proposed[input.getAttribute("data-register-edit-key")])) showDateError(input, "");
+      });
+    }
 
     record[key] = val;
     if (record.raw) {
@@ -2174,10 +2242,10 @@
     }
 
     patchRegisterSummary(record);
-    persistWorkspaceEntity(record, key, val);
+    persistWorkspaceEntity(record, key, val, editInput);
   }
 
-  function persistWorkspaceEntity(record, key, val) {
+  function persistWorkspaceEntity(record, key, val, editInput) {
     var app = typeof window !== "undefined" && window.UOS && window.UOS.ProgramApp;
     if (!app || typeof app.updateWorkspace !== "function") return;
     var patch = { recordId: record.id, key: key, requiresRender: localEditRequiresRender(key) };
@@ -2218,11 +2286,6 @@
             target[k] = val;
             if (target.payload && typeof target.payload === "object") target.payload[k] = val;
           });
-        } else if (key === "jobId" || key === "job_id" || key === "jobNumber" || key === "eventNumber") {
-          ["jobId", "job_id", "jobNumber", "job_number", "eventNumber"].forEach(function (k) {
-            target[k] = val;
-            if (target.payload && typeof target.payload === "object") target.payload[k] = val;
-          });
         } else if (key === "receipt" || key === "receiptNumber") {
           ["receipt", "receiptNumber"].forEach(function (k) {
             target[k] = val;
@@ -2231,9 +2294,15 @@
         }
       }
       return candidate;
-    }).catch(function () {
+    }).catch(function (error) {
       var index = state.pendingLocalPatches.indexOf(patch);
       if (index >= 0) state.pendingLocalPatches.splice(index, 1);
+      if (editInput && (key === "bumpInDate" || key === "bumpOutDate")) {
+        var saved = state.workspace && state.workspace.entities.events.find(function (item) { return item.id === record.id; });
+        record.raw[key] = saved ? saved[key] : "";
+        record[key] = record.raw[key];
+        showDateError(editInput, error.message || "The Event date could not be saved.");
+      }
     });
   }
 
@@ -2297,14 +2366,6 @@
             record.location = val;
             record.address = val;
             if (record.raw) { record.raw.location = val; record.raw.address = val; record.raw.site = val; }
-          } else if (key === "jobId" || key === "job_id" || key === "jobNumber" || key === "eventNumber") {
-            record.jobId = val;
-            if (record.raw) {
-              record.raw.jobId = val; record.raw.job_id = val; record.raw.jobNumber = val; record.raw.eventNumber = val;
-              if (record.raw.payload && typeof record.raw.payload === "object") {
-                record.raw.payload.jobId = val; record.raw.payload.eventNumber = val;
-              }
-            }
           } else if (key === "receipt" || key === "receiptNumber") {
             record.receipt = val;
             if (record.raw) {

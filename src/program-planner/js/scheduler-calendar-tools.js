@@ -40,16 +40,54 @@
   }
   function stamp(ms) { return new Date(ms).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z"); }
   function nextDate(date) { return new Date(civil(date, "00:00") + 86400000).toISOString().slice(0, 10).replace(/-/g, ""); }
+  function calendarEmail(value, label) {
+    var email = String(value == null ? "" : value).trim();
+    var parts = email.split("@"), local = parts[0], domain = parts[1];
+    if (parts.length !== 2 || !local || local.length > 64 || email.length > 254 || local[0] === "." || local.endsWith(".") || local.includes("..") || !/^[A-Za-z0-9.!#$%&'*+\/=?^_`{|}~-]+$/.test(local) || !domain || domain.length > 253 || !domain.includes(".") || !domain.split(".").every(function (part) { return /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/.test(part); })) {
+      throw new Error("Enter a valid email address for " + label + ".");
+    }
+    return local + "@" + domain.toLowerCase();
+  }
+  function calendarExportOptions(job, options) {
+    var subject = options.subject == null ? String(job.title || job.name || "Untitled job") : String(options.subject).trim();
+    if (!subject) throw new Error("Enter a calendar subject.");
+    var reminder = options.reminderMinutes == null || options.reminderMinutes === "" ? 0 : Number(options.reminderMinutes);
+    if (![0, 60, 1440, 10080].includes(reminder)) throw new Error("Choose one of the available reminder options.");
+    var recipients = options.ccEmails == null ? [] : options.ccEmails;
+    if (typeof recipients === "string") recipients = recipients.split(/[;,]/);
+    if (!Array.isArray(recipients)) throw new Error("Enter valid email addresses for CC recipients.");
+    var seen = new Set();
+    var ccEmails = recipients.filter(function (value) { return String(value).trim(); }).map(function (value) { return calendarEmail(value, "each CC recipient"); }).filter(function (email) {
+      var key = email.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+    return { subject: subject, reminderMinutes: reminder, ccEmails: ccEmails, organizerEmail: ccEmails.length ? calendarEmail(options.organizerEmail, "Your email") : "" };
+  }
+  function mailto(email) {
+    var parts = email.split("@");
+    return "mailto:" + encodeURIComponent(parts[0]) + "@" + parts[1];
+  }
   function outlookFile(job, options) {
     options = options || {};
     if (!job.id) throw new Error("A saved job is required to create an Outlook file.");
-    var interval = validate(job);
-    var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Horticulture Operations//Job Scheduler//EN", "CALSCALE:GREGORIAN", "BEGIN:VEVENT", "UID:" + encodeURIComponent(job.id) + "@horticulture-operations", "DTSTAMP:" + stamp(options.now == null ? Date.now() : options.now), "SUMMARY:" + escapeText(job.title || job.name || "Untitled job")];
+    var interval = validate(job), exported = calendarExportOptions(job, options);
+    var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Horticulture Operations//Job Scheduler//EN", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
+      "UID:" + encodeURIComponent(job.id) + "@horticulture-operations", "DTSTAMP:" + stamp(options.now == null ? Date.now() : options.now), "SUMMARY:" + escapeText(exported.subject)];
     if (interval.allDay) {
       lines.push("DTSTART;VALUE=DATE:" + interval.startDate.replace(/-/g, ""), "DTEND;VALUE=DATE:" + nextDate(interval.endDate));
     } else lines.push("DTSTART:" + stamp(interval.start), "DTEND:" + stamp(interval.end));
     if (options.includeLocation !== false && job.location) lines.push("LOCATION:" + escapeText(job.location));
-    lines.push("DESCRIPTION:" + escapeText("Job: " + job.id + "\nSchedule time zone: " + ZONE), "END:VEVENT", "END:VCALENDAR");
+    lines.push("DESCRIPTION:" + escapeText("Job: " + job.id + "\nSchedule time zone: " + ZONE));
+    if (exported.ccEmails.length) {
+      lines.push("ORGANIZER:" + mailto(exported.organizerEmail));
+      exported.ccEmails.forEach(function (email) { lines.push("ATTENDEE;ROLE=NON-PARTICIPANT;RSVP=FALSE:" + mailto(email)); });
+    }
+    if (exported.reminderMinutes) {
+      var triggers = { 60: "-PT1H", 1440: "-P1D", 10080: "-P1W" };
+      lines.push("BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:" + triggers[exported.reminderMinutes], "DESCRIPTION:" + escapeText(exported.subject), "END:VALARM");
+    }
+    lines.push("END:VEVENT", "END:VCALENDAR");
     return { contents: lines.map(fold).join("\r\n") + "\r\n", filename: String(job.id).replace(/[^a-zA-Z0-9_-]/g, "-") + ".ics", ambiguous: interval.ambiguous };
   }
   function daySegments(jobs, date) {
@@ -98,81 +136,44 @@
     else throw new Error("Unknown calendar handle.");
     return { date: range.date, start: start, end: end };
   }
-function stackedWeekLayout(jobs, dates) {
+function timedWeekLayout(jobs, dates) {
     var days = dates.map(function (date) { return daySegments(jobs, date); });
-    var intervals = days.flat();
-    var bands = [];
-    days.forEach(function (segments) {
-      var group = null;
-      segments.forEach(function (segment) {
-        if (!group || Math.floor(segment.start / 30) >= Math.ceil(group.end / 30)) {
-          if (group && group.count > 1) bands.push(group);
-          group = { start: segment.start, end: segment.end, count: 1 };
-        } else { group.end = Math.max(group.end, segment.end); group.count++; }
-      });
-      if (group && group.count > 1) bands.push(group);
-    });
-    // Shared bands cover whole bookings, so no job is split at a band boundary.
-    bands.forEach(function (band) { band.first = Math.floor(band.start / 30); band.last = Math.ceil(band.end / 30); });
-    var changed = true;
-    while (changed) {
-      changed = false;
-      bands.forEach(function (band) {
-        intervals.forEach(function (segment) {
-          var first = Math.floor(segment.start / 30), last = Math.ceil(segment.end / 30);
-          if (first < band.last && last > band.first && (first < band.first || last > band.last)) {
-            band.first = Math.min(first, band.first); band.last = Math.max(last, band.last); changed = true;
-          }
-        });
-      });
-      bands.sort(function (a, b) { return a.first - b.first; });
-      for (var i = 1; i < bands.length; i++) {
-        if (bands[i].first < bands[i - 1].last) {
-          bands[i - 1].last = Math.max(bands[i - 1].last, bands[i].last);
-          bands.splice(i--, 1); changed = true;
-        }
-      }
-    }
+    var rowHeight = 48;
     var rows = Array.from({ length: 48 }, function (_, index) {
-      var minute = index * 30;
-      return { minute: minute, top: 0, height: 24, cells: days.map(function (segments) {
-        return segments.filter(function (segment) { return segment.start < minute + 30 && segment.end > minute; });
-      }) };
+      return { minute: index * 30, top: index * rowHeight, height: rowHeight };
     });
-    bands.forEach(function (band) {
-      band.cells = days.map(function (segments) { return segments.filter(function (segment) {
-        return segment.start < band.last * 30 && segment.end > band.first * 30;
-      }); });
-      var count = Math.max.apply(null, band.cells.map(function (cell) { return cell.length; }));
-      var height = Math.max((band.last - band.first) * 24, 28 + count * 64 + (count + 1) * 8);
-      for (var i = band.first; i < band.last; i++) { rows[i].height = height / (band.last - band.first); rows[i].band = band; }
-    });
-    // A very short standalone booking still needs a readable, usable block.
-    intervals.forEach(function (segment) {
-      var first = Math.floor(segment.start / 30), last = Math.ceil(segment.end / 30);
-      if (!rows[first].band && last - first <= 2) {
-        var available = Math.max(1, Math.ceil((segment.end - segment.start) / 30));
-        var required = 52 / available;
-        for (var i = first; i < last; i++) rows[i].height = Math.max(rows[i].height, required);
-      }
-    });
-    var top = 0;
-    rows.forEach(function (row) { row.top = top; top += row.height; });
-    var layout = { rows: rows, height: top, dates: dates, bands: bands, blocks: [] };
-    bands.forEach(function (band) {
-      band.top = rows[band.first].top;
-      band.height = (band.last === 48 ? top : rows[band.last].top) - band.top;
-    });
-    layout.blocks = days.map(function (segments, column) {
+    var layout = { rows: rows, height: 48 * rowHeight, dates: dates, blocks: [] };
+    layout.blocks = days.map(function (segments) {
       return segments.map(function (segment) {
-        var band = rows[Math.floor(segment.start / 30)].band;
-        if (band) return { segment: segment, top: band.top + 36 + band.cells[column].indexOf(segment) * 72,
-          height: 64, minute: band.first * 30, band: band };
         var start = pixelAtMinute(layout, segment.start), end = pixelAtMinute(layout, segment.end);
-        return { segment: segment, top: start + 4, height: Math.max(44, end - start - 8), minute: Math.floor(segment.start / 30) * 30 };
+        return { segment: segment, top: start + 2, height: Math.max(1, end - start - 4),
+          minute: Math.floor(segment.start / 30) * 30, lane: segment.lane, lanes: segment.lanes };
       });
+    });
+    layout.dayRequirements = days.map(function (segments, index) {
+      var occupied = segments.length || jobs.some(function (job) { return !job._unscheduled && job.allDay && job.startDate <= dates[index] && (job.endDate || job.startDate) >= dates[index]; });
+      return occupied ? Math.max(140, segments.reduce(function (maximum, segment) { return Math.max(maximum, segment.lanes * 112 + 12); }, 0)) : 80;
     });
     return layout;
+  }
+  function weekColumnWidths(requirements, available) {
+    var minimums = requirements.map(function (value) { return Math.max(80, Number(value) || 80); });
+    var total = minimums.reduce(function (sum, width) { return sum + width; }, 0);
+    if (total >= available) return minimums;
+    var equal = available / minimums.length;
+    var widths = minimums.map(function (minimum) { return Math.max(equal, minimum); });
+    var excess = widths.reduce(function (sum, width) { return sum + width; }, 0) - available;
+    // Water-fill each group evenly, stopping each column at its own minimum.
+    [true, false].forEach(function (empty) {
+      var candidates = minimums.map(function (minimum, index) { return index; }).filter(function (index) { return (minimums[index] === 80) === empty && widths[index] > minimums[index]; });
+      while (excess > 0.001 && candidates.length) {
+        var share = excess / candidates.length, recovered = 0;
+        candidates.forEach(function (index) { var amount = Math.min(share, widths[index] - minimums[index]); widths[index] -= amount; recovered += amount; });
+        excess -= recovered;
+        candidates = candidates.filter(function (index) { return widths[index] > minimums[index] + 0.001; });
+      }
+    });
+    return widths;
   }
   function pixelAtMinute(layout, minute) {
     if (minute >= 1440) return layout.height;
@@ -213,7 +214,7 @@ function stackedWeekLayout(jobs, dates) {
     return spans;
   }
   var api = { timeZone: ZONE, shiftDate: shiftDate, dateDistance: dateDistance, occupiedDates: occupiedDates, shiftSchedule: shiftSchedule, resizeDates: resizeDates, spanLanes: spanLanes, validate: validate, localInstant: localInstant, outlookFile: outlookFile, daySegments: daySegments,
-    stackedWeekLayout: stackedWeekLayout, pixelAtMinute: pixelAtMinute, minuteAtPixel: minuteAtPixel,
+    timedWeekLayout: timedWeekLayout, weekColumnWidths: weekColumnWidths, pixelAtMinute: pixelAtMinute, minuteAtPixel: minuteAtPixel,
     dayInterval: dayInterval, intervalPatch: intervalPatch, slotInterval: slotInterval, adjustInterval: adjustInterval };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   host.UOS = host.UOS || {}; host.UOS.SchedulerCalendarTools = api;

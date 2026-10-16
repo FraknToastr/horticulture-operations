@@ -657,7 +657,7 @@
     state.busy = false;
     state.phase = "ready";
     render();
-    document.dispatchEvent(new CustomEvent("uos:program-ready", { detail: { workspace: clone(state.workspace) } }));
+    document.dispatchEvent(new CustomEvent("uos:program-ready", { detail: Object.assign({ workspace: clone(state.workspace) }, options && options.change || {}) }));
     applyInitialDeepLink();
     if (!options || options.focus !== false) {
       var initialDest = destination(state.workspace.workspace && state.workspace.workspace.destination);
@@ -669,6 +669,7 @@
 
   var mutationQueue = Promise.resolve();
   var pendingWorkspaceMutations = 0;
+  var mutationSequence = 0, collectionRevisions = Object.create(null);
 
   function updateWorkspace(mutator, mutationOptions) {
     if (state.phase !== "ready" || !state.workspace || typeof mutator !== "function") return Promise.resolve(null);
@@ -690,17 +691,19 @@
         return Promise.reject(error);
       }
       if (state.isSessionCleared) {
+        var sessionChange = describeWorkspaceChange(beforeMutation, candidate, mutationCommand, mutationStarted);
         state.workspace = candidate;
         render();
-        document.dispatchEvent(new CustomEvent("uos:program-ready", { detail: { workspace: clone(state.workspace) } }));
-        publishWorkspaceChange(beforeMutation, state.workspace, mutationCommand, mutationStarted);
+        document.dispatchEvent(new CustomEvent("uos:program-ready", { detail: Object.assign({ workspace: clone(state.workspace) }, sessionChange) }));
+        publishWorkspaceChange(beforeMutation, state.workspace, sessionChange);
         return candidate;
       }
       state.busy = true;
       programStatus("Saving…", "loading");
    return UOS.ProgramStorage.saveValidated(candidate).then(function (saved) {
-        var activated = activateValidated(saved, { focus: false });
-        publishWorkspaceChange(beforeMutation, activated, mutationCommand, mutationStarted);
+        var change = describeWorkspaceChange(beforeMutation, saved, mutationCommand, mutationStarted);
+        var activated = activateValidated(saved, { focus: false, change: change });
+        publishWorkspaceChange(beforeMutation, activated, change);
         return activated;
       }, saveFailed);
     });
@@ -714,7 +717,7 @@
     });
   }
 
-  function publishWorkspaceChange(before, after, command, started) {
+  function describeWorkspaceChange(before, after, command, started) {
     var ended = window.performance && typeof window.performance.now === "function" ? window.performance.now() : Date.now();
     var duration = Math.max(0, ended - started);
     var record = null;
@@ -726,10 +729,11 @@
         durationMs: duration
       });
     }
-    var detail = {
-      workspace: clone(after),
-      after: clone(after),
-      before: clone(before),
+    var names = record ? Object.keys(record.changed) : UOS.ProgramObservability && typeof UOS.ProgramObservability.recordMutation === "function" ? [] : Object.keys(after.entities || {});
+    names.forEach(function (name) { collectionRevisions[name] = (collectionRevisions[name] || 0) + 1; });
+    return {
+      changeId: ++mutationSequence,
+      collectionRevisions: Object.assign({}, collectionRevisions),
       mutation: record,
       revision: record ? record.revision : (after && after.workspaceRevision) || 0,
       command: command || (record ? record.command : "ProgramApp.updateWorkspace"),
@@ -737,8 +741,13 @@
       operations: record ? record.operations : {},
       durationMs: record ? record.durationMs : duration
     };
+  }
+  function publishWorkspaceChange(before, after, change) {
+    // Both aliases describe one defensive snapshot, separate from live state.
+    var snapshot = clone(after);
+    var detail = Object.assign({ workspace: snapshot, after: snapshot, before: before }, change);
     document.dispatchEvent(new CustomEvent("uos:workspace-changed", { detail: detail }));
-    return record;
+    return change.mutation;
   }
 
   function resolveDeepLink(search) {
@@ -1439,7 +1448,7 @@ function resetStartupWorkspace(workspace) {
     var project = (entities.projects || []).find(function (item) { return item.id === context.projectId; }) || null;
     var record = (entities.applications || []).concat(entities.events || []).find(function (item) { return item.id === context.registerId; });
     var jobs = (entities.jobs || []).filter(function (job) {
-      return project && job.owner === project.owner && (job.projectId === project.id || job.applicationId === context.registerId || job.eventId === context.registerId);
+      return record && job.owner === record.owner && (project && job.projectId === project.id || job.applicationId === record.id || job.eventId === record.id);
     });
     var jobIds = {};
     jobs.forEach(function (job) { jobIds[job.id] = true; });
@@ -1456,6 +1465,7 @@ function resetStartupWorkspace(workspace) {
       linkedProject: project,
       hasRegister: Boolean(context.registerId),
       hasProject: Boolean(project),
+      hasEventMilestones: Boolean(record && record.owner === "EVT" && (record.bumpInDate || record.bumpOutDate)),
       hasMap: hasCoordinates(record) || hasCoordinates(project) || (entities.geometries || []).some(function (geometry) {
         var payload = geometry.payload || {};
         return (context.projectId && geometry.projectId === context.projectId) ||
@@ -1464,6 +1474,7 @@ function resetStartupWorkspace(workspace) {
           (context.projectId && payload.projectId === context.projectId);
       }),
       hasJobs: jobs.length > 0,
+      hasScheduledBookings: jobs.some(function(job){return Boolean(job.startDate && job.endDate);}),
       hasCostedJobs: Boolean(project && (entities.costingLines || []).some(function (line) {
         return line.owner === project.owner && (line.projectId === project.id || jobIds[line.jobId]);
       })),
@@ -1490,8 +1501,8 @@ function resetStartupWorkspace(workspace) {
     context = context || {};
     var labels = { register: "Register", map: "Space Map", planner: "Project Planner", costing: "Cost Calculator", scheduler: "Job Scheduler", quotes: "Quote Builder" };
     var label = labels[actionKey] || actionKey;
-    var ready = actionKey === "register" || actionKey === "map" || Boolean(context.hasProject);
-    var used = { register: true, map: context.hasMap, planner: context.hasPlannerWork, costing: context.hasCostedJobs, scheduler: context.hasJobs, quotes: context.hasQuotes };
+    var ready = actionKey === "register" || actionKey === "map" || actionKey === "scheduler" || Boolean(context.hasProject);
+    var used = { register: true, map: context.hasMap, planner: context.hasPlannerWork, costing: context.hasCostedJobs, scheduler: context.hasScheduledBookings || context.hasEventMilestones, quotes: context.hasQuotes };
     var usage = !ready ? "inactive" : used[actionKey] ? "in-use" : "unused";
     var tooltip = !ready ? "Create a linked delivery project first to open " + label :
       "Open " + label + (usage === "unused" ? " — no saved work yet" : "");

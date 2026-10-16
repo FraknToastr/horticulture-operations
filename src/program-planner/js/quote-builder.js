@@ -10,6 +10,7 @@
   var preserveProjectListUntil = 0;
   var pendingDraftSaves = 0;
   var paymentSavePending = false;
+  var adjustmentSavePending = false;
 
 
   var state = {
@@ -338,6 +339,20 @@ function hasLifecycleAction(actions, names) {
   }
 
   var paymentPointerActive = false, paymentRenderDeferred = false;
+  function renderSourceChanges() {
+    var panel = rootNode.querySelector("[data-quote-source-changes]");
+    if (!panel) return;
+    var changes = state.quoteId && state.status === "Draft" ? UOS.ProgramQuotes.sourceChanges(workspaceSnapshot(), state.quoteId) : null;
+    panel.hidden = !changes || !changes.hasChanges;
+    if (panel.hidden) return;
+    var summary = ["added", "changed", "removed"].filter(function (kind) { return changes[kind].length; }).map(function (kind) { return changes[kind].length + " " + kind; }).join(", ");
+    panel.querySelector("[data-quote-source-summary]").textContent = "Current Project Work changed: " + summary;
+    var markup = ["added", "changed", "removed"].map(function (kind) {
+      return changes[kind].map(function (line) { return "<li><strong>" + kind[0].toUpperCase() + kind.slice(1) + ":</strong> " + esc(line.description) + "</li>"; }).join("");
+    }).join("");
+    var list = panel.querySelector("[data-quote-source-lines]");
+    if (list._sourceMarkup !== markup) { list.innerHTML = markup; list._sourceMarkup = markup; }
+  }
   function renderBuilder() {
     // A redraw between pointer-down and click can cancel the browser's click
     // even when the pressed node survives. Finish the gesture first.
@@ -369,7 +384,13 @@ function hasLifecycleAction(actions, names) {
   var lifecycleActions = lifecycleActionKeys();
     var immutable = ["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0;
     var financialLocked = Boolean(state.quoteId && window.UOS.ProgramQuotes && typeof window.UOS.ProgramQuotes.commerciallyLocked === "function" && window.UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId));
-    renderFundingChoice(immutable || financialLocked);
+    renderFundingChoice(immutable || financialLocked || adjustmentSavePending);
+    renderSourceChanges();
+    var adjustment = adjustmentEligibility(), adjustmentButton = rootNode.querySelector("[data-add-line]");
+    if (adjustmentButton) {
+      setQuoteActionEnabled(adjustmentButton, adjustment.allowed);
+      adjustmentButton.title = adjustment.reason || "Add a Quote adjustment";
+    }
     var paymentSummary = state.quoteId && window.UOS.ProgramQuotes && window.UOS.ProgramApp
       ? window.UOS.ProgramQuotes.paymentSummary(workspaceSnapshot(), state.quoteId)
       : null;
@@ -397,6 +418,7 @@ function hasLifecycleAction(actions, names) {
     var termsLabel = rootNode.querySelector("[data-quote-terms-label]");
     if (termsLabel) termsLabel.textContent = internalNotes ? "Internal Notes" : "Terms & Conditions";
     if (operationalInput) {
+      operationalInput.disabled = adjustmentSavePending;
       operationalInput.readOnly = state.fundingMode === "customer" || Boolean(window.UOS.ProgramBudget && workspaceSnapshot().entities.annualBudgets.length);
       operationalInput.title = operationalInput.readOnly ? "Allocated to the Register record in Annual Budget" : "Legacy Project amount; reconcile in Annual Budget";
       if (document.activeElement !== operationalInput) operationalInput.value = state.operationalAmount;
@@ -419,26 +441,26 @@ function hasLifecycleAction(actions, names) {
     }
     if (revisionButton) {
       revisionButton.hidden = !hasLifecycleAction(lifecycleActions, ["createRevision", "revise"]);
-      revisionButton.disabled = isSettled;
+      revisionButton.disabled = isSettled || adjustmentSavePending;
     }
     if (refreshButton) {
       refreshButton.hidden = !hasLifecycleAction(lifecycleActions, ["refreshDraftFromCurrentCosts", "refresh"]);
-      refreshButton.disabled = financialLocked;
+      refreshButton.disabled = financialLocked || adjustmentSavePending;
     }
     if (lifecycleContainer) {
       var issueButton = lifecycleContainer.querySelector("[data-quote-issue]");
       var acceptButton = lifecycleContainer.querySelector("[data-quote-accept]");
       var declineButton = lifecycleContainer.querySelector("[data-quote-decline]");
-      if (issueButton) issueButton.hidden = !hasLifecycleAction(lifecycleActions, ["issue"]);
+      if (issueButton) { issueButton.hidden = !hasLifecycleAction(lifecycleActions, ["issue"]); issueButton.disabled = adjustmentSavePending; }
       if (acceptButton) acceptButton.hidden = !hasLifecycleAction(lifecycleActions, ["accept", "Accepted"]);
       if (declineButton) declineButton.hidden = !hasLifecycleAction(lifecycleActions, ["decline", "Declined"]);
       lifecycleContainer.hidden = !(issueButton && !issueButton.hidden) && !(acceptButton && !acceptButton.hidden) && !(declineButton && !declineButton.hidden);
     }
-    var saveButton = rootNode.querySelector("[data-quote-save]"); if (saveButton) saveButton.disabled = immutable || !state.selectedEntityId;
-    [clientInput, addrInput, emailInput, prepInput, scopeInput, termsInput].forEach(function (input) { if (input) input.disabled = immutable; });
+    var saveButton = rootNode.querySelector("[data-quote-save]"); if (saveButton) saveButton.disabled = immutable || adjustmentSavePending || !state.selectedEntityId;
+    [clientInput, addrInput, emailInput, prepInput, scopeInput, termsInput].forEach(function (input) { if (input) input.disabled = immutable || adjustmentSavePending; });
     [numInput, dateInput, expiryInput, discInput, contInput].forEach(function (input) {
       if (!input) return;
-      input.disabled = immutable || financialLocked;
+      input.disabled = immutable || financialLocked || adjustmentSavePending;
       if (financialLocked) input.title = "Financial values are locked while this Draft has active payments.";
       else input.removeAttribute("title");
     });
@@ -464,7 +486,7 @@ function hasLifecycleAction(actions, names) {
     var tbody = rootNode.querySelector("[data-quote-builder-lines]");
     if (tbody) {
       var linesHtml = state.lines.map(function (line) {
-        var locked = line.readOnly || immutable || financialLocked;
+        var locked = line.readOnly || immutable || financialLocked || adjustmentSavePending;
         var disabled = locked ? " disabled" : "";
         return '<tr data-line-id="' + esc(line.id) + '">' +
           '<td class="program-quote-builder-table__description"><input type="text" class="uos-input uos-input--sm" data-line-field="description" title="' + esc(line.description) + '" data-uos-tooltip="' + esc(line.description) + '" value="' + esc(line.description) + '"' + disabled + '></td>' +
@@ -878,12 +900,14 @@ function renderPreview() {
     var hasSavedQuote = Boolean(state.quoteId);
     var noCustomerPayment = state.fundingMode === "city";
     if (noCustomerPayment && statusNode) statusNode.textContent = "No customer payment required";
-    var payable = !noCustomerPayment && hasSavedQuote && ["Issued", "Accepted"].indexOf(state.status) >= 0;
+    var receipt = UOS.ProgramQuotes.receiptEligibility({ status: state.status, fundingMode: state.fundingMode });
+    var payable = hasSavedQuote && receipt.paymentAllowed;
     if (form) {
       Array.prototype.forEach.call(form.elements, function (input) {
-        if (input.matches("[data-payment-record]")) input.disabled = paymentSavePending || !payable;
-        else if (input.matches("[data-deposit-record]")) input.disabled = paymentSavePending || noCustomerPayment || !state.selectedEntityId || state.status === "Superseded";
-        else input.disabled = paymentSavePending || noCustomerPayment || !state.selectedEntityId || state.status === "Superseded";
+        if (input.matches("[data-payment-record]")) input.disabled = adjustmentSavePending || paymentSavePending || !payable;
+        else if (input.matches("[data-deposit-record]")) input.disabled = adjustmentSavePending || paymentSavePending || !receipt.allowed || !state.selectedEntityId;
+        else input.disabled = adjustmentSavePending || paymentSavePending || !receipt.allowed || !state.selectedEntityId;
+        if (input.matches("[data-payment-record], [data-deposit-record]")) setQuoteActionEnabled(input, !input.disabled);
       });
       var paymentDate = form.elements.paymentDate;
       if (paymentDate && !paymentDate.value) paymentDate.value = UOS.ProgramDates.today(state.workspace);
@@ -891,7 +915,7 @@ function renderPreview() {
     if (formNote) formNote.textContent = noCustomerPayment ? "No customer payment required" : !state.quoteId
       ? "Save the Quote, then issue or accept it before recording payments."
       : payable ? "Payments and deposits are recorded against this Quote revision."
-      : state.status === "Superseded" ? "Payments cannot be recorded against a superseded Quote."
+      : !receipt.allowed ? receipt.reason
       : "Deposits can be recorded now. Issue or accept the Quote before recording other payments.";
     if (formNote && !state.quoteId && state.selectedEntityId && !noCustomerPayment) formNote.textContent = "Record a deposit to save this Draft. Issue or accept the Quote before recording other payments.";
     if (!rows) return;
@@ -1045,8 +1069,20 @@ function renderPreview() {
     return;
   }
 
+  function setQuoteActionEnabled(button, enabled) {
+    button.disabled = !enabled;
+    button.classList.toggle("uos-button--primary", enabled);
+    button.classList.toggle("uos-button--secondary", !enabled);
+  }
+  function adjustmentEligibility() {
+    if (adjustmentSavePending) return { allowed: false, reason: "Saving the Quote adjustment…" };
+    return UOS.ProgramQuotes.adjustmentEligibility(workspaceSnapshot(), state.quoteId, state.selectedEntityId);
+  }
   function addLineItem(categoryOrData, description, unit, quantity, rate) {
-    if (state.quoteId && window.UOS.ProgramQuotes && window.UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return ledgerError(new Error("Financial line items are locked while this Draft has active payments."));
+    var eligibility = adjustmentEligibility();
+    if (!eligibility.allowed) return Promise.resolve(null);
+    var projectId = state.selectedEntityId, quoteId = state.quoteId;
+    adjustmentSavePending = true;
     var item = typeof categoryOrData === "object" && categoryOrData !== null ? categoryOrData : {
       category: categoryOrData,
       description: description,
@@ -1070,11 +1106,14 @@ function renderPreview() {
       readOnly: false
     });
     renderBuilder();
-    saveToWorkspace();
+    return saveToWorkspace().catch(function (error) {
+      if (state.selectedEntityId === projectId && state.quoteId === quoteId) state.lines = state.lines.filter(function (line) { return line.id !== newId; });
+      return UOS.dialogs.alert({ title: "Quote adjustment not saved", message: error.message || "The Quote adjustment could not be saved." });
+    }).finally(function () { adjustmentSavePending = false; renderBuilder(); });
   }
 
   function removeLineItem(lineId) {
-    if (state.quoteId && window.UOS.ProgramQuotes && window.UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return ledgerError(new Error("Financial line items are locked while this Draft has active payments."));
+    if (!adjustmentEligibility().allowed) return Promise.resolve(null);
     var line = state.lines.find(function (item) { return item.id === lineId && !item.readOnly; });
     if (!line) return Promise.resolve(null);
     var projectId = state.selectedEntityId, quoteId = state.quoteId;
@@ -1139,7 +1178,7 @@ function renderPreview() {
       return;
     }
     var target = event.target;
-    if (!target) return;
+    if (!target || adjustmentSavePending) return;
     if (!target.isConnected) return;
 
     if (target.matches("[data-quote-num]")) state.quoteNumber = target.value;
@@ -1374,7 +1413,7 @@ function renderPreview() {
     var saveBtn = event.target.closest("[data-quote-save]");
     if (removeBtn) {
       removeLineItem(removeBtn.getAttribute("data-remove-line"));
-    } else if (addBtn) {
+    } else if (addBtn && !addBtn.disabled) {
       addLineItem("Adjustment", "Quote adjustment", "item", 1, 0);
     } else if (refreshBtn && state.quoteId && !refreshBtn.disabled) {
       window.UOS.ProgramApp.updateWorkspace(function (workspace) {

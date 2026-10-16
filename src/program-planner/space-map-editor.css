@@ -194,6 +194,24 @@ html[data-suite-theme="dark"] .space-editor[data-space-owner="EVT"] { --space-ac
 .space-editor #spaceManagementBody.is-project-empty #shapeList { display:none; }
 .space-editor #spaceProjectEmpty .space-editor__create-project { height:auto; min-height:64px; padding:16px 24px; font-size:16px; gap:8px; }
 
+/* First-use examples share the real menu's orbs without duplicating controls. */
+.space-editor .space-editor__body.has-space-onboarding { display:flex; flex-direction:column; scrollbar-gutter:auto; }
+.space-editor .space-onboarding { display:flex; flex:1 0 auto; flex-direction:column; align-items:center; justify-content:center; min-height:360px; padding:24px 16px; text-align:center; box-sizing:border-box; }
+.space-editor .space-onboarding[hidden] { display:none; }
+.space-editor .space-onboarding__add { position:relative; inset:auto; flex:none; transform:none; }
+.space-editor .space-onboarding__add[aria-expanded="true"] svg { transform:rotate(45deg); }
+.space-editor .space-onboarding__intro { max-width:240px; margin:12px 0 24px; font-size:14px; line-height:1.5; text-wrap:pretty; }
+.space-editor .space-onboarding__example { position:relative; width:100%; max-width:300px; margin:0; }
+.space-editor .space-onboarding__connections { position:absolute; top:0; left:0; width:100%; height:160px; pointer-events:none; }
+.space-editor .space-onboarding__parent { position:relative; z-index:2; display:flex; align-items:center; flex-direction:column; gap:4px; height:100px; }
+.space-editor .space-onboarding__decisions { position:relative; z-index:2; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.space-editor .space-onboarding__decisions > div { display:flex; align-items:center; flex-direction:column; gap:8px; min-width:0; }
+.space-editor .space-onboarding__orb { position:relative; inset:auto; flex:none; transform:none; cursor:default; pointer-events:none; }
+.space-editor .space-onboarding__orb svg { width:24px; height:24px; }
+.space-editor .space-onboarding__example strong { font-size:12px; line-height:1.5; }
+.space-editor .space-onboarding__example p { margin:0; font-size:12px; line-height:1.5; text-wrap:pretty; }
+.space-editor .has-space-onboarding #spaceManagementBody.is-project-empty:not([hidden]) { display:block; flex:none; padding:0 16px 24px; text-align:center; }
+
 /* The import section overlays the list; its measured height reserves reachable content. */
 .space-editor .space-editor__sidebar { position:relative; --space-moasure-height:120px; }
 .space-editor [data-space-panel="combined"] .space-editor__body { overflow:auto; overflow-anchor:none; padding-bottom:calc(var(--space-moasure-height) + 8px); scroll-padding:8px 0 calc(var(--space-moasure-height) + 8px); box-sizing:border-box; }
@@ -273,7 +291,7 @@ html[data-suite-theme="dark"] .space-editor[data-space-owner="EVT"] { --space-ac
   opacity:.9;
   filter:drop-shadow(0 1px 2px #14202a);
 }
-.space-editor :is(.space-radial__connections,.space-radial__draft-connections) path {
+.space-editor :is(.space-radial__connections,.space-radial__draft-connections,.space-onboarding__connections) path {
   stroke:#fff;
   stroke-width:5;
   stroke-linecap:round;
@@ -329,8 +347,8 @@ html[data-suite-theme="dark"] .space-editor[data-space-owner="EVT"] { --space-ac
   border-color:#83c99a;
   color:#245f38;
 }
-.space-editor #spaceCancelDraft,
-.space-editor #spaceCancelDraft:hover:not(:disabled) {
+.space-editor :is(#spaceCancelDraft,.space-onboarding__cancel),
+.space-editor :is(#spaceCancelDraft,.space-onboarding__cancel):hover:not(:disabled) {
   background:#f8dada;
   border-color:#e4a0a0;
   color:#8b3030;
@@ -341,9 +359,26 @@ html[data-suite-theme="dark"] .space-editor .space-radial__node.space-radial__ap
   border-color:#75bd8a;
   color:#dcf7e5;
 }
-html[data-suite-theme="dark"] .space-editor #spaceCancelDraft,
-html[data-suite-theme="dark"] .space-editor #spaceCancelDraft:hover:not(:disabled) {
+html[data-suite-theme="dark"] .space-editor :is(#spaceCancelDraft,.space-onboarding__cancel),
+html[data-suite-theme="dark"] .space-editor :is(#spaceCancelDraft,.space-onboarding__cancel):hover:not(:disabled) {
   background:#683e42;
   border-color:#d68c92;
   color:#ffe3e4;
 }
+
+/* Equal footer panels retain the existing logo and label heights. */
+.space-editor .space-editor__moasure-section { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0 8px; }
+.space-editor .space-editor__moasure-section .space-editor__moasure-panel { min-width:0; height:100%; justify-content:space-between; }
+.space-editor .space-editor__moasure-section .space-editor__moasure-logo img { max-width:100%; }
+.space-editor .space-editor__moasure-section .space-editor__drop-status { grid-column:1 / -1; }
+.space-editor__project-guidance { max-width:280px; margin:18px auto 0; font-size:14px; line-height:1.5; text-wrap:pretty; text-align:center; }
+.metromap-dialog { width:min(440px,calc(100vw - 32px)); padding:0; border:1px solid var(--panel-border); border-radius:var(--uos-radius-overlay,10px); background:var(--panel-bg); color:var(--uos-text); }
+.metromap-dialog header,.metromap-dialog footer { padding:16px 24px; }
+.metromap-dialog h2 { margin:0; font-size:20px; }
+.metromap-dialog__body { display:grid; gap:12px; padding:0 24px; }
+.metromap-dialog__body input[type=password] { width:100%; min-width:0; box-sizing:border-box; }
+.metromap-dialog footer { display:flex; gap:12px; justify-content:flex-end; }
+
+.space-editor .space-editor__moasure-section .space-editor__moasure-panel { height:98px; }
+.space-editor .space-editor__moasure-section .space-editor__moasure-logo { height:42px; flex:0 1 42px; min-height:0; }
+.space-editor .space-editor__moasure-section .space-editor__moasure-panel > span:last-child { min-height:28px; line-height:14px; display:flex; align-items:center; justify-content:center; }

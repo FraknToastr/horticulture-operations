@@ -39,6 +39,47 @@ test('ICS escapes text, excludes protected location, folds UTF-8 without breakin
   assert.equal(unfolded.includes('ATTENDEE'), false);
 });
 
+test('Outlook subject overrides and reminders preserve the saved job and location privacy', () => {
+ const original = job({ location: '27 Barton Terrace' });
+ for (const [reminderMinutes, trigger] of [[60, '-PT1H'], [1440, '-P1D'], [10080, '-P1W']]) {
+  const file = tools.outlookFile(original, { subject: 'Site work - 27 Barton Terrace; A, B', reminderMinutes, includeLocation: false });
+  const unfolded = file.contents.replace(/\r\n /g, '');
+  assert.ok(unfolded.includes('SUMMARY:Site work - 27 Barton Terrace\\; A\\, B'));
+  assert.ok(unfolded.includes('BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:' + trigger));
+  assert.ok(unfolded.includes('DESCRIPTION:Site work - 27 Barton Terrace\\; A\\, B\r\nEND:VALARM'));
+  assert.equal(unfolded.includes('LOCATION:'), false);
+ }
+ assert.equal(original.title, 'Depot work');
+ assert.equal(original.location, '27 Barton Terrace');
+ assert.ok(tools.outlookFile(job({ allDay: true }), { reminderMinutes: 1440 }).contents.includes('TRIGGER:-P1D'));
+ assert.equal(tools.outlookFile(original).contents.includes('VALARM'), false);
+});
+
+test('Outlook CC recipients are deduplicated informational attendees with a transient organiser', () => {
+ const options = { ccEmails: ' Team+jobs@EXAMPLE.COM;team+jobs@example.com, other@example.org ', organizerEmail: 'owner@example.com', subject: 'Coordination' };
+ const file = tools.outlookFile(job(), options);
+ const unfolded = file.contents.replace(/\r\n /g, '');
+ assert.ok(unfolded.includes('ORGANIZER:mailto:owner@example.com'));
+ assert.ok(unfolded.includes('ATTENDEE;ROLE=NON-PARTICIPANT;RSVP=FALSE:mailto:Team%2Bjobs@example.com'));
+ assert.ok(unfolded.includes('ATTENDEE;ROLE=NON-PARTICIPANT;RSVP=FALSE:mailto:other@example.org'));
+ assert.equal((unfolded.match(/ATTENDEE;/g) || []).length, 2);
+ assert.equal(options.ccEmails, ' Team+jobs@EXAMPLE.COM;team+jobs@example.com, other@example.org ');
+ assert.equal(unfolded.includes('METHOD:REQUEST'), false);
+ for (const line of file.contents.split('\r\n')) assert.ok(Buffer.byteLength(line, 'utf8') <= 75);
+ assert.equal(tools.outlookFile(job(), { organizerEmail: 'unused' }).contents.includes('ORGANIZER:'), false);
+});
+
+test('Outlook validates all export choices and rejects address injection before producing a file', () => {
+ assert.throws(() => tools.outlookFile(job(), { subject: '  ' }), /calendar subject/);
+ assert.throws(() => tools.outlookFile(job(), { reminderMinutes: 15 }), /reminder options/);
+ for (const ccEmails of ['missing-at', 'bad@@example.com', 'copy@example.com\r\nATTENDEE:mailto:other@example.com', 'copy@example.com?subject=bad', '.copy@example.com', 'copy..name@example.com']) {
+  assert.throws(() => tools.outlookFile(job(), { ccEmails, organizerEmail: 'owner@example.com' }), /valid email address/);
+ }
+ assert.throws(() => tools.outlookFile(job(), { ccEmails: ['copy@example.com'] }), /Your email/);
+ assert.throws(() => tools.outlookFile(job(), { ccEmails: ['copy@example.com'], organizerEmail: 'not-email' }), /Your email/);
+ assert.throws(() => tools.outlookFile(job(), { ccEmails: {} }), /CC recipients/);
+});
+
 test('daily segments handle overnight, multi-day and exclusive midnight ends', () => {
   const overnight = job({ startTime: '23:00', endTime: '01:00', endDate: '2026-10-06' });
   const first = tools.daySegments([overnight], '2026-10-05')[0];

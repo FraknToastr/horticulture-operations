@@ -86,6 +86,29 @@
       locationId: text(raw.locationId), location: text(raw.location), sourceKind: sourceKind(raw), canonicalSourceKind: canonicalSourceKind(raw), sourceLabel: sourceLabel(raw), sourceEntityId: text(raw.sourceEntityId || raw.taskId || raw.sourceGeometryId || raw.geometryId || raw.provenance && raw.provenance.sourceId) || null, _startMs: startMs, _endMs: endMs
     });
   }
+  /* Register dates are calendar references, never persisted operational Jobs. */
+  function eventMilestones(workspace) {
+    var events = workspace && workspace.entities && workspace.entities.events || [];
+    var seen = Object.create(null), entries = [];
+    events.forEach(function (event) {
+      var eventId = text(event && event.id);
+      if (!eventId || event.owner && event.owner !== "EVT" || seen[eventId]) return;
+      seen[eventId] = true;
+      var summary = UOS.ProgramModel && UOS.ProgramModel.recordSummary && UOS.ProgramModel.recordSummary(event);
+      var eventTitle = text(event.title || event.eventName || event.name || event.payload && (event.payload.title || event.payload.eventName || event.payload.name) || event.raw && (event.raw.title || event.raw.eventName || event.raw.name)) || summary && text(summary.title) || "Untitled event";
+      [{ field: "bumpInDate", kind: "bump-in", label: "Bump-in" }, { field: "bumpOutDate", kind: "bump-out", label: "Bump-out" }].forEach(function (milestone) {
+        var date = isoDate(event[milestone.field]);
+        if (!date) return;
+        entries.push({
+          id: "event-milestone:" + eventId + ":" + milestone.kind,
+          owner: "EVT", eventId: eventId, title: eventTitle + " · " + milestone.label,
+          startDate: date, endDate: date, startTime: "", endTime: "", allDay: true,
+          _eventMilestone: milestone.kind, _startMs: Date.parse(date + "T00:00:00Z"), _endMs: Date.parse(addDays(date, 1) + "T00:00:00Z")
+        });
+      });
+    });
+    return entries;
+  }
   function clone(value) { return value === undefined ? undefined : JSON.parse(JSON.stringify(value)); }
   function programModel() {
     var api = UOS.ProgramModel || UOS.programModel;
@@ -236,7 +259,7 @@
 
   var api = {
     addDays: addDays, mondayOfWeek: mondayOfWeek, weekDays: weekDays, monthGrid: monthGrid,
-    normalizeJob: normalizeJob, sourceKind: sourceKind, canonicalSourceKind: canonicalSourceKind, sourceLabel: sourceLabel,
+    normalizeJob: normalizeJob, eventMilestones: eventMilestones, sourceKind: sourceKind, canonicalSourceKind: canonicalSourceKind, sourceLabel: sourceLabel,
     resolveSourceRecord: resolveSourceRecord, sourceTrace: sourceTrace, duplicateSources: duplicateSources, upsertIntake: upsertIntake,
     isGenericLocation: isGenericLocation, overlaps: overlaps, detectConflicts: detectConflicts, jobType: jobType, ownerLabel: ownerLabel, scheduleJob: scheduleJob
   };

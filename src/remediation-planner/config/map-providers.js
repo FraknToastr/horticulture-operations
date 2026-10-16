@@ -7,7 +7,7 @@
    */
   var hostConfig = (root && root.UOS_REMEDIATION_MAP_CONFIG) || {};
   var config = Object.assign({
-    defaultProvider: "metromaps",
+    defaultProvider: "esri-world-imagery",
     defaultCenter: [138.6014, -34.9214],
     defaultZoom: 14,
     initializationTimeoutMs: 10000,

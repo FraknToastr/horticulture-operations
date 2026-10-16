@@ -169,6 +169,17 @@
     return getAllProjects().filter(function (project) { return project.owner === owner; });
   }
 
+  function activeEvent() {
+    if (activeOwner() !== "EVT") return null;
+    var ui = state.workspace && state.workspace.workspace || {}, entities = state.workspace && state.workspace.entities || {};
+    var selected = text(ui.selectedEntityId), project = getProjectsForActiveOwner().find(function (item) { return item.id === state.selectedProjectId; });
+    var record = (entities.events || []).find(function (item) { return item.id === selected; });
+    if (record) return record;
+    var job = state.jobs.find(function (item) { return item.id === selected; });
+    var eventId = project && project.eventId || job && job.eventId;
+    return (entities.events || []).find(function (item) { return item.id === eventId; }) || null;
+  }
+
   function isJobInProject(job, proj) {
     if (!job || !proj) return false;
     if (job.projectId && job.projectId === proj.id) return true;
@@ -206,8 +217,29 @@
     var pill = document.createElement("span"); pill.className = "scheduler-priority-pill scheduler-priority--" + info.value;
     pill.textContent = info.letter; pill.setAttribute("aria-label", info.label + " priority"); pill.title = info.label + " priority"; node.appendChild(pill);
   }
+  function appendBookingType(card, job) {
+    var accessories = card.querySelector(".scheduler-card-accessories");
+    if (!accessories) { accessories = document.createElement("span"); accessories.className = "scheduler-card-accessories"; card.appendChild(accessories); }
+    var icon = document.createElement("span"), label = job.allDay ? "All-day booking" : "Timed booking";
+    icon.className = "scheduler-booking-type";
+    icon.dataset.bookingType = job.allDay ? "all-day" : "timed";
+    icon.setAttribute("aria-label", label); icon.setAttribute("data-uos-tooltip", label); icon.title = label;
+    icon.innerHTML = job.allDay
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 11h18"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+    accessories.appendChild(icon);
+  }
   function calendarJob(job, conflicts) {
     var button = document.createElement("button"); button.type = "button";
+    if (job._eventMilestone) {
+      var event = activeEvent(), active = event && event.id === job.eventId;
+      button.className = "program-calendar-job scheduler-event-milestone scheduler-event-milestone--" + job._eventMilestone + (active ? " is-active-event" : " is-other-event");
+      button.dataset.schedulerMilestone = job.id; button.dataset.schedulerMilestoneEvent = job.eventId;
+      button.setAttribute("aria-label", title(job) + ", " + job.startDate + ", all day. Open Event in Register to change this date.");
+      button.title = title(job) + " · All day · Edit date in Register";
+      var milestoneName = document.createElement("span"); milestoneName.className = "program-calendar-job__title"; milestoneName.textContent = title(job); button.appendChild(milestoneName);
+      return button;
+    }
     var selected = job.id === state.selectedId;
     var activeProject = getProjectsForActiveOwner().find(function (project) { return project.id === state.selectedProjectId; }) || null;
     var linked = isCalendarJobInProject(job, activeProject);
@@ -220,12 +252,16 @@
     button.title = contextLabel;
     if (selected) button.setAttribute("aria-current", "true");
     var name = document.createElement("span"); name.className = "program-calendar-job__title"; name.textContent = title(job);
-    button.appendChild(name); appendPriority(button, job);
+    button.appendChild(name);
+    var accessories = document.createElement("span"); accessories.className = "scheduler-card-accessories";
+    appendPriority(accessories, job); button.appendChild(accessories);
+    var selection = document.createElement("span"); selection.className = "scheduler-selection-overlay";
+    selection.setAttribute("aria-hidden", "true"); button.appendChild(selection);
     if (job._calendarDraft) button.classList.add("is-schedule-draft");
     var duplicate = (conflicts[job.id] || []).find(function (label) { return label.indexOf("Same job type:") === 0; });
     if (duplicate) {
       var warning = document.createElement("span"); warning.className = "scheduler-type-warning"; warning.textContent = "!";
-      warning.setAttribute("aria-label", duplicate); warning.setAttribute("data-uos-tooltip", duplicate); warning.title = duplicate; button.appendChild(warning);
+      warning.setAttribute("aria-label", duplicate); warning.setAttribute("data-uos-tooltip", duplicate); warning.title = duplicate; accessories.appendChild(warning);
       button.classList.add("has-type-warning");
     }
     return button;
@@ -245,7 +281,7 @@ function renderWeek(calendar, days, conflicts) {
     var allDaySpans = UOS.SchedulerCalendarTools.spanLanes(allDayJobs, days.map(function (entry) { return entry.date; }));
     var laneCount = Math.max(1, allDaySpans.reduce(function (n, span) { return Math.max(n, span.lane + 1); }, 0));
     var rail = document.createElement("div"); rail.className = "scheduler-week-all-day scheduler-all-day-rail";
-    rail.style.gridTemplateRows = "repeat(" + laneCount + ",32px)";
+    rail.style.gridTemplateRows = "repeat(" + laneCount + ",44px)";
     days.forEach(function (entry, index) {
       var hit = document.createElement("div"); hit.className = "scheduler-all-day-hit";
       hit.dataset.schedulerHitDate = entry.date; hit.style.gridColumn = index + 1; hit.style.gridRow = "1 / span " + laneCount; rail.appendChild(hit);
@@ -259,12 +295,12 @@ function renderWeek(calendar, days, conflicts) {
       rail.appendChild(card);
     }); head.appendChild(rail); calendar.appendChild(head);
     var tools = UOS.SchedulerCalendarTools;
-    var layout = tools.stackedWeekLayout(previewJobs(state.calendarVisible), days.map(function (entry) { return entry.date; }));
+    var layout = tools.timedWeekLayout(previewJobs(state.calendarVisible), days.map(function (entry) { return entry.date; }));
     state.weekLayout = layout;
+    applyWeekColumnWidths(calendar);
     var body = document.createElement("div"); body.className = "scheduler-week-body"; body.style.height = layout.height + "px";
     var gutter = document.createElement("div"); gutter.className = "scheduler-week-gutter"; gutter.style.height = layout.height + "px";
     layout.rows.concat([{ minute: 1440, top: layout.height }]).forEach(function (row) {
-      if (row.band && row.minute !== row.band.first * 30) return;
       var label = document.createElement("span"); label.className = "scheduler-week-hour-label"; label.style.top = row.top + "px";
       label.textContent = String(Math.floor(row.minute / 60)).padStart(2, "0") + ":" + String(row.minute % 60).padStart(2, "0"); gutter.appendChild(label);
     }); body.appendChild(gutter);
@@ -274,26 +310,17 @@ function renderWeek(calendar, days, conflicts) {
       var day = document.createElement("section"); day.className = "program-calendar__day scheduler-week-day" + (entry.date === today() ? " is-today" : "") + (activeDay ? " is-active-project-day" : "");
       day.style.height = layout.height + "px"; day.setAttribute("data-scheduler-date", entry.date); day.dataset.schedulerHitDate = entry.date; day.setAttribute("data-active-project-day", activeDay ? "true" : "false");
       layout.rows.forEach(function (row) {
-        var cell = document.createElement("div"); cell.className = "scheduler-week-slot" + (row.band ? " is-shared-band" : "");
+        var cell = document.createElement("div"); cell.className = "scheduler-week-slot";
         cell.dataset.schedulerMinute = row.minute; cell.style.height = row.height + "px"; day.appendChild(cell);
-      });
-      layout.bands.forEach(function (band) {
-        var region = document.createElement("div"); region.className = "scheduler-week-overlap-band";
-        region.style.top = band.top + "px"; region.style.height = band.height + "px";
-        region.dataset.schedulerBand = band.first * 30;
-        var heading = document.createElement("span"); heading.className = "scheduler-week-band-label";
-        function clock(minute) { return String(Math.floor(minute / 60)).padStart(2, "0") + ":" + String(minute % 60).padStart(2, "0"); }
-        heading.textContent = clock(band.first * 30) + "–" + clock(band.last * 30);
-        var count = band.cells[column].length;
-        if (count) heading.textContent += " · " + count + (count === 1 ? " job" : " jobs");
-        if (count) region.appendChild(heading); day.appendChild(region);
       });
       layout.blocks[column].forEach(function (block) {
         var segment = block.segment, job = segment.job, card = calendarJob(job, conflicts);
         card.classList.add("scheduler-week-job"); card.dataset.slotMinute = Math.floor(segment.start / 30) * 30;
         card.classList.toggle("is-compact", block.height < 56);
         card.style.top = block.top + "px"; card.style.height = block.height + "px";
-        if (block.band) { card.classList.add("is-in-shared-band"); card.dataset.sharedBand = block.band.first * 30; }
+        card.dataset.schedulerLane = block.lane; card.dataset.schedulerLanes = block.lanes;
+        card.style.left = "calc(" + (block.lane / block.lanes * 100) + "% + " + (6 / block.lanes + 2) + "px)";
+        card.style.width = "calc(" + (100 / block.lanes) + "% - " + (12 / block.lanes + 4) + "px)";
         var name = card.querySelector(".program-calendar-job__title");
         name.textContent = title(job);
         var time = document.createElement("span"); time.className = "program-calendar-job__time";
@@ -320,7 +347,7 @@ function renderWeek(calendar, days, conflicts) {
     for (var offset = 0; offset < days.length; offset += 7) {
       var week = days.slice(offset, offset + 7), dates = week.map(function (entry) { return entry.date; });
       var spans = tools.spanLanes(jobs, dates), lanes = spans.reduce(function (n, span) { return Math.max(n, span.lane + 1); }, 0);
-      var row = document.createElement("div"); row.className = "scheduler-month-week"; row.style.minHeight = Math.max(116, 36 + lanes * 36) + "px";
+      var row = document.createElement("div"); row.className = "scheduler-month-week"; row.style.minHeight = Math.max(116, 36 + lanes * 48) + "px";
       week.forEach(function (entry) {
         var cell = document.createElement("section"); cell.className = "program-calendar__day scheduler-month-day" + (entry.inMonth ? "" : " is-outside") + (entry.date === today() ? " is-today" : "");
         cell.dataset.schedulerHitDate = entry.date; cell.dataset.schedulerDate = entry.date;
@@ -332,7 +359,7 @@ function renderWeek(calendar, days, conflicts) {
         var range = tools.occupiedDates(span.job), crossesRows = model().weekDays(range.startDate)[0] !== model().weekDays(range.endDate)[0];
         var first = span.start, last = crossesRows ? span.end : span.start;
         for (var index = first; index <= last; index++) {
-          var card = calendarJob(span.job, conflicts); card.classList.add("scheduler-month-card");
+          var card = calendarJob(span.job, conflicts); card.classList.add("scheduler-month-card"); appendBookingType(card, span.job);
           card.dataset.schedulerSpanStart = crossesRows ? dates[index] : range.startDate;
           card.dataset.schedulerSpanEnd = crossesRows ? dates[index] : range.endDate;
           card.style.gridColumn = (index + 1) + " / " + ((crossesRows ? index : span.end) + 2); card.style.gridRow = span.lane + 1;
@@ -344,26 +371,66 @@ function renderWeek(calendar, days, conflicts) {
       }); row.appendChild(layer); calendar.appendChild(row);
     }
   }
+  function defaultWeekScroll(scroller) {
+    var calendar = one("[data-scheduler-calendar]");
+    // Unscheduled cards precede the calendar inside its scroll container.
+    var prefix = calendar.getBoundingClientRect().top - scroller.getBoundingClientRect().top - scroller.clientTop + scroller.scrollTop;
+    return prefix + UOS.SchedulerCalendarTools.pixelAtMinute(state.weekLayout, 360);
+  }
+
+  function initializeWeekScroll() {
+    var scroller = one(".program-calendar-scroll");
+    if (state.mode !== "week" || state.weekScrollInitialized || !state.weekLayout || !scroller || !scroller.getClientRects().length) return;
+    var target = defaultWeekScroll(scroller);
+    scroller.scrollTop = target;
+    state.calendarScrollTop = target;
+    state.calendarWasVisible = true;
+    state.weekScrollInitialized = Math.abs(scroller.scrollTop - target) <= 1;
+    if (weekEditor) weekEditor.enhance();
+  }
+
+  function applyWeekColumnWidths(calendar) {
+    calendar=calendar || one('[data-scheduler-calendar]');
+    var scroller=calendar && calendar.closest('.program-calendar-scroll');
+    if(state.mode!=="week" || !scroller || !state.weekLayout)return;
+    var widths=UOS.SchedulerCalendarTools.weekColumnWidths(state.weekLayout.dayRequirements,Math.max(0,scroller.clientWidth-56));
+    state.weekLayout.columnWidths=widths;
+    calendar.style.setProperty('--scheduler-day-columns',widths.map(function(width){return width+'px';}).join(' '));
+    calendar.style.setProperty('--scheduler-week-width',(56+widths.reduce(function(sum,width){return sum+width;},0))+'px');
+  }
   function renderCalendar(conflicts) {
     if (weekEditor) weekEditor.beforeRender();
     var calendar = one("[data-scheduler-calendar]"); if (!calendar) return;
+    updateCalendarScope(state.workspace.workspace.scheduler || {});
+    renderUnscheduled(conflicts);
     var scroller = calendar.closest(".program-calendar-scroll");
-    var scrollTop = state.calendarRenderedMode === state.mode && scroller ? (scroller.scrollTop || state.calendarScrollTop || 0) : 0;
+    var sameMode = state.calendarRenderedMode === state.mode;
+    var visible = Boolean(scroller && scroller.getClientRects().length);
+    var scrollTop = sameMode ? (visible && state.calendarWasVisible ? scroller.scrollTop : state.calendarScrollTop || 0) : 0;
+    state.calendarWasVisible = visible;
     state.calendarRendering = true;
     var scrollLeft = scroller ? scroller.scrollLeft : 0;
     var days = periodDays(); while (calendar.firstChild) calendar.removeChild(calendar.firstChild);
     calendar.className = "program-calendar program-calendar--" + state.mode;
     if (state.mode === "week") {
       renderWeek(calendar, days, conflicts);
-      if (weekEditor) weekEditor.enhance();
+      if (scroller && (!sameMode || !state.weekScrollInitialized)) scrollTop = defaultWeekScroll(scroller);
       var period = one("[data-scheduler-period]"); if (period) period.textContent = periodLabel(days);
       state.calendarRenderedMode = state.mode;
       if (scroller) { scroller.scrollTop = scrollTop; scroller.scrollLeft = scrollLeft; }
       state.calendarScrollTop = scrollTop;
-      requestAnimationFrame(function () { state.calendarRendering = false; });
+      if (visible && Math.abs(scroller.scrollTop - scrollTop) <= 1) state.weekScrollInitialized = true;
+      if (weekEditor) weekEditor.enhance();
+      requestAnimationFrame(function () {
+        // Navigation can render the calendar while its drawer is still hidden.
+        // Apply its stored position as soon as it becomes visible, before paint.
+        if (!visible) initializeWeekScroll();
+        state.calendarRendering = false;
+      });
       return;
     }
     state.calendarRenderedMode = state.mode; state.calendarScrollTop = scrollTop; state.calendarRendering = false;
+    state.weekScrollInitialized = false;
     renderMonth(calendar, days, conflicts);
     if (scroller) { scroller.scrollTop = scrollTop; scroller.scrollLeft = scrollLeft; }
     var label = one("[data-scheduler-period]"); if (label) label.textContent = periodLabel(days);
@@ -781,11 +848,24 @@ function updatePillPicker() {
   function render() {
     if (!root || !state.workspace || !model()) return;
     var scheduler = state.workspace.workspace && state.workspace.workspace.scheduler || {};
-    state.selectedProjectId = text(state.workspace.workspace.selectedProjectId || scheduler.selectedProjectId);
+    var ui=state.workspace.workspace,entities=state.workspace.entities;
+    var record=(entities.applications || []).concat(entities.events || []).find(function(item){return item.id===ui.selectedEntityId && item.owner===activeOwner();});
+    var resolved=record && UOS.ProgramModel.projectForRegister(state.workspace,record);
+    var incomingProjectId=record ? text(resolved && resolved.id) : text(ui.selectedProjectId || scheduler.selectedProjectId);
+    var contextProject=(entities.projects || []).find(function(item){return item.id===incomingProjectId;});
+    var recordId=record ? record.id : contextProject && (contextProject.applicationId || contextProject.eventId) || incomingProjectId;
+    var changed=state.contextRecordId!==undefined && state.contextRecordId!==recordId;
+    if(changed && weekEditor)weekEditor.retainDraft();
+    state.contextRecordId=recordId;
+    state.selectedProjectId=incomingProjectId;
     state.mode = scheduler.mode === "month" ? "month" : "week";
     state.cursor = text(state.workspace.workspace.calendarCursor || scheduler.cursor) || today();
     state.selectedId = text(scheduler.selectedId || state.workspace.workspace.selectedEntityId);
     state.detail = scheduler.detail === true || scheduler.modeDetail === "detail" || scheduler.inspectorMode === "detail";
+    var selectedJob=(entities.jobs || []).find(function(job){return job.id===state.selectedId;});
+    if(changed || !selectedJob || selectedJob.owner!==activeOwner() || selectedJob.projectId!==state.selectedProjectId){
+      state.selectedId="";state.detail=false;state.editorJobId="";state.editorValues=[];state.editorSignature="";
+    }
     var sort = ["date", "priority", "id"].indexOf(scheduler.sort) >= 0 ? scheduler.sort : "date";
     state.jobs = (state.workspace.entities.jobs || []).map(normalizedJob).sort(function (a, b) { return a._startMs - b._startMs || title(a).localeCompare(title(b)); });
     fillSelect("category", "All categories", optionValues(category)); fillSelect("status", "All statuses", optionValues(status)); fillSelect("crew", "All crews", optionValues(crew));
@@ -802,23 +882,30 @@ function updatePillPicker() {
     all("[data-scheduler-mode]").forEach(function (button) { button.setAttribute("aria-pressed", String(button.getAttribute("data-scheduler-mode") === state.mode)); });
     var sortSelect = one("[data-scheduler-sort]"); if (sortSelect) sortSelect.value = sort;
     updatePillPicker();
-    updateCalendarScope(scheduler); var conflicts = conflictMap(); renderCalendar(conflicts); renderUnscheduled(conflicts); renderList(conflicts); renderDetail(conflicts);
+    var conflicts = conflictMap(); renderCalendar(conflicts); renderList(conflicts); renderDetail(conflicts);
     if (weekEditor) weekEditor.sync();
   }
   function updateCalendarScope(scheduler) {
     var activeProject = getProjectsForActiveOwner().find(function (project) { return project.id === state.selectedProjectId; });
-    state.calendarScope = activeProject && scheduler.calendarScope !== "all" ? "application" : "all";
-    state.calendarVisible = state.visible.filter(function (job) { return state.calendarScope === "all" || isCalendarJobInProject(job, activeProject); });
     var eventWorkspace = activeOwner() === "EVT";
+    var event = activeEvent(), hasContext = Boolean(eventWorkspace ? event : activeProject);
+    state.calendarScope = hasContext && scheduler.calendarScope !== "all" ? "application" : "all";
+    state.calendarVisible = state.visible.filter(function (job) { return state.calendarScope === "all" || isCalendarJobInProject(job, activeProject) || eventWorkspace && event && job.eventId === event.id; });
+    if (eventWorkspace) {
+      var days = periodDays(), first = days.length && days[0].date, last = days.length && days[days.length - 1].date;
+      state.calendarVisible = state.calendarVisible.concat(model().eventMilestones(state.workspace).filter(function (entry) {
+        return entry.startDate >= first && entry.startDate <= last && (state.calendarScope === "all" || event && entry.eventId === event.id);
+      }));
+    }
     all("[data-scheduler-calendar-scope]").forEach(function (button) {
       var scope = button.getAttribute("data-scheduler-calendar-scope");
       button.textContent = (scope === "all" ? "All " : "This ") + (eventWorkspace ? (scope === "all" ? "events" : "event") : (scope === "all" ? "applications" : "application"));
-      button.disabled = scope === "application" && !activeProject;
+      button.disabled = scope === "application" && !hasContext;
       button.setAttribute("aria-pressed", String(scope === state.calendarScope));
     });
     var legend = one("[data-scheduler-calendar-legend]");
     if (legend) {
-      legend.hidden = state.calendarScope !== "all" || !activeProject;
+      legend.hidden = state.calendarScope !== "all" || !hasContext;
       legend.querySelector("[data-scheduler-calendar-legend-active]").textContent = eventWorkspace ? "This event" : "This application";
       legend.querySelector("[data-scheduler-calendar-legend-other]").textContent = eventWorkspace ? "Other events" : "Other applications";
     }
@@ -972,24 +1059,42 @@ function updatePillPicker() {
     var job = state.jobs.find(function (item) { return item.id === state.selectedId; });
     if (!form || !job || !state.detail || !UOS.dialogs) return;
     var node = document.createElement("form"); node.className = "scheduler-outlook-options"; node.setAttribute("data-scheduler-outlook-form", ""); node.noValidate = true;
+    var jobLocation = text(form.elements.location && form.elements.location.value) || resolveLocationText(job);
+    if (jobLocation === "No location address specified") jobLocation = "";
     node.innerHTML = '<p><strong>' + esc(title(job)) + '</strong><br>' + esc(form.elements.startDate.value || "No start date") + ' – ' + esc(form.elements.sameDay.checked ? form.elements.startDate.value : form.elements.endDate.value) + '<br>Time zone: Australia/Adelaide</p>' +
+      '<label><span>Calendar subject</span><input type="text" name="exportSubject" required></label>' +
+      '<label><span>Reminder</span><select name="exportReminder"><option value="0">No reminder</option><option value="60">1 hour before</option><option value="1440">1 day before</option><option value="10080">1 week before</option></select></label>' +
+      '<label><span>CC</span><input type="text" name="exportCc" inputmode="email" autocomplete="off" aria-describedby="scheduler-outlook-cc-help" placeholder="name@example.com; another@example.com"></label>' +
+      '<p id="scheduler-outlook-cc-help">Separate email addresses with commas or semicolons. Recipients are included in the file; no email is sent.</p>' +
+      '<label data-outlook-organizer hidden><span>Your email</span><input type="email" name="exportOrganizerEmail" autocomplete="email"></label>' +
       '<label data-outlook-mode-field><span>Calendar event</span><select name="eventMode"><option value="allDay">Keep all day</option><option value="timed">Add start/end times</option></select></label>' +
       '<div class="scheduler-outlook-times" data-outlook-times><label><span>Start time</span><input type="time" name="exportStartTime" required></label><label><span>End time</span><input type="time" name="exportEndTime" required></label></div>' +
       '<p>Save and download saves all current schedule changes. A nominated job can also update application status through the existing scheduling rules.</p><p data-outlook-dst hidden></p><p role="alert" data-outlook-error hidden></p><button type="submit" class="uos-button uos-button--primary" data-outlook-download>Save and download</button>';
     var mode = node.elements.eventMode, start = node.elements.exportStartTime, end = node.elements.exportEndTime;
+    node.elements.exportSubject.value = title(job) + (jobLocation ? " - " + jobLocation : "");
     mode.value = form.elements.allDay.checked ? "allDay" : "timed";
     node.querySelector("[data-outlook-mode-field]").hidden = !form.elements.allDay.checked;
     start.value = form.elements.allDay.checked ? "" : form.elements.startTime.value;
     end.value = form.elements.allDay.checked ? "" : form.elements.endTime.value;
     function candidate() { return Object.assign({}, job, { startDate: form.elements.startDate.value, endDate: form.elements.sameDay.checked ? form.elements.startDate.value : form.elements.endDate.value, allDay: mode.value === "allDay", startTime: start.value, endTime: end.value }); }
+    function exportOptions() {
+      var privacy = UOS.ProgramPrivacy;
+      return { subject: node.elements.exportSubject.value, reminderMinutes: node.elements.exportReminder.value,
+        ccEmails: node.elements.exportCc.value, organizerEmail: node.elements.exportOrganizerEmail.value,
+        includeLocation: !(privacy && privacy.isEnabled()) };
+    }
     function preview() {
+      var hasRecipients = node.elements.exportCc.value.split(/[;,]/).some(function (email) { return Boolean(email.trim()); });
+      node.querySelector("[data-outlook-organizer]").hidden = !hasRecipients;
+      node.elements.exportOrganizerEmail.disabled = !hasRecipients;
+      node.elements.exportOrganizerEmail.required = hasRecipients;
       var timed = mode.value === "timed"; node.querySelector("[data-outlook-times]").hidden = !timed;
       start.disabled = end.disabled = !timed;
       var notice = node.querySelector("[data-outlook-dst]"); notice.hidden = true;
       try { if (UOS.SchedulerCalendarTools.validate(candidate()).ambiguous) { notice.textContent = "This time occurs twice when daylight saving ends. The earlier occurrence will be used."; notice.hidden = false; } } catch (error) { /* Validation appears on confirmation. */ }
     }
     node.addEventListener("input", preview); node.addEventListener("change", preview); preview();
-    UOS.dialogs.open({ title: "Create Outlook file", node: node, modalClass: "scheduler-outlook-dialog", actions: [{ label: "Cancel", value: false }] });
+    UOS.dialogs.open({ title: "Create Outlook Calendar file", node: node, modalClass: "scheduler-outlook-dialog", actions: [{ label: "Cancel", value: false }] });
     var backdrop = node.closest(".uos-modal-backdrop");
     node.addEventListener("submit", async function (event) {
       event.preventDefault();
@@ -997,7 +1102,9 @@ function updatePillPicker() {
       if (submit.disabled) return;
       errorNode.hidden = true;
       try {
-        var proposed = candidate(); UOS.SchedulerCalendarTools.validate(proposed);
+        var proposed = candidate(), options = exportOptions();
+        // Validate the entire file before changing or saving the schedule.
+        UOS.SchedulerCalendarTools.outlookFile(proposed, options);
         if (state.selectedId !== job.id) throw new Error("The selected job changed. Close this modal and try again.");
         form.elements.allDay.checked = proposed.allDay;
         form.elements.startTime.value = proposed.allDay ? "" : proposed.startTime;
@@ -1005,8 +1112,7 @@ function updatePillPicker() {
         syncScheduleDateControls(form); captureEditorDraft();
         submit.disabled = true; submit.textContent = "Saving…";
         var saved = await saveSchedule(form, true);
-        var privacy = UOS.ProgramPrivacy;
-        var file = UOS.SchedulerCalendarTools.outlookFile(saved, { includeLocation: !(privacy && privacy.isEnabled()) });
+        var file = UOS.SchedulerCalendarTools.outlookFile(saved, options);
         UOS.imports.download(file.filename, file.contents, "text/calendar;charset=utf-8");
         UOS.dialogs.close(backdrop, true);
       } catch (error) {
@@ -1057,6 +1163,16 @@ function updatePillPicker() {
     });
   }
   function onClick(event) {
+    var milestone = event.target.closest("[data-scheduler-milestone-event]");
+    if (milestone) {
+      var eventId = milestone.getAttribute("data-scheduler-milestone-event"), app = UOS.ProgramApp;
+      if (app && typeof app.navigateWithContext === "function") {
+        Promise.resolve(weekEditor ? weekEditor.canLeave(null) : true).then(function (canLeave) {
+          if (canLeave) return app.navigateWithContext("register", eventId);
+        }).catch(function (error) { if (UOS.toast) UOS.toast(error.message || "Event could not be opened.", "error"); });
+      }
+      return;
+    }
     if (event.target.closest("[data-scheduler-outlook]")) { createOutlookFile(); return; }
     var calendarScope = event.target.closest("[data-scheduler-calendar-scope]");
     if (calendarScope) {
@@ -1178,7 +1294,8 @@ function updatePillPicker() {
       capture: function () { syncScheduleDateControls(one("[data-scheduler-form]")); captureEditorDraft(); },
       discard: function () { state.editorValues = []; state.editorJobId = ""; },
       layout: function () { return state.weekLayout; },
-      pagePeriod: function (delta) { var cursor = state.gestureCursor || state.cursor; state.gestureCursor = state.mode === "week" ? UOS.SchedulerCalendarTools.shiftDate(cursor, delta * 7) : addMonths(cursor, delta); renderCalendar(conflictMap()); renderUnscheduled(conflictMap()); },
+      calendarJobs: function () { return previewJobs(state.calendarVisible); },
+      pagePeriod: function (delta) { var cursor = state.gestureCursor || state.cursor; state.gestureCursor = state.mode === "week" ? UOS.SchedulerCalendarTools.shiftDate(cursor, delta * 7) : addMonths(cursor, delta); renderCalendar(conflictMap()); },
       finishPeriod: function (keep) { var cursor = state.gestureCursor; if (keep && cursor) persist(function (scheduler, workspace) { scheduler.cursor = cursor; workspace.calendarCursor = cursor; }).then(function () { state.gestureCursor = ""; }); else state.gestureCursor = ""; },
       closeEditor: backToList,
       repaint: render
@@ -1198,6 +1315,7 @@ function updatePillPicker() {
       }).observe(calendarHeader);
     }
     var calendarScroller = one(".program-calendar-scroll");
+    if (calendarScroller && window.ResizeObserver) new ResizeObserver(function(){applyWeekColumnWidths();initializeWeekScroll();if(weekEditor)weekEditor.enhance();}).observe(calendarScroller);
     if (calendarScroller) calendarScroller.addEventListener("scroll", function () {
       if (!state.calendarRendering && calendarScroller.getClientRects().length) state.calendarScrollTop = calendarScroller.scrollTop;
     });

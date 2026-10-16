@@ -738,15 +738,17 @@ test("PC-013 C4: uos:workspace-changed canonical event payload contract", () => 
   afterWs.entities.projects.push({ id: "TEST-PROJ-1", type: "project", owner: "NSA", title: "Test" });
 
   const appSrc = fs.readFileSync("src/program-planner/js/app.js", "utf8");
-  const startIdx = appSrc.indexOf("function publishWorkspaceChange(");
+  const startIdx = appSrc.indexOf("function describeWorkspaceChange(");
   assert.ok(startIdx >= 0, "publishWorkspaceChange should be defined");
   const endIdx = appSrc.indexOf("function resolveDeepLink(", startIdx);
   const publishCode = appSrc.slice(startIdx, endIdx).trim();
 
   const publishFn = new Function("UOS", "clone", "document", "CustomEvent", "before", "after", "command", "started", `
     var window = { performance: { now: () => 100 } };
+    var mutationSequence = 0, collectionRevisions = Object.create(null);
     ${publishCode}
-    return publishWorkspaceChange(before, after, command, started);
+    var change = describeWorkspaceChange(before, after, command, started);
+    return publishWorkspaceChange(before, after, change);
   `);
 
   const record = publishFn(UOS, structuredClone, mockDocument, class CustomEvent { constructor(type, init) { this.type = type; this.detail = init && init.detail; } }, beforeWs, afterWs, "TestMutation", 50);
@@ -765,6 +767,11 @@ test("PC-013 C4: uos:workspace-changed canonical event payload contract", () => 
   assert.deepEqual(JSON.parse(JSON.stringify(event.detail.changed)), { projects: ["TEST-PROJ-1"] });
   assert.deepEqual(JSON.parse(JSON.stringify(event.detail.operations.projects)), { added: ["TEST-PROJ-1"], updated: [], removed: [] });
   assert.equal(event.detail.workspace.entities.projects.length, 1);
+  assert.equal(event.detail.changeId, 1);
+  assert.equal(event.detail.collectionRevisions.projects, 1);
+  assert.equal(event.detail.workspace, event.detail.after, "canonical aliases share one defensive snapshot");
+  event.detail.workspace.entities.projects[0].title = "Listener edit";
+  assert.equal(afterWs.entities.projects[0].title, "Test", "event consumers cannot mutate live application state");
 });
 
 test("PC-013 C4: Resource Calculator preflight guard prevents fatal error when line is already absent", async () => {

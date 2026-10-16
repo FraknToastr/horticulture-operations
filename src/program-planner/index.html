@@ -14,21 +14,21 @@
   </script>
   <title>Horticulture Program Planner · U-OS</title>
   <link rel="icon" href="../shared/assets/uos-grid-arrow-favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../shared/css/tokens.css?v=20261001-modal-focus-v1">
+  <link rel="stylesheet" href="../shared/css/tokens.css?v=20261016-audit-v1">
   <link rel="stylesheet" href="../shared/css/reset.css">
   <link rel="stylesheet" href="../shared/css/themes.css">
-  <link rel="stylesheet" href="../shared/css/components.css?v=20261002-error-remediation-v12">
+  <link rel="stylesheet" href="../shared/css/components.css?v=20261016-audit-v1">
   <link rel="stylesheet" href="../shared/css/shell.css">
   <link rel="stylesheet" href="../shared/css/accessibility.css?v=20261001-modal-focus-v1">
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
-<link rel="stylesheet" href="styles.css?v=20261013-quote-payments-v1">
-  <link rel="stylesheet" href="space-map-editor.css?v=20261014-location-move-v3">
-  <link rel="stylesheet" href="client-demo-fixes.css?v=20261015-v1">
-  <link rel="stylesheet" href="scheduler-week.css?v=20261015-handle-spacing-v1">
+<link rel="stylesheet" href="styles.css?v=20261016-allocation-year-v3">
+  <link rel="stylesheet" href="space-map-editor.css?v=20261016-adaptive-map-calendar-v2">
+  <link rel="stylesheet" href="client-demo-fixes.css?v=20261016-audit-v1">
+  <link rel="stylesheet" href="scheduler-week.css?v=20261016-adaptive-map-calendar-v2">
   <link rel="stylesheet" href="planner-row-header.css?v=20261008-ready-frame-row-buffers-v13">
-  <link rel="stylesheet" href="register-row-header.css?v=20261009-main-launcher-v1">
-  <link rel="stylesheet" href="status-v5.css?v=20260913-status-history-review-v1">
+  <link rel="stylesheet" href="register-row-header.css?v=20261016-evt-dates-v2">
+  <link rel="stylesheet" href="status-v5.css?v=20261016-evt-register-v1">
   <link rel="stylesheet" href="reports.css">
 </head>
 <body class="program-planner">
@@ -228,6 +228,7 @@
                         </span>
                       </button>
                     </div>
+                    <button type="button" class="uos-button uos-button--secondary uos-button--sm program-status-guide-open" data-status-guide-open aria-haspopup="dialog" aria-controls="registerStatusGuideDialog">Status guide</button>
                   </div>
 
                   <!-- Actions & PDF Dropzone in Main Header Top Row -->
@@ -314,10 +315,11 @@
                 <div class="space-editor__status" id="mapNotice" role="status" hidden></div>
                 </div>
               </section>
-              <section class="space-editor__moasure-section" aria-label="Moasure CSV import">
+              <section class="space-editor__moasure-section" aria-label="Map imagery and survey import">
+                <button type="button" class="space-editor__moasure-panel space-editor__metromap-panel" id="activateMetroMap"><span class="space-editor__moasure-logo"><img src="../shared/assets/metromap.svg" alt="MetroMap"></span><span>Activate Metromap</span></button>
                   <button type="button" id="moasureImportButton" class="space-editor__moasure-panel" aria-describedby="moasureDropStatus">
                     <span class="space-editor__moasure-logo"><img src="../shared/assets/moasure_logo.avif" alt="Moasure"></span>
-                    <span>Drop Moasure CSV or click to browse</span>
+                    <span>Drop Moasure CSV or click to add</span>
                   </button>
                   <p id="moasureDropStatus" class="space-editor__drop-status" role="status" aria-live="polite" hidden></p>
               </section>
@@ -834,13 +836,18 @@
 
                   <!-- Section 2: Line Items -->
                   <div class="program-quote-card program-quote-section--lines">
-                    <div class="program-quote-card__head" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <div class="program-quote-card__head program-quote-card__head--actions">
                       <h4 id="quote-section-2">2. Itemized Quotation Lines</h4>
-                      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                      <div class="program-quote-adjustment-actions">
                         <button class="uos-button uos-button--primary uos-button--sm" type="button" data-add-line>+ Quote adjustment</button>
                       </div>
                     </div>
 
+                    <details class="program-quote-source-changes" data-quote-source-changes hidden>
+                      <summary data-quote-source-summary></summary>
+                      <p>This Draft keeps its saved values. Review the changes, then use Refresh current costs.</p>
+                      <ul data-quote-source-lines></ul>
+                    </details>
                     <div class="program-quote-lines-wrap">
             <table class="uos-table program-quote-builder-table">
               <colgroup>
@@ -1194,11 +1201,11 @@
   </dialog>
 
   <script defer src="app-config.js"></script>
-  <script defer src="../remediation-planner/config/map-providers.js?v=20260922-metromaps-default"></script>
-  <script defer src="../remediation-planner/config/metromaps-provider.js?v=20260922-wmts-fix"></script>
+  <script defer src="../remediation-planner/config/map-providers.js?v=20261016-user-imagery"></script>
+  <script defer src="../remediation-planner/config/metromaps-provider.js?v=20261016-user-imagery"></script>
   <script defer src="../shared/js/suite.js?v=20261002-error-remediation-v12"></script>
   <script defer src="../shared/js/storage.js?v=20260912-empty-baseline-v1"></script>
-  <script defer src="../shared/js/program-runtime.js?v=20261015-tree-details-v1"></script>
+  <script defer src="../shared/js/program-runtime.js?v=20261016-audit-v1"></script>
   <script defer src="js/tree-hub.js?v=20261015-tree-details-v1"></script>
   <script defer src="../shared/js/imports.js?v=20261010-lazy-v1"></script>
   <script defer src="../shared/js/unified-workspace.js"></script>
@@ -1208,17 +1215,17 @@
   <script defer src="../shared/js/rate-library.js?v=20260928-rate-library-schema-v2"></script>
   <script defer src="../shared/js/map-costing.js"></script>
   <script defer src="js/privacy.js?v=20261005-quote-address"></script>
- <script defer src="js/status.js?v=20261005-named-task-history-v1"></script>
+ <script defer src="js/status.js?v=20261016-evt-register-v1"></script>
   <script defer src="js/default-rate-catalog.js?v=20261009-area-pricing-v2"></script>
-  <script defer src="js/model.js?v=20261015-quote-membership-v1"></script>
+  <script defer src="js/model.js?v=20261016-evt-register-v1"></script>
   <script defer src="js/budget-model.js?v=20260928-budget-v1"></script>
-  <script defer src="js/budget-governance.js?v=20261010-business-date-v1"></script>
+  <script defer src="js/budget-governance.js?v=20261016-evt-register-v1"></script>
   <script defer src="js/status-model.js?v=20261001-job-delete-v1"></script>
   <script defer src="js/product-contracts.js?v=20261001-planner-editor-v3"></script>
   <script defer src="js/costing-model.js?v=20261010-business-date-v1"></script>
   <script defer src="js/moasure-geometry.js?v=20261009-moasure-v1"></script>
   <script defer src="js/work-area-service.js?v=20261009-moasure-v1"></script>
-  <script defer src="js/quote-model.js?v=20261015-quote-membership-v1"></script>
+  <script defer src="js/quote-model.js?v=20261016-audit-v1"></script>
   <script defer src="js/funding-model.js?v=20261001-quote-funding-v1"></script>
   <script defer src="js/data-health.js?v=20260912-schema-v5"></script>
   <script defer src="js/status-health.js?v=20260912-schema-v5"></script>
@@ -1239,28 +1246,28 @@
  <link rel="stylesheet" href="budget-layout.css?v=20260930-budget-workspace-v2">
  <link rel="stylesheet" href="drawer-floor.css?v=20260930-unified-floor-v1">
   <script defer src="js/delete-safety.js?v=20261008-delete-warning-v1"></script>
-  <script defer src="js/register.js?v=20261008-delete-warning-guard-v16"></script>
+  <script defer src="js/register.js?v=20261016-allocation-year-v3"></script>
   <script defer src="js/budget.js?v=20261010-business-date-v1"></script>
-  <script defer src="js/register-open-project-fix.js?v=20260922-open-project"></script>
+
   <script defer src="js/drawer-workspace.js?v=20261010-costing-focus-v1"></script>
-  <script defer src="js/scheduler-model.js?v=20261014-multi-day-v4"></script>
+  <script defer src="js/scheduler-model.js?v=20261016-evt-register-v1"></script>
  <script defer src="js/planner-model.js?v=20261005-named-task-history-v1"></script>
- <script defer src="js/scheduler-calendar-tools.js?v=20261014-multi-day-v4"></script>
-  <script defer src="js/scheduler-week-editor.js?v=20261015-handle-spacing-v1"></script>
-  <script defer src="js/scheduler.js?v=20261014-multi-day-v4"></script>
-  <script defer src="js/costing.js?v=20261015-quote-views-v1"></script>
-  <script defer src="js/costing-accessibility.js?v=20260922-targeted-ui"></script>
+ <script defer src="js/scheduler-calendar-tools.js?v=20261016-adaptive-map-calendar-v2"></script>
+  <script defer src="js/scheduler-week-editor.js?v=20261016-adaptive-map-calendar-v2"></script>
+  <script defer src="js/scheduler.js?v=20261016-adaptive-map-calendar-v2"></script>
+  <script defer src="js/costing.js?v=20261016-audit-v1"></script>
+
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
-  <script defer src="../remediation-planner/js/map.js?v=20261015-tree-details-v1"></script>
-  <script defer src="js/program-map.js?v=20261015-card-sizes-v1"></script>
+  <script defer src="../remediation-planner/js/map.js?v=20261016-audit-v1"></script>
+  <script defer src="js/program-map.js?v=20261016-adaptive-map-calendar-v2"></script>
 
 <script defer src="js/planner.js?v=20261015-purpose-icons-v1"></script>
  <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>
   <script defer src="js/planner-presentation.js?v=20261015-purpose-icons-v1"></script>
- <script defer src="js/quote-builder.js?v=20261013-quote-payments-v1"></script>
-<script defer src="js/app.js?v=20261010-map-mode-v1"></script>
+ <script defer src="js/quote-builder.js?v=20261016-audit-v1"></script>
+<script defer src="js/app.js?v=20261016-adaptive-map-calendar-v2"></script>
   <script defer src="js/status-app.js?v=20260912-schema-v5"></script>
-  <script defer src="js/status-ui.js?v=20261002-scheduler-costing-v2"></script>
+  <script defer src="js/status-ui.js?v=20261016-evt-register-v1"></script>
   <script defer src="js/register-history-ui.js?v=20260912-register-history-v2"></script>
 </body>
 </html>

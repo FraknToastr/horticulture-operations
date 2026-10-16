@@ -4,6 +4,7 @@ const path = require('node:path');
 const { suppressBackupModalForFunctionalTest } = require('./test-helper.cjs');
 const pdfPath = path.resolve('src/sample/nature-strip-dashboard-source.sample.pdf');
 const bytes = Array.from(fs.readFileSync(pdfPath));
+const rendererURL = /\/vendor\/space-map\/renderer\.js(?:\?.*)?$/;
 test.use({ screenshot: 'off', trace: 'off', video: 'off' });
 
 async function launch(page, owner) {
@@ -72,7 +73,7 @@ for (const owner of ['NSA', 'EVT']) {
   });
 
   test(`${owner}: failed local Map and PDF loads can be retried`, async ({ page }) => {
-    await page.route('**/vendor/space-map/renderer.js', route => route.abort());
+    await page.route(rendererURL, route => route.abort());
     await page.route('**/vendor/maplibre/maplibre-gl.js', route => route.abort());
     await page.route('**/vendor/pdfjs/pdf.min.js', route => route.abort());
     const frame = await launch(page, owner);
@@ -82,7 +83,7 @@ for (const owner of ['NSA', 'EVT']) {
     expect(await frame.evaluate(() => UOS.ProgramMapController.getMapController())).toBeNull();
     const message = await frame.evaluate(() => UOS.imports.openPdf([]).then(() => '', error => error.message));
     expect(message).toContain('try again');
-    await page.unroute('**/vendor/space-map/renderer.js');
+    await page.unroute(rendererURL);
     await page.unroute('**/vendor/maplibre/maplibre-gl.js');
     await page.unroute('**/vendor/pdfjs/pdf.min.js');
     await frame.evaluate(async () => {

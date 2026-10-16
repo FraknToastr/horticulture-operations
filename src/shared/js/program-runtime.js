@@ -3,7 +3,7 @@
   var UOS = window.UOS = window.UOS || {};
   var source = document.currentScript.src;
   var spaceMapBuild = "20261015-tree-details-v1";
-  var rendererBuild = "20261015-tree-highlights-v1";
+  var rendererBuild = "20261016-performance-v1";
   var pending = {};
 
   function load(name, path, globalName) {

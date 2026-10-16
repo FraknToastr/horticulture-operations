@@ -30,3 +30,9 @@
 .space-editor .has-tree-details .tree-layer-menu, .has-tree-details > .tree-layer-menu { bottom:134px; }
 .tree-layer-menu { transition:bottom 180ms ease; }
 @media(prefers-reduced-motion:reduce) { .tree-details-panel,.tree-layer-menu { transition:none; } }
+/* Quote source comparison and action layout share the existing spacing tokens. */
+.program-quote-card__head--actions{display:flex;align-items:center;justify-content:space-between;gap:var(--uos-space-2)}
+.program-quote-adjustment-actions{display:flex;gap:var(--uos-space-2);flex-wrap:wrap}
+.program-quote-source-changes{margin:var(--uos-space-3);padding:var(--uos-space-3);border:1px solid var(--uos-border);border-radius:var(--uos-radius-control);background:var(--uos-surface-muted)}
+.program-quote-source-changes summary{cursor:pointer;font-weight:700;color:var(--uos-text)}
+.program-quote-source-changes p,.program-quote-source-changes ul{margin-block:var(--uos-space-2) 0}

@@ -1,0 +1,20 @@
+# Space Map, adaptive Scheduler and EVT Register
+
+Implemented locally on 16 October 2026. Changes remain uncommitted. Existing workspace changes were preserved; Overtime was not changed.
+
+- Location guidance uses saved Location pins only. Space Manager offers **Create a Project** and the Register handoff message until a Project exists, then shows the Polygon example until work geometry is saved. Drafts do not dismiss guidance. The sidebar orb toggles the real menu, including its expanded state, accessible label and keyboard controls; explanatory orbs remain illustrative.
+- The footer contains equal MetroMap and Moasure panels within its existing height. Moasure retains browsing, dropping, validation and placement.
+- Esri aerial imagery is the default. MetroMap configuration contains a credential-free template. Keys enter through the masked activation dialog or a previously authorised browser-storage entry. Clipboard denial preserves the field for manual pasting. Saving is optional; failed storage still permits activation in the current tab. Removing a saved key forgets storage while preserving the current activation. Provider errors show a generic offline-grid message, with no retry loop or credential-bearing error detail. Provider changes retain the map instance, camera and editing draft. Workspace JSON, bundle exports and map diagnostics exclude credentials.
+- Every Register Scheduler action remains enabled. Saved scheduled bookings and EVT bump dates determine its used state; unscheduled jobs and draft dates do not. Scheduler resolves the Project from the current Register record, clears the previous editor and handles on a record change, and retains drafts by job. Other records remain accessible through the existing calendar scopes and read-only summaries.
+- Week requirements are computed per visible day: 80px for empty days and at least 140px for occupied days, with additional space for concurrent lanes. Equal viewport shares expand where required, recovering width evenly from empty days before reducing spare booked-day width. Only a combined minimum wider than the viewport causes horizontal overflow. A single width array aligns headers, timed columns and the all-day rail, including saved milestones and draft previews. Resize updates geometry and handles without rebuilding the editor or resetting its values and scroll position.
+- EVT receives sortable Bump-in and Bump-out columns immediately after Received. Values use DD/MM/YYYY or an em dash. Both columns match Received's width; their space comes from Title only, retaining its 96px content minimum and ellipsis. The table overflows when that minimum is reached. Location and other columns retain their allocation. NSA retains its original table structure. EVT row and frame emphasis uses the existing blue tokens; status fills and the yellow Not Created label remain unchanged. Drawer and empty-state spans match the current column count.
+
+## Verification
+
+Five focused model test files passed: MetroMap credentials, calendar tools, Week editing, Event milestones and EVT Register model.
+
+Forty-three distinct desktop Chromium scenarios passed across the new adaptive/credential checks, onboarding, Moasure, Register shortcuts/dates/status/header checks, Week viewport and card layout, multi-day editing, direct placement and Event milestones. A focused 17-scenario run passed after the resize-handle and table changes. MetroMap responses were simulated; no external credential-account changes or live-account validation were performed.
+
+JavaScript syntax checks passed for all nine changed runtime scripts. Git whitespace checks passed. A scan of current source and distributable text files found no embedded MetroMap credentials. Git history was not changed.
+
+No screenshots or mobile-device tests were run. Historical screenshot tests were not executed; the existing narrow-viewport Moasure and mobile Scheduler cases were excluded. Existing layout assertions were updated for EVT's extra columns and blue frame emphasis; the Moasure disclosure check now follows its existing full/summary/minimal cycle.

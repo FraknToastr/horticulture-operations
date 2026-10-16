@@ -22,7 +22,10 @@ test('local libraries load only on demand and concurrent calls share a request',
   const first = runtime.ensureMap();
   assert.equal(runtime.ensureMap(), first);
   assert.equal(scripts.length, 1);
-  assert.equal(scripts[0].src, 'http://localhost/src/shared/vendor/space-map/renderer.js?v=20261011-raster-resolution-v3');
+  const rendererURL = new URL(scripts[0].src);
+  assert.equal(rendererURL.origin, 'http://localhost');
+  assert.equal(rendererURL.pathname, '/src/shared/vendor/space-map/renderer.js');
+  assert.ok(rendererURL.searchParams.get('v'), 'renderer URL must be cache-versioned');
   window.UOSSpaceGPU = { Map: function () {} };
   scripts[0].onload();
   assert.equal(await first, window.UOSSpaceGPU);

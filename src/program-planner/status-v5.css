@@ -24,6 +24,14 @@
 .program-status-lifecycle-dialog{width:min(720px,calc(100vw - 32px));max-width:720px;max-height:min(820px,calc(100dvh - 32px))}
 .program-status-lifecycle-dialog .program-data-dialog__frame{max-height:calc(100dvh - 32px)}
 .program-status-lifecycle-content{min-height:0;overflow:auto}
+.program-status-guide-open{flex:0 0 auto}
+.program-status-guide-notes{display:grid;gap:8px;margin-bottom:20px;color:var(--uos-text-muted);font-size:13px;line-height:1.5}
+.program-status-guide-notes p{margin:0;text-wrap:pretty}
+.program-status-guide-list{list-style:none;margin:0;padding:0}
+.program-status-guide-list>li{padding:16px 0;border-top:1px solid var(--panel-border)}
+.program-status-guide-list h3{margin:0 0 8px}
+.program-status-guide-list p{margin:0;line-height:1.5;text-wrap:pretty}
+.program-status-guide-list .program-status-guide-method{margin-top:8px;color:var(--uos-text-muted);font-size:13px}
 .program-status-lifecycle-content .program-status-controls{margin-top:0;border:0;padding:0;background:transparent}
 .program-status-current,
 .program-status-events li>span{display:inline-flex;width:max-content;max-width:100%;align-items:center;padding:3px 9px;border:1px solid var(--panel-border);border-radius:999px;background:var(--uos-surface);color:var(--uos-text);font-size:12px;font-weight:750;line-height:1.35}

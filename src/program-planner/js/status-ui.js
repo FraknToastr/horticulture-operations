@@ -19,6 +19,19 @@
     if (document.querySelector("[data-status-lifecycle-dialog]")) return;
     document.body.insertAdjacentHTML("beforeend", '<dialog id="statusLifecycleDialog" class="program-rate-dialog program-status-dialog program-status-lifecycle-dialog" data-status-lifecycle-dialog aria-labelledby="statusLifecycleTitle"><div class="program-data-dialog__frame"><header><div><p class="uos-eyebrow">Status governance</p><h2 id="statusLifecycleTitle" data-status-lifecycle-title tabindex="-1">Governed Lifecycle</h2></div><button type="button" class="uos-button uos-button--secondary uos-button--icon" data-status-lifecycle-close aria-label="Close Governed Lifecycle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header><div class="program-data-dialog__body program-status-lifecycle-content" data-status-lifecycle-content></div><footer><button type="button" class="uos-button uos-button--secondary" data-status-lifecycle-close>Close</button></footer></div></dialog>');
   }
+  function ensureStatusGuideDialog() {
+    if (document.querySelector("[data-status-guide-dialog]")) return;
+    document.body.insertAdjacentHTML("beforeend", '<dialog id="registerStatusGuideDialog" class="program-rate-dialog program-status-dialog program-status-lifecycle-dialog" data-status-guide-dialog aria-labelledby="registerStatusGuideTitle"><div class="program-data-dialog__frame"><header><div><p class="uos-eyebrow">Application lifecycle</p><h2 id="registerStatusGuideTitle" data-status-guide-title tabindex="-1">Register status guide</h2></div><button type="button" class="uos-button uos-button--secondary uos-button--icon" data-status-guide-close aria-label="Close status guide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header><div class="program-data-dialog__body program-status-lifecycle-content program-status-guide-content" data-status-guide-content></div><footer><button type="button" class="uos-button uos-button--secondary" data-status-guide-close>Close</button></footer></div></dialog>');
+  }
+  function openStatusGuide(trigger) {
+    var configured = UOS.ProgramAppConfig && typeof UOS.ProgramAppConfig.current === "function" ? UOS.ProgramAppConfig.current() : null;
+    var ws = workspace(), owner = configured && configured.owner || ws && ws.workspace && ws.workspace.ownerMode || UOS.ProgramModel && UOS.ProgramModel.owner;
+    var guide = UOS.ProgramStatus.registerGuide(owner === "EVT" ? "register_evt" : "register_nsa");
+    var dialog = document.querySelector("[data-status-guide-dialog]");
+    dialog.querySelector("[data-status-guide-title]").textContent = guide.title;
+    dialog.querySelector("[data-status-guide-content]").innerHTML = '<div class="program-status-guide-notes">' + guide.notes.map(function (note) { return '<p>' + esc(note) + '</p>'; }).join("") + '</div><ol class="program-status-guide-list" aria-label="Application statuses">' + guide.statuses.map(function (status) { return '<li data-status-guide-code="' + esc(status.code) + '"><h3 class="program-status-current">' + esc(status.label) + '</h3><p>' + esc(status.meaning) + '</p><p class="program-status-guide-method"><strong>How it is reached:</strong> ' + esc(status.reached) + '</p></li>'; }).join("") + '</ol>';
+    showModal(dialog, trigger, "[data-status-guide-open]");
+  }
   function showModal(dialog, returnTarget, fallbackSelector) {
     focusReturns.set(dialog, { node: returnTarget || document.activeElement, fallbackSelector: fallbackSelector || "" });
     if (!dialog.open) dialog.showModal();
@@ -212,6 +225,8 @@
   function bind() {
     dialogMarkup();
     ensureLifecycleDialog();
+    ensureStatusGuideDialog();
+    document.querySelector("[data-status-guide-dialog]").addEventListener("cancel", function (event) { event.preventDefault(); closeModal(event.currentTarget); });
   document.querySelector("[data-status-lifecycle-dialog]").addEventListener("cancel", function (event) { event.preventDefault(); closeLifecycle(); });
   document.addEventListener("keydown", function (event) {
     if (event.key !== "Escape") return;
@@ -231,6 +246,9 @@
       confirmTransition(id, requested).catch(function (error) { render(); if (error.message.indexOf("cancelled") < 0) announce(error.message); });
     }, true);
     document.addEventListener("click", function (event) {
+      var guideOpen = event.target.closest("[data-status-guide-open]"), guideClose = event.target.closest("[data-status-guide-close]");
+      if (guideOpen) { openStatusGuide(guideOpen); return; }
+      if (guideClose) { closeModal(guideClose.closest("dialog")); return; }
       var paymentReason = event.target.closest("[data-payment-reason-id]");
       if (paymentReason) {
         event.preventDefault();

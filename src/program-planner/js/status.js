@@ -12,11 +12,30 @@
   var DEFINITIONS = {
     register_nsa: {
       labels: { received: "Received", quoted: "Quoted", scheduled: "Scheduled", in_progress: "In Progress", complete: "Complete", cancelled: "Cancelled", review_required: "Review required" },
-      order: ["received", "quoted", "scheduled", "in_progress", "complete"], terminal: ["complete", "cancelled"]
+      order: ["received", "quoted", "scheduled", "in_progress", "complete"], terminal: ["complete", "cancelled"],
+      guide: {
+        received: { meaning: "The application has been received and is awaiting further processing.", reached: "Assigned to a new application. An officer can also return an eligible application to this status through Governed Lifecycle." },
+        quoted: { meaning: "The current Quote for the application's linked Project has been issued.", reached: "Set automatically by a new issue signal from the current linked Quote while status automation is enabled. This status cannot be selected manually." },
+        scheduled: { meaning: "The application's work has been scheduled.", reached: "An officer can advance the application through Governed Lifecycle. A valid scheduled Job nominated to update application status can also advance it automatically." },
+        in_progress: { meaning: "Delivery of the application's work is in progress.", reached: "An officer can advance the application through Governed Lifecycle. A valid nominated Job changing to In Progress can also advance it automatically." },
+        complete: { meaning: "The application has been confirmed complete.", reached: "An officer confirms completion through Governed Lifecycle, or approves the separate Register completion recommendation after the linked Project is complete. Project completion alone does not complete the application." },
+        cancelled: { meaning: "The application has been cancelled.", reached: "An officer selects Cancelled from an eligible active status and records a reason." },
+        review_required: { meaning: "An imported status was not recognised and needs officer review.", reached: "Assigned during migration when the source status does not match the canonical application statuses. The original value is retained; transitions and automation remain blocked until it is resolved." }
+      }
     },
     register_evt: {
       labels: { received: "Received", report_sent: "Report Completed and Sent", quoted: "Quoted", planning: "Planning", scheduled: "Scheduled", completed: "Completed", cancelled: "Cancelled", review_required: "Review required" },
-      order: ["received", "report_sent", "quoted", "planning", "scheduled", "completed"], terminal: ["completed", "cancelled"]
+      order: ["received", "report_sent", "quoted", "planning", "scheduled", "completed"], terminal: ["completed", "cancelled"],
+      guide: {
+        received: { meaning: "The Event application has been received and is awaiting further processing.", reached: "Assigned to a new Event. An officer can also return an eligible Event to this status through Governed Lifecycle." },
+        report_sent: { meaning: "The Event remediation report has been completed and sent.", reached: "An officer confirms this step through Governed Lifecycle." },
+        quoted: { meaning: "The current Quote for the Event's linked Project has been issued.", reached: "Set automatically by a new issue signal from the current linked Quote while status automation is enabled. This status cannot be selected manually." },
+        planning: { meaning: "The Event's remediation work is being planned.", reached: "An officer advances the Event through Governed Lifecycle after Quoted." },
+        scheduled: { meaning: "The Event's remediation work has been scheduled.", reached: "An officer can advance the Event through Governed Lifecycle. A valid scheduled Job nominated to update application status can also advance it automatically. A Job starting does not create an Event In Progress status." },
+        completed: { meaning: "The Event application has been confirmed complete.", reached: "An officer confirms completion through Governed Lifecycle, or approves the separate Register completion recommendation after the linked Project is complete. Project completion alone does not complete the Event." },
+        cancelled: { meaning: "The Event application has been cancelled.", reached: "An officer selects Cancelled from an eligible active status and records a reason." },
+        review_required: { meaning: "An imported status was not recognised and needs officer review.", reached: "Assigned during migration when the source status does not match the canonical Event application statuses. The original value is retained; transitions and automation remain blocked until it is resolved." }
+      }
     },
     project: {
       labels: { draft: "Draft", planning: "Planning", in_delivery: "In Delivery", on_hold: "On Hold", complete: "Complete", cancelled: "Cancelled", review_required: "Review required" },
@@ -70,6 +89,21 @@
   function vocabulary(domain) {
     var definition = DEFINITIONS[domain];
     return definition ? Object.keys(definition.labels).map(function (code) { return { code: code, label: definition.labels[code] }; }) : [];
+  }
+  function registerGuide(domain) {
+    if (domain !== "register_nsa" && domain !== "register_evt") return null;
+    var definition = DEFINITIONS[domain];
+    var codes = definition.order.concat(Object.keys(definition.labels).filter(function (code) { return definition.order.indexOf(code) < 0; }));
+    return {
+      domain: domain,
+      title: (domain === "register_evt" ? "EVT" : "NSA") + " Register status guide",
+      notes: [
+        "These are application-level Register statuses. Each record's Governed Lifecycle shows the status actions available to an officer.",
+        "Human status changes require an operator name. Moving backwards, cancelling, or changing a completed record requires a recorded reason.",
+        "Automatic changes require workspace and record automation to be enabled. Job signals additionally require a valid schedule, the application-status nomination, and automation enabled for the Job. They only advance an active application; resuming automation does not replay missed signals."
+      ],
+      statuses: codes.map(function (code) { return Object.assign({ code: code, label: definition.labels[code] }, clone(definition.guide[code])); })
+    };
   }
   function rank(domain, code) { return DEFINITIONS[domain] ? DEFINITIONS[domain].order.indexOf(code) : -1; }
   function reasonRequired(domain, from, to) {
@@ -273,5 +307,5 @@
     return workspace;
   }
 
-  return { schemaVersion: SCHEMA_VERSION, engineActor: ENGINE_ACTOR, reviewCode: REVIEW, definitions: clone(DEFINITIONS), domainFor: domainFor, vocabulary: vocabulary, codeFor: codeFor, labelFor: labelFor, canTransition: canTransition, canHumanTransition: canHumanTransition, reasonRequired: reasonRequired, transition: transition, evaluate: evaluate, runAutomatic: runAutomatic, reconcileMutation: reconcileMutation, completionEligible: projectEligible, migrate: migrate, resolveRecommendation: resolveRecommendation };
+  return { schemaVersion: SCHEMA_VERSION, engineActor: ENGINE_ACTOR, reviewCode: REVIEW, definitions: clone(DEFINITIONS), domainFor: domainFor, vocabulary: vocabulary, registerGuide: registerGuide, codeFor: codeFor, labelFor: labelFor, canTransition: canTransition, canHumanTransition: canHumanTransition, reasonRequired: reasonRequired, transition: transition, evaluate: evaluate, runAutomatic: runAutomatic, reconcileMutation: reconcileMutation, completionEligible: projectEligible, migrate: migrate, resolveRecommendation: resolveRecommendation };
 }));

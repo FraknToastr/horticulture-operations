@@ -29,7 +29,9 @@ for (const owner of ['NSA', 'EVT']) {
     await expect(button('register')).toHaveAttribute('data-shortcut-state', 'in-use');
     await expect(button('map')).toHaveAttribute('data-shortcut-state', 'unused');
     await expect(button('map')).toBeEnabled();
-    for (const name of ['planner', 'costing', 'scheduler', 'quotes']) {
+    await expect(button('scheduler')).toBeEnabled();
+    await expect(button('scheduler')).toHaveAttribute('data-shortcut-state', 'unused');
+    for (const name of ['planner', 'costing', 'quotes']) {
       await expect(button(name)).toBeDisabled();
       await expect(button(name)).toHaveAttribute('data-shortcut-state', 'inactive');
       await expect(button(name)).toHaveAttribute('data-uos-tooltip', /linked delivery project/);
@@ -55,26 +57,31 @@ for (const owner of ['NSA', 'EVT']) {
     await expect.poll(() => child.evaluate(() => window.UOS.ProgramApp.workspace().workspace.destination)).toBe('register');
     await button('register').click();
     await button('register').click();
-    expect(await child.locator(`[data-register-drawer-record="${id}"] [data-register-unlock-edit] svg`).evaluate(element => element.innerHTML)).toBe('<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"></path><path d="m13.5 6.5 4 4"></path>');
+ if (owner === 'NSA') expect(await child.locator(`[data-register-drawer-record="${id}"] [data-register-unlock-edit] svg`).evaluate(element => element.innerHTML)).toBe('<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"></path><path d="m13.5 6.5 4 4"></path>');
     await expect(child.locator(`[data-disclosure-key="register:${id}"][data-disclosure-toggle]`)).toHaveAttribute('aria-expanded', 'true');
 
-    const receiptEdit = child.locator(`[data-register-drawer-record="${id}"] [data-register-unlock-edit]`).first();
-    const receiptLayout = await receiptEdit.evaluate(button => {
-      const rect = button.getBoundingClientRect();
-      const icon = button.querySelector('svg').getBoundingClientRect();
-      const input = button.parentElement.querySelector('input').getBoundingClientRect();
-      return { width: rect.width, height: rect.height, iconWidth: icon.width, iconHeight: icon.height,
-        offsetX: Math.abs((icon.left + icon.width / 2) - (rect.left + rect.width / 2)),
-        offsetY: Math.abs((icon.top + icon.height / 2) - (rect.top + rect.height / 2)),
-        inputOffsetY: Math.abs((input.top + input.height / 2) - (rect.top + rect.height / 2)) };
-    });
-    expect(receiptLayout.width).toBe(28);
-    expect(receiptLayout.height).toBe(28);
-    expect(receiptLayout.iconWidth).toBe(16);
-    expect(receiptLayout.iconHeight).toBe(16);
-    expect(receiptLayout.offsetX).toBeLessThanOrEqual(1);
-    expect(receiptLayout.offsetY).toBeLessThanOrEqual(1);
-    expect(receiptLayout.inputOffsetY).toBeLessThanOrEqual(1);
+ if (owner === 'NSA') {
+      const receiptEdit = child.locator(`[data-register-drawer-record="${id}"] [data-register-unlock-edit]`).first();
+      const receiptLayout = await receiptEdit.evaluate(button => {
+        const rect = button.getBoundingClientRect();
+        const icon = button.querySelector('svg').getBoundingClientRect();
+        const input = button.parentElement.querySelector('input').getBoundingClientRect();
+        return { width: rect.width, height: rect.height, iconWidth: icon.width, iconHeight: icon.height,
+          offsetX: Math.abs((icon.left + icon.width / 2) - (rect.left + rect.width / 2)),
+          offsetY: Math.abs((icon.top + icon.height / 2) - (rect.top + rect.height / 2)),
+          inputOffsetY: Math.abs((input.top + input.height / 2) - (rect.top + rect.height / 2)) };
+      });
+      expect(receiptLayout.width).toBe(28);
+      expect(receiptLayout.height).toBe(28);
+      expect(receiptLayout.iconWidth).toBe(16);
+      expect(receiptLayout.iconHeight).toBe(16);
+      expect(receiptLayout.offsetX).toBeLessThanOrEqual(1);
+      expect(receiptLayout.offsetY).toBeLessThanOrEqual(1);
+      expect(receiptLayout.inputOffsetY).toBeLessThanOrEqual(1);
+ } else {
+   await expect(child.locator(`[data-register-drawer-record="${id}"] [data-register-readonly-key="eventAuditId"]`)).toHaveText(id);
+   await expect(child.locator(`[data-register-drawer-record="${id}"] [data-register-unlock-edit]`)).toHaveCount(0);
+ }
     const projectId = await child.evaluate(async id => {
       let projectId;
       await window.UOS.ProgramApp.updateWorkspace(workspace => {
@@ -223,7 +230,7 @@ for (const owner of ['NSA', 'EVT']) {
     const derived = await refreshed.evaluate(({ id, projectId, owner }) => {
       const app = window.UOS.ProgramApp;
       const workspace = app.workspace();
-      workspace.entities.jobs.push({ id: 'SHORTCUT-JOB', owner, projectId });
+      workspace.entities.jobs.push({ id: 'SHORTCUT-JOB', owner, projectId, startDate:'2026-10-05', endDate:'2026-10-05' });
       workspace.entities.quotes.push({ id: 'SHORTCUT-QUOTE', owner, projectId, status: 'Draft' });
       const emptyQuote = app.evaluateShortcutRule('quotes', app.shortcutContextForWorkspace('register', workspace, id)).usage;
       workspace.entities.costingLines.push({ id: 'SHORTCUT-COST', owner, projectId, jobId: 'SHORTCUT-JOB', quantity: 1, unitRate: 1 });

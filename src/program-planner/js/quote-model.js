@@ -4,7 +4,7 @@
   var UOS = window.UOS = window.UOS || {};
   var STATUSES = ["Draft", "Issued", "Accepted", "Declined", "Superseded"];
   var IMMUTABLE = ["Issued", "Accepted", "Declined", "Superseded"];
-  var PAYABLE_STATUSES = ["Draft", "Issued", "Accepted", "Declined"];
+  var PAYABLE_STATUSES = ["Draft", "Issued", "Accepted"];
   var PAYMENT_METHODS = ["Bank transfer", "Card", "Cash", "EFT", "Purchase order", "Council Operational Budget", "Paid with Deposit", "Other"];
 
   function object(value) { return Boolean(value) && typeof value === "object" && !Array.isArray(value); }
@@ -54,8 +54,7 @@
       total: Math.max(0, money(line.estimatedTotal)), paid: line.paid === true, sourceKind: "costingLine", readOnly: true
     };
   }
-  function inheritProject(inputWorkspace, projectId) {
-    var result = workspace(inputWorkspace);
+  function inheritedProjectLines(result, projectId) {
     var project = find(result.entities.projects, text(projectId), "Project");
     var jobIds = {};
     result.entities.jobs.forEach(function (job) {
@@ -69,6 +68,7 @@
       return true;
     }).map(inheritedLine);
   }
+  function inheritProject(inputWorkspace, projectId) { return inheritedProjectLines(workspace(inputWorkspace), projectId); }
   function totals(lines, discountRate, contingencyRate, discountAmount) {
     var subtotal = money(lines.reduce(function (sum, line) { return sum + Math.max(0, Number(line.total) || 0); }, 0));
     var suppliedDiscount = discountAmount !== undefined && discountAmount !== null && discountAmount !== "";
@@ -138,6 +138,37 @@ function valueOrExisting(input, name, existing) {
   function commerciallyLocked(result, quoteId) {
     return result.entities.payments.some(function (payment) { return payment.quoteId === quoteId && payment.status !== "Reversed"; }) ||
       (result.entities.paymentAllocations || []).some(function (allocation) { return allocation.quoteId === quoteId && allocation.status === "Active"; });
+  }
+  function adjustmentEligibility(inputWorkspace, quoteId, projectId) {
+    var entities = inputWorkspace && inputWorkspace.entities || {};
+    if (!(entities.projects || []).some(function (project) { return project.id === projectId; })) return { allowed: false, reason: "Select a Project to add Quote adjustments." };
+    var quote = quoteId && (entities.quotes || []).find(function (item) { return item.id === quoteId && item.projectId === projectId; });
+    if (quoteId && !quote) return { allowed: false, reason: "The Quote is no longer available." };
+    if (quote && quote.status !== "Draft") return { allowed: false, reason: "Create a new revision to change an issued or resolved Quote." };
+    if (quote && commerciallyLocked(inputWorkspace, quote.id)) return { allowed: false, reason: "Reverse active payments before changing Draft line items." };
+    return { allowed: true, reason: "" };
+  }
+  function receiptEligibility(quote) {
+    quote = quote || {};
+    var reason = quote.fundingMode === "city" ? "No customer payment required. Customer payments and deposits are disabled for City-funded Quotes."
+      : PAYABLE_STATUSES.indexOf(text(quote.status)) < 0 ? "Payments cannot be recorded against a " + (text(quote.status) || "missing") + " Quote." : "";
+    return { allowed: !reason, paymentAllowed: !reason && ["Issued", "Accepted"].indexOf(quote.status) >= 0, reason: reason };
+  }
+  function sourceChanges(inputWorkspace, quoteId) {
+    var quote = (inputWorkspace.entities.quotes || []).find(function (item) { return item.id === quoteId; });
+    if (!quote) return { added: [], changed: [], removed: [], hasChanges: false };
+    var excluded = new Set(quote.excludedCostingLineIds || []);
+    var current = inheritedProjectLines(inputWorkspace, quote.projectId).filter(function (line) { return !excluded.has(line.id); });
+    var saved = currentQuoteLines(inputWorkspace, quoteId).filter(function (line) { return line.costingLineId && !excluded.has(line.costingLineId); });
+    var sourceById = new Map(current.map(function (line) { return [line.id, line]; }));
+    var savedById = new Map(saved.map(function (line) { return [line.costingLineId, line]; }));
+    var fields = ["kind", "category", "description", "unit", "quantity", "rate", "total", "jobId", "rateItemId", "sourceGeometryId"];
+    function signature(line) { return JSON.stringify(fields.map(function (key) { return line[key] == null ? null : line[key]; })); }
+    function label(line) { return { id: line.costingLineId || line.id, description: line.description || "Rate item" }; }
+    var added = current.filter(function (line) { return !savedById.has(line.id); }).map(label);
+    var changed = current.filter(function (line) { return savedById.has(line.id) && signature(line) !== signature(savedById.get(line.id)); }).map(label);
+    var removed = saved.filter(function (line) { return !sourceById.has(line.costingLineId); }).map(label);
+    return { added: added, changed: changed, removed: removed, hasChanges: Boolean(added.length || changed.length || removed.length) };
   }
   function saveDraft(inputWorkspace, input) {
     var result = workspace(inputWorkspace);
@@ -408,8 +439,8 @@ function recordPayment(inputWorkspace, input) {
     var result = workspace(inputWorkspace);
     input = object(input) ? input : {};
     var quote = find(result.entities.quotes, text(input.quoteId), "Quote");
-    if (quote.fundingMode === "city") throw new Error("No customer payment required. Customer payments and deposits are disabled for City-funded Quotes.");
-    if (PAYABLE_STATUSES.indexOf(text(quote.status)) < 0) throw new Error("Payments cannot be recorded against a Superseded Quote.");
+    var eligibility = receiptEligibility(quote);
+    if (!eligibility.allowed) throw new Error(eligibility.reason);
     var value = money(input.amount);
     if (!(value > 0)) throw new Error("Payment amount must be greater than zero.");
     var paymentDate = text(input.paymentDate);
@@ -522,6 +553,9 @@ function recordPayment(inputWorkspace, input) {
   }
 
   UOS.ProgramQuotes = { statuses: STATUSES.slice(), paymentMethods: PAYMENT_METHODS.slice(), inheritProject: inheritProject, evaluateReadiness: evaluateReadiness, commerciallyLocked: function (inputWorkspace, quoteId) { return commerciallyLocked(workspace(inputWorkspace), text(quoteId)); }, saveDraft: saveDraft, updateDraft: saveDraft, refreshDraftFromCurrentCosts: refreshDraftFromCurrentCosts, commercialProjection: commercialProjection, setStatus: setStatus, issue: issue, accept: accept, decline: decline, createRevision: createRevision, lifecycleActions: lifecycleActions, projectQuotes: projectQuotes, quoteRoots: quoteRoots, quoteSnapshot: quoteSnapshot, quoteViewModel: quoteViewModel, recordPayment: recordPayment, reversePayment: reversePayment, paymentSummary: paymentSummary, deletionImpact: deletionImpact, removeQuote: removeQuote, totals: totals };
+  UOS.ProgramQuotes.adjustmentEligibility = adjustmentEligibility;
+  UOS.ProgramQuotes.receiptEligibility = receiptEligibility;
+  UOS.ProgramQuotes.sourceChanges = sourceChanges;
   UOS.ProgramQuotes.customerAmounts = customerAmounts;
   UOS.ProgramQuotes.setDraftCostingLineIncluded = setDraftCostingLineIncluded;
   UOS.ProgramQuotes.syncDraftCostingLines = syncDraftCostingLines;

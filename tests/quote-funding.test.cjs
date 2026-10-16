@@ -156,3 +156,64 @@ test("Legacy Drafts and revisions require selection; existing issued amounts and
   assert.equal(ws.entities.quotes[1].fundingMode, null);
   assert.throws(() => Q.issue(ws, ws.entities.quotes[1].id), /Choose a funding arrangement/);
 });
+
+for (const owner of ["NSA", "EVT"]) {
+  test(owner + ": receipt and adjustment eligibility follow lifecycle and funding", () => {
+    const UOS = load(owner), Q = UOS.ProgramQuotes;
+    for (const fundingMode of ["customer", "mixed", "city"]) for (const status of ["Draft", "Issued", "Accepted", "Declined", "Superseded"]) {
+      let { ws, projectId } = fixture(UOS, owner);
+      ws = save(UOS, ws, projectId, { fundingMode, proposedCustomerContribution: 60 });
+      const quote = ws.entities.quotes[0]; quote.status = status;
+      const receipt = Q.receiptEligibility(quote);
+      const allowed = fundingMode !== "city" && ["Draft", "Issued", "Accepted"].includes(status);
+      assert.equal(receipt.allowed, allowed, fundingMode + " " + status);
+      assert.equal(receipt.paymentAllowed, allowed && status !== "Draft");
+      const payment = { quoteId: quote.id, amount: 10, paymentDate: "2026-10-16", method: "Paid with Deposit", reference: "Eligibility" };
+      if (allowed) assert.equal(Q.recordPayment(ws, payment).entities.payments.length, 1);
+      else assert.throws(() => Q.recordPayment(ws, payment), /No customer payment required|Declined|Superseded/);
+      assert.equal(Q.adjustmentEligibility(ws, quote.id, projectId).allowed, status === "Draft");
+      if (status === "Draft" && allowed) {
+        const paid = Q.recordPayment(ws, payment);
+        assert.equal(Q.adjustmentEligibility(paid, quote.id, projectId).allowed, false);
+      }
+    }
+  });
+  test(owner + ": Declined quotes retain and reverse existing receipts but reject new ones", () => {
+    const UOS = load(owner), Q = UOS.ProgramQuotes;
+    let { ws, projectId } = fixture(UOS, owner);
+    ws = save(UOS, ws, projectId, { fundingMode: "customer" });
+    const id = ws.entities.quotes[0].id;
+    ws = Q.recordPayment(ws, { quoteId: id, amount: 10, paymentDate: "2026-10-16", method: "Paid with Deposit", reference: "Before decline" });
+    ws = Q.decline(Q.issue(ws, id), id);
+    const paymentId = ws.entities.payments[0].id;
+    assert.equal(Q.paymentSummary(ws, id).paid, 10);
+    assert.throws(() => Q.recordPayment(ws, { quoteId: id, amount: 10, paymentDate: "2026-10-16", reference: "After decline" }), /Declined/);
+    ws = Q.reversePayment(ws, paymentId, "Customer declined the offer");
+    assert.equal(Q.paymentSummary(ws, id).paid, 0);
+    assert.equal(ws.entities.payments[0].reversalReason, "Customer declined the offer");
+  });
+  test(owner + ": source comparison preserves exclusions, adjustments and explicit refresh", () => {
+    const UOS = load(owner), Q = UOS.ProgramQuotes;
+    let { ws, projectId } = fixture(UOS, owner);
+    const line = ws.entities.costingLines[0];
+    ws.entities.jobs.push({ id: owner + "-JOB-SOURCE", owner, type: "job", projectId, status: "Draft", sourceKind: "calculator", sourceEntityId: "manual" });
+    ws.entities.costingLines.push({ ...line, id: owner + "-COST-REMOVED", description: "Removed source", jobId: owner + "-JOB-SOURCE", estimatedTotal: 15 });
+    ws.entities.costingLines.push({ ...line, id: owner + "-COST-EXCLUDED", description: "Excluded source", estimatedTotal: 5 });
+    ws = save(UOS, ws, projectId, { customLines: [{ id: "ADJUST", description: "Retained adjustment", quantity: 1, rate: 20 }] });
+    const id = ws.entities.quotes[0].id;
+    ws = Q.setDraftCostingLineIncluded(ws, id, owner + "-COST-EXCLUDED", false);
+    assert.equal(Q.sourceChanges(ws, id).hasChanges, false);
+    ws.entities.costingLines[0].quantity = 4; ws.entities.costingLines[0].estimatedTotal = 200;
+    ws.entities.jobs.find(job => job.id === owner + "-JOB-SOURCE").status = "Cancelled";
+    ws.entities.costingLines.push({ ...line, id: owner + "-COST-ADDED", description: "Added source", estimatedTotal: 30 });
+    const subtotal = ws.entities.quotes[0].subtotal;
+    const diff = Q.sourceChanges(ws, id);
+    assert.deepEqual([diff.added.length, diff.changed.length, diff.removed.length], [1, 1, 1]);
+    ws = Q.saveDraft(ws, { id, projectId });
+    assert.equal(ws.entities.quotes[0].subtotal, subtotal, "saving does not silently reprice");
+    ws = Q.refreshDraftFromCurrentCosts(ws, id, { confirmed: true });
+    assert.equal(Q.sourceChanges(ws, id).hasChanges, false);
+    assert.equal(ws.entities.quoteLines.filter(l => l.sourceKind === "custom").length, 1);
+    assert.ok(!ws.entities.quoteLines.some(l => l.costingLineId === owner + "-COST-EXCLUDED"));
+  });
+}

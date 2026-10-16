@@ -52,7 +52,7 @@ test('Moasure tooltip follows readiness and leaves when the pointer leaves',asyn
   const drop=frame.locator('#moasureImportButton');
   await expect(drop).toBeEnabled();
   await drop.hover();
-  await expect(frame.locator('#uos-shared-tooltip')).toHaveText('Drop Moasure CSV or click to browse');
+  await expect(frame.locator('#uos-shared-tooltip')).toHaveText('Drop Moasure CSV or click to add');
   await page.mouse.move(0,0);
   await expect(frame.locator('#uos-shared-tooltip')).toBeHidden();
   await frame.evaluate(()=>{
@@ -66,7 +66,7 @@ test('Moasure tooltip follows readiness and leaves when the pointer leaves',asyn
   await expect(frame.locator('#moasureDropStatus')).toBeHidden();
   await drop.click();await importMoasure(frame);
   await drop.hover();
-  await expect(frame.locator('#uos-shared-tooltip')).toHaveText('Drop Moasure CSV or click to browse');
+  await expect(frame.locator('#uos-shared-tooltip')).toHaveText('Drop Moasure CSV or click to add');
   await page.mouse.move(0,0);
   await expect(frame.locator('#uos-shared-tooltip')).toBeHidden();
   expect(errors).toEqual([]);
@@ -97,6 +97,9 @@ for(const owner of ['NSA','EVT']){
       await expect(card.locator('.program-shape-actions')).toBeVisible();
       await frame.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
       expect(await frame.evaluate(()=>({sameCard:window.moasureCard===document.querySelector('[data-shape-card-id]'),mutations:window.moasureCardMutations,redraws:window.moasureMapRedraws}))).toEqual({sameCard:true,mutations:0,redraws:0});
+      await toggle.press('Enter');
+      await expect(card).toHaveAttribute('data-card-size','minimal');
+      await expect(toggle).toHaveAttribute('aria-expanded','false');
       await toggle.press('Enter');
       await expect(toggle).toHaveAttribute('aria-expanded','true');
       await expect(toggle).toBeFocused();
@@ -211,5 +214,18 @@ test('Moasure import uses only selected groups and fits a narrow viewport',async
   const geometry=await frame.evaluate(()=>UOS.ProgramApp.workspace().entities.geometries[0]);
   expect(geometry.moasureSurvey.layer).toBe('2');
   expect(geometry.payload.areaSqM).toBe(2);
+  expect(errors).toEqual([]);
+});
+
+
+test('Moasure footer accepts a dropped CSV and retains the MetroMap control',async({page})=>{
+  const {frame,errors}=await openDrawing(page,'NSA');
+  const text=require('node:fs').readFileSync(path.resolve('tests/fixtures/moasure/north-terrace-6.csv'),'utf8');
+  const transfer=await frame.evaluateHandle(text=>{const transfer=new DataTransfer();transfer.items.add(new File([text],'north-terrace-6.csv',{type:'text/csv'}));return transfer;},text);
+  await frame.locator('#moasureImportButton').dispatchEvent('drop',{dataTransfer:transfer});
+  await expect(frame.locator('[data-moasure-group]')).toHaveCount(1);
+  await expect(frame.locator('#moasureAnchorButton')).toBeEnabled();
+  await frame.locator('#moasureImportDialog [data-moasure-cancel]').first().click();
+  await expect(frame.locator('#activateMetroMap')).toBeEnabled();
   expect(errors).toEqual([]);
 });

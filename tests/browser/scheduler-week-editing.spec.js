@@ -62,7 +62,7 @@ test('month headings, midnight placement, priority pills and docked Outlook expo
 
 const form=f=>f.locator('[data-scheduler-form]');
 
-test('three-hour and two-hour overlapping jobs use whole cards in a shared band',async({page})=>{
+test('three-hour and two-hour overlapping jobs use continuous side-by-side cards',async({page})=>{
  const {frame:f,ids,errors}=await setup(page);
  await f.evaluate(ids=>UOS.ProgramApp.updateWorkspace(w=>{
   const a=w.entities.jobs.find(j=>j.id===ids.morning),b=w.entities.jobs.find(j=>j.id===ids.overlap);
@@ -73,12 +73,12 @@ test('three-hour and two-hour overlapping jobs use whole cards in a shared band'
  const a=day.locator('[data-scheduler-job="'+ids.morning+'"]'),b=day.locator('[data-scheduler-job="'+ids.overlap+'"]');
  await expect(a).toHaveCount(1);await expect(b).toHaveCount(1);
  await expect(a.locator('.program-calendar-job__time')).toHaveText('09:00 – 12:00');await expect(b.locator('.program-calendar-job__time')).toHaveText('10:00 – 12:00');
- const ab=await a.boundingBox(),bb=await b.boundingBox();expect(bb.y).toBeGreaterThan(ab.y+ab.height);expect(bb.x).toBe(ab.x);expect(bb.width).toBe(ab.width);
- await expect(day.locator('.scheduler-week-band-label').first()).toHaveText('09:00–12:00 · 2 jobs');
- expect(await a.evaluate(n=>getComputedStyle(n,'::after').display)).toBe('none');
+ const ab=await a.boundingBox(),bb=await b.boundingBox();expect(bb.x).toBeGreaterThanOrEqual(ab.x+ab.width);expect(bb.y-ab.y).toBe(96);expect(bb.width).toBeCloseTo(ab.width,0);expect(bb.y+bb.height).toBe(ab.y+ab.height);
+ await expect(day.locator('.scheduler-week-overlap-band')).toHaveCount(0);
+ expect(await a.evaluate(n=>getComputedStyle(n.querySelector('.scheduler-selection-overlay')).animationName)).toBe('scheduler-selection-pulse');
  expect(await a.evaluate(n=>getComputedStyle(n).color)).not.toBe('rgb(255, 255, 255)');
  await a.scrollIntoViewIfNeeded();
- await f.locator('.program-calendar-scroll').evaluate(el=>{const day=el.querySelector('.scheduler-week-day'),band=el.querySelector('.scheduler-week-overlap-band');el.scrollTop=band.getBoundingClientRect().top-day.getBoundingClientRect().top-80;});
+ await f.locator('.program-calendar-scroll').evaluate(el=>{const day=el.querySelector('.scheduler-week-day'),card=day.querySelector('.scheduler-week-job');el.scrollTop=card.getBoundingClientRect().top-day.getBoundingClientRect().top-80;});
  expect(errors).toEqual([]);
 });
 
@@ -106,17 +106,17 @@ const cell=(f,date,minute)=>f.locator('[data-scheduler-date="'+date+'"] [data-sc
 async function focus(f,id){await f.evaluate(id=>UOS.ProgramSchedulerUI.focusCalendarJob(id),id);await expect(form(f)).toBeVisible();const card=f.locator('.program-calendar-job.is-selected').first();if(await card.count())await card.scrollIntoViewIfNeeded();await f.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));}
 async function place(f,date,minute){await f.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await f.evaluate(({date,minute})=>{const n=document.querySelector('[data-scheduler-date="'+date+'"] [data-scheduler-minute="'+minute+'"]');const s=n.closest('.program-calendar-scroll');s.scrollTop+=n.getBoundingClientRect().top-s.getBoundingClientRect().top-s.querySelector('.scheduler-week-head').getBoundingClientRect().height-60;},{date,minute});const b=await cell(f,date,minute).boundingBox();await f.page().mouse.click(b.x+100,b.y+12);await expect(f.locator('dialog[open],.uos-modal-backdrop')).toHaveCount(0);}
 for(const owner of ['NSA','EVT']){
-test(owner+': direct placement, stacked overlaps and retained drafts',async({page})=>{
+test(owner+': direct placement, side-by-side overlaps and retained drafts',async({page})=>{
 const {frame:f,ids,errors}=await setup(page,owner);const jobs=()=>f.evaluate(()=>UOS.ProgramApp.workspace().entities.jobs);const before=await jobs();
 await f.locator('[data-scheduler-calendar-scope="all"]').click();
 await f.locator('[data-scheduler-unscheduled] [data-scheduler-job="'+ids.unscheduled+'"]').click();
 await place(f,'2026-10-05',540);
 await expect(form(f).locator('[name=startTime]')).toHaveValue('09:00');await expect(form(f).locator('[name=endTime]')).toHaveValue('09:30');
 const monday=f.locator('[data-scheduler-date="2026-10-05"]'),tuesday=f.locator('[data-scheduler-date="2026-10-06"]');
-await expect(monday.locator('.scheduler-week-job[data-shared-band="540"]')).toHaveCount(4);
-const boxes=await monday.locator('.scheduler-week-job[data-shared-band="540"]').evaluateAll(ns=>ns.map(n=>{const b=n.getBoundingClientRect();return {x:b.x,y:b.y,width:b.width,bottom:b.bottom};}));
-expect(new Set(boxes.map(b=>b.x)).size).toBe(1);expect(new Set(boxes.map(b=>b.width)).size).toBe(1);expect(boxes[1].y).toBeGreaterThanOrEqual(boxes[0].bottom);expect(boxes[2].y).toBeGreaterThanOrEqual(boxes[1].bottom);
-expect((await monday.locator('[data-scheduler-band="540"]').boundingBox()).height).toBe((await tuesday.locator('[data-scheduler-band="540"]').boundingBox()).height);
+await expect(monday.locator('.scheduler-week-job[data-scheduler-lanes="3"]')).toHaveCount(4);
+const boxes=await monday.locator('.scheduler-week-job[data-scheduler-lanes="3"]').evaluateAll(ns=>ns.map(n=>{const b=n.getBoundingClientRect();return {x:b.x,y:b.y,width:b.width,bottom:b.bottom};}));
+expect(new Set(boxes.map(b=>b.x)).size).toBe(3);expect(Math.max(...boxes.map(b=>b.width))-Math.min(...boxes.map(b=>b.width))).toBeLessThan(1);
+expect((await cell(f,'2026-10-05',540).boundingBox()).height).toBe(48);expect((await cell(f,'2026-10-06',540).boundingBox()).height).toBe(48);
 expect((await cell(f,'2026-10-05',570).boundingBox()).y).toBe((await cell(f,'2026-10-06',570).boundingBox()).y);
 await expect(monday.locator('.scheduler-type-warning')).toHaveCount(3);
 for(const k of ['start','end','move'])await expect(handle(f,k)).toHaveCount(1);

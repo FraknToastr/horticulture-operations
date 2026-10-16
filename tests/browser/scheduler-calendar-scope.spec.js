@@ -124,19 +124,19 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1440, 390]) test(`${own
     await expect(card(ids.scheduled.A[source])).toHaveClass(/is-selected/);
     const selectionStyle = await card(ids.scheduled.A[source]).evaluate(el => ({
       outline: getComputedStyle(el).outlineStyle,
-      animation: getComputedStyle(el, '::after').animationName,
-      pointerEvents: getComputedStyle(el, '::after').pointerEvents
+      animation: getComputedStyle(el.querySelector('.scheduler-selection-overlay')).animationName,
+      pointerEvents: getComputedStyle(el.querySelector('.scheduler-selection-overlay')).pointerEvents
     }));
-    expect(selectionStyle).toEqual({ outline: 'none', animation: 'scheduler-selection-ants', pointerEvents: 'none' });
+    expect(selectionStyle).toEqual({ outline: 'solid', animation: 'scheduler-selection-pulse', pointerEvents: 'none' });
     const borderVisibility = await card(ids.scheduled.A[source]).evaluate(el => {
-      const s = getComputedStyle(el, '::after');
-      return { content: s.content, display: s.display, position: s.position, parentPosition: getComputedStyle(el).position, background: s.backgroundImage };
+      const s = getComputedStyle(el.querySelector('.scheduler-selection-overlay'));
+      return { content: el.querySelector('.scheduler-selection-overlay').tagName, display: s.display, position: s.position, parentPosition: getComputedStyle(el).position, background: s.backgroundImage };
     });
-    expect(borderVisibility.content).toBe('""');
+    expect(borderVisibility.content).toBe('SPAN');
     expect(borderVisibility.display).not.toBe('none');
     expect(borderVisibility.position).toBe('absolute');
     expect(borderVisibility.parentPosition).toBe('relative');
-    expect(borderVisibility.background).not.toBe('none');
+    expect(borderVisibility.background).toBe('none');
     if (width === 1440) await card(ids.scheduled.A[source]).screenshot({ path: testInfo.outputPath(`${owner}-${source}-selected-pill.png`) });
     expect((await context()).register).toBe(before.register);
     expect((await context()).project).toBe(before.project);
@@ -145,7 +145,7 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1440, 390]) test(`${own
   }
   const form = frame.locator('[data-scheduler-form]');
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect.poll(() => card(ids.scheduled.A['space-map']).evaluate(el => getComputedStyle(el, '::after').animationName)).toBe('none');
+  await expect.poll(() => card(ids.scheduled.A['space-map']).evaluate(el => getComputedStyle(el.querySelector('.scheduler-selection-overlay')).animationName)).toBe('none');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await form.locator('[name="startDate"]').fill('2026-10-07');
   await form.locator('[name="updatesApplicationStatus"]').check();

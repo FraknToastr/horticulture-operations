@@ -3,8 +3,8 @@
 .program-scheduler-detail [data-scheduler-detail-title]{font-size:14px;line-height:1.35}
 .program-scheduler-calendar>.program-scheduler-head{flex:0 0 auto;position:relative;z-index:30}
 .program-scheduler-calendar>.program-calendar-scroll{isolation:isolate;min-width:0}
-.program-calendar.program-calendar--week{display:block;min-width:1036px;background:var(--panel-bg,#fff);overflow:visible}
-.scheduler-week-head,.scheduler-week-body{display:grid;grid-template-columns:56px repeat(7,minmax(140px,1fr));gap:0}
+.program-calendar.program-calendar--week{display:block;width:var(--scheduler-week-width,100%);min-width:0;background:var(--panel-bg,#fff);overflow:visible}
+.scheduler-week-head,.scheduler-week-body{display:grid;grid-template-columns:56px var(--scheduler-day-columns,repeat(7,minmax(80px,1fr)));gap:0}
 .scheduler-week-head{position:sticky;top:0;z-index:20;background:var(--panel-bg,#fff);border-bottom:1px solid var(--panel-border,#dbe3ea)}
 .scheduler-week-head .program-calendar__weekday{position:static;padding:10px 6px;text-align:center;border-right:1px solid var(--panel-border,#dbe3ea);font-size:11px;min-width:0}
 .scheduler-week-head .program-calendar__date{margin:4px 0 0;font-size:16px}
@@ -13,12 +13,12 @@
 .scheduler-week-all-day-label{grid-column:1;display:flex;align-items:center;font-weight:800}
 .scheduler-week-all-day{padding:4px;border-right:1px solid var(--panel-border,#dbe3ea);min-width:0;min-height:38px}
 .scheduler-week-all-day .program-calendar-job{margin:2px 0}
-.scheduler-week-body{height:1152px;position:relative;margin-bottom:20px}
-.scheduler-week-gutter{position:sticky;left:0;z-index:10;height:1152px;background:var(--panel-bg,#fff);border-right:1px solid var(--panel-border,#dbe3ea)}
+.scheduler-week-body{height:2304px;position:relative;margin-bottom:20px}
+.scheduler-week-gutter{position:sticky;left:0;z-index:10;height:2304px;background:var(--panel-bg,#fff);border-right:1px solid var(--panel-border,#dbe3ea)}
 .scheduler-week-hour-label{position:absolute;left:0;right:0;height:16px;padding:2px 4px;font-size:10px;font-weight:700;color:var(--uos-text-muted);background:var(--panel-bg,#fff);line-height:12px}
-.program-calendar--week .program-calendar__day.scheduler-week-day{position:relative;height:1152px;min-height:0;padding:0;border-right:1px solid var(--panel-border,#dbe3ea);box-sizing:border-box;overflow:visible}
+.program-calendar--week .program-calendar__day.scheduler-week-day{position:relative;height:2304px;min-height:0;padding:0;border-right:1px solid var(--panel-border,#dbe3ea);box-sizing:border-box;overflow:visible}
 .program-calendar-job.scheduler-week-job{position:absolute;box-sizing:border-box;margin:0!important;min-height:0!important;min-width:0;padding:2px 4px!important;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;font-size:11px;line-height:14px;border-radius:4px}
-/* Marching ants need a positioned card, while timed cards must stay in their slot. */
+/* Timed cards remain positioned in their day column. */
 .program-calendar.program-calendar--week .program-calendar-job.scheduler-week-job{position:absolute}
 .scheduler-week-job .program-calendar-job__title{display:block;width:100%;flex:0 0 auto}
 .scheduler-week-job .program-calendar-job__time{font-size:10px;white-space:nowrap;display:block;flex:0 0 auto;color:inherit;opacity:.9}
@@ -38,10 +38,6 @@ html[data-suite-theme="dark"] .program-scheduler-outlook-panel{--outlook-surface
 .scheduler-priority--low{color:#14532d;background:#dcfce7;border-color:#86efac}
 .scheduler-priority--medium{color:#854d0e;background:#fef3c7;border-color:#fcd34d}
 .scheduler-priority--high{color:#991b1b;background:#fee2e2;border-color:#fca5a5}
-.program-calendar-job>.scheduler-priority-pill{position:absolute;right:3px;top:2px;margin:0}
-.program-calendar-job:has(>.scheduler-priority-pill) .program-calendar-job__title{padding-right:23px;box-sizing:border-box}
-.program-calendar-job.has-schedule-handles .program-calendar-job__title{padding-right:52px;box-sizing:border-box}
-.program-calendar-job.has-schedule-handles:has(>.scheduler-priority-pill) .program-calendar-job__title{padding-right:76px}
 .scheduler-week-day.is-editable{cursor:crosshair}
 .scheduler-week-day.is-editable:focus-visible{outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:-2px}
 .scheduler-week-day.is-editable:focus-visible:after{content:"";position:absolute;left:0;right:0;top:var(--scheduler-focused-minute,37.5%);height:24px;outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:-2px;pointer-events:none;z-index:12}
@@ -52,8 +48,7 @@ html[data-suite-theme="dark"] .program-scheduler-outlook-panel{--outlook-surface
 [data-week-boundary]{position:absolute;z-index:14;height:0;border-top:2px solid var(--uos-brand);pointer-events:none}
 .scheduler-week-job.is-schedule-draft{box-shadow:inset 0 0 0 2px var(--uos-brand)}
 .scheduler-week-slot{position:relative;display:flex;flex-direction:column;gap:4px;padding:4px;box-sizing:border-box;flex:none;box-shadow:inset 0 1px 0 var(--panel-border,#dbe3ea)}
-.scheduler-type-warning{position:absolute;right:26px;top:3px;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:#fef3c7;color:#854d0e;border:1px solid #fcd34d;border-radius:50%;font-weight:900;font-size:12px;line-height:14px}
-.program-calendar-job.has-type-warning .program-calendar-job__title{padding-right:43px;box-sizing:border-box}
+.scheduler-type-warning{flex:none;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:#fef3c7;color:#854d0e;border:1px solid #fcd34d;border-radius:50%;font-weight:900;font-size:12px;line-height:14px}
 .scheduler-week-handle{border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--uos-brand)}
 .scheduler-week-handle:hover{background:transparent}
 .scheduler-week-handle svg{transform:translateY(var(--grip-offset-y,0));background:var(--uos-surface,#fff);border-radius:2px}
@@ -76,10 +71,10 @@ html[data-suite-theme="dark"] .program-scheduler-outlook-panel{--outlook-surface
 .scheduler-outlook-options button{justify-self:end}
 @media(max-width:480px){.scheduler-outlook-times{grid-template-columns:1fr}}
 
-/* One booking is one continuous block. Shared bands stack overlapping bookings. */
+/* One continuous booking per lane; the shared time scale never stretches. */
 .program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job{
- position:absolute;left:6px;right:6px;width:auto;min-height:44px!important;margin:0!important;
- padding:7px 9px!important;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;
+ position:absolute;right:auto;min-height:0!important;margin:0!important;
+ padding:4px!important;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:start;gap:2px 4px;
  border:1px solid var(--panel-border,#bcc5cc);border-radius:3px;
  background:color-mix(in srgb,var(--uos-brand) 12%,var(--panel-bg,#fff));
  color:var(--uos-text,#263741)!important;box-shadow:none;z-index:3;
@@ -88,41 +83,34 @@ html[data-suite-theme="dark"] .program-scheduler-outlook-panel{--outlook-surface
  background:var(--uos-surface-subtle,#f2f4f6);color:var(--uos-text,#263741)!important;
 }
 .program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job.is-selected{
- border:3px solid var(--uos-brand);padding:5px 7px!important;
- background:color-mix(in srgb,var(--uos-brand) 18%,var(--panel-bg,#fff));outline:0!important;box-shadow:none!important;
+ border-color:var(--uos-brand);
+ background:color-mix(in srgb,var(--uos-brand) 18%,var(--panel-bg,#fff));
 }
-.program-calendar.program-calendar--week .scheduler-week-job::after,
-.program-calendar.program-calendar--week .scheduler-week-job::before{display:none!important;animation:none!important}
 .scheduler-week-day>.scheduler-week-job .program-calendar-job__title{
- color:inherit!important;font-weight:700;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:38px;box-sizing:border-box;
+ color:inherit!important;font-weight:700;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;
 }
 .scheduler-week-day>.scheduler-week-job .program-calendar-job__time,
 .scheduler-week-job-context{color:inherit;font-size:11px;font-weight:400;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.scheduler-week-overlap-band{
- position:absolute;left:0;right:0;box-sizing:border-box;
- border-top:1px solid var(--panel-border,#bcc5cc);border-bottom:1px solid var(--panel-border,#bcc5cc);
- background:color-mix(in srgb,var(--uos-brand) 4%,var(--panel-bg,#fff));pointer-events:none;z-index:1;
-}
-.scheduler-week-band-label{display:block;padding:8px;font-size:10px;line-height:12px;font-weight:700;color:var(--uos-text-muted)}
-.scheduler-week-slot.is-shared-band{box-shadow:none}
-.scheduler-week-day>.scheduler-week-job.is-in-shared-band{left:8px;right:8px;background:var(--panel-bg,#fff)}
 .scheduler-week-handle{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;border-radius:0!important}
 .scheduler-week-handle:focus-visible .scheduler-week-edge-grip,
 .scheduler-week-handle:focus-visible svg{outline:2px solid var(--uos-focus,var(--uos-brand));outline-offset:2px}
 .scheduler-week-handle svg{width:18px;height:18px;box-shadow:none}
 .scheduler-week-drag-ghost{border-radius:3px}
-.program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job.is-compact{padding:4px 7px!important;gap:2px}
-.program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job.is-compact.is-selected{padding:2px 5px!important}
+.program-calendar.program-calendar--week .scheduler-week-day>.scheduler-week-job.is-compact{padding:3px 4px!important;gap:2px}
 .scheduler-week-job.is-compact .program-calendar-job__title{line-height:14px}
 .scheduler-week-job.is-compact .program-calendar-job__time{line-height:12px}
 .scheduler-week-job.is-compact .scheduler-week-job-context{display:none}
 
 
 /* All-day date ranges use compact, non-overlapping lanes above the time ladder. */
-.scheduler-week-head>.scheduler-all-day-rail{grid-column:2 / -1;grid-row:2;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px 0;padding:4px 0;position:relative;min-height:40px}
+.scheduler-week-head>.scheduler-all-day-rail{grid-column:2 / -1;grid-row:2;display:grid;grid-template-columns:var(--scheduler-day-columns,repeat(7,minmax(80px,1fr)));gap:4px 0;padding:4px 0;position:relative;min-height:40px}
 .scheduler-all-day-hit{min-width:0;border-right:1px solid var(--panel-border,#dbe3ea)}
-.scheduler-all-day-rail>.scheduler-all-day-card{position:relative;z-index:2;min-width:0;margin:0 4px!important;min-height:32px;max-height:32px;padding:6px 30px 6px 8px;box-sizing:border-box;overflow:hidden}
+.scheduler-all-day-rail>.scheduler-all-day-card{position:relative;z-index:2;min-width:0;margin:0 4px!important;min-height:44px;max-height:44px;padding:5px 7px;box-sizing:border-box;overflow:hidden}
 .scheduler-all-day-card .program-calendar-job__title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.program-calendar-job.scheduler-event-milestone{--scheduler-milestone-colour:var(--uos-lifecycle-bump-in);border:1px solid var(--scheduler-milestone-colour);border-inline-start-width:4px;background:color-mix(in srgb,var(--scheduler-milestone-colour) 14%,var(--uos-surface,#fff));color:var(--uos-text,#10274c);font-weight:600;text-align:left}
+.program-calendar-job.scheduler-event-milestone--bump-out{--scheduler-milestone-colour:var(--uos-lifecycle-bump-out)}
+.program-calendar-job.scheduler-event-milestone:hover{background:color-mix(in srgb,var(--scheduler-milestone-colour) 23%,var(--uos-surface,#fff))}
+.program-calendar-job.scheduler-event-milestone.is-active-event{background:color-mix(in srgb,var(--scheduler-milestone-colour) 25%,var(--uos-surface,#fff));box-shadow:inset 0 0 0 1px var(--scheduler-milestone-colour)}
 .scheduler-all-day-card.continues-before{border-left-style:dashed}
 .scheduler-all-day-card.continues-after{border-right-style:dashed}
 /* Month dates remain a seven-column grid; booking lanes can span cells. */
@@ -132,14 +120,11 @@ html[data-suite-theme="dark"] .program-scheduler-outlook-panel{--outlook-surface
 .scheduler-month-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));position:relative}
 .scheduler-month-week>.scheduler-month-day{min-height:116px;padding:5px 7px;box-sizing:border-box;border-right:1px solid var(--panel-border,#dbe3ea);border-bottom:1px solid var(--panel-border,#dbe3ea);overflow:visible}
 .scheduler-month-day>.program-calendar__date{margin:0;line-height:22px}
-.scheduler-month-jobs{position:absolute;left:0;right:0;top:32px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:32px;gap:4px 0;pointer-events:none}
-.scheduler-month-jobs>.scheduler-month-card{position:relative;min-width:0;min-height:32px;margin:0 4px!important;padding:5px 28px 5px 7px;box-sizing:border-box;pointer-events:auto;overflow:hidden}
+.scheduler-month-jobs{position:absolute;left:0;right:0;top:32px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:44px;gap:4px 0;pointer-events:none}
+.scheduler-month-jobs>.scheduler-month-card{position:relative;min-width:0;min-height:44px;margin:0 4px!important;padding:5px 7px;box-sizing:border-box;pointer-events:auto;overflow:hidden}
 .scheduler-month-card .program-calendar-job__title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .scheduler-month-card.is-selected{position:relative}
-.scheduler-month-card.is-selected,.scheduler-all-day-card.is-selected{padding-right:72px!important}
-.scheduler-month-card.is-selected .program-calendar-job__title,.scheduler-all-day-card.is-selected .program-calendar-job__title{padding-right:0!important}
 .scheduler-month-jobs>.scheduler-month-card,.scheduler-all-day-rail>.scheduler-all-day-card{width:auto!important;max-width:none!important;justify-self:stretch}
-.scheduler-month-card.is-selected::after{display:block!important;animation:scheduler-selection-ants .8s linear infinite!important}
 .scheduler-week-handle[data-scheduler-gesture-owner]{z-index:60!important;touch-action:none}
 .scheduler-week-edge-grip.is-date-grip{width:7px;height:18px;transform:none}
 .scheduler-week-handle[data-week-handle="date-start"],.scheduler-week-handle[data-week-handle="date-end"]{cursor:ew-resize}
@@ -147,4 +132,20 @@ html[data-suite-theme="dark"] .program-scheduler-outlook-panel{--outlook-surface
 .scheduler-date-drag-ghost{position:fixed!important;right:auto;z-index:65!important;pointer-events:none;padding:6px;overflow:hidden;white-space:normal;font-size:11px}
 .program-calendar .is-date-preview{box-shadow:inset 0 0 0 2px var(--uos-brand);background:color-mix(in srgb,var(--uos-brand) 10%,var(--panel-bg,#fff))}
 .program-calendar-job.is-drag-source{opacity:.25}
-@media(prefers-reduced-motion:reduce){.scheduler-month-card.is-selected::after{animation:none!important}}
+
+/* Every card shares one accessory rail; the editor reserves a full Move target. */
+.program-calendar-job:has(>.scheduler-card-accessories){display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:start;column-gap:4px}
+.program-calendar-job>.program-calendar-job__title{grid-column:1;grid-row:1;min-width:0;margin:0;padding:0!important;box-sizing:border-box}
+.scheduler-card-accessories{grid-column:2;grid-row:1;display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0;height:20px;align-self:start}
+.scheduler-card-accessories>.scheduler-priority-pill{margin:0}
+.scheduler-card-accessories>.scheduler-type-warning{position:static}
+.has-schedule-handles>.scheduler-card-accessories::before{content:"";display:block;flex:none;width:44px;height:20px}
+.scheduler-booking-type{display:inline-flex;flex:none;align-items:center;justify-content:center;width:18px;height:20px;color:inherit}
+.scheduler-booking-type svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.scheduler-week-job>.program-calendar-job__time,.scheduler-week-job>.scheduler-week-job-context{grid-column:1 / -1;min-width:0}
+.program-calendar-job{position:relative;--scheduler-selection-colour:var(--uos-brand);--scheduler-selection-period:1.4s}
+.program-calendar-job.is-selected{outline:2px solid var(--scheduler-selection-colour)!important;outline-offset:-2px}
+.scheduler-selection-overlay{display:none;position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;background:none}
+.program-calendar-job.is-selected>.scheduler-selection-overlay{display:block;box-shadow:inset 0 0 0 3px var(--scheduler-selection-colour),0 0 10px 2px color-mix(in srgb,var(--scheduler-selection-colour) 65%,transparent);animation:scheduler-selection-pulse var(--scheduler-selection-period) ease-in-out infinite}
+@keyframes scheduler-selection-pulse{0%,100%{opacity:.2}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.program-calendar-job.is-selected>.scheduler-selection-overlay{animation:none;opacity:1}}

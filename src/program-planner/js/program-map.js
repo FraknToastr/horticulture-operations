@@ -147,7 +147,7 @@
     one('#removeLocationButton').disabled=!location || !ready || busy || !valid;
     one('#fitLocationsButton').disabled=!ready || busy;one('#homeLocationsButton').disabled=!ready || busy;one('#labelLocationsButton').disabled=!ready || busy;
     var reason=moasureDisabledReason(),drop=one('#moasureImportButton');drop.disabled=Boolean(reason) || busy;
-    drop.setAttribute('data-uos-tooltip','Drop Moasure CSV or click to browse');drop.removeAttribute('title');
+    drop.setAttribute('data-uos-tooltip','Drop Moasure CSV or click to add');drop.removeAttribute('title');
  one('#moasureReplaceFile').disabled=Boolean(reason) || busy;
     if(reason)showMoasureDropMessage(reason);else if(one('#moasureDropStatus').textContent===drop.dataset.disabledReason)showMoasureDropMessage('');
     drop.dataset.disabledReason=reason;
@@ -191,6 +191,7 @@
   function setRadialExpanded(expanded, restoreFocus) {
     radialExpanded=Boolean(expanded);
     var hub=one("#spaceRadialToggle"),actions=one("#spaceRadialActions");
+    var guideAdd=one("[data-space-onboarding-add]");if(guideAdd){guideAdd.setAttribute("aria-expanded",String(radialExpanded));guideAdd.setAttribute("aria-label",radialExpanded?"Collapse creation menu":"Expand creation menu");}
     if(actions)actions.hidden=!radialExpanded;
     if(hub){
       hub.setAttribute("aria-expanded",String(radialExpanded));
@@ -830,6 +831,12 @@ function setMapCanvasCursor(cursor) {
   }
   function handleSpaceEditorClick(event){
     var target=event.target;
+    if(target.closest('[data-space-onboarding-add]')){
+      updateRadialControls();setRadialExpanded(!radialExpanded);
+      var first=radialExpanded && one('#spaceRadialActions [data-space-create]:not(:disabled)');
+      if(first)first.focus({preventScroll:true});
+      return true;
+    }
     var modeButton=target.closest('[data-space-mode]');
     if(modeButton){if(!modeButton.disabled)switchSpaceMode(modeButton.getAttribute('data-space-mode')).catch(showError);return true;}
     var pin=target.closest("[data-space-pin]");
@@ -1902,6 +1909,35 @@ var selectedSpatialFilter = null;
     });
   }
 
+  function renderMapOnboarding(record,workspace){
+    var body=one('.space-editor__body'),guide=one('#spaceMapOnboarding');
+    var manager=mapViewState(workspace).scopeMode==="projects",kind=manager?"Polygon":"Location";
+    if(guide && guide.dataset.kind!==kind){guide.remove();guide=null;}
+    if(!guide){
+      guide=root.document.createElement('section');
+      guide.id='spaceMapOnboarding';guide.className='space-onboarding';guide.dataset.kind=kind;
+      guide.setAttribute('aria-label','Getting started with Space Map');
+      function symbol(path){return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+path+'"/></svg>';}
+      guide.innerHTML='<button type="button" class="space-radial__hub space-onboarding__add" data-space-onboarding-add aria-label="Expand creation menu" aria-controls="spaceRadialActions" aria-expanded="'+radialExpanded+'" aria-describedby="spaceOnboardingAddTip">'+symbol('M12 5v14M5 12h14')+'</button>'+
+        '<p id="spaceOnboardingAddTip" class="space-onboarding__intro">Click + to add a '+(manager?'work polygon':'location')+'.</p>'+
+        '<figure class="space-onboarding__example" aria-label="'+kind+' editing controls explained">'+
+        '<svg class="space-onboarding__connections" viewBox="0 0 300 160" preserveAspectRatio="none" aria-hidden="true"><path d="M150 28L50 126M150 28L150 126M150 28L250 126"/></svg>'+
+        '<div class="space-onboarding__parent"><span class="space-radial__node space-onboarding__orb">'+symbol(manager?'m4 4 16 2-3 14-14-3Z':'M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0ZM15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0')+'</span><strong>'+kind+'</strong></div>'+
+        '<div class="space-onboarding__decisions">'+
+        '<div><span class="space-radial__node space-radial__approve space-onboarding__orb">'+symbol('m5 12 4 4L19 6')+'</span><strong>Approve</strong><p>Save the current edit.</p></div>'+
+        '<div><span class="space-radial__node space-onboarding__orb">'+symbol('M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12')+'</span><strong>Undo</strong><p>Reverse the latest step.</p></div>'+
+        '<div><span class="space-radial__node space-onboarding__cancel space-onboarding__orb">'+symbol('m6 6 12 12M6 18 18 6')+'</span><strong>Cancel</strong><p>Discard the unsaved edit.</p></div>'+
+        '</div></figure>';
+      body.insertBefore(guide,body.firstChild);
+    }
+    // Use saved work only: previews and reference layers must not dismiss help.
+    var model=root.UOS.ProgramModel,project=record && model.projectForRegister(workspace,record);
+    var hasWork=Boolean(record && (manager ? project && model.projectWorkGeometry(workspace,project.id).length : recordLocations(record,workspace).length));
+    guide.hidden=!record || hasWork || manager && !project;
+    setRadialExpanded(radialExpanded);
+    body.classList.toggle('has-space-onboarding',!guide.hidden);
+  }
+
   function renderEventPicker() {
     var workspace=getWorkspace(), state=mapViewState(workspace), entities=workspace.entities;
     var owner=state.ownerMode || workspace.workspace.ownerMode;
@@ -1911,10 +1947,11 @@ var selectedSpatialFilter = null;
     var pins=record ? recordLocations(record,pinSession ? pinSession.workspace : workspace) : [];
     var selected=pinSession ? pinSession.selectedId : state.selectedLocationId;
     var numbers=!(workspace.workspace.map && workspace.workspace.map.showLocationNumbers===false);
-    one("#eventPickerList").innerHTML=pins.length ? pins.map(function(pin,index){return '<button type="button" class="space-editor__pin'+(pin.id===selected?' is-selected':'')+'" data-space-pin="'+esc(pin.id)+'" aria-label="Location '+(index+1)+': '+esc(pin.name || pin.address)+'" aria-pressed="'+(pin.id===selected)+'" title="'+esc(pin.address || pin.name)+'">'+root.UOS.RemediationMap.pinSymbol(index+1,true,owner)+'</button>';}).join("") : '<p class="space-editor__empty">'+(record?'No pins. Use + to place a location.':'Open a Register record to manage its locations.')+'</p>';
+    one("#eventPickerList").innerHTML=pins.length ? pins.map(function(pin,index){return '<button type="button" class="space-editor__pin'+(pin.id===selected?' is-selected':'')+'" data-space-pin="'+esc(pin.id)+'" aria-label="Location '+(index+1)+': '+esc(pin.name || pin.address)+'" aria-pressed="'+(pin.id===selected)+'" title="'+esc(pin.address || pin.name)+'">'+root.UOS.RemediationMap.pinSymbol(index+1,true,owner)+'</button>';}).join("") : record ? '' : '<p class="space-editor__empty">Open a Register record to manage its locations.</p>';
     var needsProject=!state.selectedProjectId && Boolean(record);
     one("#spaceManagementBody").classList.toggle("is-project-empty",needsProject);
-    one("#spaceProjectEmpty").innerHTML=needsProject ? '<button type="button" class="uos-button uos-button--primary space-editor__create-project" data-promote-register-id="'+esc(record.id)+'">Create Project</button>' : '';
+    one("#spaceProjectEmpty").innerHTML=needsProject ? '<button type="button" class="uos-button uos-button--primary space-editor__create-project" data-promote-register-id="'+esc(record.id)+'">Create a Project</button><p class="space-editor__project-guidance">This ' + (record.owner === 'EVT' ? 'Event' : 'Nature Strip Application') + ' has been added to the Register. Proceed to create a Remediation Project.</p>' : '';
+    renderMapOnboarding(record,workspace);
     one('#labelLocationsButton').setAttribute('aria-pressed',String(numbers));
     addSpaceControlIcons(one('.space-editor'));
     ['#moasureImportDialog','#coordinateShapeDialog'].forEach(function(id){var dialog=one(id);if(dialog)addSpaceControlIcons(dialog);});
@@ -2108,6 +2145,37 @@ var selectedSpatialFilter = null;
     all(".program-map-menu[open]").forEach(function (menu) { if (menu !== except) menu.open = false; });
   }
 
+  function initMetroMapActivation() {
+    var api=root.UOS.MetroMapCredentials,button=one('#activateMetroMap');
+    if(!api || !button)return;
+    var dialog=root.document.createElement('dialog');dialog.id='metroMapActivation';dialog.className='program-dialog metromap-dialog';
+    dialog.setAttribute('aria-labelledby','metroMapActivationTitle');
+    dialog.innerHTML='<form><header><h2 id="metroMapActivationTitle">Activate MetroMap</h2></header><div class="metromap-dialog__body"><label class="uos-field"><span>MetroMap API key</span><input id="metroMapKey" type="password" autocomplete="off" spellcheck="false" required></label><button type="button" class="uos-button uos-button--secondary" data-metro-paste>Paste</button><label><input type="checkbox" data-metro-save> Save key in this browser for later visits</label><button type="button" class="uos-button uos-button--secondary" data-metro-forget>Remove saved key</button><p role="status" data-metro-status></p></div><footer><button type="button" class="uos-button uos-button--secondary" data-metro-cancel>Cancel</button><button type="submit" class="uos-button uos-button--primary">Activate</button></footer></form>';
+    root.document.body.appendChild(dialog);
+    var pasteVersion=0,input=dialog.querySelector('input[type=password]'),save=dialog.querySelector('[data-metro-save]'),status=dialog.querySelector('[data-metro-status]'),forget=dialog.querySelector('[data-metro-forget]');
+    function refresh(){forget.disabled=!api.status().saved;button.setAttribute('aria-label',api.status().active?'MetroMap activation settings':'Activate Metromap');}
+    function close(){pasteVersion++;input.value='';dialog.close();button.focus({preventScroll:true});}
+    button.addEventListener('click',function(){refresh();save.checked=api.status().saved;status.textContent=api.status().storageUnavailable?'Browser storage is unavailable. You can activate for this tab.':'';dialog.showModal();input.focus();});
+    dialog.querySelector('[data-metro-cancel]').addEventListener('click',close);
+    dialog.addEventListener('cancel',function(event){event.preventDefault();close();});
+    dialog.querySelector('[data-metro-paste]').addEventListener('click',async function(){
+      var version=++pasteVersion;
+      try{var value=await root.navigator.clipboard.readText();if(!dialog.open || version!==pasteVersion)return;if(value)input.value=value.trim();status.textContent='';}
+      catch(_){if(!dialog.open || version!==pasteVersion)return;status.textContent='Clipboard access unavailable. Paste the key manually into the key field.';}
+      input.focus();
+    });
+    forget.addEventListener('click',function(){try{api.forget();save.checked=false;status.textContent='Saved key removed. MetroMap remains active in this tab.';}catch(error){status.textContent=error.message;}refresh();});
+    dialog.querySelector('form').addEventListener('submit',function(event){
+      event.preventDefault();
+      try{
+        var result=api.activate(input.value,save.checked);activeProviderId='metromaps';
+        if(mapController)mapController.setProvider(activeProviderId);
+        var notice=one('#mapNotice');if(notice)notice.textContent=activeProviderId==='offline'?'Aerial imagery unavailable. The offline grid is active.':result.warning || 'MetroMap activated for this tab.';
+        refresh();close();
+      }catch(_){status.textContent='Enter a valid MetroMap API key.';input.focus();}
+    });
+    refresh();
+  }
   function ensureMapInstance() {
     var container = one("#eventMap");
     if (!container) return;
@@ -3132,6 +3200,7 @@ var selectedSpatialFilter = null;
       }
     });
 
+    initMetroMapActivation();
     var providerSelect = one("#providerSelect");
     if (providerSelect) {
       providerSelect.addEventListener("change", function (event) {

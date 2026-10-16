@@ -187,7 +187,7 @@ test("Budget UI allocates to a Register record before any Project exists", async
   await expect(projectBudget.locator('[data-register-operational-amount]')).toHaveCount(0);
   await expect(projectBudget).not.toContainText("Council Operational Amount");
   await expect(projectBudget.locator('[data-register-budget-row="action"]')).toContainText("Budget");
-  await expect(projectBudget.locator('[data-register-allocation-fy]')).toHaveText("FY 2026/27");
+  await expect(projectBudget.locator('[data-register-allocation-fy]')).toHaveText("2026/2027");
   await expect(projectBudget.locator('[data-register-budget-row="allocation"]')).toContainText("$0.00");
   await expect(projectBudget.locator('[data-register-action="allocate-budget"]')).toHaveText("Allocate");
   await projectBudget.locator('[data-register-action="allocate-budget"]').click();
@@ -281,9 +281,10 @@ test("NSA Register drawer places newest-first FY allocations in the inline table
     const projectGroup = drawer.locator(".program-register-nsa-summary-group--project");
     const allocationRows = projectGroup.locator('[data-register-budget-row="allocation"]');
     await expect(allocationRows).toHaveCount(2);
-    await expect(allocationRows.nth(0).locator("[data-register-allocation-fy]")).toHaveText("FY 2026/27");
+    await expect(allocationRows.nth(0).locator("[data-register-allocation-fy]")).toHaveText("2026/2027");
+    await expect(allocationRows.nth(0).locator("[data-register-allocation-fy]")).toHaveCSS("text-align", "left");
     await expect(allocationRows.nth(0).locator("[data-register-allocation-amount]")).toHaveText("$625.00");
-    await expect(allocationRows.nth(1).locator("[data-register-allocation-fy]")).toHaveText("FY 2025/26");
+    await expect(allocationRows.nth(1).locator("[data-register-allocation-fy]")).toHaveText("2025/2026");
     await expect(allocationRows.nth(1).locator("[data-register-allocation-amount]")).toHaveText("$375.00");
     const geometry = await projectGroup.evaluate((group) => {
       const project = group.querySelector(".program-register-nsa-project-fact");
@@ -358,6 +359,9 @@ test("Event Register drawer keeps project-free allocations in the inline table",
   const projectGroup = drawer.locator(".program-register-nsa-summary-group--project");
   await expect(projectGroup.locator('[data-register-budget-row="allocation"]')).toHaveCount(2);
   await expect(projectGroup.locator("[data-register-allocation-header]")).toHaveText("Financial YearAllocated");
+  await expect(projectGroup.locator('[data-register-budget-fy="2026-27"] [data-register-allocation-fy]')).toHaveText("2026/2027");
+  await expect(projectGroup.locator('[data-register-budget-fy="2025-26"] [data-register-allocation-fy]')).toHaveText("2025/2026");
+  await expect(projectGroup.locator("[data-register-allocation-fy]").first()).toHaveCSS("text-align", "left");
   await expect(projectGroup.locator('[data-register-budget-fy="2026-27"] [data-register-allocation-amount]')).toHaveText("$625.00");
   await expect(projectGroup.locator('[data-register-budget-fy="2025-26"] [data-register-allocation-amount]')).toHaveText("$375.00");
   await expect(projectGroup.locator('[data-register-action="allocate-budget"]')).toBeVisible();

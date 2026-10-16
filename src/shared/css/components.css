@@ -19,14 +19,15 @@
 .major-event-details{display:grid;grid-template-columns:max-content 1fr;gap:.45rem .8rem}.major-event-details dt{font-weight:700}.major-event-details dd{margin:0;overflow-wrap:anywhere}
 
 .uos-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--uos-space-2); padding: 0 var(--uos-space-3); font-weight: 700; font-size: 12px; white-space: nowrap; }
-.uos-button:hover, .uos-icon-button:hover { border-color: var(--uos-brand); color: var(--uos-brand-text); background: var(--uos-brand-soft); }
-.uos-button:active, .uos-icon-button:active { transform: translateY(1px); }
+.uos-button:enabled:hover, .uos-icon-button:enabled:hover { border-color: var(--uos-brand); color: var(--uos-brand-text); background: var(--uos-brand-soft); }
+.uos-button:enabled:active, .uos-icon-button:enabled:active { transform: translateY(1px); }
 .uos-button--primary { border-color: var(--uos-action); color: var(--uos-on-action); background: var(--uos-action); }
-.uos-button--primary:hover { color: var(--uos-on-action); background: var(--uos-action-hover); }
+.uos-button--primary:enabled:hover { color: var(--uos-on-action); background: var(--uos-action-hover); }
 .uos-button--subtle, .uos-icon-button { border-color: transparent; background: transparent; }
 .uos-button--danger { color: var(--uos-danger); }
-.uos-button--danger:hover { color: var(--uos-danger); border-color: var(--uos-danger); background: var(--uos-danger-soft); }
+.uos-button--danger:enabled:hover { color: var(--uos-danger); border-color: var(--uos-danger); background: var(--uos-danger-soft); }
 .uos-button:disabled, .uos-icon-button:disabled { opacity: .44; transform: none; }
+.uos-button--primary:disabled { border-color: var(--uos-border-strong); color: var(--uos-text-muted); background: var(--uos-surface-muted); }
 .uos-icon-button { width: 36px; height: 36px; min-height: 36px; display: inline-grid; place-items: center; padding: 0; }
 .uos-icon-button svg, .uos-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 

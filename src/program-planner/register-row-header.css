@@ -11,8 +11,8 @@
 .program-register-table__reference-col { width: calc(var(--register-reference-width, 96px) + 8px); }
 .program-register-table__toggle-col { width: calc(var(--commercial-frame-height) + 16px); }
 .program-register-table__app-id-col { width: calc(var(--register-app-id-width, 140px) + 8px); }
-.program-register-table__title-col,
-.program-register-table__location-col { width: calc(var(--register-flex-width, 96px) + 8px); }
+.program-register-table__title-col { width: calc(var(--register-title-width, 96px) + 8px); }
+.program-register-table__location-col { width: calc(var(--register-location-width, 96px) + 8px); }
 .program-register-table__status-col { width: calc(var(--register-status-width, 96px) + 8px); }
 .program-register-table__received-col { width: calc(var(--register-received-width, 96px) + 8px); }
 .program-register-table__project-col { width: calc(var(--register-project-width, 96px) + 8px); }
@@ -118,3 +118,14 @@
 .program-register-summary-row.is-disclosure-open .program-register-row-toggle svg { transform: rotate(90deg); }
 .program-register-row-toggle svg { transition: transform 140ms ease; }
 @media (prefers-reduced-motion: reduce) { .program-register-row-toggle svg { transition: none; } }
+
+.program-register-table__event-date-col { width:calc(var(--register-received-width,96px) + 8px); }
+.program-register-table [data-register-event-date][hidden] { display:none!important; }
+/* Owner tokens colour row emphasis; status pills retain their own palette. */
+#program-app .program-register-summary-row[data-owner="EVT"] {
+  --commercial-row-background:var(--register-shortcut-owner-hover);
+  --commercial-frame-emphasis:var(--register-shortcut-owner);
+}
+#program-app .program-register-summary-row[data-owner="EVT"]:is(.is-selected,.is-disclosure-open,[aria-selected="true"]) :is(.commercial-value-frame,.program-register-row-toggle) {
+  border-color:var(--commercial-frame-emphasis)!important;
+}

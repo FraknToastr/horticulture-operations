@@ -186,6 +186,25 @@ test("owner and July–June year identities isolate Register allocations", () =>
   assert.equal(ws.entities.allocationEntries.find((row) => row.registerId === "EVT-EVENT-OWNER").referenceNumber, "EV-12");
 });
 
+test("Council Event Number edits preserve current and historical budget audit references", () => {
+  const UOS = api(null);
+  let ws = UOS.ProgramModel.blank("2026-10-16T00:00:00Z");
+  ws.entities.events.push({ id: "EVT-EVENT-AUDIT", owner: "EVT", type: "event", title: "Event", status: "received", jobId: "EVT-INTERNAL-42" });
+  ws = UOS.ProgramBudget.createAnnualBudget(ws, { owner: "EVT", financialYear: "2026-27" });
+  const budgetId = ws.entities.annualBudgets[0].id;
+  ws = UOS.ProgramBudget.approveAnnualBudget(ws, budgetId, { ...decision, amount: 200 });
+  ws = UOS.ProgramBudget.adjustAllocation(ws, budgetId, "EVT-EVENT-AUDIT", { ...decision, amount: 20 });
+  const original = JSON.parse(JSON.stringify(ws.entities.allocationEntries[0]));
+  ws = UOS.ProgramModel.updateRecord(ws, "EVT-EVENT-AUDIT", { councilEventNumber: "COA-999" }).workspace;
+  ws.entities.events[0].jobId = "outdated-alias";
+  ws = UOS.ProgramBudget.adjustAllocation(ws, budgetId, "EVT-EVENT-AUDIT", { ...decision, amount: 10, at: "2026-10-16T01:00:00Z" });
+  const entries = JSON.parse(JSON.stringify(ws.entities.allocationEntries));
+  assert.deepEqual(entries[0], original);
+  assert.equal(entries[1].referenceNumber, "EVT-INTERNAL-42");
+  assert.equal(entries[1].registerId, "EVT-EVENT-AUDIT");
+  assert.equal(ws.entities.events[0].councilEventNumber, "COA-999");
+});
+
 test("legacy Project funding remains labelled data outside approved annual authority", () => {
   const UOS = api();
   let ws = UOS.ProgramModel.blank("2026-09-29T00:00:00Z");

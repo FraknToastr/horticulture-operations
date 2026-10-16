@@ -31,6 +31,7 @@ export class NavigationControl {
 
 export class Marker {
   constructor(options = {}) { this.options = options; this.element = options.element || document.createElement('div'); this.handlers = {}; this.coordinate = [0, 0]; this.element.classList.add('maplibregl-marker'); }
+  setOffset(offset) { this.options.offset = offset.slice(); this.update(); return this; }
   setLngLat(c) { this.coordinate = Array.isArray(c) ? c.slice(0, 2) : [c.lng, c.lat]; this.update(); return this; }
   getLngLat() { return { lng: this.coordinate[0], lat: this.coordinate[1] }; }
   getElement() { return this.element; }
@@ -58,8 +59,8 @@ export class Marker {
 }
 
 class GeoSource {
-  constructor(map, id, definition) { this.map = map; this.id = id; Object.assign(this, definition); this.version = 0; this.serialized = ''; }
-  setData(data) { const serialized = JSON.stringify(data); if (serialized !== this.serialized) { this.data = data; this.serialized = serialized; this.version++; this.map.dirtySources.add(this.id); this.map.legacy?.getSource(this.id)?.setData(data); this.map.invalidate(); } }
+  constructor(map, id, definition) { this.map = map; this.id = id; Object.assign(this, definition); this.serialized = ''; }
+  setData(data) { const serialized = JSON.stringify(data); if (serialized !== this.serialized) { this.data = data; this.serialized = serialized; this.map.dirtySources.add(this.id); this.map.legacy?.getSource(this.id)?.setData(data); this.map.invalidate(); } }
 }
 
 export class Map {
@@ -70,10 +71,10 @@ export class Map {
     this.origin = mercator(this.center); this.sources = new globalThis.Map(); this.layers = []; this.handlers = {}; this.markers = new Set(); this.controls = [];
     this.layers = structuredClone(options.style?.layers || []);
     this.outlineScale = uniform(1);
-    this.objects = new globalThis.Map(); this.dirtySources = new Set(); this.reference = new globalThis.Map(); this.tiles = new globalThis.Map(); this.tileGeneration = 0;
+    this.objects = new globalThis.Map(); this.dirtySources = new Set(); this.dirtyLayers = new Set(); this.reference = new globalThis.Map(); this.tiles = new globalThis.Map();
     this.backend = 'initializing'; this.attempt = -1; this.generation = 0; this.removed = false; this.loaded = false; this.pendingFrame = 0; this.rendering = false; this.redraw = false;
-    this.dragPan = { enabled: true, disable: () => { this.dragPan.enabled = false; }, enable: () => { this.dragPan.enabled = true; } };
-    this.doubleClickZoom = { disable: () => { this.noDoubleClick = true; }, enable: () => { this.noDoubleClick = false; } };
+    this.dragPan = { enabled: true, disable: () => this.setDragPan(false), enable: () => this.setDragPan(true) };
+    this.doubleClickZoom = { disable: () => this.setDoubleClickZoom(false), enable: () => this.setDoubleClickZoom(true) };
     this.container.classList.add('maplibregl-map'); this.container.style.position = 'relative';
     // The controller accesses the canvas before asynchronous GPU initialization.
     this.canvas = document.createElement('canvas'); this.container.prepend(this.canvas); this.bindCanvas(this.canvas);
@@ -89,7 +90,17 @@ export class Map {
   getCenter() { return { lng: this.center[0], lat: this.center[1] }; }
   getZoom() { return this.zoom; }
   getBounds() { const a = this.unproject([0, this.height]), b = this.unproject([this.width, 0]); return new LngLatBounds([a.lng, a.lat], [b.lng, b.lat]); }
-  isMoving() { return !!this.panning; }
+  isMoving() { return this.legacy ? this.legacy.isMoving() : !!this.panning; }
+  setDragPan(enabled) {
+    if (this.dragPan.enabled === enabled) return;
+    this.dragPan.enabled = enabled;
+    if (this.legacy) this.legacy.dragPan[enabled ? 'enable' : 'disable']();
+  }
+  setDoubleClickZoom(enabled) {
+    if (!!this.noDoubleClick === !enabled) return;
+    this.noDoubleClick = !enabled;
+    if (this.legacy) this.legacy.doubleClickZoom[enabled ? 'enable' : 'disable']();
+  }
   getStyle() { return { version: 8, sources: Object.fromEntries([...this.sources].map(([id, s]) => [id, { type: s.type, data: s.data }])), layers: this.layers }; }
   setGlyphs() {}
   getSource(id) { return this.sources.get(id); }
@@ -98,20 +109,24 @@ export class Map {
   getLayer(id) { return this.layers.find(l => l.id === id); }
   addLayer(layer, before) { const i = this.layers.findIndex(l => l.id === before); this.layers.splice(i < 0 ? this.layers.length : i, 0, structuredClone(layer)); this.legacy?.addLayer(layer, before); if (layer.source) this.dirtySources.add(layer.source); this.invalidate(); }
   removeLayer(id) { this.layers = this.layers.filter(l => l.id !== id); this.disposeObject(id); this.legacy?.removeLayer(id); this.invalidate(); }
-  setPaintProperty(id, key, value) { const l = this.getLayer(id); if (!l) return; l.paint ||= {}; l.paint[key] = value; this.dirtySources.add(l.source); this.legacy?.setPaintProperty(id, key, value); this.invalidate(); }
-  setLayoutProperty(id, key, value) { const l = this.getLayer(id); if (!l) return; l.layout ||= {}; l.layout[key] = value; this.dirtySources.add(l.source); this.legacy?.setLayoutProperty(id, key, value); this.invalidate(); }
-  isSourceLoaded(id) { const source = this.sources.get(id); return !!source && (source.type !== 'raster' || [...this.tiles.values()].some(t => t.source === id && t.texture)); }
+  setPaintProperty(id, key, value) { const l = this.getLayer(id); if (!l) return; l.paint ||= {}; if (JSON.stringify(l.paint[key]) === JSON.stringify(value)) return; l.paint[key] = value; this.dirtyLayers.add(id); this.legacy?.setPaintProperty(id, key, value); this.invalidate(); }
+  setLayoutProperty(id, key, value) { const l = this.getLayer(id); if (!l) return; l.layout ||= {}; if (JSON.stringify(l.layout[key]) === JSON.stringify(value)) return; l.layout[key] = value; this.dirtyLayers.add(id); this.legacy?.setLayoutProperty(id, key, value); this.invalidate(); }
+  isSourceLoaded(id) {
+    if (this.legacy) return !!this.legacy.getSource(id) && this.legacy.isSourceLoaded(id);
+    const source = this.sources.get(id);
+    return !!source && (source.type !== 'raster' || [...this.tiles.values()].some(t => t.source === id && t.texture));
+  }
   addControl(control, position = 'top-right') { const el = control.onAdd(this); const wrap = document.createElement('div'); wrap.className = `maplibregl-control-container space-map-controls space-map-controls--${position}`; Object.assign(wrap.style, { position: 'absolute', top: '0', right: '0', zIndex: '3' }); wrap.append(el); this.container.append(wrap); this.controls.push(wrap); return this; }
   project(c) { if (this.legacy) return this.legacy.project(c); const p = mercator(Array.isArray(c) ? c : [c.lng, c.lat]), center = mercator(this.center); return { x: this.width / 2 + (p[0] - center[0]) * this.scale, y: this.height / 2 - (p[1] - center[1]) * this.scale }; }
   unproject(p) { if (this.legacy) return this.legacy.unproject(p); p = Array.isArray(p) ? p : [p.x, p.y]; const center = mercator(this.center), c = geographic([center[0] + (p[0] - this.width / 2) / this.scale, center[1] - (p[1] - this.height / 2) / this.scale]); return { lng: c[0], lat: c[1] }; }
   easeTo(options) {
     if (this.legacy) { this.legacy.easeTo(options); return this; }
     if (options.center) this.center = Array.isArray(options.center) ? options.center.slice() : [options.center.lng, options.center.lat];
-    const previous = this.zoom; if (options.zoom != null) this.zoom = Math.max(0, Math.min(22, options.zoom));
+    if (options.zoom != null) this.zoom = Math.max(0, Math.min(22, options.zoom));
     this.updateCamera();
     // Camera motion also changes raster visibility and the local projection
     // used by reference geometry; always schedule a complete redraw.
-    this.dirtyAll(); this.invalidate(); this.fire('move'); this.fire('moveend', { originalEvent: options.originalEvent }); return this;
+    this.invalidate(); this.fire('move'); this.fire('moveend', { originalEvent: options.originalEvent }); return this;
   }
   jumpTo(options) { return this.easeTo(options); }
   fitBounds(bounds, options = {}) {
@@ -131,18 +146,22 @@ export class Map {
     const size = `${width}:${height}:${ratio}`;
     // Reassigning canvas dimensions clears the surface, even at the same size.
     if (this.renderer && this.rendererSize !== size) { if (this.renderer.getPixelRatio() !== ratio) this.renderer.setPixelRatio(ratio); this.renderer.setSize(width, height, false); this.rendererSize = size; }
-    if (changed) this.legacy?.resize(); this.updateCamera();
+    if (this.legacy && changed) {
+      if (this.legacy.getPixelRatio() !== ratio) this.legacy.setPixelRatio(ratio);
+      else this.legacy.resize();
+    } this.updateCamera();
     if (changed) { this.invalidate(); this.fire('resize'); } return this;
   }
   updateCamera() {
-    this.scale = 512 * 2 ** this.zoom / WORLD;
-    this.outlineScale.value = 1 / this.scale;
+    const scale = 512 * 2 ** this.zoom / WORLD;
+    if (scale !== this.scale) for (const layer of this.layers) if (layer.type === 'line') this.dirtyLayers.add(layer.id);
+    this.scale = scale; this.outlineScale.value = 1 / scale;
+    for (const marker of this.markers) marker.update();
     if (!this.camera) return;
     const c = mercator(this.center);
     if (Math.hypot(c[0] - this.origin[0], c[1] - this.origin[1]) > 65536) { this.origin = c; this.dirtyAll(); for (const ref of this.reference.values()) ref.dirty = true; for (const [key, tile] of this.tiles) this.releaseTile(key, tile); }
     this.camera.left = -this.width / (2 * this.scale); this.camera.right = -this.camera.left; this.camera.top = this.height / (2 * this.scale); this.camera.bottom = -this.camera.top;
     this.camera.position.set(c[0] - this.origin[0], c[1] - this.origin[1], 100); this.camera.updateProjectionMatrix();
-    for (const m of this.markers) m.update();
   }
   dirtyAll() { for (const id of this.sources.keys()) this.dirtySources.add(id); }
   eventPoint(event) { const r = this.container.getBoundingClientRect(); return { x: event.clientX - r.left, y: event.clientY - r.top }; }
@@ -155,12 +174,12 @@ export class Map {
       this.fire(e.pointerType === 'touch' ? 'touchmove' : 'mousemove', eventFor(e));
       if (!pointers.has(e.pointerId)) return; const p = this.eventPoint(e); pointers.set(e.pointerId, p);
       if (start && Math.hypot(p.x - start.x, p.y - start.y) > 3) moved = true;
-      if (pointers.size === 2 && this.dragPan.enabled) { const ps = [...pointers.values()], distance = Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y); if (pinchDistance) this.zoom = Math.max(0, Math.min(22, this.zoom + Math.log2(distance / pinchDistance))); pinchDistance = distance; this.dirtyAll(); this.updateCamera(); this.invalidate(); }
+      if (pointers.size === 2 && this.dragPan.enabled) { const ps = [...pointers.values()], distance = Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y); if (pinchDistance) this.zoom = Math.max(0, Math.min(22, this.zoom + Math.log2(distance / pinchDistance))); pinchDistance = distance; this.updateCamera(); this.invalidate(); }
       else if (this.panning && this.dragPan.enabled && last) { const c = mercator(this.center); this.center = geographic([c[0] - (p.x - last.x) / this.scale, c[1] + (p.y - last.y) / this.scale]); this.updateCamera(); this.invalidate(); this.fire('move', eventFor(e)); } last = p;
     });
     const finish = e => { pointers.delete(e.pointerId); this.fire(e.pointerType === 'touch' ? 'touchend' : 'mouseup', eventFor(e)); if (!moved && e.type !== 'pointercancel') this.fire('click', eventFor(e)); this.panning = false; start = last = null; pinchDistance = 0; this.fire('moveend', eventFor(e)); };
     canvas.addEventListener('pointerup', finish); canvas.addEventListener('pointercancel', finish);
-    canvas.addEventListener('wheel', e => { e.preventDefault(); const p = this.eventPoint(e), before = this.unproject(p); this.zoom = Math.max(0, Math.min(22, this.zoom - e.deltaY * .003)); this.updateCamera(); const after = this.unproject(p), a = mercator([before.lng, before.lat]), b = mercator([after.lng, after.lat]), c = mercator(this.center); this.center = geographic([c[0] + a[0] - b[0], c[1] + a[1] - b[1]]); this.updateCamera(); this.dirtyAll(); this.invalidate(); clearTimeout(this.wheelTimer); this.wheelTimer = setTimeout(() => this.fire('moveend', eventFor(e)), 100); }, { passive: false });
+    canvas.addEventListener('wheel', e => { e.preventDefault(); const p = this.eventPoint(e), before = this.unproject(p); this.zoom = Math.max(0, Math.min(22, this.zoom - e.deltaY * .003)); this.updateCamera(); const after = this.unproject(p), a = mercator([before.lng, before.lat]), b = mercator([after.lng, after.lat]), c = mercator(this.center); this.center = geographic([c[0] + a[0] - b[0], c[1] + a[1] - b[1]]); this.updateCamera(); this.invalidate(); clearTimeout(this.wheelTimer); this.wheelTimer = setTimeout(() => this.fire('moveend', eventFor(e)), 100); }, { passive: false });
     canvas.addEventListener('dblclick', e => { if (!this.noDoubleClick) this.easeTo({ zoom: this.zoom + 1, center: Object.values(this.unproject(this.eventPoint(e))), originalEvent: e }); });
     canvas.addEventListener('keydown', e => { if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', '+', '-', '='].includes(e.key)) return; e.preventDefault(); if (['+', '-', '='].includes(e.key)) this.easeTo({ zoom: this.zoom + (e.key === '-' ? -1 : 1), originalEvent: e }); else { const c = mercator(this.center), dx = e.key === 'ArrowRight' ? 100 : e.key === 'ArrowLeft' ? -100 : 0, dy = e.key === 'ArrowUp' ? 100 : e.key === 'ArrowDown' ? -100 : 0; this.easeTo({ center: geographic([c[0] + dx / this.scale, c[1] + dy / this.scale]), originalEvent: e }); } });
     canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.recover(new Error('Graphics context lost')); });
@@ -203,11 +222,19 @@ export class Map {
     const api = await window.UOS.ProgramRuntime.ensureLegacyMap();
     const host = document.createElement('div'); Object.assign(host.style, { position: 'absolute', inset: '0' }); this.container.prepend(host); this.legacyHost = host;
     const sources = {}; for (const [id, s] of this.sources) sources[id] = s.type === 'geojson' ? { type: s.type, data: s.data } : { type: s.type, tiles: s.tiles, tileSize: s.tileSize, minzoom: s.minzoom, maxzoom: s.maxzoom, attribution: s.attribution };
-    this.legacy = new api.Map({ container: host, center: this.center, zoom: this.zoom, style: { version: 8, sources, layers: this.layers } }); this.canvas = this.legacy.getCanvas();
+    this.legacy = new api.Map({ container: host, center: this.center, zoom: this.zoom, pixelRatio: this.ratio, maxTileCacheSize: 128, style: { version: 8, sources, layers: this.layers } }); this.canvas = this.legacy.getCanvas();
     await new Promise((resolve, reject) => { const timer = setTimeout(() => reject(new Error('Legacy map timed out')), 8000); this.legacy.once('load', () => { clearTimeout(timer); resolve(); }); this.legacy.once('error', e => { clearTimeout(timer); reject(e.error); }); });
     this.backend = 'maplibre';
-    this.attribution.hidden = true; this.dragPan.enabled ? this.legacy.dragPan.enable() : this.legacy.dragPan.disable();
-    for (const name of ['click', 'mousedown', 'mouseup', 'mousemove', 'touchstart', 'touchmove', 'touchend', 'move', 'moveend', 'sourcedata', 'idle', 'error']) this.legacy.on(name, e => { const c = this.legacy.getCenter(); this.center = [c.lng, c.lat]; this.zoom = this.legacy.getZoom(); this.updateCamera(); this.dragPan.enabled ? this.legacy.dragPan.enable() : this.legacy.dragPan.disable(); this.fire(name, e); this.dragPan.enabled ? this.legacy.dragPan.enable() : this.legacy.dragPan.disable(); });
+    this.attribution.hidden = true;
+    if (!this.dragPan.enabled) this.legacy.dragPan.disable();
+    if (this.noDoubleClick) this.legacy.doubleClickZoom.disable();
+    for (const name of ['click', 'mousedown', 'mouseup', 'mousemove', 'touchstart', 'touchmove', 'touchend', 'move', 'moveend', 'sourcedata', 'idle', 'error']) this.legacy.on(name, e => {
+      if (name === 'move' || name === 'moveend') {
+        const c = this.legacy.getCenter(); this.center = [c.lng, c.lat]; this.zoom = this.legacy.getZoom();
+        this.updateCamera();
+      }
+      this.fire(name, e);
+    });
     this.canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.recover(new Error('Legacy context lost')); });
     this.syncLegacyReference();
   }
@@ -250,8 +277,8 @@ export class Map {
     this.rendering = true; const generation = this.generation;
     try {
       const background = this.layers.find(l => l.type === 'background'); this.scene.background = new Color(background?.paint?.['background-color'] || '#f7f9fd');
-      for (let i = 0; i < this.layers.length; i++) if (this.dirtySources.has(this.layers[i].source)) this.rebuildLayer(this.layers[i], this.layers[i].source === 'uos-grid' ? 0 : 100 + i);
-      this.dirtySources.clear(); this.renderReference(); this.renderTiles(); this.renderer.render(this.scene, this.camera); if (generation === this.generation) this.fire('idle');
+      for (let i = 0; i < this.layers.length; i++) if (this.dirtySources.has(this.layers[i].source) || this.dirtyLayers.has(this.layers[i].id)) this.rebuildLayer(this.layers[i], this.layers[i].source === 'uos-grid' ? 0 : 100 + i);
+      this.dirtySources.clear(); this.dirtyLayers.clear(); this.renderReference(); this.renderTiles(); this.renderer.render(this.scene, this.camera); if (generation === this.generation) this.fire('idle');
     } catch (error) { if (generation === this.generation) queueMicrotask(() => this.recover(error)); }
     finally { this.rendering = false; if (this.redraw) { this.redraw = false; this.invalidate(); } }
   }
@@ -332,6 +359,20 @@ export class Map {
       addLegacyReference(this.legacy, id, ref.payload);
     }
   }
-  getResourceMetrics() { let bytes = 0; for (const [id, objects] of this.objects) if (id.startsWith('reference-')) for (const o of objects) bytes += o.userData.buffer?.array.byteLength || Object.values(o.geometry?.attributes || {}).reduce((n, a) => n + a.array.byteLength, 0); return { backend: this.backend, referenceGpuBytes: bytes, tiles: this.tiles.size, canvasPixels: Math.round(this.width * this.height * this.ratio ** 2), pixelRatio: this.ratio, referenceLayers: [...this.reference.keys()] }; }
+  getResourceMetrics() {
+    let bytes = 0;
+    for (const [id, objects] of this.objects) if (id.startsWith('reference-')) for (const o of objects) bytes += o.userData.buffer?.array.byteLength || Object.values(o.geometry?.attributes || {}).reduce((n, a) => n + a.array.byteLength, 0);
+    // Read-only diagnostics for the pinned MapLibre version. Unsupported native
+    // memory/cache measurements are null, never a misleading zero.
+    const nativeCache = this.legacy?.style?.sourceCaches?.['uos-basemap'];
+    const active = nativeCache?.getIds?.().length ?? null, cached = nativeCache?._cache?.order?.length ?? null;
+    const canvas = this.getCanvas(), native = this.backend === 'maplibre';
+    return { backend: this.backend, referenceGpuBytes: native ? null : bytes,
+      tiles: native ? (active == null || cached == null ? null : active + cached) : this.tiles.size,
+      activeTiles: native ? active : [...this.tiles.values()].filter(t => t.mesh?.visible).length,
+      cachedTiles: native ? cached : this.tiles.size, tileCacheLimit: 128,
+      canvasPixels: canvas.width * canvas.height, pixelRatio: native ? this.legacy.getPixelRatio() : this.ratio,
+      referenceLayers: [...this.reference.keys()] };
+  }
   remove() { this.removed = true; clearTimeout(this.wheelTimer); this.resizeObserver.disconnect(); this.disposeRenderer(); for (const m of [...this.markers]) m.remove(); this.overlay.remove(); this.attribution.remove(); this.controls.forEach(c => c.remove()); this.handlers = {}; }
 }

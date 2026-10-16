@@ -53,7 +53,7 @@ for (const owner of ['NSA', 'EVT']) {
         hidden: 'true', label: heading.kind.toUpperCase(), gap: '8px' });
     }
   });
-  test(`${owner}: Calculator headers align, wrap Kind menu and keep table headings separate`, async ({ page }, testInfo) => {
+  test(`${owner}: Calculator headers align, wrap Kind menu and keep table headings separate`, async ({ page }) => {
     await page.setViewportSize({ width: 2400, height: 1000 });
     const child = await setup(page, owner, 'costing');
     for (const width of [2400, 1400, 390]) {
@@ -87,10 +87,9 @@ for (const owner of ['NSA', 'EVT']) {
     }
     await page.setViewportSize({ width: 1840, height: 1000 });
     await child.locator('.program-cost-catalog').evaluate(pane => { pane.style.maxWidth = ''; });
-    await child.locator('.program-costing-workspace').screenshot({ path: testInfo.outputPath(`${owner}-calculator-headers.png`) });
   });
 
-  test(`${owner}: Calculator column headings stick while standard-height sections scroll`, async ({ page }, testInfo) => {
+  test(`${owner}: Calculator column headings stick while standard-height sections scroll`, async ({ page }) => {
     await page.setViewportSize({ width: 1840, height: 800 });
     const child = await setup(page, owner, 'costing');
     await child.evaluate(async owner => {
@@ -146,7 +145,6 @@ for (const owner of ['NSA', 'EVT']) {
     }
     await page.setViewportSize({ width: 1840, height: 800 });
     await child.evaluate(() => { for (const wrap of document.querySelectorAll('.program-cost-table-wrap,.program-calculator-table-wrap')) { wrap.style.maxWidth = ''; wrap.scrollLeft = 0; wrap.scrollTop = 160; } });
-    await child.locator('.program-costing-workspace').screenshot({ path: testInfo.outputPath(`${owner}-sticky-headers.png`) });
   });
 
   test(`${owner}: Quote funding preserves scroll and focused control after saves and remounts`, async ({ page }) => {
@@ -160,6 +158,12 @@ for (const owner of ['NSA', 'EVT']) {
         const pane = radio.closest('.program-quote-pane-body');
         pane.scrollTop += radio.getBoundingClientRect().top - pane.getBoundingClientRect().top - 100;
       });
+      // The drawer can still be opening after navigation resolves. Raw mouse
+      // clicks do not wait for clipping ancestors to expose their target.
+      await expect.poll(() => radio.evaluate(radio => {
+        const bounds = radio.getBoundingClientRect();
+        return document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2) === radio;
+      })).toBe(true);
       const before = await pane.evaluate(pane => pane.scrollTop);
       const point = await radio.boundingBox();
       await page.mouse.click(point.x + point.width / 2, point.y + point.height / 2);

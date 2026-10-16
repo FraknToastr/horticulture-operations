@@ -1388,7 +1388,7 @@ body.program-planner:is(.is-nsa-mode, .is-evt-mode) .program-map-toggles .uos-bu
 .program-cost-col-unit { width: 3%; }
 .program-cost-col-rate { width: 8%; }
 .program-cost-col-state { width: 8%; }
-.program-cost-col-actions { width: 31%; }
+
 .program-cost-table th:last-child,
 .program-cost-table td:last-child { width: 150px; min-width: 150px; padding-left: 2px; padding-right: 8px; }
 .program-cost-table th,
@@ -10364,9 +10364,6 @@ body[data-drawer-module] .program-register-module-host #shapeList > .program-sha
 .planner-cat-header-row th { padding: 10px 12px; background: var(--program-owner-soft, #ecfdf5); border-top: 1px solid var(--program-owner-border, #a7f3d0); border-bottom: 2px solid var(--program-owner-strong, #047857); color: var(--program-owner-strong, #047857); font-size: 11px; font-weight: 900; letter-spacing: .04em; text-align: left; text-transform: uppercase; }
 .planner-cat-header-row th:not(:first-child) { color: var(--uos-text-muted); text-align: left; }
 .planner-section-heading { min-width: 280px; }
-.planner-section-toggle { display: inline-flex; align-items: center; gap: 7px; border: 0; padding: 0; color: inherit; background: transparent; font: inherit; font-weight: 900; letter-spacing: inherit; cursor: pointer; }
-.planner-section-toggle:focus-visible { outline: 2px solid var(--uos-focus); outline-offset: 3px; border-radius: 3px; }
-.planner-section-toggle__icon { display: inline-block; width: 14px; font-size: 16px; line-height: 1; transition: transform 120ms ease; }
 .planner-section-toggle[aria-expanded="false"] .planner-section-toggle__icon { transform: rotate(-90deg); }
 
 .program-register-project-state.is-created { color: var(--uos-brand-text); border-color: var(--uos-brand-text); background: var(--uos-brand-soft); }
@@ -10382,65 +10379,21 @@ body[data-drawer-module] .program-register-module-host #shapeList > .program-sha
   width: 112px;
   text-align: right !important;
 }
-.planner-section-toggle {
-  display: inline-flex;
-  width: 32px;
-  height: 32px;
-  margin-inline-start: auto;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 1px solid var(--border, #b8c8c0);
-  border-radius: 6px;
-  background: var(--panel, #fff);
-  color: var(--green, #18734b);
-  cursor: pointer;
-}
-.planner-section-toggle:hover {
-  border-color: var(--green, #18734b);
-  background: #eef7f1;
-}
-.planner-section-toggle:focus-visible {
-  outline: 3px solid rgba(24, 115, 75, .28);
-  outline-offset: 2px;
-}
-.planner-section-toggle__icon {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.25;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: transform 140ms ease;
-}
 
 /* Planner section disclosure controls. Register actions use commercial-icon-button. */
+/* One definition owns the Planner disclosure button and its states. */
 .planner-section-toggle {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  min-height: 30px;
-  padding: 0;
-  border: 1px solid var(--border, #b8c8c0);
-  border-radius: 6px;
-  background: var(--panel, #fff);
-  color: var(--green, #18734b);
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  width:var(--uos-disclosure-size);height:var(--uos-disclosure-size);
+  min-width:var(--uos-disclosure-size);min-height:var(--uos-disclosure-size);
+  margin-inline-start:auto;padding:0;border:1px solid var(--border,#b8c8c0);
+  border-radius:var(--uos-radius-control);background:var(--panel,#fff);
+  color:var(--green,#18734b);font:inherit;font-weight:900;letter-spacing:inherit;cursor:pointer;
 }
-.planner-section-toggle:hover {
-  border-color: var(--green, #18734b);
-  background: #eef7f1;
-  color: var(--green, #18734b);
-}
-.planner-section-toggle:focus-visible {
-  outline: 3px solid rgba(24, 115, 75, .28);
-  outline-offset: 2px;
-}
-.planner-section-toggle__icon {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2.25;
-}
+.planner-section-toggle:hover {border-color:var(--green,#18734b);background:#eef7f1;color:var(--green,#18734b)}
+.planner-section-toggle:focus-visible {outline:3px solid rgba(24,115,75,.28);outline-offset:2px;border-radius:3px}
+.planner-section-toggle__icon {display:inline-block;width:18px;height:18px;font-size:16px;line-height:1;fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round;transition:transform 140ms ease}
+
 
 /* Rate Library category slider: a neutral segmented control, independent of category pill colours. */
 .program-cost-tabs {
@@ -10494,7 +10447,7 @@ body[data-drawer-module] .program-register-module-host #shapeList > .program-sha
   box-shadow: none;
   border-left-color: transparent;
 }
-.program-cost-col-actions { width: 152px !important; }
+
 .program-cost-table thead th:last-child {
   z-index: 4;
 }
@@ -10510,7 +10463,7 @@ body[data-drawer-module] .program-register-module-host #shapeList > .program-sha
 .program-cost-table th:last-child,
 .program-cost-table td:last-child { width: 144px; min-width: 144px; padding-left: 0; padding-right: 2px; }
 .program-cost-table th:last-child { width: 144px; min-width: 144px; padding-left: 0; padding-right: 2px; border-left-color: transparent; }
-.program-cost-col-actions { width: 144px !important; }
+
 .program-cost-table .program-category-pill {
   max-width: none;
   overflow: visible;
@@ -10627,7 +10580,7 @@ html[data-suite-theme="dark"] .program-cost-table .program-category-pill[data-ca
 .program-cost-col-description { width: 39%; }
 .program-cost-table th:last-child,
 .program-cost-table td:last-child { width: 160px; min-width: 160px; padding-right: 4px; }
-.program-cost-col-actions { width: 160px !important; }
+
 .program-cost-table .program-category-pill {
   max-width: calc(25ch + 18px);
   overflow: hidden;
@@ -10842,6 +10795,9 @@ html[data-suite-theme="dark"] .program-cost-table .program-category-pill[data-ca
   font-size: 12px;
   white-space: nowrap;
 }
+.program-register-allocation-table__row [data-register-allocation-fy] {
+  text-align: left;
+}
 /* Both Calculator rails share Register Action control dimensions. */
 .program-rate-actions { display: flex; align-items: center; gap: 4px; }
 .program-rate-actions .uos-button--icon,
@@ -10899,20 +10855,6 @@ html .program-scheduler-detail > .program-scheduler-inspector__head {border-bott
 .program-calendar-job.is-other-project:hover, .program-calendar-job.is-other-project:focus-visible {background:var(--uos-surface-subtle,#e2e8f0);color:var(--uos-text,#0f172a);border-color:var(--uos-border-strong,#94a3b8);}
 .program-calendar-job.is-linked-project {background:var(--program-owner-strong,#065f46);color:var(--uos-on-action,#fff);border-color:var(--program-owner-strong,#065f46);}
 .program-calendar-job.is-linked-project:hover, .program-calendar-job.is-linked-project:focus-visible {background:var(--program-owner-accent,#047857);color:var(--uos-on-action,#fff);}
-.program-calendar-job.is-linked-project.is-selected {position:relative;outline:none!important;}
-.program-calendar-job.is-linked-project.is-selected::after {
-  content:""!important;display:block!important;position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
-  background-image:repeating-linear-gradient(90deg,#fff 0 4px,#0f172a 4px 8px),repeating-linear-gradient(0deg,#fff 0 4px,#0f172a 4px 8px),repeating-linear-gradient(90deg,#fff 0 4px,#0f172a 4px 8px),repeating-linear-gradient(0deg,#fff 0 4px,#0f172a 4px 8px);
-  background-size:8px 2px,2px 8px,8px 2px,2px 8px;
-  background-position:0 0,100% 0,0 100%,0 0;background-repeat:repeat-x,repeat-y,repeat-x,repeat-y;
-  animation:scheduler-selection-ants 800ms linear infinite;
-}
-@keyframes scheduler-selection-ants {
-  to {background-position:8px 0,100% 8px,-8px 100%,0 -8px;}
-}
-@media (prefers-reduced-motion:reduce) {
-  .program-calendar-job.is-linked-project.is-selected::after {animation:none;}
-}
 .program-calendar-job.is-linked-project .program-calendar-job__title {color:inherit;}
 .program-calendar-job.is-other-project .program-calendar-job__title {font-weight:500;color:inherit;}
 .program-scheduler-form__timed[hidden] {display:none!important;}

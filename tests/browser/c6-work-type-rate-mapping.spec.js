@@ -55,12 +55,13 @@ async function createPolygon(child, projectId, workTypeKey, id) {
 async function openPolygonInspector(frame, geometryId) {
   await frame.locator('[data-program-destination="map"]').click();
   await expect(frame.locator('[data-program-view="map"]')).toBeVisible();
-  await frame.locator('[data-space-expand="'+geometryId+'"]').click();
-  const shapeCard = frame.locator(`[data-shape-card-id="${geometryId}"]`);
+  await frame.locator('[data-space-mode="projects"]').click();
+  const shapeCard = frame.locator('[data-shape-card-id="' + geometryId + '"]');
   await expect(shapeCard).toBeVisible();
+  for (let i = 0; i < 2 && await shapeCard.getAttribute('data-card-size') !== 'full'; i++) await shapeCard.locator('[data-space-expand]').click();
+  await expect(shapeCard).toHaveAttribute('data-card-size', 'full');
   return shapeCard;
 }
-
 async function openCosting(frame) {
   await frame.locator('[data-program-destination="costing"]').click();
   await expect(frame.locator(".program-cost-table").first()).toBeVisible();
