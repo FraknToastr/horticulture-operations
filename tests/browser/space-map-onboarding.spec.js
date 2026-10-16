@@ -31,6 +31,8 @@ for(const owner of ['NSA','EVT']){
     const {frame,recordId,errors}=await setup(page,owner);
     const guide=frame.locator('#spaceMapOnboarding'),add=guide.locator('[data-space-onboarding-add]');
     await expect(guide).toBeVisible();
+    await expect(guide.getByRole('heading',{name:'Tips',exact:true})).toHaveCount(1);
+    await expect.poll(()=>guide.evaluate(node=>node.querySelector('.space-onboarding__heading').getBoundingClientRect().bottom<=node.querySelector('[data-space-onboarding-add]').getBoundingClientRect().top)).toBe(true);
     await expect(guide.getByRole('button')).toHaveCount(1);
     await expect(guide.locator('.space-onboarding__orb')).toHaveCount(4);
     await expect(guide).toContainText('Save the current edit.');
@@ -48,7 +50,14 @@ for(const owner of ['NSA','EVT']){
     await frame.locator('[data-space-mode="projects"]').click();
     await expect(guide).toBeHidden();
     await expect(frame.getByRole('button',{name:'Create a Project',exact:true})).toBeVisible();
-    await expect(frame.locator('.space-editor__project-guidance')).toHaveText(`This ${owner==='NSA'?'Nature Strip Application':'Event'} has been added to the Register. Proceed to create a Remediation Project.`);
+    await expect(frame.locator('.space-editor__project-guidance')).toHaveText(owner==='NSA' ? 'The Nature Strip Application is in the Register. Proceed to create a Project' : 'The Event is in the Register. Proceed to create a Remediation Project.');
+    await expect.poll(()=>frame.locator('#spaceProjectEmpty').evaluate(node=>{
+      const body=node.closest('.space-editor__body').getBoundingClientRect();
+      const button=node.querySelector('button').getBoundingClientRect(),message=node.querySelector('p').getBoundingClientRect();
+      const footer=document.querySelector('.space-editor__moasure-section').getBoundingClientRect();
+      const center=(body.left+body.right)/2;
+      return Math.abs((button.left+button.right)/2-center)<1 && Math.abs((message.left+message.right)/2-center)<1 && button.bottom<=message.top && message.bottom<=footer.top;
+    })).toBe(true);
     await expect(frame.locator('#moasureImportButton')).toBeVisible();
     await frame.locator('[data-space-mode="register"]').click();
     await expect(guide).toBeVisible();
@@ -82,6 +91,7 @@ for(const owner of ['NSA','EVT']){
     await expect.poll(()=>frame.evaluate(id=>UOS.ProgramModel.projectForRegister(UOS.ProgramApp.workspace(),id)?.id,recordId)).toBeTruthy();
     const projectId=await frame.evaluate(id=>UOS.ProgramModel.projectForRegister(UOS.ProgramApp.workspace(),id).id,recordId);
     await expect(guide).toContainText('Polygon');
+    await expect(guide.getByRole('heading',{name:'Tips',exact:true})).toHaveCount(1);
     await expect(guide).toBeVisible();
     await frame.evaluate(async({projectId,owner})=>UOS.ProgramApp.updateWorkspace(workspace=>UOS.WorkAreaService.createGeometry(workspace,projectId,{
       id:owner+'-GEO-ONBOARDING',geometry:{type:'Polygon',coordinates:[[[138.6,-34.92],[138.601,-34.92],[138.601,-34.921],[138.6,-34.92]]]},payload:{}

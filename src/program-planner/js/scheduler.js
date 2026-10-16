@@ -169,15 +169,17 @@
     return getAllProjects().filter(function (project) { return project.owner === owner; });
   }
 
-  function activeEvent() {
-    if (activeOwner() !== "EVT") return null;
+  function activeRegisterRecord() {
     var ui = state.workspace && state.workspace.workspace || {}, entities = state.workspace && state.workspace.entities || {};
-    var selected = text(ui.selectedEntityId), project = getProjectsForActiveOwner().find(function (item) { return item.id === state.selectedProjectId; });
-    var record = (entities.events || []).find(function (item) { return item.id === selected; });
+    var owner = activeOwner(), records = owner === "EVT" ? entities.events || [] : entities.applications || [];
+    var selected = text(ui.selectedEntityId), record = records.find(function (item) { return item.id === selected && item.owner === owner; });
     if (record) return record;
-    var job = state.jobs.find(function (item) { return item.id === selected; });
-    var eventId = project && project.eventId || job && job.eventId;
-    return (entities.events || []).find(function (item) { return item.id === eventId; }) || null;
+    var sourceId = selected || ui.selectedJobId || ui.selectedProjectId || (ui.scheduler || {}).selectedProjectId;
+    var context = UOS.ProgramApp.resolveWorkingContext(state.workspace, sourceId);
+    return records.find(function (item) { return item.id === context.registerId && item.owner === owner; }) || null;
+  }
+  function activeEvent() {
+    return activeOwner() === "EVT" ? activeRegisterRecord() : null;
   }
 
   function isJobInProject(job, proj) {
@@ -849,7 +851,7 @@ function updatePillPicker() {
     if (!root || !state.workspace || !model()) return;
     var scheduler = state.workspace.workspace && state.workspace.workspace.scheduler || {};
     var ui=state.workspace.workspace,entities=state.workspace.entities;
-    var record=(entities.applications || []).concat(entities.events || []).find(function(item){return item.id===ui.selectedEntityId && item.owner===activeOwner();});
+    var record=activeRegisterRecord();
     var resolved=record && UOS.ProgramModel.projectForRegister(state.workspace,record);
     var incomingProjectId=record ? text(resolved && resolved.id) : text(ui.selectedProjectId || scheduler.selectedProjectId);
     var contextProject=(entities.projects || []).find(function(item){return item.id===incomingProjectId;});
@@ -888,9 +890,12 @@ function updatePillPicker() {
   function updateCalendarScope(scheduler) {
     var activeProject = getProjectsForActiveOwner().find(function (project) { return project.id === state.selectedProjectId; });
     var eventWorkspace = activeOwner() === "EVT";
-    var event = activeEvent(), hasContext = Boolean(eventWorkspace ? event : activeProject);
+    var record = activeRegisterRecord(), hasContext = Boolean(record), event = eventWorkspace ? record : null;
     state.calendarScope = hasContext && scheduler.calendarScope !== "all" ? "application" : "all";
-    state.calendarVisible = state.visible.filter(function (job) { return state.calendarScope === "all" || isCalendarJobInProject(job, activeProject) || eventWorkspace && event && job.eventId === event.id; });
+    state.calendarVisible = state.visible.filter(function (job) {
+      return state.calendarScope === "all" || record && job.owner === record.owner &&
+        (job[eventWorkspace ? "eventId" : "applicationId"] === record.id || isCalendarJobInProject(job, activeProject));
+    });
     if (eventWorkspace) {
       var days = periodDays(), first = days.length && days[0].date, last = days.length && days[days.length - 1].date;
       state.calendarVisible = state.calendarVisible.concat(model().eventMilestones(state.workspace).filter(function (entry) {

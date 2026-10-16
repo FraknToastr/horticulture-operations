@@ -192,18 +192,21 @@ html[data-suite-theme="dark"] .space-editor[data-space-owner="EVT"] { --space-ac
 .space-editor .space-editor__body:has(#spaceManagementBody.is-project-empty:not([hidden])) { display:flex; flex-direction:column; scrollbar-gutter:auto; }
 .space-editor #spaceManagementBody.is-project-empty:not([hidden]) { display:grid; flex:1; place-items:center; padding:16px; }
 .space-editor #spaceManagementBody.is-project-empty #shapeList { display:none; }
+.space-editor #spaceProjectEmpty { display:flex; flex-direction:column; align-items:center; width:100%; min-width:0; text-align:center; }
 .space-editor #spaceProjectEmpty .space-editor__create-project { height:auto; min-height:64px; padding:16px 24px; font-size:16px; gap:8px; }
 
 /* First-use examples share the real menu's orbs without duplicating controls. */
 .space-editor .space-editor__body.has-space-onboarding { display:flex; flex-direction:column; scrollbar-gutter:auto; }
 .space-editor .space-onboarding { display:flex; flex:1 0 auto; flex-direction:column; align-items:center; justify-content:center; min-height:360px; padding:24px 16px; text-align:center; box-sizing:border-box; }
 .space-editor .space-onboarding[hidden] { display:none; }
+.space-editor .space-onboarding__heading { margin:0 0 16px; font-size:16px; font-weight:700; line-height:1.3; }
 .space-editor .space-onboarding__add { position:relative; inset:auto; flex:none; transform:none; }
 .space-editor .space-onboarding__add[aria-expanded="true"] svg { transform:rotate(45deg); }
-.space-editor .space-onboarding__intro { max-width:240px; margin:12px 0 24px; font-size:14px; line-height:1.5; text-wrap:pretty; }
+.space-editor .space-onboarding__intro { max-width:240px; margin:12px 0 56px; font-size:14px; line-height:1.5; text-wrap:pretty; }
 .space-editor .space-onboarding__example { position:relative; width:100%; max-width:300px; margin:0; }
 .space-editor .space-onboarding__connections { position:absolute; top:0; left:0; width:100%; height:160px; pointer-events:none; }
 .space-editor .space-onboarding__parent { position:relative; z-index:2; display:flex; align-items:center; flex-direction:column; gap:4px; height:100px; }
+.space-editor .space-onboarding__parent > strong { position:absolute; bottom:100%; margin-bottom:4px; }
 .space-editor .space-onboarding__decisions { position:relative; z-index:2; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
 .space-editor .space-onboarding__decisions > div { display:flex; align-items:center; flex-direction:column; gap:8px; min-width:0; }
 .space-editor .space-onboarding__orb { position:relative; inset:auto; flex:none; transform:none; cursor:default; pointer-events:none; }

@@ -185,7 +185,7 @@ for (const owner of ['NSA', 'EVT']) for (const width of [1440, 390]) test(`${own
   await expect(card(ids.scheduled.B.planner)).toBeVisible();
 });
 
-test('without an active project the calendar shows all jobs and never opens an editor', async ({ page }) => {
+test('without an active project both calendar scopes work and other jobs remain read-only', async ({ page }) => {
   const { frame, ids } = await setup(page, 'NSA');
   await frame.evaluate(async () => {
     await window.UOS.ProgramApp.updateWorkspace(ws => {
@@ -196,13 +196,18 @@ test('without an active project the calendar shows all jobs and never opens an e
     });
     await window.UOS.ProgramApp.navigateWithContext('scheduler', 'NSA-APP-CALENDAR-UNPROMOTED');
   });
-  await expect(frame.locator('[data-scheduler-calendar-scope="application"]')).toBeDisabled();
+  await expect(frame.locator('[data-scheduler-calendar-scope="application"]')).toBeEnabled();
+  await expect(frame.locator('[data-scheduler-calendar-scope="application"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(frame.locator('.program-calendar-job')).toHaveCount(0);
+  await frame.locator('[data-scheduler-calendar-scope="all"]').click();
   await expect(frame.locator('[data-scheduler-calendar-scope="all"]')).toHaveAttribute('aria-pressed', 'true');
   await frame.locator(`.program-calendar-job[data-scheduler-job="${ids.scheduled.A.planner}"]`).click();
   await expect(frame.locator('[data-scheduler-other-project-summary]')).toBeVisible();
   await expect(frame.locator('[data-scheduler-detail]')).toBeHidden();
-  expect(await frame.evaluate(() => window.UOS.ProgramApp.workspace().workspace.scheduler.calendarScope)).toBe('application');
+  expect(await frame.evaluate(() => window.UOS.ProgramApp.workspace().workspace.scheduler.calendarScope)).toBe('all');
   await frame.locator('[data-scheduler-other-project-summary]').press('Escape');
+  await frame.locator('[data-scheduler-calendar-scope="application"]').click();
+  await expect(frame.locator('.program-calendar-job')).toHaveCount(0);
   await frame.evaluate(async id => { await window.UOS.ProgramApp.navigateWithContext('scheduler', id); }, ids.register.A);
   await expect(frame.locator('[data-scheduler-calendar-scope="application"]')).toHaveAttribute('aria-pressed', 'true');
 });

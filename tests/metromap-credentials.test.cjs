@@ -4,13 +4,14 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const source = fs.readFileSync('src/remediation-planner/config/metromaps-provider.js', 'utf8');
 function load(storage = new Map(), broken = false) {
-  const context = { UOS_REMEDIATION_MAP_CONFIG: { defaultProvider: 'esri-world-imagery', providers: [] }, localStorage: {
+  const events = new Map();
+  const context = { addEventListener: (type, listener) => events.set(type, listener), UOS_REMEDIATION_MAP_CONFIG: { defaultProvider: 'esri-world-imagery', providers: [] }, localStorage: {
     getItem: key => { if (broken) throw Error('blocked'); return storage.get(key); },
     setItem: (key, value) => { if (broken) throw Error('blocked'); storage.set(key, value); },
     removeItem: key => { if (broken) throw Error('blocked'); storage.delete(key); }
   } };
   vm.runInNewContext(source, context);
-  return { api: context.UOS.MetroMapCredentials, config: context.UOS_REMEDIATION_MAP_CONFIG, storage };
+  return { api: context.UOS.MetroMapCredentials, config: context.UOS_REMEDIATION_MAP_CONFIG, storage, dispatch: (type, event = {}) => events.get(type)?.(event) };
 }
 test('MetroMap defaults to Esri and activates only from entered or saved credentials', () => {
   const { api, config, storage } = load();
@@ -45,4 +46,42 @@ test('storage failure still allows tab activation and reports failed removal saf
 test('provider source contains only a credential-free template', () => {
   assert.match(source, /key\/\{key\}\//);
   assert.doesNotMatch(source, /key\/[A-Za-z0-9_-]{20,}\//);
+});
+
+test('activation notifications reset the label state when saved storage is removed', () => {
+  const { api, storage, dispatch } = load();
+  const states = [];
+  const unsubscribe = api.subscribe(() => states.push(api.status()));
+  api.activate('test-key-manual', false);
+  assert.equal(api.status().keyRemoved, false);
+  api.activate('test-key-saved', true);
+  storage.delete('uos.metromap.user-key');
+  dispatch('storage', { key: 'uos.metromap.user-key' });
+  assert.equal(api.status().active, true);
+  assert.equal(api.status().saved, false);
+  assert.equal(api.status().keyRemoved, true);
+  api.activate('test-key-again', true);
+  storage.clear();
+  dispatch('storage', { key: null });
+  assert.equal(states.at(-1).keyRemoved, true);
+  api.activate('test-key-focus', true);
+  storage.clear();
+  dispatch('focus');
+  assert.equal(states.at(-1).keyRemoved, true);
+  unsubscribe();
+  const count = states.length;
+  api.activate('test-key-unsubscribed', false);
+  assert.equal(states.length, count);
+});
+
+test('explicit forgetting and same-document storage removal retain tab imagery but require the activation label', () => {
+  const { api, storage } = load();
+  api.activate('test-key-saved', true);
+  api.forget();
+  assert.equal(api.status().active, true);
+  assert.equal(api.status().keyRemoved, true);
+  api.activate('test-key-restored', true);
+  assert.equal(api.status().keyRemoved, false);
+  storage.delete('uos.metromap.user-key');
+  assert.equal(api.status().keyRemoved, true);
 });

@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="../shared/css/print.css" media="print">
   <link rel="stylesheet" href="../shared/vendor/maplibre/maplibre-gl.css">
 <link rel="stylesheet" href="styles.css?v=20261016-allocation-year-v3">
-  <link rel="stylesheet" href="space-map-editor.css?v=20261016-adaptive-map-calendar-v2">
+  <link rel="stylesheet" href="space-map-editor.css?v=20261017-guide-spacing-v1">
   <link rel="stylesheet" href="client-demo-fixes.css?v=20261016-audit-v1">
   <link rel="stylesheet" href="scheduler-week.css?v=20261016-adaptive-map-calendar-v2">
   <link rel="stylesheet" href="planner-row-header.css?v=20261008-ready-frame-row-buffers-v13">
@@ -316,7 +316,7 @@
                 </div>
               </section>
               <section class="space-editor__moasure-section" aria-label="Map imagery and survey import">
-                <button type="button" class="space-editor__moasure-panel space-editor__metromap-panel" id="activateMetroMap"><span class="space-editor__moasure-logo"><img src="../shared/assets/metromap.svg" alt="MetroMap"></span><span>Activate Metromap</span></button>
+                <button type="button" class="space-editor__moasure-panel space-editor__metromap-panel" id="activateMetroMap"><span class="space-editor__moasure-logo"><img src="../shared/assets/metromap.svg" alt="MetroMap"></span><span data-metro-label>Activate Metromap</span></button>
                   <button type="button" id="moasureImportButton" class="space-editor__moasure-panel" aria-describedby="moasureDropStatus">
                     <span class="space-editor__moasure-logo"><img src="../shared/assets/moasure_logo.avif" alt="Moasure"></span>
                     <span>Drop Moasure CSV or click to add</span>
@@ -1202,7 +1202,7 @@
 
   <script defer src="app-config.js"></script>
   <script defer src="../remediation-planner/config/map-providers.js?v=20261016-user-imagery"></script>
-  <script defer src="../remediation-planner/config/metromaps-provider.js?v=20261016-user-imagery"></script>
+  <script defer src="../remediation-planner/config/metromaps-provider.js?v=20261017-metro-label-v1"></script>
   <script defer src="../shared/js/suite.js?v=20261002-error-remediation-v12"></script>
   <script defer src="../shared/js/storage.js?v=20260912-empty-baseline-v1"></script>
   <script defer src="../shared/js/program-runtime.js?v=20261016-audit-v1"></script>
@@ -1254,12 +1254,12 @@
  <script defer src="js/planner-model.js?v=20261005-named-task-history-v1"></script>
  <script defer src="js/scheduler-calendar-tools.js?v=20261016-adaptive-map-calendar-v2"></script>
   <script defer src="js/scheduler-week-editor.js?v=20261016-adaptive-map-calendar-v2"></script>
-  <script defer src="js/scheduler.js?v=20261016-adaptive-map-calendar-v2"></script>
+  <script defer src="js/scheduler.js?v=20261016-tips-scope-v3"></script>
   <script defer src="js/costing.js?v=20261016-audit-v1"></script>
 
   <script defer src="../remediation-planner/js/model.js?v=20260822-polygon-editor-fix"></script>
   <script defer src="../remediation-planner/js/map.js?v=20261016-audit-v1"></script>
-  <script defer src="js/program-map.js?v=20261016-adaptive-map-calendar-v2"></script>
+  <script defer src="js/program-map.js?v=20261017-guide-labels-v1"></script>
 
 <script defer src="js/planner.js?v=20261015-purpose-icons-v1"></script>
  <script defer src="js/planner-section-headers.js?v=20261007-planner-section-labels-v4"></script>

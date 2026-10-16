@@ -1,0 +1,1766 @@
+{
+  "source": "src/sample/horticulture-program-workspace-20260923-123603-v3.json",
+  "financialYear": "2026–27",
+  "cutoff": {
+    "from": "2026-07-01",
+    "through": "2027-06-30"
+  },
+  "excludedApplications": [
+    {
+      "id": "NSA-APP-0084FYY",
+      "title": "135 Gover St, North Adelaide",
+      "received": "2025-01-16",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-010TUMZ",
+      "title": "212 Brougham Pl, North Adelaide",
+      "received": "2025-07-15",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-01QY0YA",
+      "title": "101 East Terrace, Adelaide SA 5000.",
+      "received": "2025-05-05",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-02C4BWP",
+      "title": "11 Barton Terrace East, North Adelaide",
+      "received": "2025-09-15",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-02QAWNQ",
+      "title": "215 Brougham Pl, North Adelaide",
+      "received": "2026-02-12",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-03HVP9A",
+      "title": "140 Molesworth St, North Adelaide",
+      "received": "2026-01-30",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-05HL2T6",
+      "title": "57-59 Mackinnon Pde, North Adelaide",
+      "received": "2024-04-24",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-05PV7FL",
+      "title": "318 South Terrace, Adelaide",
+      "received": "2025-09-15",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-06WGZ1R",
+      "title": "99 Palmer Pl, North Adelaide SA 5006.",
+      "received": "2025-05-26",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-080SQOU",
+      "title": "67 Halifax St, Adelaide",
+      "received": "2023-12-12",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-08YNV02",
+      "title": "213 East Terrace, Adelaide",
+      "received": "2025-07-23",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-09H8GLA",
+      "title": "94 Giles Street, Adelaide",
+      "received": "2025-08-18",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0A32936",
+      "title": "14 Catherine Helen Spence St, Adelaide SA 5000.",
+      "received": "2025-05-21",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0AGVCXL",
+      "title": "222 Brougham Pl, North Adelaide",
+      "received": "2025-02-14",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0BNSR1X",
+      "title": "109 Brougham Place, North Adelaide",
+      "received": "2025-08-29",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0E2UZV9",
+      "title": "12-18 Brougham Pl, North Adelaide",
+      "received": "2025-02-12",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0E66AUQ",
+      "title": "42 Childers St, North Adelaide",
+      "received": "2025-01-08",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0F87URV",
+      "title": "39,37,35,33,31,29,27,25,23 Ward Street North Adelaide",
+      "received": "2025-12-29",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0G2L56Q",
+      "title": "199 Gilbert St, Adelaide",
+      "received": "2024-05-22",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0GDJ8BD",
+      "title": "63 Whitmore Square",
+      "received": "2025-02-21",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0HFXEJR",
+      "title": "89 Tynte St, North Adelaide",
+      "received": "2025-12-22",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0HW2DRB",
+      "title": "274 Ward Street, North Adelaide",
+      "received": "2025-09-18",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0JCO91B",
+      "title": "North Adelaide Primary 62-80 Tynte St, North Adelaide",
+      "received": "2025-12-03",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0K7Y2CX",
+      "title": "175 Ward Street, North Adelaide",
+      "received": "2025-08-31",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0LZKFZ1",
+      "title": "95 Archer Street North Adelaide",
+      "received": "2025-02-26",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0M2LIF5",
+      "title": "382/3 South Terrace",
+      "received": "2025-04-02",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0MO3K9M",
+      "title": "57 Childers Street, North Adelaide",
+      "received": "2025-09-17",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0OSR9F6",
+      "title": "23 Stanley Street, North Adelaide",
+      "received": "2025-09-17",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0OZ7O0Z",
+      "title": "53 Mann Terrace, North Adelaide",
+      "received": "2025-11-05",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0QR2ZBZ",
+      "title": "344 Carrington St, Adelaide SA 5000",
+      "received": "2025-07-20",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0RBK1LL",
+      "title": "Grenfell Street",
+      "received": "",
+      "reason": "Received date unavailable"
+    },
+    {
+      "id": "NSA-APP-0SNGIIZ",
+      "title": "316 Halifax Street",
+      "received": "2025-10-06",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-0THEJND",
+      "title": "160 Sturt St, Adelaide",
+      "received": "2026-04-09",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-11OXLJ7",
+      "title": "313 Flinders St, Adelaide SA 5000.",
+      "received": "2025-05-23",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-14PTYKM",
+      "title": "16 Mills Terrace, North Adelaide",
+      "received": "2025-08-28",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-169VTGV",
+      "title": "83 Gilbert Street, Adelaide",
+      "received": "2025-10-03",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-17VW39Z",
+      "title": "",
+      "received": "",
+      "reason": "Received date unavailable"
+    },
+    {
+      "id": "NSA-APP-18A38AM",
+      "title": "193 Halifax St, Adelaide",
+      "received": "2025-04-09",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-19GHHOJ",
+      "title": "90-94 Gover St, North Adelaide SA 5006",
+      "received": "2025-05-25",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1BJAITX",
+      "title": "223 Angas Street, Adelaide",
+      "received": "2025-09-02",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1E9V05N",
+      "title": "22 28 Whitmore Square, Adelaide",
+      "received": "2025-07-01",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1EWO81Q",
+      "title": "196-198 Halifax St Adelaide",
+      "received": "2024-10-16",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1FOIRTT",
+      "title": "140 Barton Tice West, North Adelaide",
+      "received": "2025-03-19",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1FOVTO5",
+      "title": "78 Archer St, North Adelaide",
+      "received": "2026-03-17",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1GCKCRC",
+      "title": "77 Hurtle Square",
+      "received": "2025-01-19",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1HCUG7P",
+      "title": "317A Flinders Street, Adelaide",
+      "received": "2025-09-13",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1K6O0PI",
+      "title": "164 Sturt Street, Adelaide",
+      "received": "2025-09-15",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1KA84Q9",
+      "title": "Wakefield Street",
+      "received": "",
+      "reason": "Received date unavailable"
+    },
+    {
+      "id": "NSA-APP-1KVZNG9",
+      "title": "91 Finniss St, North Adelaide SA 5006",
+      "received": "2026-05-11",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1MX8FDA",
+      "title": "347 Halifax St, Adelaide",
+      "received": "2024-10-23",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1RJWVR5",
+      "title": "Unit 8/211 Gilles St, Adelaide",
+      "received": "2026-03-30",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1RTOAE1",
+      "title": "64 Gover Street, North Adelaide",
+      "received": "2025-08-31",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1SSYM1Z",
+      "title": "36 Gover St, North Adelaide",
+      "received": "2025-06-15",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1TXO8ED",
+      "title": "364 Gilles St, Adelaide",
+      "received": "2025-03-11",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1U6YOLH",
+      "title": "110 Mills Terrace, North Adelaide",
+      "received": "2026-04-20",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1V0X336",
+      "title": "101 Kingston Terrace, North Adelaide",
+      "received": "2026-01-13",
+      "reason": "Outside received-date financial-year scope"
+    },
+    {
+      "id": "NSA-APP-1WJEFYT",
+      "title": "86 Gover St, North Adelaide",
+      "received": "2026-05-07",
+      "reason": "Outside received-date financial-year scope"
+    }
+  ],
+  "idMappings": [
+    {
+      "collection": "rateItems",
+      "from": "RATE-03Q5IYW",
+      "to": "RATE-0Q8AMS4"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0792XC3",
+      "to": "RATE-1IH3NUE"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-08NOY3P",
+      "to": "RATE-15DWKFB"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-08WUH60",
+      "to": "RATE-0J5JQLC"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-09OCIAW",
+      "to": "RATE-0GIUNH2"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0D2ZK7E",
+      "to": "RATE-0YVLQ87"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0DAABEF",
+      "to": "RATE-1BKB96D"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0DLVIOB",
+      "to": "RATE-0XOVMVY"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0EWX5ZT",
+      "to": "RATE-1F7Y69F"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0FTBD6P",
+      "to": "RATE-1DIRS5K"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0GHHJTP",
+      "to": "RATE-0CBTMH7"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0HQKYAS",
+      "to": "RATE-16ITKEH"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0K0L5G0",
+      "to": "RATE-0IL1509"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0KQHDAL",
+      "to": "RATE-1EB8D73"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0MFO5YT",
+      "to": "RATE-10OJY60"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0OE3MTC",
+      "to": "RATE-1G89ECF"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0V9N628",
+      "to": "RATE-0KBYX7X"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-0ZF0VYU",
+      "to": "RATE-0IZC1HE"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-13HF5EH",
+      "to": "RATE-05FY6WQ"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1C7Q6H6",
+      "to": "RATE-1NFODUE"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1CT00CK",
+      "to": "RATE-0KP0O7S"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1DGXS4B",
+      "to": "RATE-19XB0BV"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1F7NCZY",
+      "to": "RATE-11PWI5G"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1GC1SMT",
+      "to": "RATE-0DXVRRM"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1HEXPQP",
+      "to": "RATE-0XW5W7R"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1HLJI7U",
+      "to": "RATE-1Y866EW"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1N9GYEZ",
+      "to": "RATE-0EOBVMR"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1QWHUJO",
+      "to": "RATE-0VTCN2L"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1S3WIWW",
+      "to": "RATE-19I0OXP"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1SML561",
+      "to": "RATE-1DZC09Z"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1UDBSI2",
+      "to": "RATE-1PV7GWC"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1VO26KD",
+      "to": "RATE-11F9QR1"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1WP8WOC",
+      "to": "RATE-14ZTWST"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1WTO831",
+      "to": "RATE-1PR88E5"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1XPNCXF",
+      "to": "RATE-05ZOIJO"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1Y14KSX",
+      "to": "RATE-076HI8T"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-1YHUNOD",
+      "to": "RATE-1QRPQN8"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-AERATION",
+      "to": "RATE-0EUIM9Z"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-AERATION-ESTIMATED",
+      "to": "RATE-0718JEK"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-FERTILISING-ESTIMATED",
+      "to": "RATE-1RTW67Z"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-IRRIGATION-SYSTEM",
+      "to": "RATE-1CJOOD8"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-MULCHING-SOIL-PREP",
+      "to": "RATE-15NDP9P"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-NATIVE-GARDEN-BED",
+      "to": "RATE-0OSX05Z"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-PERMEABLE-PAVING",
+      "to": "RATE-0V5JRXB"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-ROLLING-ESTIMATED",
+      "to": "RATE-0O3AC0C"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-TOPDRESSING-ESTIMATED",
+      "to": "RATE-0GDT5W7"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-TREE-PLANTING",
+      "to": "RATE-1NQ7OBY"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-TURF-RENOVATION",
+      "to": "RATE-1RTL89P"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-TURFING",
+      "to": "RATE-0NXRQ7F"
+    },
+    {
+      "collection": "rateItems",
+      "from": "RATE-TURFING-ESTIMATED",
+      "to": "RATE-06AN0QW"
+    }
+  ],
+  "statusRepairs": [],
+  "checklistConflicts": [
+    {
+      "projectId": "NSA-PROJ-186F3X1",
+      "key": "1",
+      "retained": {
+        "due": "",
+        "notes": "",
+        "owner": "Technical Officer",
+        "status": "Complete"
+      },
+      "alternative": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "resolution": "Project-scoped checklist is authoritative"
+    }
+  ],
+  "unconvertedChecklists": [
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "101",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "N/A"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "102",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "103",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "104",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "105",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "106",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "107",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "108",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "109",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0V8C3UZ",
+      "key": "110",
+      "saved": {
+        "due": "",
+        "notes": "",
+        "owner": "Not assigned",
+        "status": "Not Started"
+      },
+      "reason": "Not a current NSA checklist key; no inferred task mapping"
+    },
+    {
+      "applicationId": "NSA-APP-0MZ9P8K",
+      "saved": {
+        "1": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "2": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "3": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "4": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "5": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "6": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "7": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "8": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "9": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "10": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "11": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "12": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "13": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "14": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "15": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "16": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "17": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "18": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "19": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "20": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "21": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "22": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "23": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "24": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "25": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        }
+      },
+      "reason": "No linked project; not inventing a project"
+    },
+    {
+      "applicationId": "NSA-APP-13LCZ00",
+      "saved": {
+        "1": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "2": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "3": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "4": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "5": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "6": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "7": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "8": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "9": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "10": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "11": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "12": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "13": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "14": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "15": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "16": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "17": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "18": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "19": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "20": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "21": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "22": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "23": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "24": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "25": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        }
+      },
+      "reason": "No linked project; not inventing a project"
+    },
+    {
+      "applicationId": "NSA-APP-1ABM83S",
+      "saved": {
+        "1": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "2": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "3": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "4": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "5": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "6": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "7": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "8": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "9": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "10": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "11": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "12": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "13": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "14": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "15": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "16": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "17": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "18": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "19": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "20": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "21": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "22": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "23": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "24": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "25": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        }
+      },
+      "reason": "No linked project; not inventing a project"
+    },
+    {
+      "applicationId": "NSA-APP-1CM6GBG",
+      "saved": {
+        "1": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "2": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "3": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "4": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "5": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "6": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "7": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "8": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "9": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "10": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "11": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "12": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "13": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "14": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "15": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "16": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "17": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "18": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "19": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "20": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "21": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "22": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "23": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "24": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "25": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        }
+      },
+      "reason": "No linked project; not inventing a project"
+    },
+    {
+      "applicationId": "NSA-APP-1D6H1L2",
+      "saved": {
+        "1": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "2": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "3": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "4": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "5": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "6": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "7": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "8": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "9": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "10": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "11": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "12": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "13": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "14": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "15": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "16": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "17": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "18": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "19": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "20": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "21": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "22": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "23": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "24": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "25": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        }
+      },
+      "reason": "No linked project; not inventing a project"
+    },
+    {
+      "applicationId": "NSA-APP-1K0I8NY",
+      "saved": {
+        "1": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "2": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "3": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "4": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "5": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "6": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "7": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "8": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "9": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "10": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "11": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "12": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "13": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "14": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "15": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "16": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "17": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "18": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "19": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "20": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "21": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "22": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "23": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "24": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        },
+        "25": {
+          "due": "",
+          "notes": "",
+          "owner": "Not assigned",
+          "status": "Not Started"
+        }
+      },
+      "reason": "No linked project; not inventing a project"
+    }
+  ],
+  "sourceWarnings": [
+    "Nature Strip native records replace the corresponding unified owner slice; unified records only fill owners without a native source.",
+    "Remediation native records replace the corresponding unified owner slice; unified records only fill owners without a native source.",
+    "282 legacy records with unresolved canonical relationships were quarantined during startup; review Data Health before restoring them."
+  ],
+  "counts": {
+    "applications": 12,
+    "projects": 2,
+    "rateItems": 50,
+    "tasks": 50,
+    "catalogs": 1,
+    "statusEvents": 5
+  },
+  "taskStatusNormalization": "Saved display labels converted to canonical task codes; task progress preserved.",
+  "retainedApplications": [
+    {
+      "id": "NSA-APP-0MZ9P8K",
+      "title": "115 Brougham Pl, North Adelaide SA 5006",
+      "received": "2026-07-13",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-0TJWILI",
+      "title": "339 Gilles St, Adelaide SA 5000, Australia",
+      "received": "2026-08-28",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-0UYCI60",
+      "title": "80 Buxton St, North Adelaide SA 5006, Australia",
+      "received": "2026-09-11",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-0V8C3UZ",
+      "title": "185 Jeffcott St, North Adelaide SA 5006, Australia",
+      "received": "2026-09-19",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-0VIBPJY",
+      "title": "63 Light Square, Adelaide SA 5000, Australia",
+      "received": "2026-09-03",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-0VSBB8X",
+      "title": "380 Gilles St, Adelaide SA 5000, Australia",
+      "received": "2026-09-06",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-13LCZ00",
+      "title": "116 Brougham Pl, North Adelaide SA 5006",
+      "received": "2026-08-02",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-1ABM83S",
+      "title": "199 Jeffcott St No coordinates found",
+      "received": "2026-07-30",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-1CM6GBG",
+      "title": "121 Brougham Pl, North Adelaide SA 5006",
+      "received": "2026-07-17",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-1D6H1L2",
+      "title": "124 Brougham Pl, North Adelaide SA 5006",
+      "received": "2026-07-20",
+      "status": "received"
+    },
+    {
+      "id": "NSA-APP-1K0I8NY",
+      "title": "185 Childers St, North Adelaide SA 5006",
+      "received": "2026-07-29",
+      "status": "in_progress"
+    },
+    {
+      "id": "NSA-APP-1U7VLB1",
+      "title": "27 Barton Terrace E, North Adelaide SA 5006",
+      "received": "2026-07-03",
+      "status": "in_progress"
+    }
+  ],
+  "validation": {
+    "model": "passed",
+    "isolation": "passed",
+    "normalizationStability": "passed",
+    "exportImport": "passed"
+  }
+}
