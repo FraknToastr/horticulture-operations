@@ -1,0 +1,28 @@
+TAP version 13
+# Subtest: local libraries load only on demand and concurrent calls share a request
+ok 1 - local libraries load only on demand and concurrent calls share a request
+  ---
+  duration_ms: 1.717459
+  type: 'test'
+  ...
+# Subtest: failed runtime (onerror) is removed and can be retried
+ok 2 - failed runtime (onerror) is removed and can be retried
+  ---
+  duration_ms: 0.746733
+  type: 'test'
+  ...
+# Subtest: failed runtime (onload) is removed and can be retried
+ok 3 - failed runtime (onload) is removed and can be retried
+  ---
+  duration_ms: 0.594384
+  type: 'test'
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 3
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 42.64055

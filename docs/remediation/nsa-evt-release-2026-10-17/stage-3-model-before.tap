@@ -1,0 +1,37 @@
+TAP version 13
+# Subtest: global-rate migration archives obsolete Project links and keeps the candidate valid
+not ok 1 - global-rate migration archives obsolete Project links and keeps the candidate valid
+  ---
+  duration_ms: 25.764823
+  type: 'test'
+  location: '/home/n0rt/headroom-projects/Hort Ops 23 September/tests/global-rate-workspace-recovery.test.cjs:16:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    NSA-PROJ-0VCASS6.catalogId references missing entity "NSA-CAT-2026".
+    NSA-PROJ-186F3X1.catalogId references missing entity "NSA-CAT-2026".
+    
+    2 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 2
+  operator: 'strictEqual'
+  stack: |-
+    valid (/home/n0rt/headroom-projects/Hort Ops 23 September/scripts/review_nsa_workspace_warnings.cjs:46:10)
+    buildCandidate (/home/n0rt/headroom-projects/Hort Ops 23 September/scripts/review_nsa_workspace_warnings.cjs:60:3)
+    TestContext.<anonymous> (/home/n0rt/headroom-projects/Hort Ops 23 September/tests/global-rate-workspace-recovery.test.cjs:18:42)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 61.400809

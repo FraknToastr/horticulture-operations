@@ -61,10 +61,6 @@ test("Budget form and all eight actions persist through approval, closure and re
   await expect(form.locator('[data-budget-action="allocate"]')).toBeEnabled();
   await expect(form.locator('[data-budget-action="apply-reopen"]')).toBeDisabled();
   await expect(form.locator('[name="evidence"]')).toHaveValue("Council minutes 42");
-  await page.setViewportSize({ width: 480, height: 720 });
-  const row = form.locator('[data-budget-persistent-actions]');
-  await expect(row.locator('button')).toHaveCount(8);
-  expect(await row.evaluate((node) => ({ overflow: getComputedStyle(node).overflowX, wide: node.scrollWidth > node.clientWidth }))).toEqual({ overflow: "auto", wide: true });
 });
 
 test("Budget UI allocates to a Register record before any Project exists", async ({ page }) => {

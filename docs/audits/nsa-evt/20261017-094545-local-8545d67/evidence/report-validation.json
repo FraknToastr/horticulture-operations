@@ -1,0 +1,44 @@
+{
+  "id": "REPORT-VALIDATION",
+  "status": "PASS",
+  "startedAt": "2026-10-17T04:20:04.919Z",
+  "endedAt": "2026-10-17T04:20:05.654Z",
+  "browser": "151.0.7922.34",
+  "checks": [
+    "HTML embedded JSON equals results.json",
+    "Markdown verdict matches JSON",
+    "No external scripts/styles",
+    "Offline file opening with zero HTTP requests",
+    "Mode/module/severity/result/search filters",
+    "Keyboard disclosure",
+    "Test pagination",
+    "Desktop 1600/1024 has no document overflow",
+    "No browser exceptions"
+  ],
+  "layouts": [
+    {
+      "width": 1600,
+      "documentWidth": 1600,
+      "overflow": false,
+      "keyboardControls": true
+    },
+    {
+      "width": 1024,
+      "documentWidth": 1024,
+      "overflow": false,
+      "keyboardControls": true
+    }
+  ],
+  "networkRequests": 0,
+  "errors": [],
+  "artifactHashes": {
+    "results.json": "6365f770d62a0a55fff4d203e2dfd212b00fa9c6a164714d63a95b6064390358",
+    "report.md": "e844ea895f2e3e982adcacb41bc10208e3264e3905478bd21b6f84f4444eb761",
+    "report.html": "99ab1dc4781c14b4d95d2d37fa6a59c72b93cbd83e4f7a1980a8dc439a630915"
+  },
+  "excluded": [
+    "Screenshots",
+    "Mobile/touch",
+    "Video/trace"
+  ]
+}

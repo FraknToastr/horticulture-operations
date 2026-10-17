@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: desktop release blocks excluded capabilities before invoking them
+ok 1 - desktop release blocks excluded capabilities before invoking them
+  ---
+  duration_ms: 1.045846
+  type: 'test'
+  ...
+# Subtest: desktop release retains filters for mixed files and excludes mobile Budget coverage
+ok 2 - desktop release retains filters for mixed files and excludes mobile Budget coverage
+  ---
+  duration_ms: 0.25537
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 218.184479

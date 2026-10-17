@@ -1,0 +1,286 @@
+TAP version 13
+# Subtest: NSA: mapped bulk deletion preserves existing geometry semantics, historical=false
+ok 1 - NSA: mapped bulk deletion preserves existing geometry semantics, historical=false
+  ---
+  duration_ms: 78.47523
+  type: 'test'
+  ...
+# Subtest: NSA: mapped bulk deletion preserves existing geometry semantics, historical=true
+ok 2 - NSA: mapped bulk deletion preserves existing geometry semantics, historical=true
+  ---
+  duration_ms: 51.739388
+  type: 'test'
+  ...
+# Subtest: NSA: bulk kinds, shared classification and project isolation
+ok 3 - NSA: bulk kinds, shared classification and project isolation
+  ---
+  duration_ms: 246.355203
+  type: 'test'
+  ...
+# Subtest: NSA: partial deletion retains actuals and recalculates editable Drafts
+ok 4 - NSA: partial deletion retains actuals and recalculates editable Drafts
+  ---
+  duration_ms: 72.458699
+  type: 'test'
+  ...
+# Subtest: NSA: bulk deletion retains Issued protections
+ok 5 - NSA: bulk deletion retains Issued protections
+  ---
+  duration_ms: 79.186151
+  type: 'test'
+  ...
+# Subtest: NSA: bulk deletion retains Accepted protections
+ok 6 - NSA: bulk deletion retains Accepted protections
+  ---
+  duration_ms: 81.450495
+  type: 'test'
+  ...
+# Subtest: NSA: bulk deletion retains Declined protections
+ok 7 - NSA: bulk deletion retains Declined protections
+  ---
+  duration_ms: 90.289091
+  type: 'test'
+  ...
+# Subtest: NSA: bulk deletion retains Superseded protections
+ok 8 - NSA: bulk deletion retains Superseded protections
+  ---
+  duration_ms: 95.405288
+  type: 'test'
+  ...
+# Subtest: NSA: bulk deletion retains payment protections
+ok 9 - NSA: bulk deletion retains payment protections
+  ---
+  duration_ms: 82.543458
+  type: 'test'
+  ...
+# Subtest: NSA: bulk deletion retains allocation protections
+ok 10 - NSA: bulk deletion retains allocation protections
+  ---
+  duration_ms: 70.837044
+  type: 'test'
+  ...
+# Subtest: NSA: bulk deletion retains budget protections
+ok 11 - NSA: bulk deletion retains budget protections
+  ---
+  duration_ms: 54.08304
+  type: 'test'
+  ...
+# Subtest: NSA: bulk deletion retains planner protections
+ok 12 - NSA: bulk deletion retains planner protections
+  ---
+  duration_ms: 54.279429
+  type: 'test'
+  ...
+# Subtest: EVT: mapped bulk deletion preserves existing geometry semantics, historical=false
+ok 13 - EVT: mapped bulk deletion preserves existing geometry semantics, historical=false
+  ---
+  duration_ms: 50.716681
+  type: 'test'
+  ...
+# Subtest: EVT: mapped bulk deletion preserves existing geometry semantics, historical=true
+ok 14 - EVT: mapped bulk deletion preserves existing geometry semantics, historical=true
+  ---
+  duration_ms: 65.225194
+  type: 'test'
+  ...
+# Subtest: EVT: bulk kinds, shared classification and project isolation
+ok 15 - EVT: bulk kinds, shared classification and project isolation
+  ---
+  duration_ms: 184.026086
+  type: 'test'
+  ...
+# Subtest: EVT: partial deletion retains actuals and recalculates editable Drafts
+ok 16 - EVT: partial deletion retains actuals and recalculates editable Drafts
+  ---
+  duration_ms: 57.258208
+  type: 'test'
+  ...
+# Subtest: EVT: bulk deletion retains Issued protections
+ok 17 - EVT: bulk deletion retains Issued protections
+  ---
+  duration_ms: 62.557607
+  type: 'test'
+  ...
+# Subtest: EVT: bulk deletion retains Accepted protections
+ok 18 - EVT: bulk deletion retains Accepted protections
+  ---
+  duration_ms: 67.709752
+  type: 'test'
+  ...
+# Subtest: EVT: bulk deletion retains Declined protections
+ok 19 - EVT: bulk deletion retains Declined protections
+  ---
+  duration_ms: 67.472932
+  type: 'test'
+  ...
+# Subtest: EVT: bulk deletion retains Superseded protections
+ok 20 - EVT: bulk deletion retains Superseded protections
+  ---
+  duration_ms: 71.299147
+  type: 'test'
+  ...
+# Subtest: EVT: bulk deletion retains payment protections
+ok 21 - EVT: bulk deletion retains payment protections
+  ---
+  duration_ms: 57.142613
+  type: 'test'
+  ...
+# Subtest: EVT: bulk deletion retains allocation protections
+ok 22 - EVT: bulk deletion retains allocation protections
+  ---
+  duration_ms: 57.22913
+  type: 'test'
+  ...
+# Subtest: EVT: bulk deletion retains budget protections
+ok 23 - EVT: bulk deletion retains budget protections
+  ---
+  duration_ms: 45.009903
+  type: 'test'
+  ...
+# Subtest: EVT: bulk deletion retains planner protections
+ok 24 - EVT: bulk deletion retains planner protections
+  ---
+  duration_ms: 46.796352
+  type: 'test'
+  ...
+# Subtest: NSA: Draft membership preserves history, survives refresh/import, and respects payment locks
+ok 25 - NSA: Draft membership preserves history, survives refresh/import, and respects payment locks
+  ---
+  duration_ms: 109.486835
+  type: 'test'
+  ...
+# Subtest: EVT: Draft membership preserves history, survives refresh/import, and respects payment locks
+ok 26 - EVT: Draft membership preserves history, survives refresh/import, and respects payment locks
+  ---
+  duration_ms: 67.607715
+  type: 'test'
+  ...
+# Subtest: Exclusions carry into the next revision and cannot reference another Project
+ok 27 - Exclusions carry into the next revision and cannot reference another Project
+  ---
+  duration_ms: 50.877015
+  type: 'test'
+  ...
+# Subtest: NSA: three funding arrangements, exact coverage, shortfall and surplus
+ok 28 - NSA: three funding arrangements, exact coverage, shortfall and surplus
+  ---
+  duration_ms: 82.082022
+  type: 'test'
+  ...
+# Subtest: NSA: City coverage, zero customer GST/payable and payment command prohibition
+ok 29 - NSA: City coverage, zero customer GST/payable and payment command prohibition
+  ---
+  duration_ms: 58.125665
+  type: 'test'
+  ...
+# Subtest: NSA: genuine surpluses in each mode preserve City allocation and customer offers
+ok 30 - NSA: genuine surpluses in each mode preserve City allocation and customer offers
+  ---
+  duration_ms: 71.008914
+  type: 'test'
+  ...
+# Subtest: NSA: suggestions are explicit; overrides survive reload, refresh and revision
+ok 31 - NSA: suggestions are explicit; overrides survive reload, refresh and revision
+  ---
+  duration_ms: 64.850193
+  type: 'test'
+  ...
+# Subtest: EVT: three funding arrangements, exact coverage, shortfall and surplus
+ok 32 - EVT: three funding arrangements, exact coverage, shortfall and surplus
+  ---
+  duration_ms: 58.21286
+  type: 'test'
+  ...
+# Subtest: EVT: City coverage, zero customer GST/payable and payment command prohibition
+ok 33 - EVT: City coverage, zero customer GST/payable and payment command prohibition
+  ---
+  duration_ms: 40.37818
+  type: 'test'
+  ...
+# Subtest: EVT: genuine surpluses in each mode preserve City allocation and customer offers
+ok 34 - EVT: genuine surpluses in each mode preserve City allocation and customer offers
+  ---
+  duration_ms: 55.012184
+  type: 'test'
+  ...
+# Subtest: EVT: suggestions are explicit; overrides survive reload, refresh and revision
+ok 35 - EVT: suggestions are explicit; overrides survive reload, refresh and revision
+  ---
+  duration_ms: 49.052512
+  type: 'test'
+  ...
+# Subtest: Customer-only shortfalls cannot use City allocation; declines are not confirmed funding
+ok 36 - Customer-only shortfalls cannot use City allocation; declines are not confirmed funding
+  ---
+  duration_ms: 41.460028
+  type: 'test'
+  ...
+# Subtest: Funding commercial values lock with deposits/allocations and unlock after reversal
+ok 37 - Funding commercial values lock with deposits/allocations and unlock after reversal
+  ---
+  duration_ms: 33.345102
+  type: 'test'
+  ...
+# Subtest: Legacy Drafts and revisions require selection; existing issued amounts and projections survive
+ok 38 - Legacy Drafts and revisions require selection; existing issued amounts and projections survive
+  ---
+  duration_ms: 42.880798
+  type: 'test'
+  ...
+# Subtest: NSA: receipt and adjustment eligibility follow lifecycle and funding
+ok 39 - NSA: receipt and adjustment eligibility follow lifecycle and funding
+  ---
+  duration_ms: 456.56722
+  type: 'test'
+  ...
+# Subtest: NSA: rejected receipt validation leaves all entities unchanged
+ok 40 - NSA: rejected receipt validation leaves all entities unchanged
+  ---
+  duration_ms: 36.764439
+  type: 'test'
+  ...
+# Subtest: NSA: Declined quotes retain and reverse existing receipts but reject new ones
+ok 41 - NSA: Declined quotes retain and reverse existing receipts but reject new ones
+  ---
+  duration_ms: 70.786878
+  type: 'test'
+  ...
+# Subtest: NSA: source comparison preserves exclusions, adjustments and explicit refresh
+ok 42 - NSA: source comparison preserves exclusions, adjustments and explicit refresh
+  ---
+  duration_ms: 29.315041
+  type: 'test'
+  ...
+# Subtest: EVT: receipt and adjustment eligibility follow lifecycle and funding
+ok 43 - EVT: receipt and adjustment eligibility follow lifecycle and funding
+  ---
+  duration_ms: 358.958499
+  type: 'test'
+  ...
+# Subtest: EVT: rejected receipt validation leaves all entities unchanged
+ok 44 - EVT: rejected receipt validation leaves all entities unchanged
+  ---
+  duration_ms: 31.464899
+  type: 'test'
+  ...
+# Subtest: EVT: Declined quotes retain and reverse existing receipts but reject new ones
+ok 45 - EVT: Declined quotes retain and reverse existing receipts but reject new ones
+  ---
+  duration_ms: 35.934976
+  type: 'test'
+  ...
+# Subtest: EVT: source comparison preserves exclusions, adjustments and explicit refresh
+ok 46 - EVT: source comparison preserves exclusions, adjustments and explicit refresh
+  ---
+  duration_ms: 23.210241
+  type: 'test'
+  ...
+1..46
+# tests 46
+# suites 0
+# pass 46
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1932.900439

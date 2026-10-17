@@ -1,0 +1,704 @@
+{
+  "config": {
+    "argv": [
+      "/home/n0rt/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/n0rt/headroom-projects/Hort Ops 23 September/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=playwright.desktop.config.cjs",
+      "--project",
+      "metromap",
+      "--project",
+      "inspector",
+      "--project",
+      "budget",
+      "--reporter=line,json"
+    ],
+    "configFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/playwright.desktop.config.cjs",
+    "rootDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 1,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "core",
+        "name": "core",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/evt-register-delivery.spec.js",
+          "**/register-status-guide.spec.js",
+          "**/register-drawer-context.spec.js",
+          "**/drawer-scroll-ownership.spec.js",
+          "**/register-drawer-motion.spec.js",
+          "**/register-shortcut-states.spec.js",
+          "**/planner-task-editor.spec.js",
+          "**/planner-draft-recovery.spec.js",
+          "**/cost-library-legacy-grouping.spec.js",
+          "**/calculator-planner-job-isolation.spec.js",
+          "**/c4-browser-acceptance.spec.js",
+          "**/quote-payment-funding-workflow.spec.js",
+          "**/quote-first-interaction.spec.js",
+          "**/quoted-lifecycle.spec.js",
+          "**/draft-quoted-cost-deletion.spec.js",
+          "**/workspace-backup-recovery.spec.js",
+          "**/startup-status-recovery.spec.js",
+          "**/factory-reset-startup.spec.js",
+          "**/workspace-sanitation.spec.js",
+          "**/data-import-keyboard.spec.js",
+          "**/scheduler-side-by-side.spec.js",
+          "**/scheduler-multi-day.spec.js",
+          "**/scheduler-unused-action-scope.spec.js",
+          "**/scheduler-week-viewport.spec.js",
+          "**/scheduler-event-milestones.spec.js",
+          "**/space-map-onboarding.spec.js",
+          "**/program-runtime.spec.js",
+          "**/performance-audit.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "budget",
+        "name": "budget",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/budget-workflow.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "metromap",
+        "name": "metromap",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/adaptive-map-scheduler-register.spec.js",
+          "**/metromap-activation.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "adaptive",
+        "name": "adaptive",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/adaptive-map-scheduler-register.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "inspector",
+        "name": "inspector",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/space-map-draft-actions.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "map-draft",
+        "name": "map-draft",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/space-map-draft-actions.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "gpu",
+        "name": "gpu",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/space-map-gpu.spec.js"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": {
+      "command": "PORT=4199 node src/scripts/static-server.cjs",
+      "url": "http://127.0.0.1:4199/src/program-planner/index.html?workspace=NSA",
+      "reuseExistingServer": false,
+      "timeout": 15000
+    }
+  },
+  "suites": [
+    {
+      "title": "budget-workflow.spec.js",
+      "file": "budget-workflow.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Budget form and all eight actions persist through approval, closure and reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "budget",
+              "projectName": "budget",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1211,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:38.953Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db418101d06301656072-07daca26c30f583b8a13",
+          "file": "budget-workflow.spec.js",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "Budget UI allocates to a Register record before any Project exists",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "budget",
+              "projectName": "budget",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1687,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:40.421Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db418101d06301656072-e2c8bfc1be1e702967b3",
+          "file": "budget-workflow.spec.js",
+          "line": 66,
+          "column": 1
+        },
+        {
+          "title": "NSA Register drawer places newest-first FY allocations in the inline table",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "budget",
+              "projectName": "budget",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 603,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:42.116Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db418101d06301656072-d245b293787325e23db0",
+          "file": "budget-workflow.spec.js",
+          "line": 249,
+          "column": 1
+        },
+        {
+          "title": "Event Register drawer keeps project-free allocations in the inline table",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "budget",
+              "projectName": "budget",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 423,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:42.725Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db418101d06301656072-6a943892c715e84db11d",
+          "file": "budget-workflow.spec.js",
+          "line": 332,
+          "column": 1
+        },
+        {
+          "title": "Carry-forward requires review and confirmation before moving unused funds",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "budget",
+              "projectName": "budget",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 964,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:43.154Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db418101d06301656072-9dfe0746fa0218e0619d",
+          "file": "budget-workflow.spec.js",
+          "line": 367,
+          "column": 1
+        },
+        {
+          "title": "annual management transfers exact cents as a linked pair",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "budget",
+              "projectName": "budget",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 561,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:44.126Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db418101d06301656072-e27ba983998f3664a856",
+          "file": "budget-workflow.spec.js",
+          "line": 448,
+          "column": 1
+        },
+        {
+          "title": "No year-end review records the answer without a next-year budget or movement",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "budget",
+              "projectName": "budget",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 510,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:44.693Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db418101d06301656072-e342001406b3969b2a68",
+          "file": "budget-workflow.spec.js",
+          "line": 490,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "adaptive-map-scheduler-register.spec.js",
+      "file": "adaptive-map-scheduler-register.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "MetroMap credentials stay outside workspace exports and preserve the editing session",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "metromap",
+              "projectName": "metromap",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4302,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:45.488Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3b5fbbb22c8933e64c5e-0c5106b0a437f048a460",
+          "file": "adaptive-map-scheduler-register.spec.js",
+          "line": 35,
+          "column": 1
+        },
+        {
+          "title": "MetroMap manual activation survives storage failures without retry loops",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "metromap",
+              "projectName": "metromap",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2292,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:49.858Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3b5fbbb22c8933e64c5e-8d01b5b5c75f749ea87a",
+          "file": "adaptive-map-scheduler-register.spec.js",
+          "line": 75,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "metromap-activation.spec.js",
+      "file": "metromap-activation.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: MetroMap has no Paste button and its label follows activation and storage removal",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "metromap",
+              "projectName": "metromap",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3329,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:52.159Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "83a165eaf310503cf0a7-0a947c8f55bf569c3e1b",
+          "file": "metromap-activation.spec.js",
+          "line": 5,
+          "column": 3
+        },
+        {
+          "title": "EVT: MetroMap has no Paste button and its label follows activation and storage removal",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "metromap",
+              "projectName": "metromap",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3083,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:53.978Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "83a165eaf310503cf0a7-878722473af1393f4858",
+          "file": "metromap-activation.spec.js",
+          "line": 5,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "space-map-draft-actions.spec.js",
+      "file": "space-map-draft-actions.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: radial Undo restores completed vertex edits without saving or remounting cards",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "inspector",
+              "projectName": "inspector",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6358,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-shape-card-id]').locator('header')\nExpected: visible\nError: strict mode violation: locator('[data-shape-card-id]').locator('header') resolved to 2 elements:\n    1) <header class=\"space-editor__geometry-summary\">…</header> aka locator('header').filter({ hasText: 'Event Space' })\n    2) <header>…</header> aka locator('header').filter({ hasText: 'Vertices (4)' })\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-shape-card-id]').locator('header')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-shape-card-id]').locator('header')\nExpected: visible\nError: strict mode violation: locator('[data-shape-card-id]').locator('header') resolved to 2 elements:\n    1) <header class=\"space-editor__geometry-summary\">…</header> aka locator('header').filter({ hasText: 'Event Space' })\n    2) <header>…</header> aka locator('header').filter({ hasText: 'Vertices (4)' })\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-shape-card-id]').locator('header')\u001b[22m\n\n    at /home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/space-map-draft-actions.spec.js:163:42",
+                    "location": {
+                      "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/space-map-draft-actions.spec.js",
+                      "column": 42,
+                      "line": 163
+                    },
+                    "snippet": "  161 |     await card.locator('[data-space-expand]').click();\n  162 |     await expect(card).toHaveAttribute('data-card-size','minimal');\n> 163 |     await expect(card.locator('header')).toBeVisible();\n      |                                          ^\n  164 |     await expect(card.locator('.space-editor__fields tr:visible')).toHaveCount(1);\n  165 |     await expect(card.locator('.space-editor__fields th')).toBeHidden();\n  166 |     await expect(card.locator('.space-editor__fields td').first()).toHaveText(/\\S/);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/space-map-draft-actions.spec.js",
+                        "column": 42,
+                        "line": 163
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-shape-card-id]').locator('header')\nExpected: visible\nError: strict mode violation: locator('[data-shape-card-id]').locator('header') resolved to 2 elements:\n    1) <header class=\"space-editor__geometry-summary\">…</header> aka locator('header').filter({ hasText: 'Event Space' })\n    2) <header>…</header> aka locator('header').filter({ hasText: 'Vertices (4)' })\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-shape-card-id]').locator('header')\u001b[22m\n\n\n  161 |     await card.locator('[data-space-expand]').click();\n  162 |     await expect(card).toHaveAttribute('data-card-size','minimal');\n> 163 |     await expect(card.locator('header')).toBeVisible();\n      |                                          ^\n  164 |     await expect(card.locator('.space-editor__fields tr:visible')).toHaveCount(1);\n  165 |     await expect(card.locator('.space-editor__fields th')).toBeHidden();\n  166 |     await expect(card.locator('.space-editor__fields td').first()).toHaveText(/\\S/);\n    at /home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/space-map-draft-actions.spec.js:163:42"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:44:57.372Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results/space-map-draft-actions-NS-89101--saving-or-remounting-cards-inspector/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/space-map-draft-actions.spec.js",
+                    "column": 42,
+                    "line": 163
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "61e83e420d113ceac531-ad617fa47c7376c1252d",
+          "file": "space-map-draft-actions.spec.js",
+          "line": 122,
+          "column": 3
+        },
+        {
+          "title": "EVT: radial Undo restores completed vertex edits without saving or remounting cards",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "inspector",
+              "projectName": "inspector",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "61e83e420d113ceac531-e84ac1fe98f9dc1f9221",
+          "file": "space-map-draft-actions.spec.js",
+          "line": 122,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "message": "\u001b[31mTesting stopped early after 1 maximum allowed failures.\u001b[39m"
+    }
+  ],
+  "stats": {
+    "startTime": "2026-10-17T04:44:38.510Z",
+    "duration": 26844.654,
+    "expected": 11,
+    "skipped": 1,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

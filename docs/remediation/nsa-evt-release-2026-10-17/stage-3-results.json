@@ -1,0 +1,173 @@
+{
+  "stage": 3,
+  "status": "COMPLETE",
+  "stoppedAfterStage": 3,
+  "nextStage": 4,
+  "productionReleaseVerdict": "UNVERIFIED",
+  "commit": "8545d675921297349123e9828e62035981d34889",
+  "branch": "main",
+  "upstream": "origin/main",
+  "target": "local HTTP desktop Chromium",
+  "environment": {
+    "node": "v22.23.2",
+    "playwright": "1.62.0",
+    "browser": "Google Chrome for Testing 151.0.7922.34"
+  },
+  "warningReview": {
+    "originalWarnings": 57,
+    "candidateWarnings": 3,
+    "corrected": 54,
+    "source": {
+      "path": "src/sample/nsa-workspace-2026-27-area-pricing-v5.json",
+      "sha256": "d3424d247bca9586f1a35a7e3e584fa18b637e0bbeb44b0e29da84122c64ec5f",
+      "bytes": 173344
+    },
+    "candidate": {
+      "path": "src/sample/nsa-workspace-2026-27-global-rates-reviewed-v5.json",
+      "sha256": "347b3a039ccfe2d25804d7eff368a1ee875cf233d142232c696e50a95c821781",
+      "bytes": 254345,
+      "adopted": false
+    },
+    "ownerDecisions": [
+      {
+        "code": "STATUS_MIGRATION_READINESS",
+        "contractId": "PC-012",
+        "severity": "warning",
+        "collection": "migration",
+        "entityId": "status-readiness",
+        "field": "migration.statusReadiness",
+        "relatedIds": [],
+        "message": "Status migration readiness review is pending; automation remains paused until an attributed officer enables it.",
+        "repair": null,
+        "disposition": "owner-decision-required",
+        "decision": "An attributed officer must review readiness and decide whether to enable automation."
+      },
+      {
+        "code": "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+        "contractId": "",
+        "severity": "warning",
+        "collection": "projects",
+        "entityId": "NSA-PROJ-0VCASS6",
+        "field": "funding.operationalAmount",
+        "relatedIds": [],
+        "message": "Project has no explicit Council Operational Amount.",
+        "repair": null,
+        "disposition": "owner-decision-required",
+        "decision": "Record the authorised Council operational amount; no source amount exists, including evidence for zero."
+      },
+      {
+        "code": "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+        "contractId": "",
+        "severity": "warning",
+        "collection": "projects",
+        "entityId": "NSA-PROJ-186F3X1",
+        "field": "funding.operationalAmount",
+        "relatedIds": [],
+        "message": "Project has no explicit Council Operational Amount.",
+        "repair": null,
+        "disposition": "owner-decision-required",
+        "decision": "Record the authorised Council operational amount; no source amount exists, including evidence for zero."
+      }
+    ]
+  },
+  "model": {
+    "tests": 17,
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "files": [
+      "tests/global-rate-workspace-recovery.test.cjs",
+      "tests/model-v5.test.cjs",
+      "tests/rate-library-schema.test.cjs",
+      "tests/desktop-release-policy.test.cjs"
+    ],
+    "evidence": "stage-3-model-results.tap"
+  },
+  "browser": {
+    "passed": 2,
+    "total": 2,
+    "cases": [
+      {
+        "project": "core",
+        "file": "reviewed-workspace-recovery.spec.js",
+        "title": "nsa-workspace-2026-27-area-pricing-v5.json: isolated import preserves IDs, lineage, JSON/ZIP round trips and reload",
+        "status": "passed",
+        "durationMs": 1053
+      },
+      {
+        "project": "core",
+        "file": "reviewed-workspace-recovery.spec.js",
+        "title": "nsa-workspace-2026-27-global-rates-reviewed-v5.json: isolated import preserves IDs, lineage, JSON/ZIP round trips and reload",
+        "status": "passed",
+        "durationMs": 858
+      }
+    ],
+    "evidence": "stage-3-browser-results.json"
+  },
+  "preFixRegression": {
+    "exitCode": 1,
+    "evidence": "stage-3-model-before.tap",
+    "defect": "Existing migration left two Project.catalogId references to its removed catalog"
+  },
+  "harnessAttempts": [
+    {
+      "file": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-browser-attempt-1.json",
+      "stats": {
+        "startTime": "2026-10-17T05:00:57.386Z",
+        "duration": 1561.8410000000001,
+        "expected": 0,
+        "skipped": 1,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "classification": "Harness expected graph omitted documented browser-local rollout markers; no application defect",
+      "resolved": true
+    },
+    {
+      "file": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-browser-attempt-2.json",
+      "stats": {
+        "startTime": "2026-10-17T05:01:46.446Z",
+        "duration": 1455.408,
+        "expected": 0,
+        "skipped": 1,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "classification": "Harness expected graph omitted documented browser-local rollout markers; no application defect",
+      "resolved": true
+    }
+  ],
+  "excludedMediaAttachments": 0,
+  "preservation": {
+    "checkedAt": "2026-10-17T05:03:11.148Z",
+    "protectedFiles": 391,
+    "changedProtectedFiles": [],
+    "originalAuditChanged": false,
+    "earlierStageEvidenceChanged": false,
+    "status": "PASS"
+  },
+  "sourceHashes": {
+    "src/program-planner/js/model.js": "904b49d6f5f07daa1215058cbe95a896f351dd8db0432cce32baa2fe2bedd20c",
+    "src/program-planner/index.html": "52cba6a5acdd260ec2c5b28be012fc4450dfab1dada98801d7af49fefa031168",
+    "scripts/desktop-release-plan.cjs": "625087065828bb29cbcd6c2c48a15356ef9fd19d5d5544a6abb89eeba961ff13",
+    "docs/remediation/nsa-evt-release-2026-10-17/README.md": "de84ec018a9d51f858dd6470e46b0ae77031faf0327c9d0fdf196ecd98f12f2a",
+    "scripts/review_nsa_workspace_warnings.cjs": "c9c9bd7eecae1e9a3c27b6a478e3d86e791f9e98cc18d510d4cfb8efc1426652",
+    "tests/global-rate-workspace-recovery.test.cjs": "d95e80a6608d8466e1a86243eeced0ebb09706ddecad8d0a1d71eb656468474c",
+    "tests/browser/reviewed-workspace-recovery.spec.js": "e32e47366c8fadc5a66f59f2881ac4b9cc75c0f3c7a5c067256506996e1c4115",
+    "src/sample/nsa-workspace-2026-27-global-rates-reviewed-v5.json": "347b3a039ccfe2d25804d7eff368a1ee875cf233d142232c696e50a95c821781"
+  },
+  "review": {
+    "agent": "stage3_warning_review",
+    "status": "Candidate delta justified; original and operational data preserved",
+    "edits": false,
+    "testsRun": false
+  },
+  "limits": [
+    "Three owner decisions remain unresolved; no amounts invented and automation remains paused",
+    "Candidate not adopted or substituted for approved source",
+    "No full release rerun",
+    "No screenshots, mobile, touch, video or traces",
+    "No GitHub Pages or Edge file certification",
+    "No commits or pushes"
+  ]
+}

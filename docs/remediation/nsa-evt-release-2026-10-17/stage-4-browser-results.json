@@ -1,0 +1,336 @@
+{
+  "config": {
+    "argv": [
+      "/home/n0rt/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/n0rt/headroom-projects/Hort Ops 23 September/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=docs/remediation/nsa-evt-release-2026-10-17/stage-4/playwright.config.cjs"
+    ],
+    "configFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4/playwright.config.cjs",
+    "rootDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 1,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/nsa-evt-stage4-playwright-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4",
+        "testIgnore": [],
+        "testMatch": [
+          "pdf-compat.spec.cjs"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4-browser-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "pdf-compat.spec.cjs",
+      "file": "pdf-compat.spec.cjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: 6.4.299 matches shipped PDF extraction with lazy promises, real workers and no external network",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1260,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:17:54.636Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "pdf-parity-proof",
+                      "contentType": "application/json",
+                      "body": "W3sicG9ydCI6NDE5OSwidmVyc2lvbiI6IjIuMTYuMTA1IiwibG9hZCI6eyJzYW1lUHJvbWlzZSI6dHJ1ZSwidmVyc2lvbiI6IjIuMTYuMTA1IiwiY2FjaGVkIjp0cnVlfSwicGRmUmVxdWVzdHMiOjMsIndvcmtlcnNDcmVhdGVkIjoyLCJ3b3JrZXJzUmVtYWluaW5nIjowLCJwYWdlcyI6MiwiZmllbGRzIjowLCJleHRyYWN0aW9uU0hBMjU2IjoiZTBjYTZjYWVjODYxOTZkZjMwYjAyOGZhZmUwMmFkYTdjNzk2YjQ5ZDk2ODUyNzM3MjIzYWVmZGQ3Y2Y4OTFiOSIsImZvcm1GaWVsZHMiOjEsImlzRXZhbFN1cHBvcnRlZCI6W2ZhbHNlLGZhbHNlXX0seyJwb3J0Ijo0MjA0LCJ2ZXJzaW9uIjoiNi40LjI5OSIsImxvYWQiOnsic2FtZVByb21pc2UiOnRydWUsInZlcnNpb24iOiI2LjQuMjk5IiwiY2FjaGVkIjp0cnVlfSwicGRmUmVxdWVzdHMiOjMsIndvcmtlcnNDcmVhdGVkIjoyLCJ3b3JrZXJzUmVtYWluaW5nIjowLCJwYWdlcyI6MiwiZmllbGRzIjowLCJleHRyYWN0aW9uU0hBMjU2IjoiZTBjYTZjYWVjODYxOTZkZjMwYjAyOGZhZmUwMmFkYTdjNzk2YjQ5ZDk2ODUyNzM3MjIzYWVmZGQ3Y2Y4OTFiOSIsImZvcm1GaWVsZHMiOjEsImlzRXZhbFN1cHBvcnRlZCI6W2ZhbHNlLGZhbHNlXX1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-106038dc89adb33d4a89",
+          "file": "pdf-compat.spec.cjs",
+          "line": 44,
+          "column": 3
+        },
+        {
+          "title": "NSA: failed PDF module load retries explicitly and deduplicates the retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 285,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:17:56.134Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-a55cab544b9450059071",
+          "file": "pdf-compat.spec.cjs",
+          "line": 90,
+          "column": 3
+        },
+        {
+          "title": "EVT: 6.4.299 matches shipped PDF extraction with lazy promises, real workers and no external network",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1199,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:17:56.424Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "pdf-parity-proof",
+                      "contentType": "application/json",
+                      "body": "W3sicG9ydCI6NDE5OSwidmVyc2lvbiI6IjIuMTYuMTA1IiwibG9hZCI6eyJzYW1lUHJvbWlzZSI6dHJ1ZSwidmVyc2lvbiI6IjIuMTYuMTA1IiwiY2FjaGVkIjp0cnVlfSwicGRmUmVxdWVzdHMiOjMsIndvcmtlcnNDcmVhdGVkIjoyLCJ3b3JrZXJzUmVtYWluaW5nIjowLCJwYWdlcyI6MiwiZmllbGRzIjowLCJleHRyYWN0aW9uU0hBMjU2IjoiZTBjYTZjYWVjODYxOTZkZjMwYjAyOGZhZmUwMmFkYTdjNzk2YjQ5ZDk2ODUyNzM3MjIzYWVmZGQ3Y2Y4OTFiOSIsImZvcm1GaWVsZHMiOjEsImlzRXZhbFN1cHBvcnRlZCI6W2ZhbHNlLGZhbHNlXX0seyJwb3J0Ijo0MjA0LCJ2ZXJzaW9uIjoiNi40LjI5OSIsImxvYWQiOnsic2FtZVByb21pc2UiOnRydWUsInZlcnNpb24iOiI2LjQuMjk5IiwiY2FjaGVkIjp0cnVlfSwicGRmUmVxdWVzdHMiOjMsIndvcmtlcnNDcmVhdGVkIjoyLCJ3b3JrZXJzUmVtYWluaW5nIjowLCJwYWdlcyI6MiwiZmllbGRzIjowLCJleHRyYWN0aW9uU0hBMjU2IjoiZTBjYTZjYWVjODYxOTZkZjMwYjAyOGZhZmUwMmFkYTdjNzk2YjQ5ZDk2ODUyNzM3MjIzYWVmZGQ3Y2Y4OTFiOSIsImZvcm1GaWVsZHMiOjEsImlzRXZhbFN1cHBvcnRlZCI6W2ZhbHNlLGZhbHNlXX1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-3118d7ccca8d53707487",
+          "file": "pdf-compat.spec.cjs",
+          "line": 44,
+          "column": 3
+        },
+        {
+          "title": "EVT: failed PDF module load retries explicitly and deduplicates the retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 244,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:17:57.631Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-2a8c80c1cabe032f55a9",
+          "file": "pdf-compat.spec.cjs",
+          "line": 90,
+          "column": 3
+        },
+        {
+          "title": "NSA: candidate PDF library stages and applies the real Register PDF import",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 571,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:17:57.881Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-2ec21b85c572d18e3fa6",
+          "file": "pdf-compat.spec.cjs",
+          "line": 107,
+          "column": 1
+        },
+        {
+          "title": "candidate PDF load timeout stays bounded and permits an explicit retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8322,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:17:58.458Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-70d169964aa092c60996",
+          "file": "pdf-compat.spec.cjs",
+          "line": 126,
+          "column": 1
+        },
+        {
+          "title": "a malformed PDF does not poison the successful candidate module cache",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 518,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:18:06.787Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-1b0e52ade6fb1621355b",
+          "file": "pdf-compat.spec.cjs",
+          "line": 139,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-17T05:17:54.055Z",
+    "duration": 13313.045999999998,
+    "expected": 7,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

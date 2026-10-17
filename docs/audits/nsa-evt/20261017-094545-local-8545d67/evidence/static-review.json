@@ -1,0 +1,67 @@
+{
+  "reviewedAt": "2026-10-16T23:52:48.311Z",
+  "css": {
+    "path": "src/program-planner/styles.css",
+    "bytes": 388715,
+    "lines": 11065,
+    "important": 1891,
+    "hexColours": 1236,
+    "sharedTokenReferences": 686,
+    "repeatedSelectorGroupsApproximate": 160,
+    "interpretation": "Maintenance metrics only. Media contexts not normalised; no unused-CSS or runtime performance proof."
+  },
+  "sharedComponents": [
+    "src/shared/css/tokens.css",
+    "src/shared/css/accessibility.css",
+    "src/shared/css/components.css",
+    "src/shared/js/suite.js"
+  ],
+  "sourceEvidence": [
+    {
+      "area": "Focus/reduced motion",
+      "paths": [
+        "src/shared/css/accessibility.css:4",
+        "src/shared/css/accessibility.css:34",
+        "src/shared/js/suite.js:43"
+      ]
+    },
+    {
+      "area": "Tree request and memory limits",
+      "paths": [
+        "src/program-planner/space-map/tree-loader.mjs:5",
+        "src/program-planner/space-map/tree-worker.mjs:4"
+      ]
+    },
+    {
+      "area": "Renderer bounds",
+      "paths": [
+        "src/program-planner/space-map/renderer.mjs:143",
+        "src/program-planner/space-map/renderer.mjs:225"
+      ]
+    },
+    {
+      "area": "Scheduler owner context",
+      "paths": [
+        "src/program-planner/js/scheduler.js:149–201"
+      ]
+    },
+    {
+      "area": "Persistence revision fence and atomic clearing",
+      "paths": [
+        "src/program-planner/js/storage.js:328",
+        "src/shared/js/storage.js:295"
+      ]
+    }
+  ],
+  "positiveObservations": [
+    "Shared runtime, design tokens and components are reused across owners",
+    "No runtime CDN/font/ArcGIS SDK dependency found in inspected program/shared entrypoints",
+    "Reference details use finite two-decimal values and textContent",
+    "Current owner title privacy exception is explicit"
+  ],
+  "limits": [
+    "Source review is not full accessibility conformance",
+    "No stylesheet cleanup performed",
+    "Exact live-provider uptime and long-session resource growth unverified"
+  ]
+}

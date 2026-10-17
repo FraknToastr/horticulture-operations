@@ -1,0 +1,248 @@
+{
+  "establishedAt": "2026-10-16T23:39:05.505Z",
+  "gates": [
+    {
+      "id": "G-A",
+      "title": "Constitutional integrity",
+      "authority": "src/governance/RELEASE_GATES.md#gate-a",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-B",
+      "title": "Core Project, evidence and Quote pathway",
+      "authority": "src/governance/RELEASE_GATES.md#gate-b",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-C",
+      "title": "Evidence-based Quote readiness",
+      "authority": "src/governance/RELEASE_GATES.md#gate-c",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-D",
+      "title": "Commercial immutability and revision",
+      "authority": "src/governance/RELEASE_GATES.md#gate-d",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-E",
+      "title": "Dependency protection",
+      "authority": "src/governance/RELEASE_GATES.md#gate-e",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-F",
+      "title": "Persistence, import and recovery",
+      "authority": "src/governance/RELEASE_GATES.md#gate-f",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-G",
+      "title": "NSA/EVT isolation",
+      "authority": "src/governance/RELEASE_GATES.md#gate-g",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-H",
+      "title": "Usable controls and truthful workspace locks",
+      "authority": "src/governance/RELEASE_GATES.md#gate-h",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-I",
+      "title": "Retired sidebar architecture remains inactive",
+      "authority": "src/governance/RELEASE_GATES.md#gate-i",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-J",
+      "title": "Location and polygon surfaces",
+      "authority": "src/governance/RELEASE_GATES.md#gate-j",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-K",
+      "title": "Scheduler ownership and routing",
+      "authority": "src/governance/RELEASE_GATES.md#gate-k",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-L",
+      "title": "Active-project calendar signals",
+      "authority": "src/governance/RELEASE_GATES.md#gate-l",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-M",
+      "title": "Drawer viewport containment",
+      "authority": "src/governance/RELEASE_GATES.md#gate-m",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-N",
+      "title": "Unified drawer scroll ownership",
+      "authority": "src/governance/RELEASE_GATES.md#gate-n",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-O",
+      "title": "Annual budget authority and allocation",
+      "authority": "src/governance/RELEASE_GATES.md#gate-o",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-P",
+      "title": "Financial audit, closure and carry-forward",
+      "authority": "src/governance/RELEASE_GATES.md#gate-p",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-Q",
+      "title": "Job origin and deliberate Planner delivery",
+      "authority": "src/governance/RELEASE_GATES.md#gate-q",
+      "mandatory": true,
+      "reason": "Current project release-gate authority, interpreted with later explicit owner changes",
+      "expected": "Approved invariant holds in both NSA and EVT; any narrower evidence is disclosed",
+      "environment": "Local HTTP desktop Chromium, disposable browser contexts; model checks where applicable",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    },
+    {
+      "id": "G-R",
+      "title": "Current owner-approved regressions and safe reference layers",
+      "authority": "Current session owner instructions; docs/space-map-scheduler-guidance-2026-10-16.md; current module implementations",
+      "mandatory": true,
+      "reason": "Recent changes are part of this local release candidate",
+      "expected": "MetroMap has no bundled key; tree reference layers remain read-only; closing radial menu cancels drafts; Scheduler does not cross Register context",
+      "environment": "Local HTTP desktop Chromium; software GPU and forced WebGL where supported",
+      "status": "NOT TESTED",
+      "evidence": [],
+      "limitations": []
+    }
+  ],
+  "precedence": [
+    "Explicit current owner instructions",
+    "Active repository instructions",
+    "Current approved NSA/EVT requirements",
+    "Historical reports as leads only"
+  ],
+  "resolvedOverrides": [
+    "Scheduler available without Project; used only for owning saved bookings",
+    "Empty Map sidebar onboarding replaces old empty-card presentation",
+    "Explicit calendar action creates Planner jobs",
+    "Current no-Paste MetroMap activation modal"
+  ],
+  "openAmbiguities": [
+    "Gate Q and PC-027 text still describes automatic Operational Task Job creation, unlike current runtime contract. Verify explicit owner change and disclose documentation drift."
+  ],
+  "unsupportedEnvironments": [
+    "Actual Edge on Windows file:// entrypoint",
+    "Published GitHub Pages artifact",
+    "Mobile/touch excluded by owner",
+    "Actual desktop Outlook import"
+  ],
+  "decisionOrder": [
+    "NO-GO for demonstrated blocker",
+    "UNVERIFIED for missing mandatory evidence",
+    "CONDITIONAL GO with owner-accepted nonblocking conditions",
+    "GO after all required proof"
+  ]
+}

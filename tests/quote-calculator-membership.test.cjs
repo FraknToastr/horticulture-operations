@@ -37,7 +37,7 @@ for(const owner of ['NSA','EVT'])test(owner+': Draft membership preserves histor
   assert.equal(w.entities.quotes[1].subtotal,230);
   assert.equal(w.entities.quoteLines.find(l=>l.quoteId===originalId&&l.costingLineId===sourceId).quantity,1);
   assert.throws(()=>Q.setDraftCostingLineIncluded(w,originalId,sourceId,false),/unpaid Draft/);
-  w=Q.recordPayment(w,{quoteId:draftId,amount:10,paymentDate:'2026-10-15',reference:'Deposit',method:'Bank transfer'});
+  w=Q.recordPayment(w,{quoteId:draftId,amount:10,paymentDate:'2026-10-15',reference:'Deposit',method:'Paid with Deposit'});
   assert.throws(()=>Q.setDraftCostingLineIncluded(w,draftId,sourceId,false),/unpaid Draft/);
   assert.throws(()=>Q.syncDraftCostingLines(w,draftId,[sourceId]),/unpaid Draft/);
   assert.throws(()=>Q.saveDraft(w,{id:draftId,projectId,excludedCostingLineIds:[sourceId]}),/Reverse active payments/);

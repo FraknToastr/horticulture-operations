@@ -1,0 +1,139 @@
+{
+  "harness": "nsa-evt-finance-audit.cjs",
+  "timestamp": "2026-10-16T23:18:12.532Z",
+  "environment": {
+    "node": "v22.23.2",
+    "protocol": "in-memory Node VM",
+    "storage": "none",
+    "externalRequests": "none"
+  },
+  "sourceHashes": {
+    "src/program-planner/js/status.js": "ed52bee7d8c7cca2a34b3ec665dca6f725e7c908704e6f2caaeb1144057e9dc0",
+    "src/program-planner/js/default-rate-catalog.js": "7bc60f8232599a8176ec7d3d82797cc9e49205edbb889565607c5a1d652f660b",
+    "src/program-planner/js/model.js": "d2a530c4bbf3da514429ed7f34c14675b7009e18ee7f52b95d289aa9d7ab0356",
+    "src/program-planner/js/funding-model.js": "5f5b833fb45cf1653324d17b178b89d4ffb973ce8aaf3e0a0211f017a3b890cb",
+    "src/program-planner/js/quote-model.js": "28cae70e416e58d09f08c9405d703e8eb14e0d6822188d09d12606c13fe13aee"
+  },
+  "results": [
+    {
+      "id": "NSA-DRAFT-DEPOSIT",
+      "owner": "NSA",
+      "status": "PASS",
+      "expected": "Draft Customer permits a deposit with exact Quote/Project linkage",
+      "actual": {
+        "amount": 20,
+        "method": "Paid with Deposit",
+        "ownerMatches": true,
+        "quoteMatches": true,
+        "projectMatches": true,
+        "inputPreserved": true
+      }
+    },
+    {
+      "id": "NSA-DRAFT-REGULAR-PAYMENT-BOUNDARY",
+      "owner": "NSA",
+      "classification": "public API consistency observation; ordinary UI path has its own guard",
+      "status": "FAIL",
+      "sourceExpectation": "quote-model.js receiptEligibility.paymentAllowed false and quote-builder.js:1927 blocks regular payments until Issued/Accepted",
+      "actual": {
+        "quoteStatus": "Draft",
+        "eligibility": {
+          "allowed": true,
+          "paymentAllowed": false,
+          "reason": ""
+        },
+        "canonicalCommandAcceptedBankTransfer": true,
+        "rejection": null,
+        "inputPreserved": true
+      }
+    },
+    {
+      "id": "NSA-REVERSAL-TRACEABILITY",
+      "owner": "NSA",
+      "status": "PASS",
+      "expected": "PC-009 reversal preserves exact revision/Project/owner, reason, timestamp and original input; repeat reversal preserves original evidence",
+      "actual": {
+        "status": "Reversed",
+        "reasonPresent": true,
+        "validTimestamp": true,
+        "idempotent": true,
+        "inputPreserved": true
+      }
+    },
+    {
+      "id": "NSA-REVERSAL-ATTRIBUTION",
+      "owner": "NSA",
+      "status": "OBSERVATION",
+      "authority": "Audit scenario requests correct actor/timestamp evidence; PC-009 requires retained reversal evidence but does not explicitly require a named reversing officer. No login authentication is assumed.",
+      "actual": {
+        "quotePreparedBy": "Synthetic recording officer",
+        "sessionOperatorName": "Synthetic reversing officer",
+        "paymentReversedBy": null,
+        "viewerActorTextFromSource": "Not recorded",
+        "reversalCreatesStatusEvent": false,
+        "reversalCreatesQuoteEvent": false
+      },
+      "limitation": "A session operator name is available but ignored; a prepared-by officer is not proof of who reversed a payment. Absence of actor must not be replaced by invented attribution. No mandatory named-actor rule is established by this observation alone."
+    },
+    {
+      "id": "EVT-DRAFT-DEPOSIT",
+      "owner": "EVT",
+      "status": "PASS",
+      "expected": "Draft Customer permits a deposit with exact Quote/Project linkage",
+      "actual": {
+        "amount": 20,
+        "method": "Paid with Deposit",
+        "ownerMatches": true,
+        "quoteMatches": true,
+        "projectMatches": true,
+        "inputPreserved": true
+      }
+    },
+    {
+      "id": "EVT-DRAFT-REGULAR-PAYMENT-BOUNDARY",
+      "owner": "EVT",
+      "classification": "public API consistency observation; ordinary UI path has its own guard",
+      "status": "FAIL",
+      "sourceExpectation": "quote-model.js receiptEligibility.paymentAllowed false and quote-builder.js:1927 blocks regular payments until Issued/Accepted",
+      "actual": {
+        "quoteStatus": "Draft",
+        "eligibility": {
+          "allowed": true,
+          "paymentAllowed": false,
+          "reason": ""
+        },
+        "canonicalCommandAcceptedBankTransfer": true,
+        "rejection": null,
+        "inputPreserved": true
+      }
+    },
+    {
+      "id": "EVT-REVERSAL-TRACEABILITY",
+      "owner": "EVT",
+      "status": "PASS",
+      "expected": "PC-009 reversal preserves exact revision/Project/owner, reason, timestamp and original input; repeat reversal preserves original evidence",
+      "actual": {
+        "status": "Reversed",
+        "reasonPresent": true,
+        "validTimestamp": true,
+        "idempotent": true,
+        "inputPreserved": true
+      }
+    },
+    {
+      "id": "EVT-REVERSAL-ATTRIBUTION",
+      "owner": "EVT",
+      "status": "OBSERVATION",
+      "authority": "Audit scenario requests correct actor/timestamp evidence; PC-009 requires retained reversal evidence but does not explicitly require a named reversing officer. No login authentication is assumed.",
+      "actual": {
+        "quotePreparedBy": "Synthetic recording officer",
+        "sessionOperatorName": "Synthetic reversing officer",
+        "paymentReversedBy": null,
+        "viewerActorTextFromSource": "Not recorded",
+        "reversalCreatesStatusEvent": false,
+        "reversalCreatesQuoteEvent": false
+      },
+      "limitation": "A session operator name is available but ignored; a prepared-by officer is not proof of who reversed a payment. Absence of actor must not be replaced by invented attribution. No mandatory named-actor rule is established by this observation alone."
+    }
+  ]
+}

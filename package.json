@@ -9,7 +9,8 @@
     "test:canonical-work-governance": "node --test tests/canonical-work-governance.test.cjs",
     "test:budget-gates": "node scripts/run_budget_gates.cjs",
     "test:browser": "playwright test",
-    "test:release": "node scripts/run_release_gates.cjs"
+    "test:release": "node scripts/run_release_gates.cjs",
+    "test:release:desktop": "node scripts/run_desktop_release_gates.cjs"
   },
   "devDependencies": {
     "@playwright/test": "1.62.0",

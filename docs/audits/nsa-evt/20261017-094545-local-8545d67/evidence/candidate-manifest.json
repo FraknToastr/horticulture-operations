@@ -1,0 +1,1907 @@
+[
+  {
+    "path": ".gitignore",
+    "bytes": 555,
+    "sha256": "69a25e32ed2205c54296dd3ccd09fb971e63bdf9865b72695adc1fe65a4278e7"
+  },
+  {
+    "path": ".nojekyll",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "AGENTS.md",
+    "bytes": 3389,
+    "sha256": "29af892a240fde39939e0c0e73113e4d5ab38c542715dd13cd57ced96e8f51c2"
+  },
+  {
+    "path": "CODEBASE_GOVERNANCE_REVIEW.md",
+    "bytes": 10104,
+    "sha256": "a718767614630d4688aca6a7b4f20d8f2f323d838bda55714ef2dc8c5c8b8ea9"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Program_Planner_Stage0_Assessment_Scoped.zip",
+    "bytes": 26323,
+    "sha256": "84b1f137f3d4cdacdf714db5802a9e249661e0ad4172b53d39989ad77b5e8aa9"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Program_Planner_Stage0_Assessment_Scoped/APPLICATION_SCOPE.md",
+    "bytes": 3243,
+    "sha256": "bc7c51525be2236a3263ec67963aab328aadc74e68b23408f9b951477222b4ab"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Program_Planner_Stage0_Assessment_Scoped/BUSINESS_WORKFLOW_MAPS.md",
+    "bytes": 3628,
+    "sha256": "b8f3c48843d83fd0b0f23b856aa3c178eca8cebaa588a3fdfce43abcb945d5ee"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Program_Planner_Stage0_Assessment_Scoped/CHANGELOG.md",
+    "bytes": 862,
+    "sha256": "56f504c1def92abeea391c54567dc6d3f882c55c28c1235bf74364ba23863e96"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Program_Planner_Stage0_Assessment_Scoped/FINDINGS_LEDGER.csv",
+    "bytes": 2720,
+    "sha256": "2961e518e104abbb6f4d8b1be2cb94bb5a60f7772aafc46e3beaad2b0a20056d"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Program_Planner_Stage0_Assessment_Scoped/SESSION_HANDOFF.md",
+    "bytes": 3777,
+    "sha256": "b76940880e12e2c997848491a4c901bd6e1d4833bcb11ff4362826dfc1068bd3"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Program_Planner_Stage0_Assessment_Scoped/SOURCE_FIRST_NOTE.md",
+    "bytes": 2997,
+    "sha256": "567945c93af16b74982b41fa0bcb07dd1766718069522896d076530f0db9c43f"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Program_Planner_Stage0_Assessment_Scoped/SOURCE_MANIFEST.csv",
+    "bytes": 40323,
+    "sha256": "070422369c51d71a718ba23a06ce36ceb61c28560a895f48054c28eb0fa1ee90"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Program_Planner_Stage0_Assessment_Scoped/STAGE_00_REPORT.md",
+    "bytes": 10317,
+    "sha256": "712d87e6f93e6984223ae64c55449b5579799e886a749545eddf9efd107421e3"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Review_Console.html",
+    "bytes": 199989,
+    "sha256": "9d17295b63a7f4006abc067391dc465c53f81b05e9ae52ac929cc5af7004b4b6"
+  },
+  {
+    "path": "ChatGPT Blind Review/Horticulture_Review_Console_Offline.zip",
+    "bytes": 22,
+    "sha256": "8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85"
+  },
+  {
+    "path": "ChatGPT Blind Review/Independent_Blind_Assessment_Horticulture_Staged_Review_Master_Prompt.md",
+    "bytes": 15027,
+    "sha256": "7e7bde119e20f9b4b7b00927d4a4787cfc36c0074bbcf17fe1ae63cdfb1cbb79"
+  },
+  {
+    "path": "ChatGPT Blind Review/Independent_Blind_Assessment_Horticulture_Staged_Review_Master_Prompt_v2.md",
+    "bytes": 23067,
+    "sha256": "b99f634e5f4db65e97a731e78a15bfc60505380d3f53cb68885a49f581444adb"
+  },
+  {
+    "path": "ChatGPT Blind Review/Independent_Blind_Assessment_Horticulture_Staged_Review_Master_Prompt_v2.zip",
+    "bytes": 8916,
+    "sha256": "e59a069775ac770b95a1959e9da2d878d6b3db24963da9f7e6b921d511151599"
+  },
+  {
+    "path": "ChatGPT Blind Review/README.md",
+    "bytes": 2466,
+    "sha256": "0f2f2fe541048903d26a61adfb895acb4e0c8e0b87d2b69c931d73c30418e85b"
+  },
+  {
+    "path": "ChatGPT Blind Review/horticulture-operations-detached-branch.zip",
+    "bytes": 5681787,
+    "sha256": "3bc65a0ece717d2ca920fb4c885fa1f3e1c32d34da77415fb11cdbd4d12dfcc7"
+  },
+  {
+    "path": "IMPLEMENTATION_CHECKPOINT_2026-09-12.md",
+    "bytes": 9358,
+    "sha256": "e4eefaf8721570933332baf286ef8e95733f975ebe8d4e9c3fd07183bf3870ed"
+  },
+  {
+    "path": "Independent_Blind_Assessment_Horticulture_Staged_Review_Master_Prompt_Improved.md",
+    "bytes": 20666,
+    "sha256": "48d47fbe2d277881ca28349eac0bc0fe9f6ba54997d96bf42ddfab5e1c799c04"
+  },
+  {
+    "path": "JS_MODULE_REFACTOR_REVIEW.md",
+    "bytes": 17711,
+    "sha256": "59246c5798274d8a7fd148566a8e5f1006dd3b83db2897291fa271ae1ddef287"
+  },
+  {
+    "path": "README_RUN.txt",
+    "bytes": 1035,
+    "sha256": "4deb71eff76a56071d8e083ec89755139d63986713cff79d5d7fb3553d872b3d"
+  },
+  {
+    "path": "budget-business-workflow.mmd",
+    "bytes": 1895,
+    "sha256": "f41c1571e5d063e0d9761b94baebe218924776e63f78466b593317d03f391daa"
+  },
+  {
+    "path": "docs/EVT-register-dates-and-identity-2026-10-16.md",
+    "bytes": 3061,
+    "sha256": "a3c79c147ef1d06871785c9e3f4f1e2f78666a9bec489e9d6815a98327491540"
+  },
+  {
+    "path": "docs/NSA-EVT-performance-workflow-audit-2026-10-16.md",
+    "bytes": 36988,
+    "sha256": "76e2a6a72c12075221b350ed16c7171f5ff8973dc9cec1c5f64eed4009650f60"
+  },
+  {
+    "path": "docs/NSA-EVT-performance-workflow-implementation-2026-10-16.md",
+    "bytes": 11379,
+    "sha256": "d2eb79c7681aa54cdeaa379a81473d7f370567d35cf92471e31862c5a928946d"
+  },
+  {
+    "path": "docs/branch-consolidation-2026-10-11.md",
+    "bytes": 1680,
+    "sha256": "4f9aca8bfc9ad0ef50a8b3e74f841ad67b137d225fe90ed787cb017084ef916f"
+  },
+  {
+    "path": "docs/launcher-transport-allowlist.md",
+    "bytes": 2461,
+    "sha256": "a22117011ac1ecec41b24e458d5a1cecd578f5d43706cb3d91fbbecf8737004e"
+  },
+  {
+    "path": "docs/nsa-evt-delete-audit.md",
+    "bytes": 3575,
+    "sha256": "40b79249f08521bd47e50435128f22dacf56ee0724631653c2b090fa34271e56"
+  },
+  {
+    "path": "docs/publication-allowlist-2026-10-09.md",
+    "bytes": 13142,
+    "sha256": "b9c1a05dcd275a6a3a087b854fe27dd853cff87d1dda0f0d25d70652db3f9a91"
+  },
+  {
+    "path": "docs/publication-allowlist-2026-10-15.md",
+    "bytes": 1622,
+    "sha256": "de5f7cebf4fc3e725d9c0b3e19fec572355e34432ac24d6b4f8c95dd1cbdbf5e"
+  },
+  {
+    "path": "docs/readiness/README.md",
+    "bytes": 2172,
+    "sha256": "fc978cfe075cf58c0070f55b9f42685d9d2343f045154c8e6a1cc25d896a3639"
+  },
+  {
+    "path": "docs/readiness/nsa-demo-readiness-report.html",
+    "bytes": 279471,
+    "sha256": "32378e47de19bd4b8d889ec74e2c666376155d3eea2e18012678c24b3f2ba80a"
+  },
+  {
+    "path": "docs/readiness/nsa-demo-readiness-report.md",
+    "bytes": 77195,
+    "sha256": "7e804cd77671ea33d9a7321391ae73f0d6d2c61bc6cd5333bcda6e59299b0040"
+  },
+  {
+    "path": "docs/readiness/readiness-data.json",
+    "bytes": 132513,
+    "sha256": "39a9032f29bb87a35033414c2dac5d20d3e205a6ea188c370d63921e991f45dd"
+  },
+  {
+    "path": "docs/space-map-adaptive-scheduler-register-2026-10-16.md",
+    "bytes": 4108,
+    "sha256": "ededfdf2e2039b71ec22a01d726adbfffbf14837d6c72a2849e1d765e05e0558"
+  },
+  {
+    "path": "docs/space-map-renderer.md",
+    "bytes": 5147,
+    "sha256": "6600528d57d80cee241665610af25be827ae5b3f5ce6db2a07247c2fc46c0b2c"
+  },
+  {
+    "path": "docs/space-map-scheduler-guidance-2026-10-16.md",
+    "bytes": 3591,
+    "sha256": "36d5043dda6041074c0d8e07a749eae2cf63610d18927acb5569a47482e18082"
+  },
+  {
+    "path": "index-alternate.html",
+    "bytes": 2804,
+    "sha256": "c4c80eb2a1acdd8726701323a4ce97e8b8f8ace5e6950603e9a598b8f737aaa2"
+  },
+  {
+    "path": "index.html",
+    "bytes": 2600,
+    "sha256": "cacca58c1baacbbb3d3bfd0c257dac6e1ebd68a6cb160af554c4a6623facee5e"
+  },
+  {
+    "path": "md-mermaid-viewer.html",
+    "bytes": 20422,
+    "sha256": "4940fbc18f999dabd837348ff53e02ce6192f331af1f2c31eccfa84f6b70717b"
+  },
+  {
+    "path": "package-lock.json",
+    "bytes": 17580,
+    "sha256": "176f1b5f31ef6bcd09bc39b6920d4152840705eb689f65d59352a32bc48a4bdb"
+  },
+  {
+    "path": "package.json",
+    "bytes": 684,
+    "sha256": "bcb30be11c6e8d998ed59d0e82cf37d5a24d416bda98245e9d13305e8c002c8b"
+  },
+  {
+    "path": "playwright.config.cjs",
+    "bytes": 529,
+    "sha256": "fede7edd08e6ed116030c98a175d8f4d9742284c88b7ed139648d133629df7ef"
+  },
+  {
+    "path": "quote-acceptance-process.md",
+    "bytes": 8331,
+    "sha256": "5a1a2f2c15b2579962ffce9645d3e8e6ee307d195ac615f716ec8598910d0ac5"
+  },
+  {
+    "path": "quote-customer-approval-assessment.md",
+    "bytes": 6680,
+    "sha256": "35e3f9ccc72e587ffce6ec9678f2cd110cdcf0a2a174b6b7e9f465e688cfcbbe"
+  },
+  {
+    "path": "scripts/build_space_map.cjs",
+    "bytes": 2109,
+    "sha256": "27e04ba17b3aa4df03ea604cce03950f7a585f6c944e9e3e22e38fd768c9fa59"
+  },
+  {
+    "path": "scripts/convert_current_year_nsa_backup.cjs",
+    "bytes": 6826,
+    "sha256": "3061006b47efdbeea0e3e646820eb83cdb6e3bcc1225c0231895270592d48a6a"
+  },
+  {
+    "path": "scripts/measure_space_map.cjs",
+    "bytes": 7906,
+    "sha256": "afca39ca79adeb7da81e20225ad67d3b37b51a90de3173c305f6053f1dcacb64"
+  },
+  {
+    "path": "scripts/run_budget_gates.cjs",
+    "bytes": 949,
+    "sha256": "59f6c8c1acdfac844491c5cf922ec7954797893c9d8da1b625efb9e25c792b5f"
+  },
+  {
+    "path": "scripts/run_release_gates.cjs",
+    "bytes": 1493,
+    "sha256": "7f20cc8660d3bd11cde68ef9a2264a6daff09af1829fdbafdc171bf0bf5aeb7b"
+  },
+  {
+    "path": "src/AI_INSTRUCTIONS.md",
+    "bytes": 3358,
+    "sha256": "4a21ccdf62be2ee41836d79ba2bac79c21745123979af0b94f45b893e1cf7a74"
+  },
+  {
+    "path": "src/ChagGPT Release Audit.md",
+    "bytes": 26300,
+    "sha256": "aacd4fe1c7687169e797415dd2f21bcc0c08a31535e4767a5f17e7bd61a03dbd"
+  },
+  {
+    "path": "src/GeoForge-MapLibre-KML-KMZ-GeoJSON.zip",
+    "bytes": 47588,
+    "sha256": "e8dfc5ec7f967134bfba4097be1bb82cfaad470b32250af86d580bdc2772d38e"
+  },
+  {
+    "path": "src/GeoForge-MapLibre-KML-KMZ-GeoJSON.zip:SmartScreen",
+    "bytes": 7,
+    "sha256": "82254025d1b98d60044d3aeb7c56eed7c61c07c3e30534d6e05dab9d6c326750"
+  },
+  {
+    "path": "src/GeoForge-MapLibre-KML-KMZ-GeoJSON/geo-converter/README.md",
+    "bytes": 2986,
+    "sha256": "fe9f55aa45cf5f9b009258e102848930e1a2914eaae27f279b3eba03e3441245"
+  },
+  {
+    "path": "src/GeoForge-MapLibre-KML-KMZ-GeoJSON/geo-converter/app.js",
+    "bytes": 29298,
+    "sha256": "cfea165364d5f7fe637241453037f3f8b3d7224dd6758b812bc9beb464cc3171"
+  },
+  {
+    "path": "src/GeoForge-MapLibre-KML-KMZ-GeoJSON/geo-converter/index.html",
+    "bytes": 8162,
+    "sha256": "d0c01e4973964b6bf173700e77e0c102b84cf833732148fe6eae6dd7341d0d18"
+  },
+  {
+    "path": "src/GeoForge-MapLibre-KML-KMZ-GeoJSON/geo-converter/styles.css",
+    "bytes": 12739,
+    "sha256": "0df4c715b6d0b911cbf1c0d0126f9c0a0cb62069d78bde4a6cca5db1d1db60ae"
+  },
+  {
+    "path": "src/GeoForge-MapLibre-KML-KMZ-GeoJSON/geo-converter/vendor/jszip.min.js",
+    "bytes": 97630,
+    "sha256": "acc7e41455a80765b5fd9c7ee1b8078a6d160bbbca455aeae854de65c947d59e"
+  },
+  {
+    "path": "src/Horticulture-Operations-Troubleshooting-F06-PC013/hort_troubleshoot_docs/01_RESOURCE_CALCULATOR_LINE_DELETE_TROUBLESHOOTING.md",
+    "bytes": 9677,
+    "sha256": "287feee1f82e0570a53096c17e7490a27c7c3d9e0c7e120895813bcd336faea6"
+  },
+  {
+    "path": "src/Horticulture-Operations-Troubleshooting-F06-PC013/hort_troubleshoot_docs/02_F06_PC013_QUOTE_READINESS_REMEDIATION.md",
+    "bytes": 15376,
+    "sha256": "fa92e60be622676e4987498c424c835e7b5c9c68801acf7b55da200c828b6cb1"
+  },
+  {
+    "path": "src/Horticulture-Operations-Troubleshooting-F06-PC013/hort_troubleshoot_docs/03_CODEX_PROMPT_F06_PC013.md",
+    "bytes": 5703,
+    "sha256": "e3facf98bdad880c6bcef0b63b1cb2b7b4fd720d462ed515a988e80236b32be4"
+  },
+  {
+    "path": "src/Horticulture-Operations-Troubleshooting-F06-PC013/hort_troubleshoot_docs/README.md",
+    "bytes": 2182,
+    "sha256": "b7666e2443b201136cf50cbb0726c36943ac3b364dc43f7ab078f25446714247"
+  },
+  {
+    "path": "src/MOASURE/North Terrace 6.csv",
+    "bytes": 2463,
+    "sha256": "5ee0bcd609b50b47df1fd5525eaa051ea85c094c9c16b0b2a0cc659b1b808b34"
+  },
+  {
+    "path": "src/README_GOVERNANCE.md",
+    "bytes": 3481,
+    "sha256": "9f428be265393badafd3645fa29fd7ae7a0ba8e3ba0407dc7d378580bff35bd1"
+  },
+  {
+    "path": "src/governance/APP_API_REFERENCE.md",
+    "bytes": 4911,
+    "sha256": "5d9e760c8dbd32a68a7fc6c54104131a387ce65d9da85ef304f4f81527421c7a"
+  },
+  {
+    "path": "src/governance/BUDGET_QUOTE_OVERLAP_REVIEW_2026-09-29.md",
+    "bytes": 3482,
+    "sha256": "5f69b7c1c59987e080ea7d1fdd2539da769316ca96d18c5a8afb3feff1e64f1d"
+  },
+  {
+    "path": "src/governance/CANONICAL_MODEL.md",
+    "bytes": 13547,
+    "sha256": "15f3dd788ff00a1245a8bb477e2516d2d503e6f825a9bc328d0ebb5ece81e633"
+  },
+  {
+    "path": "src/governance/COMPREHENSIVE_BASELINE_REVIEW_PROTOCOL.md",
+    "bytes": 11732,
+    "sha256": "7ad195e5f17b065809b40cab651104043bb4789d21a9dba501c52bf52f0834ea"
+  },
+  {
+    "path": "src/governance/Codex Prompt — F-01 to F-09 Staged Remediation.md",
+    "bytes": 18957,
+    "sha256": "3ef913b74275c9bb16b63f11c3047b78877ece3fd83259a8c8f38148146a8425"
+  },
+  {
+    "path": "src/governance/DECISIONS.md",
+    "bytes": 11084,
+    "sha256": "bbd555768310e3f54277d34de386396b4ac4a8514eaaf0d30c68cdf1e73ac6ff"
+  },
+  {
+    "path": "src/governance/Horticulture_Applications_Universal_Engineering_Test_and_Review_Standard_v1.1.md",
+    "bytes": 54538,
+    "sha256": "ce61d548c44a9c8ba97eb519a53c137fbb080ee6a592e8e1f2854848cf76da01"
+  },
+  {
+    "path": "src/governance/PC-020 — Planner Task Management and Delivery Lineage.md",
+    "bytes": 34925,
+    "sha256": "eb9301780a0c9b36a258f72ff36c1bc7a2b57584f4e025aef1492a1e76a5583a"
+  },
+  {
+    "path": "src/governance/PLANNER_BUDGET_UI_TEST_ACCEPTANCE_2026-09-29.md",
+    "bytes": 2459,
+    "sha256": "b6ff0171a272d768c0787293d123c2cf0874b988383a24041609b37c4f7f915e"
+  },
+  {
+    "path": "src/governance/PRODUCT_CONSTITUTION.md",
+    "bytes": 61551,
+    "sha256": "ad73ba4cecd6e46d81e0dc62afc3d02b6f719f10593f117f3da00627dd94a4e5"
+  },
+  {
+    "path": "src/governance/PRODUCT_CONSTITUTION_VIEWER.html",
+    "bytes": 93280,
+    "sha256": "4ba3ea9a8c75192704a4260b85bb4ee8b9f918982a4ee4bf6ae2266029a4e6eb"
+  },
+  {
+    "path": "src/governance/PRODUCT_CONTRACTS.md",
+    "bytes": 17653,
+    "sha256": "8e76d7b015b239ecbbc53726df68a8c0d22bafcdf1e732bf3e469e578376adf8"
+  },
+  {
+    "path": "src/governance/PROJECT_TEST_PROFILE.md",
+    "bytes": 13529,
+    "sha256": "e6e24fee0d8ab6a48650f7aec72ee9bef5ff27959b324b485e16b1667d99f383"
+  },
+  {
+    "path": "src/governance/QUOTE_FUNDING_VERIFICATION.md",
+    "bytes": 3838,
+    "sha256": "9f541041516a92510f6d0a91529dba7ce9835333d16d0bbf6fe7bef4d97b2e53"
+  },
+  {
+    "path": "src/governance/RELEASE_GATES.md",
+    "bytes": 18612,
+    "sha256": "ec7ca28b7bd4d5b8e04d3f1e411b2a4c3a924b39df09b598da03fcb8d5ef02c8"
+  },
+  {
+    "path": "src/governance/STATUS_MUTATION_MAP.md",
+    "bytes": 31856,
+    "sha256": "ad88b906f008c99dfdbabb86a007a8b1aa0206d60cfef0135da249dee424e24b"
+  },
+  {
+    "path": "src/governance/UX_RULES.md",
+    "bytes": 16416,
+    "sha256": "181cbbb7f154ebb60eafc6a833e66b436f2dee743c3e611bd991aec6579fde55"
+  },
+  {
+    "path": "src/hort_troubleshoot_docs/01_RESOURCE_CALCULATOR_LINE_DELETE_TROUBLESHOOTING.md",
+    "bytes": 9677,
+    "sha256": "287feee1f82e0570a53096c17e7490a27c7c3d9e0c7e120895813bcd336faea6"
+  },
+  {
+    "path": "src/hort_troubleshoot_docs/02_F06_PC013_QUOTE_READINESS_REMEDIATION.md",
+    "bytes": 15376,
+    "sha256": "fa92e60be622676e4987498c424c835e7b5c9c68801acf7b55da200c828b6cb1"
+  },
+  {
+    "path": "src/hort_troubleshoot_docs/03_CODEX_PROMPT_F06_PC013.md",
+    "bytes": 5703,
+    "sha256": "e3facf98bdad880c6bcef0b63b1cb2b7b4fd720d462ed515a988e80236b32be4"
+  },
+  {
+    "path": "src/hort_troubleshoot_docs/README.md",
+    "bytes": 2182,
+    "sha256": "b7666e2443b201136cf50cbb0726c36943ac3b364dc43f7ab078f25446714247"
+  },
+  {
+    "path": "src/index.html",
+    "bytes": 2330,
+    "sha256": "159422c619c3c179bab1c604048851d1772f8f8de227a9d053b4742830e0026d"
+  },
+  {
+    "path": "src/launcher.css",
+    "bytes": 2635,
+    "sha256": "7cdf2f3754a681804b63430cd2f5f4785b56ce9e3e52d1ff54fe9956ba310a86"
+  },
+  {
+    "path": "src/program-planner/SPACE-MAP-MOASURE.md",
+    "bytes": 3468,
+    "sha256": "08d68717d3294ffcfbb2da55fcf4e64804115d4884b7336bf9760b79a529c1bb"
+  },
+  {
+    "path": "src/program-planner/app-config.js",
+    "bytes": 1804,
+    "sha256": "fdf225f7905248fc4a9236966133130ffa0dfec0a8f2ce243eb711119059373b"
+  },
+  {
+    "path": "src/program-planner/budget-layout.css",
+    "bytes": 2232,
+    "sha256": "af6698b11069a00594a435ce7331c8fedb2e1f109226d9b772063142e7284ea0"
+  },
+  {
+    "path": "src/program-planner/client-demo-fixes.css",
+    "bytes": 4432,
+    "sha256": "f4f00f21648247dad076e77a50fcd34c151274e2a759e6fb017449a360203a01"
+  },
+  {
+    "path": "src/program-planner/drawer-floor.css",
+    "bytes": 3732,
+    "sha256": "065f2638647963f6654b5663cadb69b08cff880b5749a31aeb538bfe5ab44e15"
+  },
+  {
+    "path": "src/program-planner/events.html",
+    "bytes": 1256,
+    "sha256": "577c5af3a5ef18ade332a8aa37465314c00c3c017832b822c3ea82e5c8b5752e"
+  },
+  {
+    "path": "src/program-planner/index.html",
+    "bytes": 146731,
+    "sha256": "9767467a0f299caba6bc4328e1767559c11561998743347b545e31c0d8003135"
+  },
+  {
+    "path": "src/program-planner/js/app.js",
+    "bytes": 82778,
+    "sha256": "1664702f75d17b0011f2e61a2a148cca7e6d206a6bc1b988629a21b192718523"
+  },
+  {
+    "path": "src/program-planner/js/budget-governance.js",
+    "bytes": 33183,
+    "sha256": "f86eaef9053e8da69355cde3faf2a42bf607c70486f5608f5b03e9bcac883b72"
+  },
+  {
+    "path": "src/program-planner/js/budget-model.js",
+    "bytes": 24612,
+    "sha256": "a9a47b79b4ba90ba2d4da8eead0c2767cd9104c5d3a359af0578fe037d5edee8"
+  },
+  {
+    "path": "src/program-planner/js/budget.js",
+    "bytes": 35756,
+    "sha256": "2111408aed70e3e7c0a6efda2bfad31367434d21ff65c1da35dfd00ba20277cd"
+  },
+  {
+    "path": "src/program-planner/js/card-visibility.js",
+    "bytes": 12369,
+    "sha256": "828af8876ce52d4d204efa58b95d16bd2f6db5cbc3645b55c09d62e71fb03fd5"
+  },
+  {
+    "path": "src/program-planner/js/costing-model.js",
+    "bytes": 44341,
+    "sha256": "4f38ef257d4cc3d4bae3cb74b91f819393901ce90cc808cc5d218ee609d44196"
+  },
+  {
+    "path": "src/program-planner/js/costing.js",
+    "bytes": 106717,
+    "sha256": "f274f7b8c3919c4cbbcbc87c59c2f0d2a727e47c43e83e27b1e58c66d09480b8"
+  },
+  {
+    "path": "src/program-planner/js/dashboard.js",
+    "bytes": 8738,
+    "sha256": "9d7f46093fbdeabaf4ac00703f709b3740a3e86172a82a15e228f1c70692ef5a"
+  },
+  {
+    "path": "src/program-planner/js/data-health.js",
+    "bytes": 36544,
+    "sha256": "43732a8ae2848710d0347128a2dc1001867db6691f973f5d3481e2f88ca19126"
+  },
+  {
+    "path": "src/program-planner/js/data-settings.js",
+    "bytes": 23713,
+    "sha256": "6e64d03f6bb444cb6034402b414fc6e6ee79b5fcdb26d292dfef6797af8ac9a4"
+  },
+  {
+    "path": "src/program-planner/js/data-workspace.js",
+    "bytes": 60992,
+    "sha256": "edbf7a3670cabe0ea3134bff1a8762fe5cb6609904953eefd7569d3210826ccf"
+  },
+  {
+    "path": "src/program-planner/js/default-rate-catalog.js",
+    "bytes": 7380,
+    "sha256": "7bc60f8232599a8176ec7d3d82797cc9e49205edbb889565607c5a1d652f660b"
+  },
+  {
+    "path": "src/program-planner/js/delete-safety.js",
+    "bytes": 2412,
+    "sha256": "69173b629ee7f05c8830fe8f43773377128e558bee4cdca783bd860e500028f6"
+  },
+  {
+    "path": "src/program-planner/js/disclosure-rows.js",
+    "bytes": 28529,
+    "sha256": "ded4798c4a2b62a5707eec6947a4b8146e855a660a001e94fb176d8e7d5770bb"
+  },
+  {
+    "path": "src/program-planner/js/drawer-workspace.js",
+    "bytes": 24847,
+    "sha256": "4b6bafd0e240df59f808db61d103fb7895f5471c98a963d63878b09b9afe2404"
+  },
+  {
+    "path": "src/program-planner/js/funding-model.js",
+    "bytes": 13231,
+    "sha256": "5f5b833fb45cf1653324d17b178b89d4ffb973ce8aaf3e0a0211f017a3b890cb"
+  },
+  {
+    "path": "src/program-planner/js/map-floating-draw-toolbar.js",
+    "bytes": 3440,
+    "sha256": "a08bea3e7ee61e892fbb63fc15409c636b7e403e4b6b45bd5084cc1e29b06d5f"
+  },
+  {
+    "path": "src/program-planner/js/migration.js",
+    "bytes": 16619,
+    "sha256": "980fb3396d9b5945847b66e692fd8ae028856caf94a39f5cae8b9a2c7f6eae86"
+  },
+  {
+    "path": "src/program-planner/js/moasure-geometry.js",
+    "bytes": 8250,
+    "sha256": "18b3fac633972a1b612618a4beea8c51e5f19681e69c8ce5be562f05c2c428f3"
+  },
+  {
+    "path": "src/program-planner/js/model.js",
+    "bytes": 173538,
+    "sha256": "d2a530c4bbf3da514429ed7f34c14675b7009e18ee7f52b95d289aa9d7ab0356"
+  },
+  {
+    "path": "src/program-planner/js/observability.js",
+    "bytes": 3549,
+    "sha256": "3462f9f1bd91d94af4d69e54629f7256d0b0abf0f35597f1ecd67cf3a8174680"
+  },
+  {
+    "path": "src/program-planner/js/planner-model.js",
+    "bytes": 21903,
+    "sha256": "cf234cbb6554a0710b318291e0ad82332939c0567fc19ca194bf9813525afa4c"
+  },
+  {
+    "path": "src/program-planner/js/planner-presentation.js",
+    "bytes": 3629,
+    "sha256": "51a0877cf19e2499ee7882d30b2e9354d22a7b8267f9c85274420ee85aab6f55"
+  },
+  {
+    "path": "src/program-planner/js/planner-section-headers.js",
+    "bytes": 5613,
+    "sha256": "d6dfb5d560bae83cbddb37c22ec389ad866d64d0013e729d10d26bc84b01c23c"
+  },
+  {
+    "path": "src/program-planner/js/planner.js",
+    "bytes": 78259,
+    "sha256": "2260dfa111e9f7eb03d6f81a4bfc69b58907c8c572dcb4cf65b80a81d74b5aa0"
+  },
+  {
+    "path": "src/program-planner/js/privacy.js",
+    "bytes": 6246,
+    "sha256": "956aa3f3d2a661bcb5f4896fad7d118c4a6cea90f15b8723a6edff55a5699ac9"
+  },
+  {
+    "path": "src/program-planner/js/product-contracts.js",
+    "bytes": 32495,
+    "sha256": "e171e7b30f64a66c8bd24e2fafd46e43d7717b0c1a38431553af99ef9ddaa83d"
+  },
+  {
+    "path": "src/program-planner/js/program-map.js",
+    "bytes": 199302,
+    "sha256": "899d8d0e0e055fb3e23194738ee373d41067d730893ba11dd0d95cf5c7c7732d"
+  },
+  {
+    "path": "src/program-planner/js/quote-builder.js",
+    "bytes": 114971,
+    "sha256": "3593a54426cd322343271f7fed34b8697e5a0a01ce0f5565ba6ba1b5d24bc7cc"
+  },
+  {
+    "path": "src/program-planner/js/quote-model.js",
+    "bytes": 44665,
+    "sha256": "28cae70e416e58d09f08c9405d703e8eb14e0d6822188d09d12606c13fe13aee"
+  },
+  {
+    "path": "src/program-planner/js/register-history-ui.js",
+    "bytes": 3258,
+    "sha256": "fbaf9197479d19e1192fd22a60a7c8932c4adfcc6f50eb5e5c954e1f5437577a"
+  },
+  {
+    "path": "src/program-planner/js/register.js",
+    "bytes": 150687,
+    "sha256": "f3b086f8781bdc32708e633743d27c5f64e52302b794b098c8cdc0a80c18302e"
+  },
+  {
+    "path": "src/program-planner/js/reports-model.js",
+    "bytes": 8150,
+    "sha256": "1bc2c9267ca4f1575e141ea550bbd45a44d0e880ae9fef95219b6c6b1e2bff73"
+  },
+  {
+    "path": "src/program-planner/js/reports.js",
+    "bytes": 9006,
+    "sha256": "2b6cf4aa3475fd04574c3433bd9df36c12f988db9669e342e0f188fcdcd63e98"
+  },
+  {
+    "path": "src/program-planner/js/scheduler-calendar-tools.js",
+    "bytes": 15826,
+    "sha256": "191115e15199ebc1bbfafbefe859e9a97ea61820606b781c35026a637e137a6a"
+  },
+  {
+    "path": "src/program-planner/js/scheduler-model.js",
+    "bytes": 19385,
+    "sha256": "8080c9100628345ccdd8d63d82f409f087e7c624e5732397309ab6297995138c"
+  },
+  {
+    "path": "src/program-planner/js/scheduler-week-editor.js",
+    "bytes": 30040,
+    "sha256": "f250d2e6f05e3ddfd91f918feed2f250d1fec07028da98b9810812b767f4a0d8"
+  },
+  {
+    "path": "src/program-planner/js/scheduler.js",
+    "bytes": 96370,
+    "sha256": "676ea132498f822e45efe00e301e13c47fbdbc37a0618dbe2880c32be321862a"
+  },
+  {
+    "path": "src/program-planner/js/status-app.js",
+    "bytes": 4362,
+    "sha256": "41288514af807805f945327154c2eccb0a86340c5af1888a63f13fa5fd1906af"
+  },
+  {
+    "path": "src/program-planner/js/status-health.js",
+    "bytes": 1973,
+    "sha256": "79c9042312f4e84ff9db280357f1e79175ba9cad5000e5a2ce18783a9142d218"
+  },
+  {
+    "path": "src/program-planner/js/status-model.js",
+    "bytes": 13790,
+    "sha256": "478824189669406687854b30ff6f65e9e9e74e2fadfd16a857af7b32e02d307d"
+  },
+  {
+    "path": "src/program-planner/js/status-ui.js",
+    "bytes": 33175,
+    "sha256": "e3720ca58dd11fb0e98b5a248adcc9c98205a6d5448fa5df21236bc1c4cf1b49"
+  },
+  {
+    "path": "src/program-planner/js/status.js",
+    "bytes": 31246,
+    "sha256": "ed52bee7d8c7cca2a34b3ec665dca6f725e7c908704e6f2caaeb1144057e9dc0"
+  },
+  {
+    "path": "src/program-planner/js/storage.js",
+    "bytes": 19710,
+    "sha256": "cea3b8e4b37e7ff78e8846d152295632fbc7f5a3e52be3d2f88262c6391c5051"
+  },
+  {
+    "path": "src/program-planner/js/tree-hub.js",
+    "bytes": 5791,
+    "sha256": "e5a4779d01c29fc95c8eb1ba1d2c35e86679eb7ece933c750b5c515f4bebabee"
+  },
+  {
+    "path": "src/program-planner/js/work-area-service.js",
+    "bytes": 39756,
+    "sha256": "6887e24417ddd86750fcf3e0b5a1b6a60a5f6da1cabec37b8ed19a994e1aa607"
+  },
+  {
+    "path": "src/program-planner/nsa.html",
+    "bytes": 1261,
+    "sha256": "7abb2775802edff76e76494be4669156a0bd1207be98ce596bf17377cde2df09"
+  },
+  {
+    "path": "src/program-planner/planner-editor.css",
+    "bytes": 10940,
+    "sha256": "a3cba397a310938a5d2ca768831cb0c16d5c0dd6c0380b4b40104ff4b372348c"
+  },
+  {
+    "path": "src/program-planner/planner-row-header.css",
+    "bytes": 10067,
+    "sha256": "8785c049fbcbe8f5e8bce9e234834787cd1a82ee7773c8591f2f9177b5a65ced"
+  },
+  {
+    "path": "src/program-planner/register-row-header.css",
+    "bytes": 6646,
+    "sha256": "fde066a70e26e11e59f1af645f193c7a36dd29ed04c5d939075b2ff15fde72bb"
+  },
+  {
+    "path": "src/program-planner/reports.css",
+    "bytes": 5761,
+    "sha256": "da45d63a371813d1c71f4ff638488f0344fd9efadc5d13cf6655a1a20e610861"
+  },
+  {
+    "path": "src/program-planner/scheduler-week.css",
+    "bytes": 17393,
+    "sha256": "253c4f297623c70b7fcb0c3d79a3de8f1e2caf2ed0e9ad651d48171f66522324"
+  },
+  {
+    "path": "src/program-planner/space-map-editor.css",
+    "bytes": 29226,
+    "sha256": "008deedca010c1e2329f9ad4c9fcd209d92a08567f543b23e8bdd576e62bb655"
+  },
+  {
+    "path": "src/program-planner/status-v5.css",
+    "bytes": 5144,
+    "sha256": "2994fbca27568a11ac3f6905e627e3cce9e916053a3f9e7376ff7385afe96449"
+  },
+  {
+    "path": "src/program-planner/styles.css",
+    "bytes": 388715,
+    "sha256": "503fff1902b004bce6de74f02e7243a16825258e054fe3f48934d8adde60dbce"
+  },
+  {
+    "path": "src/remediation-planner/config/map-providers.js",
+    "bytes": 1593,
+    "sha256": "5732855fbaec1a0581ab2c2de408effdb288fc8fe2041280cae20a5fb9e1e497"
+  },
+  {
+    "path": "src/remediation-planner/config/metromaps-provider.js",
+    "bytes": 3213,
+    "sha256": "4f56fe73d9f9825cccc88a4189b62df27d0b6c038924c7920f56fbf2d082bb13"
+  },
+  {
+    "path": "src/remediation-planner/js/map.js",
+    "bytes": 73210,
+    "sha256": "e8e4e685a4ccc9ecf91102a8424c7b5231a34853be749e4bf9ec829407144416"
+  },
+  {
+    "path": "src/remediation-planner/js/model.js",
+    "bytes": 81333,
+    "sha256": "80d56701383caaca6e1d9833eb58e968657c6bcf65ae20716000038cf8fed554"
+  },
+  {
+    "path": "src/sample/horticulture-program-workspace-20260923-123603-v3.json",
+    "bytes": 2305758,
+    "sha256": "c4d79d377af1904e37eee56f690e88671649fdf091d345a645dcb421aa397131"
+  },
+  {
+    "path": "src/sample/nature-strip-dashboard-source.sample.pdf",
+    "bytes": 146401,
+    "sha256": "dad11ad73f89eaddb5b1b6980e3b62627b05c52db66eb880343a102119b4989f"
+  },
+  {
+    "path": "src/sample/nsa-workspace-2026-27-area-pricing-report.json",
+    "bytes": 1192,
+    "sha256": "d68b11663abd95b970f302178383f4a487d4d17ea20454df74049ea86f864eff"
+  },
+  {
+    "path": "src/sample/nsa-workspace-2026-27-area-pricing-v5.json",
+    "bytes": 173344,
+    "sha256": "d3424d247bca9586f1a35a7e3e584fa18b637e0bbeb44b0e29da84122c64ec5f"
+  },
+  {
+    "path": "src/sample/nsa-workspace-2026-27-conversion-report.json",
+    "bytes": 43936,
+    "sha256": "7d23160d2a71a77a0775e78fae080fb0e0c6c6ead9a9bfc71eabb78a572bc3e0"
+  },
+  {
+    "path": "src/sample/nsa-workspace-2026-27-schema-v5.json",
+    "bytes": 167530,
+    "sha256": "6bc42fa166a566930438181618ea71988f7e28b576ff221710c6e74397115261"
+  },
+  {
+    "path": "src/scripts/static-server.cjs",
+    "bytes": 1227,
+    "sha256": "e57d311bb483b7c144d0fc82ef626944c189caaf92525ef26e1096ba3ce47d93"
+  },
+  {
+    "path": "src/shared/assets/Horticulture Operations Suite Backdrop.jpg",
+    "bytes": 480869,
+    "sha256": "92f58392895f59a2f1d155d41187e85069985a8ed991dad980896283264a2d32"
+  },
+  {
+    "path": "src/shared/assets/Horticulture Operations Suite Backdrop.png",
+    "bytes": 2489717,
+    "sha256": "6c175251cb2e5277082c92f8f0f3406aab0da436d7911bb91a561949287023d4"
+  },
+  {
+    "path": "src/shared/assets/metromap.svg",
+    "bytes": 8694,
+    "sha256": "9f962a468677e956c3ae7c1866a1db24b8c0ce5e00a77cce0480c2d97abac7a9"
+  },
+  {
+    "path": "src/shared/assets/moasure_logo.avif",
+    "bytes": 3791,
+    "sha256": "63464d67824914844db578eca671c02a9bbecf816dd49dcd33bb5b4104e5fc6d"
+  },
+  {
+    "path": "src/shared/assets/outlook calendar icon.svg",
+    "bytes": 2928,
+    "sha256": "3ca803df65f49a5b74e3809ba3615035a790e1d0ba957176ec84208d03b04689"
+  },
+  {
+    "path": "src/shared/assets/uos-grid-arrow-favicon.svg",
+    "bytes": 823,
+    "sha256": "22f8d48484747bd671883716907166b5808f415fc1db6a8b5160b56c22e4990b"
+  },
+  {
+    "path": "src/shared/assets/uos-logo-dot-column.svg",
+    "bytes": 405,
+    "sha256": "d77aeb6668f1dcf7ae61f9bcae54659eb4eccf55fdb3b736e53327fa6a6bb978"
+  },
+  {
+    "path": "src/shared/assets/uos-logo-forward-dark.svg",
+    "bytes": 5556,
+    "sha256": "2b9fbbd22bd0614d9b72d43a05284c15a2a530c9829c54a87a0ce74a9a8c637a"
+  },
+  {
+    "path": "src/shared/assets/uos-logo-forward.svg",
+    "bytes": 5556,
+    "sha256": "9f155b869752d1ba0252560e1ae4dd9be8c54e3ee3abffa6dc9c1fbaa15d3d27"
+  },
+  {
+    "path": "src/shared/css/accessibility.css",
+    "bytes": 1945,
+    "sha256": "1b8a49cc15a380feae34187c2723edd77977ea78fe56760fca48c0834e046116"
+  },
+  {
+    "path": "src/shared/css/components.css",
+    "bytes": 17835,
+    "sha256": "5180b3b38ced89a35f1315869e01c7d79a722925082b5d97ecfe243b2cdeefb8"
+  },
+  {
+    "path": "src/shared/css/print.css",
+    "bytes": 3286,
+    "sha256": "24ce926b186ac9cc476d6ec96a4e7c9f82d8ee8e0fa4b25a35f9b45d58297c84"
+  },
+  {
+    "path": "src/shared/css/reset.css",
+    "bytes": 845,
+    "sha256": "0e862afab7e1c2af5ecfe44cb8ca9cf9fcce5c7f3ba626598342a1dfe7b06d3d"
+  },
+  {
+    "path": "src/shared/css/shell.css",
+    "bytes": 9247,
+    "sha256": "29d9eb5f8da94202597360ee733dace317d5064672df4024aef0a22004f50a90"
+  },
+  {
+    "path": "src/shared/css/themes.css",
+    "bytes": 4214,
+    "sha256": "7074508bd39256aff09ca9860c899a3979abf9c99c7937d26b6b670a0d1d8391"
+  },
+  {
+    "path": "src/shared/css/tokens.css",
+    "bytes": 3410,
+    "sha256": "494a1340fca227d2a620ffe8b03044aaea3de6da78550657e5d988f9cd576f20"
+  },
+  {
+    "path": "src/shared/fonts/OFL.txt",
+    "bytes": 4452,
+    "sha256": "797cb441b593b3326a69fcf83d84264301d89e8871a75b38bae1d101e922e10c"
+  },
+  {
+    "path": "src/shared/fonts/OpenDyslexic-Bold.woff",
+    "bytes": 121096,
+    "sha256": "2dc180ab7df58833b64ed4a871c51adbe3c53936ca4ac3200c109b26d731075b"
+  },
+  {
+    "path": "src/shared/fonts/OpenDyslexic-Italic.woff",
+    "bytes": 122108,
+    "sha256": "c2c486b4b24543888bf0f4f3607019739b55f2f20e425e74a374e88335bd8962"
+  },
+  {
+    "path": "src/shared/fonts/OpenDyslexic-Regular.woff",
+    "bytes": 115096,
+    "sha256": "7465efa8054da355ee52d1c0404bab60cb2fe1eabfc1cfcecfc37679be4ecb58"
+  },
+  {
+    "path": "src/shared/fonts/README.md",
+    "bytes": 362,
+    "sha256": "532d562fae6e71825f7aa4aa8e415ba7e4d2855e71cbbccee44fceeca2b9e4f2"
+  },
+  {
+    "path": "src/shared/js/import-targets.js",
+    "bytes": 5742,
+    "sha256": "976d6e659163dfab69ff85d053cd9eef21d3e8bee3a735bb4e3bd47c450946b7"
+  },
+  {
+    "path": "src/shared/js/imports.js",
+    "bytes": 7516,
+    "sha256": "084898f4392ebe6b24de1578e06030b8699c228149b591a6d4863dbaf9480619"
+  },
+  {
+    "path": "src/shared/js/map-costing.js",
+    "bytes": 9357,
+    "sha256": "b698f79f82467292a9493312caaf6bd091539ff50d5cb0035df645e4b468872b"
+  },
+  {
+    "path": "src/shared/js/program-runtime.js",
+    "bytes": 3229,
+    "sha256": "b0b98fd0fd58f16c100e61545a675895e4d7ff81aaecb0f00e34ee9f329d5e41"
+  },
+  {
+    "path": "src/shared/js/rate-library.js",
+    "bytes": 15068,
+    "sha256": "29552d9ceec7b3678efaf2342126f03250923133c4386cddd11fb4ee82b23515"
+  },
+  {
+    "path": "src/shared/js/smart-import.js",
+    "bytes": 15315,
+    "sha256": "f7a1d90e66632ed52439174774ca4cb9deee6326d3664478c5d5b5c3a146ad69"
+  },
+  {
+    "path": "src/shared/js/storage.js",
+    "bytes": 25278,
+    "sha256": "f5aab5e4040e59445ead07f1c84888645c852742bc7c3afcad865ad81aece86c"
+  },
+  {
+    "path": "src/shared/js/suite.js",
+    "bytes": 36825,
+    "sha256": "87cacac9cc2eee1f3ef96d4ef2a86b19a46b0d0eda5221448332027a43d2e125"
+  },
+  {
+    "path": "src/shared/js/unified-workspace.js",
+    "bytes": 39231,
+    "sha256": "14a3011e8cd6bb805cc8258e78fbd38f97183af7e5557aff7fe0454cd5e464d4"
+  },
+  {
+    "path": "src/shared/js/xlsx-reader.js",
+    "bytes": 8528,
+    "sha256": "796da0e1e393ee4baef077d97b8906ef2f8e4a56a1f281188445a7abe3d0bccf"
+  },
+  {
+    "path": "src/shared/space-map/geometry.mjs",
+    "bytes": 5430,
+    "sha256": "8d35158bbaf748dadf328c9bf448e4b4ac929e6276a0f2a85909c5038ba547cb"
+  },
+  {
+    "path": "src/shared/space-map/legacy-reference.mjs",
+    "bytes": 2284,
+    "sha256": "cecfb7b607167dd4e303240796dbc6b3d567588496edfedc07c35aefa628e932"
+  },
+  {
+    "path": "src/shared/space-map/reference-picking.mjs",
+    "bytes": 2360,
+    "sha256": "22a9ae7c93d21c18b1241ebf61731471d300765b1a800e69c7617fa0b5d4e2d9"
+  },
+  {
+    "path": "src/shared/space-map/renderer.mjs",
+    "bytes": 38450,
+    "sha256": "f90b2f4d020a5381187dd0e0a6369517c50f0b2afc9397bc0c0401870ff2247b"
+  },
+  {
+    "path": "src/shared/space-map/tree-loader.mjs",
+    "bytes": 16910,
+    "sha256": "40e6b521317a22bcb8a1336c8a7a5fbaa86df90f6848c1aef1a3547152a37662"
+  },
+  {
+    "path": "src/shared/space-map/tree-worker.mjs",
+    "bytes": 7541,
+    "sha256": "535aab3f94557ce67b0439386b903992e94203f17cb1c682808753180ade3c1f"
+  },
+  {
+    "path": "src/shared/vendor/maplibre/maplibre-gl.css",
+    "bytes": 69422,
+    "sha256": "792ac997dcf6ae6f643eb4e2dee4630c85e7056526bd8fb85ffe83c67d6c41b4"
+  },
+  {
+    "path": "src/shared/vendor/maplibre/maplibre-gl.js",
+    "bytes": 913906,
+    "sha256": "e380deae560bc5d182be4124a1b9cdd5086304b0cb82c92a5af23d018aa81015"
+  },
+  {
+    "path": "src/shared/vendor/pdfjs/pdf.min.js",
+    "bytes": 286899,
+    "sha256": "1fc294eefda602e591a06c1d5af361cae23756b5a334fc2421d5f9accce038e5"
+  },
+  {
+    "path": "src/shared/vendor/pdfjs/pdf.worker.min.js",
+    "bytes": 1066087,
+    "sha256": "99732130603cd4980f009a29a38a86373b43ffb9ae22c35ec85440f311ceddfc"
+  },
+  {
+    "path": "src/shared/vendor/space-map/earcut-LICENSE.txt",
+    "bytes": 738,
+    "sha256": "0b348fff56384b43dbb37593906904e56d0f9deb51eae590d4dc6d427fbf1808"
+  },
+  {
+    "path": "src/shared/vendor/space-map/esbuild-LICENSE.txt",
+    "bytes": 1069,
+    "sha256": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+  },
+  {
+    "path": "src/shared/vendor/space-map/renderer.js",
+    "bytes": 935568,
+    "sha256": "f72be1b1af3270c9787611c2dd349151b8be6e6c81b0bcf4b229a339d34cce5c"
+  },
+  {
+    "path": "src/shared/vendor/space-map/three-LICENSE.txt",
+    "bytes": 1081,
+    "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc"
+  },
+  {
+    "path": "src/shared/vendor/space-map/tree-loader-file.js",
+    "bytes": 15588,
+    "sha256": "98b6b35ddb841cedfa34bf9b4087fe37b826bca244cf49a8b3c8a3cac35e3ce4"
+  },
+  {
+    "path": "src/shared/vendor/space-map/tree-loader.js",
+    "bytes": 15121,
+    "sha256": "df0ac85ccde3e5ea39c1235b8c5193d6212cc49a7d8bf3111113de00d66c29bd"
+  },
+  {
+    "path": "src/shared/vendor/space-map/tree-worker-source.js",
+    "bytes": 13807,
+    "sha256": "9c0093d2322a8dfe23e9488efd9050721bcfa0a64828f9ab6fd1f03d8bc3bc24"
+  },
+  {
+    "path": "src/shared/vendor/space-map/tree-worker.js",
+    "bytes": 13680,
+    "sha256": "7071cd484100b12f65380d453955914fba7e7454eb84c80f4b22114a1ac0bf1f"
+  },
+  {
+    "path": "src/snips/Budget Button does not have Activated Module style like other buttons.png",
+    "bytes": 7917,
+    "sha256": "a53d4e974d6badefcd394da2eb29cc6493655c8006d43569b86a8561ed182e61"
+  },
+  {
+    "path": "src/snips/Calculator Rate Library issues.png",
+    "bytes": 22583,
+    "sha256": "0f75746931ad5562edbfbcead8edc4ceb3c77a6fd9364a868caf3391b42cd173"
+  },
+  {
+    "path": "src/snips/Category Pill and Add-Edit-Delete buttons still not right.png",
+    "bytes": 11177,
+    "sha256": "508915c351473edf4b3e4546679cc6cc325244c693a904b0005fc7e3d5089753"
+  },
+  {
+    "path": "src/snips/Cost Library Correct Presentation.png",
+    "bytes": 84732,
+    "sha256": "88c59f7988d81eee0bdc1e88ce7fd874158f61c654ef036795b75d77ddc481a9"
+  },
+  {
+    "path": "src/snips/Cost Library Incorrect Presentation.png",
+    "bytes": 105281,
+    "sha256": "943c64b6f3fbb5ca25aaef0eb0d40fc35dc8daf7db22f73a34701f8e720cdfa5"
+  },
+  {
+    "path": "src/snips/Floating map editor panel.png",
+    "bytes": 115755,
+    "sha256": "1afa08350d9e3e842fa82e39d6e9807712044a5d1eea847bec71bab3e0484164"
+  },
+  {
+    "path": "src/snips/Planner Section header and table header to be merged and sections to become collapsible.png",
+    "bytes": 48750,
+    "sha256": "eb510dd8a0a74fec005dfad6bfae9d2575f2ea9a47509c551b60cbacade2e1b2"
+  },
+  {
+    "path": "src/snips/Status History is not working properly.png",
+    "bytes": 14398,
+    "sha256": "882b8f3256abd4aef6e1f471497faa49f24319eff60a9683f68c8189acd0f712"
+  },
+  {
+    "path": "src/snips/map filter was not fixed despite fraudulent claims by codex.png",
+    "bytes": 32259,
+    "sha256": "ac2ee6f4d12f2796cf9f981f311819cd65bbf11e0171532fcfe1fbeb811c1f07"
+  },
+  {
+    "path": "src/snips/shortcut buttons active-available-notActive styles NOT fixed.png",
+    "bytes": 6030,
+    "sha256": "b5129b626b48ab716e9994ee5d4cb419bb6429414467eab88ba2684360356250"
+  },
+  {
+    "path": "src/snips/the Add to Resource Calculator button is still be clipped on the left side - reduce Unit column width more.png",
+    "bytes": 29786,
+    "sha256": "46dcd68547a4cb6de8dc8f4b53c4ff062a11e0d61ee0f8274c4ecb88d0688b56"
+  },
+  {
+    "path": "src/snips/wrong style for Register button.png",
+    "bytes": 7278,
+    "sha256": "8963b4b5af5eddeb1e95692234b77e68de27d246b71a380f69d9a645dd721d62"
+  },
+  {
+    "path": "tests/area-pricing.test.cjs",
+    "bytes": 5073,
+    "sha256": "1775a41ea3905f118b4fbe47545793f1ff804221035e1d30b736236ab87daf84"
+  },
+  {
+    "path": "tests/browser/adaptive-map-scheduler-register.spec.js",
+    "bytes": 17748,
+    "sha256": "5ecfa804cea1b4f0a8bbaf46e26090745d10d55a2106b50e24449a0599d95e49"
+  },
+  {
+    "path": "tests/browser/area-pricing.spec.js",
+    "bytes": 5955,
+    "sha256": "8e80c1c45c93bf496e03055544805ed1f3a6da77ee2fd87ee0cb16534ad2761f"
+  },
+  {
+    "path": "tests/browser/budget-workflow.spec.js",
+    "bytes": 36323,
+    "sha256": "a9129d1720d1eb5ed6e4571beff98a3e5ab177b0293941d134dbd58961c5517e"
+  },
+  {
+    "path": "tests/browser/business-dates.spec.js",
+    "bytes": 2518,
+    "sha256": "d41e6902da4621cfa5c6b9ef13ccdb1db5f50fca640545898c9cb508625f03ee"
+  },
+  {
+    "path": "tests/browser/c4-browser-acceptance.spec.js",
+    "bytes": 9408,
+    "sha256": "868fc447cc07681deebd6cd9e5bab6fc2ac835e5ec88e41e47189c6ceaf3f13d"
+  },
+  {
+    "path": "tests/browser/c5-status-history.spec.js",
+    "bytes": 11464,
+    "sha256": "c298cddc36af1e85aa4e6f97e24122c696b7bfd11dfe20db90bb94d5daa5bc24"
+  },
+  {
+    "path": "tests/browser/c6-work-type-rate-mapping.spec.js",
+    "bytes": 22467,
+    "sha256": "9b6d4170d52e406a4cde0814af2fcde11c04b407491fef8ee4c983823d02d446"
+  },
+  {
+    "path": "tests/browser/calculator-bulk-tools.spec.js",
+    "bytes": 11715,
+    "sha256": "017d7ef8f8fc564c5573d52485f3b0038cbfdc8300190719899abd62e06cdbfe"
+  },
+  {
+    "path": "tests/browser/calculator-headers-quote-position.spec.js",
+    "bytes": 17232,
+    "sha256": "c0c202e0482deef204e0b7423351d5f26780749702c5fbd19b118cc455d47a3a"
+  },
+  {
+    "path": "tests/browser/calculator-keyboard-focus.spec.js",
+    "bytes": 6500,
+    "sha256": "d2ed04c88bdbbdee437cc5e3986494376f4787f024107b9f959e484794b2cfa1"
+  },
+  {
+    "path": "tests/browser/calculator-line-deletion.spec.js",
+    "bytes": 12391,
+    "sha256": "ed09674e5b7b91ec747b9db5eb641aac93f583c78379ad09a38c9f32da393b82"
+  },
+  {
+    "path": "tests/browser/calculator-planner-job-isolation.spec.js",
+    "bytes": 3556,
+    "sha256": "cd944431e429f8ac5c6fdc5a1a774e8323d674862ed270411aa7ba1d6e66b5fc"
+  },
+  {
+    "path": "tests/browser/calculator-render-scope.spec.js",
+    "bytes": 7855,
+    "sha256": "312f5216cfda191ad668df4d4ead19eff911e390ed10dacd5af838de6754a937"
+  },
+  {
+    "path": "tests/browser/canonical-costing.spec.js",
+    "bytes": 19766,
+    "sha256": "148abaff7a9af49afa4a7b5c20eae546c04da6f6a6bb735834d5df794caf9965"
+  },
+  {
+    "path": "tests/browser/client-demo-fixes.spec.js",
+    "bytes": 14281,
+    "sha256": "f6522eeeb9de82ca6df5733e9ce27c645d9d7db29fbe9f6ce737f6b8742507cb"
+  },
+  {
+    "path": "tests/browser/cost-calculator-targeted-ui.spec.js",
+    "bytes": 5528,
+    "sha256": "f9cfbc3ab0f9de59305850ea13140a8a551bbf62c57f011920a36b4a4a0ff050"
+  },
+  {
+    "path": "tests/browser/cost-library-focus-stability.spec.js",
+    "bytes": 7746,
+    "sha256": "fd48cb3aa4e8f47f837da3aba7786b8b719975e508ef91c691a2981dc738bdae"
+  },
+  {
+    "path": "tests/browser/cost-library-layout.spec.js",
+    "bytes": 5420,
+    "sha256": "8c23f276b5dc05f3b4148cc579753afc75abdb1165b9f18ea6fa07c82ef4e6cf"
+  },
+  {
+    "path": "tests/browser/cost-library-legacy-grouping.spec.js",
+    "bytes": 2431,
+    "sha256": "f4b020e08371f8538cdad65d14788f81ab04b14b67e4010ca065e63222da9096"
+  },
+  {
+    "path": "tests/browser/current-year-backup-recovery.spec.js",
+    "bytes": 3499,
+    "sha256": "d2136ac015cc1e68a8b5018f0735ffdb83c6a87c90ced4fcdb36267572666e19"
+  },
+  {
+    "path": "tests/browser/data-import-keyboard.spec.js",
+    "bytes": 3614,
+    "sha256": "4e84e7843327f6de51a0d50ae4a805ed44819ee27de66f8385340ba9363e2bb1"
+  },
+  {
+    "path": "tests/browser/delete-register.spec.js",
+    "bytes": 2303,
+    "sha256": "d0216068d830ce40ac24c871e55fb308240b322c13d267c77b21462563620686"
+  },
+  {
+    "path": "tests/browser/delete-warning-audit.spec.js",
+    "bytes": 16619,
+    "sha256": "8a00ab1eeb65d414385613320c70883e2eb58dec422f1d6b8acfef6f85d25ec7"
+  },
+  {
+    "path": "tests/browser/draft-quoted-cost-deletion.spec.js",
+    "bytes": 6176,
+    "sha256": "e44d4f633b4f2cb7698f46acd12d04de42312bf28298c4f700ac4a574cf0b347"
+  },
+  {
+    "path": "tests/browser/drawer-scroll-ownership.spec.js",
+    "bytes": 7294,
+    "sha256": "c33db98c6e04e732922cd8d73bb55dcd97743ca34e5d704012cd000c2f6e4771"
+  },
+  {
+    "path": "tests/browser/drawer-viewport-floor.spec.js",
+    "bytes": 12454,
+    "sha256": "64e07a36127e8138c6011efc29861a3cec7dbf5b5cd09a8aecba89caf8a323fd"
+  },
+  {
+    "path": "tests/browser/evt-register-delivery.spec.js",
+    "bytes": 10739,
+    "sha256": "d85a5e444e659684d4d919498c6e602febe195c8a8b636a417aa75453511f961"
+  },
+  {
+    "path": "tests/browser/factory-reset-startup.spec.js",
+    "bytes": 8130,
+    "sha256": "2a457566dc03f06d39bd7d38d1326193b894e0d2426a23010e4b79e4bb0092ec"
+  },
+  {
+    "path": "tests/browser/floating-draw-toolbar.spec.js",
+    "bytes": 2188,
+    "sha256": "4e4d8178b5dd6e49c8bb452c2f7b42055258b234d096f6fc8e0b154d67956952"
+  },
+  {
+    "path": "tests/browser/framed-table-emphasis.spec.js",
+    "bytes": 6625,
+    "sha256": "453896321a787c777d5dca4aaf284bc178da744af78ef564f63a4dd494da4223"
+  },
+  {
+    "path": "tests/browser/lifecycle-modal-dismissal.spec.js",
+    "bytes": 4774,
+    "sha256": "b6fc5dfafbd7f8625cbb15c566c72e8ea68548535c91b12d103f5a0d0299d04b"
+  },
+  {
+    "path": "tests/browser/lifecycle-regressions.spec.js",
+    "bytes": 6858,
+    "sha256": "e9fb03e697ecf8bdf2e4587fcc24873a65bec9d4811ba8ed434b91cacc473692"
+  },
+  {
+    "path": "tests/browser/location-active-register.spec.js",
+    "bytes": 3206,
+    "sha256": "711034f70f342713698c34017c99afe436ea8b69dbb01274097047caa210716f"
+  },
+  {
+    "path": "tests/browser/location-filter.spec.js",
+    "bytes": 5482,
+    "sha256": "b1650d63cce3213b604b068e5be22a46fd0e796b773cec13c2e2f175a7c3ea4e"
+  },
+  {
+    "path": "tests/browser/map-drawing-lifecycle.spec.js",
+    "bytes": 5870,
+    "sha256": "1ed595abcc0a19cddf531b53f07db0de6e5ec60c72d6df8bbe2211144fcf7bf5"
+  },
+  {
+    "path": "tests/browser/map-reimport-focus.spec.js",
+    "bytes": 2951,
+    "sha256": "d3d199c53aec868dd7df447278829ca763a61ab751b2a28f8c05ab0db0f0c96f"
+  },
+  {
+    "path": "tests/browser/metromap-activation.spec.js",
+    "bytes": 4040,
+    "sha256": "f9d84f784cb1583c4bf78514f91e605dc6082a5a420346d6ad2b6131dfd97b99"
+  },
+  {
+    "path": "tests/browser/moasure-map.spec.js",
+    "bytes": 14839,
+    "sha256": "1a548b62c374783509b035f61338b695357aa2fdf92b4001b12ab0db56adedca"
+  },
+  {
+    "path": "tests/browser/modal-focus-clearance.spec.js",
+    "bytes": 6475,
+    "sha256": "f26337c3049905d09e15a92e1e151ca4968dd769d55a5d16acbcbbf9d65adbff"
+  },
+  {
+    "path": "tests/browser/nsa-pdf-import.spec.js",
+    "bytes": 1936,
+    "sha256": "f4d8ad3ec05247e72b8fcf00fc321c1b886e0366bef85092479155de92b3cf94"
+  },
+  {
+    "path": "tests/browser/performance-audit.spec.js",
+    "bytes": 14025,
+    "sha256": "ca81f1fcfa611950a64697f4b7c92451de9c8f1851dd0076de983af65b959b75"
+  },
+  {
+    "path": "tests/browser/planner-current-state.spec.js",
+    "bytes": 10533,
+    "sha256": "9821ce1e344a8c55415e6508bd01b686465eb949b91a7f8d7035f2180dd88a9c"
+  },
+  {
+    "path": "tests/browser/planner-draft-recovery.spec.js",
+    "bytes": 3025,
+    "sha256": "dcfcbf0ebf9613272e741075a18e5df62bffe33b9b537fca043b2711d878f4fd"
+  },
+  {
+    "path": "tests/browser/planner-editor-controls.spec.js",
+    "bytes": 7606,
+    "sha256": "f64122e029b309c2f834e0de36eabed062dd57211e51d0e6319d6fee36c501ca"
+  },
+  {
+    "path": "tests/browser/planner-reset-history.spec.js",
+    "bytes": 15511,
+    "sha256": "d045d09de1aae7d0fcf0d50c3001fbc6fea920d9fb1885f84fadeba0df49fd07"
+  },
+  {
+    "path": "tests/browser/planner-responsive-columns.spec.js",
+    "bytes": 4307,
+    "sha256": "034eb8db8c20eca60eaf0689b3e9b0e5a6e693707532eeac7691d9f1fabc2991"
+  },
+  {
+    "path": "tests/browser/planner-scheduler-visual-and-delete.spec.js",
+    "bytes": 9311,
+    "sha256": "30e0a5c851fb9c67bbbe4992c11bdafe89c7e0dc3b5028867eeabc2b4531c8b0"
+  },
+  {
+    "path": "tests/browser/planner-section-headers.spec.js",
+    "bytes": 9869,
+    "sha256": "c8761811bf994a0967b06279a42335a806d8558a8d1e921a8ce059898e71acd5"
+  },
+  {
+    "path": "tests/browser/planner-task-editor.spec.js",
+    "bytes": 12386,
+    "sha256": "6bf63380596f54e9c90a2122525b74ec6731692ddcf1acdddec8c040217889b8"
+  },
+  {
+    "path": "tests/browser/polygon-inspector-editing.spec.js",
+    "bytes": 12898,
+    "sha256": "aad84a2329eb941e4ac86658219dc4dd55cdb6d79dd89838ec811d1eaae37204"
+  },
+  {
+    "path": "tests/browser/polygon-job-promotion.spec.js",
+    "bytes": 11402,
+    "sha256": "c31222ac18a6a726f37836c538e54acba1ec94ea96087aec874f86b9cc0b55ea"
+  },
+  {
+    "path": "tests/browser/program-runtime.spec.js",
+    "bytes": 5004,
+    "sha256": "50306e0cd85656312247bc465f4a0065c50a7a18761827bc21d8c55482b38083"
+  },
+  {
+    "path": "tests/browser/quote-customer-issue-workflow.spec.js",
+    "bytes": 6299,
+    "sha256": "ca32281cec762f8c36ce0e2a711f3c5cc635ff0d7663f765ad382b80110a486b"
+  },
+  {
+    "path": "tests/browser/quote-editor-reset.spec.js",
+    "bytes": 9858,
+    "sha256": "e715d7ee922ae091c6482d9f13d029edd19a04a419c251aff9c75d75f43f8862"
+  },
+  {
+    "path": "tests/browser/quote-first-interaction.spec.js",
+    "bytes": 6764,
+    "sha256": "5d57a6187e59b1bb600a4534290c57be3f99aec28db7a5f7fcc3408b42c59fa9"
+  },
+  {
+    "path": "tests/browser/quote-funding.spec.js",
+    "bytes": 13974,
+    "sha256": "779955ce927b5d6ae57586961383fed663c78380e4856889fdb6bcd02f5063af"
+  },
+  {
+    "path": "tests/browser/quote-itemisation-layout.spec.js",
+    "bytes": 3122,
+    "sha256": "ca316004524b9a1c6c477a097148e1b6563242bc22a93ea289f84f8254925980"
+  },
+  {
+    "path": "tests/browser/quote-payment-funding-workflow.spec.js",
+    "bytes": 12753,
+    "sha256": "e23630c25041db7ee3a79c3f659ac3f54b0c10fdecc1863efb97a651f371c6f0"
+  },
+  {
+    "path": "tests/browser/quote-print-layout.spec.js",
+    "bytes": 6642,
+    "sha256": "29b9f838ac89062a99e947105585d00967f0c39edb9c44551e0866ac37aa4d0b"
+  },
+  {
+    "path": "tests/browser/quote-section-navigation.spec.js",
+    "bytes": 12852,
+    "sha256": "9b20ca65b573ed009a15d87bedd0fcd320c44f28c9d231093e06ff39673cf54b"
+  },
+  {
+    "path": "tests/browser/quote-status-pills.spec.js",
+    "bytes": 14267,
+    "sha256": "d159d36eed6698e3628a2b803edf1602d7d230c6f0d18caa79ed37cc2e825b2d"
+  },
+  {
+    "path": "tests/browser/quoted-lifecycle.spec.js",
+    "bytes": 12408,
+    "sha256": "006862f99bdaf014b1f1c286818dfeacb328148f24cd2cfcdc2dea34921e128c"
+  },
+  {
+    "path": "tests/browser/rate-category-frames.spec.js",
+    "bytes": 4791,
+    "sha256": "db8da7d7502d646b4464483f1629053a38fa29a32e700fedea3e6879a0e586f7"
+  },
+  {
+    "path": "tests/browser/rate-editor-layout.spec.js",
+    "bytes": 9576,
+    "sha256": "53a670281172782605e623096d907530e993a563ed49f2b22132eeade35e3127"
+  },
+  {
+    "path": "tests/browser/rate-library-interactions.spec.js",
+    "bytes": 19693,
+    "sha256": "b06caa0cad6f371eb4a3066c7d65e21062101c5eff0b4482f9ce82a361480636"
+  },
+  {
+    "path": "tests/browser/register-drawer-context.spec.js",
+    "bytes": 9343,
+    "sha256": "3702f9c3538eeefbddafa32d419e863e8a8b502a3feadd86f7cc9c77513d1a9d"
+  },
+  {
+    "path": "tests/browser/register-drawer-motion.spec.js",
+    "bytes": 9345,
+    "sha256": "f71837773ff8d1a5b18d5ae18a9ebaa44bca557114fb292de0142e7596048831"
+  },
+  {
+    "path": "tests/browser/register-framed-layout.spec.js",
+    "bytes": 12545,
+    "sha256": "7e910d43e55013719aa53709fc7fd51f0a54af516a727be21ea4d58b0e92067a"
+  },
+  {
+    "path": "tests/browser/register-open-project-audit.spec.js",
+    "bytes": 4009,
+    "sha256": "03c1269ec686270d9ed93e43a819abb8ade581d008715db1e32e17a9e2a1776c"
+  },
+  {
+    "path": "tests/browser/register-project-status-colours.spec.js",
+    "bytes": 2820,
+    "sha256": "78db0f2c3edb01c107ea04946b7992945effbd5c405da2e55726069d3c16e3ba"
+  },
+  {
+    "path": "tests/browser/register-row-header-regressions.spec.js",
+    "bytes": 9418,
+    "sha256": "bbae4322da700e38029668fc0b53d3029300bd7c1c96622c0557961036c5f3b5"
+  },
+  {
+    "path": "tests/browser/register-shortcut-states.spec.js",
+    "bytes": 17868,
+    "sha256": "e1361f795508f0f126e390b319e6691f26807595e708e74ee3915b95b105e6ef"
+  },
+  {
+    "path": "tests/browser/register-status-guide.spec.js",
+    "bytes": 2645,
+    "sha256": "99040a58c7cea8405bc843fbd702e27b303e2b701a9e4bf6cae067c54d829420"
+  },
+  {
+    "path": "tests/browser/scheduler-application-nomination.spec.js",
+    "bytes": 5451,
+    "sha256": "da6c890becc233a353c3736a76f70b38de3a646b0cd5d9f205d0eaab27759b65"
+  },
+  {
+    "path": "tests/browser/scheduler-calendar-scope.spec.js",
+    "bytes": 16129,
+    "sha256": "398e8b05534d3ecbde7cd69f387878a3de460a62c7727edb8304510364dc06b9"
+  },
+  {
+    "path": "tests/browser/scheduler-costing-refinements.spec.js",
+    "bytes": 8772,
+    "sha256": "074c9974d6ab2ac86936719bc44fc0ed672dda583512dd988e27d4901e7cddb1"
+  },
+  {
+    "path": "tests/browser/scheduler-event-milestones.spec.js",
+    "bytes": 8221,
+    "sha256": "5ba085bbc1c987e10c11b6a631520f5de70aa3aff50b5bc65779f04c2996f52b"
+  },
+  {
+    "path": "tests/browser/scheduler-hourly-outlook.spec.js",
+    "bytes": 16446,
+    "sha256": "eefd0fa3cf20ebcbd60e988d75c4f188f7ef4c3e8e135214c79a8c93b9fd32d5"
+  },
+  {
+    "path": "tests/browser/scheduler-multi-day.spec.js",
+    "bytes": 10588,
+    "sha256": "0d1c90c33f9559d6d304a4e3aaa0be88646e4ad6f7483af02f113675816a24e3"
+  },
+  {
+    "path": "tests/browser/scheduler-side-by-side.spec.js",
+    "bytes": 9289,
+    "sha256": "30ccbb028e0201fe495ef41d9956d7f071571d75d785e826c3c3fe68b1f8dfff"
+  },
+  {
+    "path": "tests/browser/scheduler-unused-action-scope.spec.js",
+    "bytes": 8034,
+    "sha256": "8bfd6591da3ec74fb23030a14346554c3cef751df7eafb9693109ef3f311f247"
+  },
+  {
+    "path": "tests/browser/scheduler-week-editing.spec.js",
+    "bytes": 14282,
+    "sha256": "a9bb8a6858679bb7f34389a3fd5ec9242eb67e3d03414a46b3312ff73278bea9"
+  },
+  {
+    "path": "tests/browser/scheduler-week-viewport.spec.js",
+    "bytes": 7129,
+    "sha256": "13aab9347f8682c4c86daf11dadb7ee0d8e60c1c12c2f1dddea5f1877b956227"
+  },
+  {
+    "path": "tests/browser/shared-tooltip-clearance.spec.js",
+    "bytes": 5395,
+    "sha256": "74e679da1565a56dc571058cc06424e2cb071519b1591fff0fbc5c66e755ea91"
+  },
+  {
+    "path": "tests/browser/space-map-draft-actions.spec.js",
+    "bytes": 32465,
+    "sha256": "7a429ee9fe02361d09bfd15539a179229e51fc42fe2a437bcd2cebd9bcafd2cf"
+  },
+  {
+    "path": "tests/browser/space-map-editor.spec.js",
+    "bytes": 16898,
+    "sha256": "65883465abf0d00087875141f63e792ad90e0456509d0c74900eacbc3fea52fb"
+  },
+  {
+    "path": "tests/browser/space-map-gpu.spec.js",
+    "bytes": 34196,
+    "sha256": "29f2e9e6147706d547992c93c93573a522bb8b6803d6cbf4b0c17d80f9f81084"
+  },
+  {
+    "path": "tests/browser/space-map-onboarding.spec.js",
+    "bytes": 7279,
+    "sha256": "7db1546b130fbd4773031b622cd1edb2318a3b17801e056f4a9897c71a07702b"
+  },
+  {
+    "path": "tests/browser/space-map-radial.spec.js",
+    "bytes": 13641,
+    "sha256": "39d5a0a80e92de8d5bf21884869e6c7cc97e9084a3f3a48f283c3482f1094fd1"
+  },
+  {
+    "path": "tests/browser/space-map-sidebar.spec.js",
+    "bytes": 34869,
+    "sha256": "1f9185b33b4f5f12f65643d1d9a25946f94e4972192e737984fda489bd0fbc80"
+  },
+  {
+    "path": "tests/browser/startup-status-recovery.spec.js",
+    "bytes": 5585,
+    "sha256": "96b8bf03cba08becaae5288bf560dbc288a765b189ba24f1ebd9471cf7fa396a"
+  },
+  {
+    "path": "tests/browser/status-ui.spec.js",
+    "bytes": 6494,
+    "sha256": "e8644d8f6d58bdae4c2dba0504c9f616cc1fff812ba064bf7b9c0e4edd0b134c"
+  },
+  {
+    "path": "tests/browser/test-helper.cjs",
+    "bytes": 854,
+    "sha256": "56e08ef9e0f4d734a52ae975d9e9dc8677f2f7500d24250a8ecb9afe58f837ae"
+  },
+  {
+    "path": "tests/browser/unified-commercial-rows.spec.js",
+    "bytes": 12355,
+    "sha256": "a67c9c818fd61e699e6d804bbd18dbe9b4ecb477a0b95a1a1f5556d5f491b923"
+  },
+  {
+    "path": "tests/browser/workspace-backup-recovery.spec.js",
+    "bytes": 6596,
+    "sha256": "db844339a949817b1667c64092d61136ba693aaa5059a27b3f680d214888fb7f"
+  },
+  {
+    "path": "tests/browser/workspace-preview-counts.spec.js",
+    "bytes": 2398,
+    "sha256": "2f58061784fbbc9a6213937f0b773d03af53541843ab1ac495d8af48aa88d1af"
+  },
+  {
+    "path": "tests/browser/workspace-sanitation.spec.js",
+    "bytes": 3065,
+    "sha256": "41e675d825f4846237f7a0c7788516e6b038871cc5134c78964a6a3fa305e475"
+  },
+  {
+    "path": "tests/budget-governance.test.cjs",
+    "bytes": 18349,
+    "sha256": "35a312ba6b2184933fb81d78ac285e4e159279135a3f06a2f2af318ecd5e4f4a"
+  },
+  {
+    "path": "tests/budget-model.test.cjs",
+    "bytes": 6840,
+    "sha256": "9bc7ccec60024a49be2830d524c6e482defcd6a945144d0bacd4844b083e9016"
+  },
+  {
+    "path": "tests/business-dates.test.cjs",
+    "bytes": 4608,
+    "sha256": "d52e6c811637e4f46371d4554c966fbca532a4caac85e69d5623954f828141a8"
+  },
+  {
+    "path": "tests/c5-canonical-status-history.test.cjs",
+    "bytes": 5714,
+    "sha256": "f80fb8ccac2503fc3ddea41c9e9712078c21ed62b90b8bd1987580f353c49208"
+  },
+  {
+    "path": "tests/c6-multirate-corrective.test.cjs",
+    "bytes": 16023,
+    "sha256": "27c8b68d5a1d14050b0a68353b78862223827c20be0bf091023943913a9dba0d"
+  },
+  {
+    "path": "tests/calculator-bulk-delete.test.cjs",
+    "bytes": 9223,
+    "sha256": "8d4705e56240b6a2cd69964ee39f67dac3d25d5aae85609261553401793219a5"
+  },
+  {
+    "path": "tests/canonical-costing-commands.test.cjs",
+    "bytes": 17950,
+    "sha256": "9b2cf14b3efbd5f0cad83ec13451d346fda402aa81d605c591b6b51cf0d348c7"
+  },
+  {
+    "path": "tests/canonical-work-governance.test.cjs",
+    "bytes": 4133,
+    "sha256": "3b361f341c8992a8ea2b2568e33f27fab002fb134a48f97cb20f8d8fbbc7eac0"
+  },
+  {
+    "path": "tests/costing-adjustments.test.cjs",
+    "bytes": 1615,
+    "sha256": "9cfb9b684a2b8ed200fb8092657abe80395a67315ad3337eeb8a97ceda745911"
+  },
+  {
+    "path": "tests/current-year-backup-recovery.test.cjs",
+    "bytes": 3648,
+    "sha256": "4e46daae7596da849e5c48c3f751ed060e69290d0df196bb8032097a23654066"
+  },
+  {
+    "path": "tests/data-roundtrip.test.cjs",
+    "bytes": 2791,
+    "sha256": "f547d8aae64862c443424eab8f42a6c5d74288d2daaba79d5ce0ec63db0ca26a"
+  },
+  {
+    "path": "tests/delete-register-v5.test.cjs",
+    "bytes": 3505,
+    "sha256": "8ae3456c233c739169026f275953fee77de78ebbb96e12547ee299706baecb6a"
+  },
+  {
+    "path": "tests/delete-safety.test.cjs",
+    "bytes": 3595,
+    "sha256": "2d71d344d0c99fc97334ab3a98178eb73a4faa3a8ca9e39eedb58bd0f93afb6f"
+  },
+  {
+    "path": "tests/empty-operational-baseline.test.cjs",
+    "bytes": 7535,
+    "sha256": "a2c3b4779c4b79f6760720bedd5102a73054e022c4cfcf29709928f35f39ff53"
+  },
+  {
+    "path": "tests/evt-register-model.test.cjs",
+    "bytes": 9700,
+    "sha256": "99441b4be8b50061ac60b7771bc687dfc8dbd4820dad9a03d13cf173237c4264"
+  },
+  {
+    "path": "tests/fixtures/moasure/north-terrace-6.csv",
+    "bytes": 2463,
+    "sha256": "5ee0bcd609b50b47df1fd5525eaa051ea85c094c9c16b0b2a0cc659b1b808b34"
+  },
+  {
+    "path": "tests/governed-remediation.test.cjs",
+    "bytes": 48914,
+    "sha256": "c6ee50cfe5395930477d3c4e486dbc9ef5d303711dbc296c15c3cc5097b7958c"
+  },
+  {
+    "path": "tests/helpers/area-pricing-suite.cjs",
+    "bytes": 2933,
+    "sha256": "5cffae97b8fa9a420769b7c72b72516983687672ad860c1a4ce42638f2fa8b08"
+  },
+  {
+    "path": "tests/location-polygon-sidebar.test.cjs",
+    "bytes": 3888,
+    "sha256": "b60786d2ae44a9703fe321687924d1a8e953cdcee1b76711c2fadab7632c9d62"
+  },
+  {
+    "path": "tests/metromap-credentials.test.cjs",
+    "bytes": 4223,
+    "sha256": "091c291f2b580e17080d4e5fc55b5d03e9923441baa44b3876da36707ba4b9d7"
+  },
+  {
+    "path": "tests/moasure-geometry.test.cjs",
+    "bytes": 4732,
+    "sha256": "dc0f4805b0485abd626b6a06888c0277cfd848cf5e868128d634f8d089f1bc13"
+  },
+  {
+    "path": "tests/model-v5.test.cjs",
+    "bytes": 5363,
+    "sha256": "0008f97a3ab1beb000a2a9224336411d5009328273bde1d21e6791b58e4845ff"
+  },
+  {
+    "path": "tests/nsa-pdf-import-preview.test.cjs",
+    "bytes": 3343,
+    "sha256": "94667ea3ae481d598cd816811b6bf2364ebc6325de34d3c5c4e5a93227de4b0f"
+  },
+  {
+    "path": "tests/planner-current-state.test.cjs",
+    "bytes": 5788,
+    "sha256": "7e202ebc0addd73d52b0415ea36b892d5fe529c09041bf9010bb1b7b3285285b"
+  },
+  {
+    "path": "tests/planner-draft-job.test.cjs",
+    "bytes": 15424,
+    "sha256": "da4768767deefe8e82b3b33113cbb4bf1f65ff9200a347a3ecceb15fdbe5e2f4"
+  },
+  {
+    "path": "tests/planner-reset-history.test.cjs",
+    "bytes": 11347,
+    "sha256": "5aa251dd218dbcabc256556d40bc77c3eb05f83b8414014db98dfce8e9973c49"
+  },
+  {
+    "path": "tests/program-runtime.test.cjs",
+    "bytes": 2311,
+    "sha256": "a851ab4e2a46e6bc8b7381cb0e66565007b423984fcf933fd1e14ee14e736234"
+  },
+  {
+    "path": "tests/quote-calculator-membership.test.cjs",
+    "bytes": 5244,
+    "sha256": "ab366d3d314568eca3d090ab7f26dd8852393e22fbbb263e2d8b032ae2ce0c82"
+  },
+  {
+    "path": "tests/quote-funding.test.cjs",
+    "bytes": 15027,
+    "sha256": "3fdf13d84f2d7e21adae0372359c3d0801931348ce5d16091604bd0c6358e7dd"
+  },
+  {
+    "path": "tests/rate-library-schema.test.cjs",
+    "bytes": 7474,
+    "sha256": "c41e84312e139a756719a30824cd82bec69056eb6f7261073f67ed66ccedf14e"
+  },
+  {
+    "path": "tests/readiness/README.md",
+    "bytes": 3851,
+    "sha256": "dece4b593bea71cc3bb46e0ccc2efe361cd532cf018292d27aa07c46d4da4585"
+  },
+  {
+    "path": "tests/readiness/build-report.cjs",
+    "bytes": 17059,
+    "sha256": "76d54792c61da62b3aff41a96833e718b8ca73caac34293029918eeb652d1eb7"
+  },
+  {
+    "path": "tests/readiness/demo-rehearsal.cjs",
+    "bytes": 11870,
+    "sha256": "33728bfaf08f4a74b54728ef737a953fecf560328b6b7a80015522ab385cab02"
+  },
+  {
+    "path": "tests/readiness/diagnose-import.cjs",
+    "bytes": 2098,
+    "sha256": "e6d9402a1ff47adab598d30855a559c8f675598e1aabd9af551e809dd5f08f0c"
+  },
+  {
+    "path": "tests/readiness/faults-and-restart.cjs",
+    "bytes": 8565,
+    "sha256": "e872c08befdcc4e350aef35c9b52445d86c593b0b754ec9d7bd761368c1ab131"
+  },
+  {
+    "path": "tests/readiness/live-and-quota.cjs",
+    "bytes": 5869,
+    "sha256": "b10d82afd31bc8ef48cac673af41952ee2503380a1aa7bbe200e1962b37108c5"
+  },
+  {
+    "path": "tests/readiness/navigation-revision-fix.cjs",
+    "bytes": 8386,
+    "sha256": "58402da39d65463a8e415d61ada315c4d8722d4169d0bbf0a7450af655ebd09f"
+  },
+  {
+    "path": "tests/readiness/quote-file-edge.cjs",
+    "bytes": 298,
+    "sha256": "dd14b4a0af681ae37139be5115b9f0e2e1e74281425dc455f2f4ae08149af84d"
+  },
+  {
+    "path": "tests/readiness/quote-file.config.cjs",
+    "bytes": 444,
+    "sha256": "25c04d0c5e1c18914ba07ea11f3937e689a1d4bb2e135239a4c420d74d90d3c3"
+  },
+  {
+    "path": "tests/readiness/record-local-correction.cjs",
+    "bytes": 4114,
+    "sha256": "fef7b20d61578f47a21a6d68e6fdf2eaaaebbfd4cd6be43f201a6552bc7345eb"
+  },
+  {
+    "path": "tests/readiness/record-quote-correction.cjs",
+    "bytes": 3400,
+    "sha256": "20c9087a5a9b092a4f3365bb31c76945aca4d2aad8b5e97d51053c18a90cf394"
+  },
+  {
+    "path": "tests/readiness/report-template.html",
+    "bytes": 21409,
+    "sha256": "806c17b0b0db902db99baa76394a6a2ae62e36820856931bd5eb23ca085b0292"
+  },
+  {
+    "path": "tests/readiness/run-edge.ps1",
+    "bytes": 2203,
+    "sha256": "965a3a7656cdc9b83166669077b19ac30445916e4cb476ff8d4c7146a295461f"
+  },
+  {
+    "path": "tests/readiness/verify-report.cjs",
+    "bytes": 6215,
+    "sha256": "b052895f0370767a0293ba0eaf7bca6351115a2eaa0a82ea19d225b0ad8884e3"
+  },
+  {
+    "path": "tests/readiness/workspace-readiness.cjs",
+    "bytes": 20370,
+    "sha256": "2855f67be309c20534794a8bd5f1dc7d5cceb2bf7316a1f604528614b8e5497e"
+  },
+  {
+    "path": "tests/register-status-guide.test.cjs",
+    "bytes": 2460,
+    "sha256": "2f5f853a3fcf79c553ec69cceae2a760f795502c9781b11c90a00047cf6bbdce"
+  },
+  {
+    "path": "tests/scheduler-application-nomination.test.cjs",
+    "bytes": 12337,
+    "sha256": "a69a7fdcdd3608c4254a566ef571c73668e128ab589296d4f152fc68655ca399"
+  },
+  {
+    "path": "tests/scheduler-calendar-tools.test.cjs",
+    "bytes": 7165,
+    "sha256": "93b45ec9718fabd0217b50824dfc19a0a775235ec644d6cf6b481aa1dacc6e5a"
+  },
+  {
+    "path": "tests/scheduler-date-ranges.test.cjs",
+    "bytes": 1856,
+    "sha256": "8f50939c2fde491ec268ad5736f713384028c0654ec7140648347eb0acdff9e4"
+  },
+  {
+    "path": "tests/scheduler-event-milestones.test.cjs",
+    "bytes": 3273,
+    "sha256": "09d434a9d540186da4f91dfb18e8751501a244581eceafb8cbecf6bd7fd9756f"
+  },
+  {
+    "path": "tests/scheduler-week-editing.test.cjs",
+    "bytes": 7333,
+    "sha256": "c5dee501065978099d966fcb7638b495ffb658bd3d8d8aacaedcc117148c3d1a"
+  },
+  {
+    "path": "tests/sidebar-architecture.test.cjs",
+    "bytes": 998,
+    "sha256": "459181bfb47742015278540ce062a7077d25c04f4313b625f54c0d22964a98c3"
+  },
+  {
+    "path": "tests/space-map-dashes.test.cjs",
+    "bytes": 1282,
+    "sha256": "bc8d979fac097fd0005b72c9198931bc653457283718cacaa5fd27181556ab2f"
+  },
+  {
+    "path": "tests/space-map-tree.test.cjs",
+    "bytes": 4948,
+    "sha256": "6a52791e47c67e73e7fe039f9b989eddd5032a6dbb873bf318aa3a9c2fcdfd44"
+  },
+  {
+    "path": "tests/status.test.cjs",
+    "bytes": 8014,
+    "sha256": "f0958008bff322b39736bf26cabbae5a2103be2b39e3d9a748afb38ab7444461"
+  },
+  {
+    "path": "tests/tree-reference-selection.test.cjs",
+    "bytes": 2514,
+    "sha256": "dbcd63022473e2732bbc7e634f93122f1ba8489612213bf95fd617d5e4183ffe"
+  },
+  {
+    "path": "tests/workspace-import-signature.test.cjs",
+    "bytes": 1223,
+    "sha256": "a88ee3bba997470952756d96babeda3d5ed60c4086d5309f571d4196cdf67d96"
+  },
+  {
+    "path": "tests/workspace-sanitation.test.cjs",
+    "bytes": 6719,
+    "sha256": "3b75d586ae4800d218b12dbb4c429c61a628c4c41a04f45e30112b14c64a2fe3"
+  }
+]

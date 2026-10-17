@@ -35,6 +35,50 @@ async function point(frame,x=.5,y=.7){
 async function start(frame,kind){await startSpaceCreation(frame,kind);}
 
 async function draftCoordinates(frame){return frame.evaluate(()=>{const g=UOS.ProgramMapController.getMapController().getOperationalSnapshot().features.features[0].geometry;return g.type==='Polygon'?g.coordinates[0].slice(0,-1):g.coordinates;});}
+for(const owner of ['NSA','EVT']){
+  test(owner+': closing either radial hub cancels active map drafts',async({page})=>{
+    const {frame,errors}=await setup(page,owner);
+    const hub=frame.locator('#spaceRadialToggle'),orbs=frame.locator('#spaceDraftActions');
+    const guideHub=frame.locator('[data-space-onboarding-add]');
+    const saved=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities));
+    async function assertClosed(){
+      await expect(hub).toHaveAttribute('aria-expanded','false');
+      await expect(orbs).toBeHidden();
+      await expect(frame.locator('#mapToolStatus')).toBeHidden();
+      expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing())).toBeNull();
+      expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(saved);
+    }
+    for(const kind of ['polygon','line','square']){
+      await start(frame,kind);
+      await expect(guideHub).toBeVisible();
+      await hub.click();await assertClosed();
+      await hub.click();await point(frame,.55,.7);
+      expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing())).toBeNull();
+      await start(frame,kind);await point(frame,.35,.6);await point(frame,.65,.6);
+      await guideHub.click();await assertClosed();
+    }
+    await frame.locator('[data-space-mode="register"]').click();
+    await frame.locator('[data-space-pin]').click();
+    await frame.locator('#moveLocationButton').click();await point(frame,.55,.7);
+    await hub.click();await assertClosed();
+    await expect(frame.locator('#moveLocationButton')).toHaveAttribute('aria-pressed','false');
+    await start(frame,'polygon');await point(frame,.35,.6);await point(frame,.65,.6);await point(frame,.65,.85);
+    await frame.locator('#spaceAcceptDraft').click();
+    await expect(frame.locator('[data-shape-card-id]')).toHaveCount(1);
+    const geometry=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries));
+    await frame.locator('[data-shape-action="edit"]').click();
+    const lat=frame.locator('[data-coord-lat="0"]');
+    await lat.fill(String(Number(await lat.inputValue())+.00003));await lat.press('Tab');
+    await hub.click();await expect(orbs).toBeHidden();
+    expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries))).toBe(geometry);
+    await frame.locator('[data-polygon-placement]').click();
+    await hub.click();await expect(orbs).toBeHidden();
+    await expect(frame.locator('.program-map-canvas-container')).not.toHaveAttribute('data-placement-active','true');
+    expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities.geometries))).toBe(geometry);
+    expect(errors).toEqual([]);
+  });
+}
+
 async function dragCoordinate(page,frame,coordinate,dx=24,dy=16){
   const pixel=await frame.evaluate(c=>UOS.ProgramMapController.getMapController().projectCoordinate(c),coordinate);
   const canvas=await frame.locator('.maplibregl-canvas').boundingBox();
@@ -102,11 +146,33 @@ for(const owner of ['NSA','EVT']){
     await lat.fill(String(Number(await lat.inputValue())+.00003));await lat.press('Tab');const latitudeEdit=await draftCoordinates(frame);
     await lng.fill(String(Number(await lng.inputValue())+.00003));await lng.press('Tab');
     await frame.evaluate(()=>window.undoCard=document.querySelector('[data-shape-card-id]'));
-    await card.locator('[data-space-expand]').click();await expect(card.locator('.space-editor__drawer')).toBeHidden();
+    await expect(card).toHaveAttribute('data-card-size','full');
+    await expect(card.locator('.space-editor__fields tr:visible')).toHaveCount(3);
+    await expect(card.locator('.program-shape-actions button:visible')).toHaveCount(6);
+    await expect(card.locator('.space-editor__drawer')).toBeVisible();
+    await card.locator('[data-space-expand]').click();
+    await expect(card).toHaveAttribute('data-card-size','summary');
+    await expect(card.locator('.space-editor__fields tr:visible')).toHaveCount(3);
+    await expect(card.locator('.program-shape-actions button:visible')).toHaveCount(6);
+    await expect(card.locator('.space-editor__drawer')).toBeHidden();
     await undo.click();expect(await draftCoordinates(frame)).toEqual(latitudeEdit);
     expect(await frame.evaluate(()=>window.undoCard===document.querySelector('[data-shape-card-id]'))).toBe(true);
     await undo.click();await expect(undo).toBeHidden();expect(await draftCoordinates(frame)).toEqual(original);
-    await card.locator('[data-space-expand]').click();await card.locator('[data-delete-vertex="1"]').click();
+    await card.locator('[data-space-expand]').click();
+    await expect(card).toHaveAttribute('data-card-size','minimal');
+    await expect(card.locator('.space-editor__geometry-summary')).toBeVisible();
+    await expect(card.locator('.space-editor__fields tr:visible')).toHaveCount(1);
+    await expect(card.locator('.space-editor__fields th:visible')).toHaveCount(0);
+    await expect(card.locator('.space-editor__fields td').first()).toHaveText(/\S/);
+    await expect(card.locator('.program-shape-actions button:visible')).toHaveCount(0);
+    await expect(card.locator('.space-editor__drawer')).toBeHidden();
+    await card.locator('[data-space-expand]').click();
+    await expect(card).toHaveAttribute('data-card-size','full');
+    await expect(card.locator('.space-editor__fields tr:visible')).toHaveCount(3);
+    await expect(card.locator('.program-shape-actions button:visible')).toHaveCount(6);
+    await expect(card.locator('.space-editor__drawer')).toBeVisible();
+    expect(await frame.evaluate(()=>window.undoCard===document.querySelector('[data-shape-card-id]'))).toBe(true);
+    await card.locator('[data-delete-vertex="1"]').click();
     await frame.getByRole('dialog').getByRole('button',{name:'Remove vertex',exact:true}).click();await expect(card.locator('.rem-vertex-item')).toHaveCount(3);
     await undo.click();await expect(card.locator('.rem-vertex-item')).toHaveCount(4);expect(await draftCoordinates(frame)).toEqual(original);
     if(owner==='NSA'){
@@ -156,7 +222,9 @@ for(const owner of ['NSA','EVT']){
         await accept.evaluate(button=>button.click());
         expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates.length)).toBe(0);
         if(entry==='radial'){
-          await frame.locator('#spaceRadialToggle').click();await expect(orbs).toBeHidden();await frame.locator('#spaceRadialToggle').click();await expect(orbs).toBeVisible();
+        await frame.locator('#spaceRadialToggle').click();await expect(orbs).toBeHidden();await frame.locator('#spaceRadialToggle').click();await expect(orbs).toBeHidden();
+        expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing())).toBeNull();
+        await start(frame,kind);
           expect(await frame.evaluate(()=>UOS.ProgramMapController.getMapController().getDrawing().coordinates.length)).toBe(0);
         }
         await point(frame,.35,.6);await expect(accept).toBeDisabled();
@@ -204,6 +272,9 @@ for(const owner of ['NSA','EVT']){
         UOS.ProgramApp.updateWorkspace=mutation=>new Promise((resolve,reject)=>{window.releaseDraftSave=()=>window.draftOriginalUpdate(mutation).then(resolve,reject);});
       });
       await accept.click();await expect(orbs).toBeVisible();await expect(accept).toBeDisabled();await expect(cancel).toBeDisabled();
+      await frame.locator('#spaceRadialToggle').click();
+      await expect(frame.locator('#spaceRadialToggle')).toHaveAttribute('aria-expanded','true');
+      await expect(orbs).toBeVisible();
       await frame.evaluate(()=>{UOS.ProgramApp.updateWorkspace=window.draftOriginalUpdate;window.releaseDraftSave();delete window.draftOriginalUpdate;delete window.releaseDraftSave;});
       await expect(orbs).toBeHidden();await expect(frame.locator('[data-space-pin]')).toHaveCount(2);
       await frame.locator('[data-space-pin]').last().click();await frame.locator('#removeLocationButton').click();

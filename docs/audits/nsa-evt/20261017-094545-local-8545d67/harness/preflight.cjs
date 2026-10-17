@@ -1,0 +1,33 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const cp=require('node:child_process');
+const crypto=require('node:crypto');
+const os=require('node:os');
+const root=process.cwd();
+const run='docs/audits/nsa-evt/20261017-094545-local-8545d67';
+const snapshot='/tmp/nsa-evt-audit-20261017-094545';
+if(fs.existsSync(path.join(root,run)))throw new Error('Audit run already exists');
+if(fs.existsSync(snapshot))throw new Error('Disposable snapshot already exists');
+const git=(...args)=>cp.execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim();
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const tracked=git('ls-files','-z').split('\0').filter(Boolean);
+const selected=tracked.filter(p=>!/^overtime-planner(?:-stage3)?\//.test(p)&&!/^Offline\//.test(p));
+const files=selected.filter(p=>fs.existsSync(path.join(root,p))&&fs.statSync(path.join(root,p)).isFile()).map(p=>({path:p,bytes:fs.statSync(path.join(root,p)).size,sha256:sha(fs.readFileSync(path.join(root,p)))}));
+const before=cp.execFileSync('git',['status','--porcelain=v1','-z','--untracked-files=all'],{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean).map(x=>({status:x.slice(0,2),path:x.slice(3)}));
+const changes=before.map(x=>({...x,sha256:fs.existsSync(path.join(root,x.path))&&fs.statSync(path.join(root,x.path)).isFile()?sha(fs.readFileSync(path.join(root,x.path))):null}));
+const packages=Object.fromEntries(Object.keys(require(path.join(root,'package.json')).devDependencies).map(n=>[n,require(path.join(root,'node_modules',n,'package.json')).version]));
+const browser=require(path.join(root,'node_modules/playwright')).chromium.executablePath();
+const baseline={runId:path.basename(run),startedAt:new Date().toISOString(),target:'current local working tree',commit:git('rev-parse','HEAD'),branch:git('branch','--show-current'),upstream:git('rev-parse','--abbrev-ref','--symbolic-full-name','@{upstream}'),remote:git('remote','get-url','origin'),remoteTrackingCommit:git('rev-parse','origin/main'),remoteTrackingFreshness:'Local tracking reference only; not a deployed-artifact check',candidateSha256:sha(files.map(x=>x.path+'\0'+x.sha256).join('\n')),files,preExistingChanges:changes,environment:{os:os.platform(),release:os.release(),arch:os.arch(),node:process.version,packages,browserExecutable:browser,browserRuntimePresent:fs.existsSync(browser),protocol:'local HTTP',viewport:{width:1600,height:1000},network:'Local app; mocked external services where tests provide mocks. Offline and file-protocol claims require separate evidence.'},entrypoints:['src/index.html','src/program-planner/nsa.html','src/program-planner/events.html'],scopeExclusions:['Independent Overtime applications, dependencies and tests','Other launcher applications','GitHub Pages deployed version','Operator browser profiles and real operational transactions','Screenshot, mobile viewport, touch, video and trace execution']};
+fs.mkdirSync(path.join(root,run,'evidence'),{recursive:true});fs.mkdirSync(path.join(root,run,'harness'),{recursive:true});
+fs.writeFileSync(path.join(root,run,'evidence','baseline.json'),JSON.stringify(baseline,null,2)+'\n');
+fs.writeFileSync(path.join(root,run,'evidence','candidate-manifest.json'),JSON.stringify(files,null,2)+'\n');
+for(const f of files){const dest=path.join(snapshot,f.path);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,f.path),dest);}
+fs.symlinkSync(path.join(root,'node_modules'),path.join(snapshot,'node_modules'),'dir');
+const tests=files.filter(x=>/^tests\/(browser\/.*\.spec\.js|[^/]+\.test\.cjs)$/.test(x.path)).map(x=>{
+ const text=fs.readFileSync(path.join(root,x.path),'utf8');
+ const forbidden=text.split('\n').flatMap((line,i)=>/\.screenshot\s*\(|toHaveScreenshot|recordVideo|tracing\.(start|stop)|touchscreen|hasTouch|isMobile|width\s*:\s*(?:3\d\d|4\d\d|5\d\d|6\d\d)\b|\[\s*\d{3,4}\s*,\s*(?:390|448|430|375)\s*\]/.test(line)?[{line:i+1,reason:line.includes('screenshot')||line.includes('Screenshot')?'screenshot call or assertion':'viewport/touch/media review needed'}]:[]);
+ return {path:x.path,sha256:x.sha256,kind:x.path.includes('/browser/')?'browser':'node',forbiddenReview:forbidden,status:'NOT TESTED',writes:'Disposable snapshot and profiles only; inspected before selection'};
+});
+fs.writeFileSync(path.join(root,run,'evidence','test-inventory.json'),JSON.stringify(tests,null,2)+'\n');
+fs.copyFileSync(__filename,path.join(root,run,'harness','preflight.cjs'));
+console.log(JSON.stringify({run,snapshot,commit:baseline.commit,candidateSha256:baseline.candidateSha256,files:files.length,preExistingChanges:changes.length,node:tests.filter(x=>x.kind==='node').length,browser:tests.filter(x=>x.kind==='browser').length,flaggedBrowser:tests.filter(x=>x.kind==='browser'&&x.forbiddenReview.length).map(x=>x.path),environment:baseline.environment}));

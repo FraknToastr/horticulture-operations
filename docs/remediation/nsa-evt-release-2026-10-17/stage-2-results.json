@@ -1,0 +1,157 @@
+{
+  "stage": 2,
+  "status": "COMPLETE",
+  "stoppedAfterStage": 2,
+  "nextStage": 3,
+  "productionReleaseVerdict": "UNVERIFIED",
+  "commit": "8545d675921297349123e9828e62035981d34889",
+  "branch": "main",
+  "upstream": "origin/main",
+  "target": "local HTTP desktop Chromium",
+  "environment": {
+    "node": "v22.23.2",
+    "playwright": "1.62.0",
+    "browser": "Google Chrome for Testing 151.0.7922.34"
+  },
+  "decisions": {
+    "draftDeposits": true,
+    "ordinaryPayments": [
+      "Issued",
+      "Accepted"
+    ],
+    "newDeclinedReceipts": false,
+    "existingReversalsRetained": true
+  },
+  "model": {
+    "tests": 46,
+    "passed": 46,
+    "failed": 0,
+    "skipped": 0,
+    "files": [
+      "tests/quote-funding.test.cjs",
+      "tests/quote-calculator-membership.test.cjs",
+      "tests/calculator-bulk-delete.test.cjs"
+    ],
+    "evidence": "stage-2-model-results.tap"
+  },
+  "browser": {
+    "passed": 11,
+    "total": 11,
+    "cases": [
+      {
+        "project": "core",
+        "file": "performance-audit.spec.js",
+        "title": "NSA: quote adjustments roll back, snapshots disclose source changes and Declined receipts stay disabled",
+        "status": "passed",
+        "durationMs": 1395
+      },
+      {
+        "project": "core",
+        "file": "performance-audit.spec.js",
+        "title": "EVT: quote adjustments roll back, snapshots disclose source changes and Declined receipts stay disabled",
+        "status": "passed",
+        "durationMs": 3636
+      },
+      {
+        "project": "core",
+        "file": "quote-first-interaction.spec.js",
+        "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+        "status": "passed",
+        "durationMs": 2907
+      },
+      {
+        "project": "core",
+        "file": "quote-first-interaction.spec.js",
+        "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+        "status": "passed",
+        "durationMs": 2593
+      },
+      {
+        "project": "core",
+        "file": "quote-payment-funding-workflow.spec.js",
+        "title": "NSA: default Customer permits a first deposit without toggling funding",
+        "status": "passed",
+        "durationMs": 6871
+      },
+      {
+        "project": "core",
+        "file": "quote-payment-funding-workflow.spec.js",
+        "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+        "status": "passed",
+        "durationMs": 1072
+      },
+      {
+        "project": "core",
+        "file": "quote-payment-funding-workflow.spec.js",
+        "title": "EVT: default Customer permits a first deposit without toggling funding",
+        "status": "passed",
+        "durationMs": 6364
+      },
+      {
+        "project": "core",
+        "file": "quote-payment-funding-workflow.spec.js",
+        "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+        "status": "passed",
+        "durationMs": 1021
+      },
+      {
+        "project": "core",
+        "file": "quote-payment-funding-workflow.spec.js",
+        "title": "NSA: first-deposit failure keeps data and retry records one payment despite repeated submits",
+        "status": "passed",
+        "durationMs": 1350
+      },
+      {
+        "project": "core",
+        "file": "quote-payment-funding-workflow.spec.js",
+        "title": "EVT: first-deposit failure keeps data and retry records one payment despite repeated submits",
+        "status": "passed",
+        "durationMs": 1354
+      },
+      {
+        "project": "core",
+        "file": "quote-payment-funding-workflow.spec.js",
+        "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+        "status": "passed",
+        "durationMs": 1647
+      }
+    ],
+    "evidence": "stage-2-browser-results.json"
+  },
+  "preFixAttempt": {
+    "exitCode": 1,
+    "evidence": "stage-2-model-before.tap",
+    "note": "Focused pre-fix regression failed. This direct runner captured wrapper-level diagnostics only; original immutable audit supplies the API-mismatch diagnosis."
+  },
+  "excludedMediaAttachments": 0,
+  "preservation": {
+    "checkedAt": "2026-10-17T04:53:40.729Z",
+    "protectedFiles": 380,
+    "changedProtectedFiles": [],
+    "originalAuditChanged": false,
+    "stage1EvidenceChanged": false,
+    "status": "PASS"
+  },
+  "sourceHashes": {
+    "src/program-planner/js/quote-model.js": "a1152622f3e2dc686b87874a1b10169e64fff5c53783e2729f050a57019c2ba8",
+    "src/program-planner/index.html": "704413e9f1ea7b6bff55f58e9690afc03c304cc2ad2154830cd6b790c928fc00",
+    "tests/quote-funding.test.cjs": "e6582268324afdbf4e1859b6df881509ba0b32b3950c774c82f3979ebb4965f3",
+    "tests/quote-calculator-membership.test.cjs": "a4ebfdb1bad59a923596e3ff7db691aa523c7468a8d491e2d7b9d4b7c81941e0",
+    "tests/calculator-bulk-delete.test.cjs": "0d06a85cb2f9e6563d0002dbac1a461f32688e44ff7551a539bb24d29be35e1d",
+    "tests/browser/quote-payment-funding-workflow.spec.js": "aed87f5359b1e615eefbe349ec0b8cc9b7a9a77a7f5726d02f69d292b18fa01b",
+    "docs/remediation/nsa-evt-release-2026-10-17/README.md": "bd94554885d65cfe31cea7254f63d08b0572bde5afc6fd71796f3df24e8fb7e1"
+  },
+  "review": {
+    "agent": "stage2_review",
+    "status": "No blocking findings",
+    "edits": false,
+    "testsRun": false
+  },
+  "limits": [
+    "No full release rerun",
+    "No screenshots, mobile, touch, video or traces",
+    "No GitHub Pages or Edge file certification",
+    "No commits or pushes",
+    "Reversal attribution remains Stage 5"
+  ]
+}

@@ -1,0 +1,875 @@
+{
+  "createdAt": "2026-10-17T04:44:28.735Z",
+  "modelFiles": [
+    "tests/area-pricing.test.cjs",
+    "tests/budget-governance.test.cjs",
+    "tests/budget-model.test.cjs",
+    "tests/business-dates.test.cjs",
+    "tests/c5-canonical-status-history.test.cjs",
+    "tests/c6-multirate-corrective.test.cjs",
+    "tests/calculator-bulk-delete.test.cjs",
+    "tests/canonical-costing-commands.test.cjs",
+    "tests/canonical-work-governance.test.cjs",
+    "tests/costing-adjustments.test.cjs",
+    "tests/current-year-backup-recovery.test.cjs",
+    "tests/data-roundtrip.test.cjs",
+    "tests/delete-register-v5.test.cjs",
+    "tests/desktop-release-policy.test.cjs",
+    "tests/delete-safety.test.cjs",
+    "tests/empty-operational-baseline.test.cjs",
+    "tests/evt-register-model.test.cjs",
+    "tests/governed-remediation.test.cjs",
+    "tests/location-polygon-sidebar.test.cjs",
+    "tests/metromap-credentials.test.cjs",
+    "tests/moasure-geometry.test.cjs",
+    "tests/model-v5.test.cjs",
+    "tests/nsa-pdf-import-preview.test.cjs",
+    "tests/planner-current-state.test.cjs",
+    "tests/planner-draft-job.test.cjs",
+    "tests/planner-reset-history.test.cjs",
+    "tests/program-runtime.test.cjs",
+    "tests/quote-calculator-membership.test.cjs",
+    "tests/quote-funding.test.cjs",
+    "tests/rate-library-schema.test.cjs",
+    "tests/register-status-guide.test.cjs",
+    "tests/scheduler-application-nomination.test.cjs",
+    "tests/scheduler-calendar-tools.test.cjs",
+    "tests/scheduler-date-ranges.test.cjs",
+    "tests/scheduler-event-milestones.test.cjs",
+    "tests/scheduler-week-editing.test.cjs",
+    "tests/sidebar-architecture.test.cjs",
+    "tests/space-map-dashes.test.cjs",
+    "tests/space-map-tree.test.cjs",
+    "tests/status.test.cjs",
+    "tests/tree-reference-selection.test.cjs",
+    "tests/workspace-import-signature.test.cjs",
+    "tests/workspace-sanitation.test.cjs"
+  ],
+  "browserTests": [
+    {
+      "project": "core",
+      "title": "c4-browser-acceptance.spec.js > RC-DEL-03: immediate Add → Remove reaches canonical zero without a settled-state wait",
+      "file": "c4-browser-acceptance.spec.js",
+      "line": 34
+    },
+    {
+      "project": "core",
+      "title": "c4-browser-acceptance.spec.js > C4 mapped work deletion retains geometry and prevents automatic recreation",
+      "file": "c4-browser-acceptance.spec.js",
+      "line": 46
+    },
+    {
+      "project": "core",
+      "title": "c4-browser-acceptance.spec.js > C4 deleted calculator line remains absent after reload",
+      "file": "c4-browser-acceptance.spec.js",
+      "line": 91
+    },
+    {
+      "project": "core",
+      "title": "calculator-planner-job-isolation.spec.js > Calculator Rate Items do not reuse a Planner job",
+      "file": "calculator-planner-job-isolation.spec.js",
+      "line": 9
+    },
+    {
+      "project": "core",
+      "title": "cost-library-legacy-grouping.spec.js > imported legacy rates appear in each of the five Cost Library menus",
+      "file": "cost-library-legacy-grouping.spec.js",
+      "line": 4
+    },
+    {
+      "project": "core",
+      "title": "data-import-keyboard.spec.js > NSA: Browse Files skips the native input and keyboard and drop imports still work",
+      "file": "data-import-keyboard.spec.js",
+      "line": 7
+    },
+    {
+      "project": "core",
+      "title": "data-import-keyboard.spec.js > EVT: Browse Files skips the native input and keyboard and drop imports still work",
+      "file": "data-import-keyboard.spec.js",
+      "line": 7
+    },
+    {
+      "project": "core",
+      "title": "draft-quoted-cost-deletion.spec.js > NSA: Draft-quoted unscheduled costs can be removed while financial history remains protected",
+      "file": "draft-quoted-cost-deletion.spec.js",
+      "line": 5
+    },
+    {
+      "project": "core",
+      "title": "draft-quoted-cost-deletion.spec.js > EVT: Draft-quoted unscheduled costs can be removed while financial history remains protected",
+      "file": "draft-quoted-cost-deletion.spec.js",
+      "line": 5
+    },
+    {
+      "project": "core",
+      "title": "drawer-scroll-ownership.spec.js > record modules cannot scroll the outer Register drawer or move its hard floor",
+      "file": "drawer-scroll-ownership.spec.js",
+      "line": 8
+    },
+    {
+      "project": "core",
+      "title": "drawer-scroll-ownership.spec.js > unused Create Project and Allocate Budget actions use a white surface",
+      "file": "drawer-scroll-ownership.spec.js",
+      "line": 102
+    },
+    {
+      "project": "core",
+      "title": "evt-register-delivery.spec.js > EVT dates validate inline and persist without changing audit identity or legacy references",
+      "file": "evt-register-delivery.spec.js",
+      "line": 30
+    },
+    {
+      "project": "core",
+      "title": "evt-register-delivery.spec.js > NSA Register retains its existing receipt and fields without EVT delivery dates",
+      "file": "evt-register-delivery.spec.js",
+      "line": 89
+    },
+    {
+      "project": "core",
+      "title": "evt-register-delivery.spec.js > Scheduler action reflects saved Event dates immediately without a Project",
+      "file": "evt-register-delivery.spec.js",
+      "line": 101
+    },
+    {
+      "project": "core",
+      "title": "evt-register-delivery.spec.js > Scheduler action reflects saved Event dates immediately with a Project",
+      "file": "evt-register-delivery.spec.js",
+      "line": 101
+    },
+    {
+      "project": "core",
+      "title": "evt-register-delivery.spec.js > EVT Register identifier order and title privacy preserve their field meanings",
+      "file": "evt-register-delivery.spec.js",
+      "line": 138
+    },
+    {
+      "project": "core",
+      "title": "evt-register-delivery.spec.js > NSA Register identifier order and title privacy preserve their field meanings",
+      "file": "evt-register-delivery.spec.js",
+      "line": 138
+    },
+    {
+      "project": "core",
+      "title": "factory-reset-startup.spec.js > NSA factory reset opens the empty Register with the default Rate Library",
+      "file": "factory-reset-startup.spec.js",
+      "line": 12
+    },
+    {
+      "project": "core",
+      "title": "factory-reset-startup.spec.js > EVT factory reset opens the empty Register with the default Rate Library",
+      "file": "factory-reset-startup.spec.js",
+      "line": 12
+    },
+    {
+      "project": "core",
+      "title": "factory-reset-startup.spec.js > NSA linked Register record persists after a factory reset and outer-page reload",
+      "file": "factory-reset-startup.spec.js",
+      "line": 34
+    },
+    {
+      "project": "core",
+      "title": "factory-reset-startup.spec.js > EVT linked Register record persists after a factory reset and outer-page reload",
+      "file": "factory-reset-startup.spec.js",
+      "line": 34
+    },
+    {
+      "project": "core",
+      "title": "factory-reset-startup.spec.js > EVT factory-reset launch purges a valid stored workspace",
+      "file": "factory-reset-startup.spec.js",
+      "line": 75
+    },
+    {
+      "project": "core",
+      "title": "factory-reset-startup.spec.js > restored or cancelled NSA reset intent cannot delete Register records",
+      "file": "factory-reset-startup.spec.js",
+      "line": 95
+    },
+    {
+      "project": "core",
+      "title": "performance-audit.spec.js > NSA: native raster survives its watchdog; failed raster falls back",
+      "file": "performance-audit.spec.js",
+      "line": 26
+    },
+    {
+      "project": "core",
+      "title": "performance-audit.spec.js > EVT: native raster survives its watchdog; failed raster falls back",
+      "file": "performance-audit.spec.js",
+      "line": 26
+    },
+    {
+      "project": "core",
+      "title": "performance-audit.spec.js > catalog owns accessible labels without accumulating observers",
+      "file": "performance-audit.spec.js",
+      "line": 74
+    },
+    {
+      "project": "core",
+      "title": "performance-audit.spec.js > NSA: quote adjustments roll back, snapshots disclose source changes and Declined receipts stay disabled",
+      "file": "performance-audit.spec.js",
+      "line": 93
+    },
+    {
+      "project": "core",
+      "title": "performance-audit.spec.js > EVT: quote adjustments roll back, snapshots disclose source changes and Declined receipts stay disabled",
+      "file": "performance-audit.spec.js",
+      "line": 93
+    },
+    {
+      "project": "core",
+      "title": "performance-audit.spec.js > mutation metadata identifies changed collections and shares defensive event aliases",
+      "file": "performance-audit.spec.js",
+      "line": 136
+    },
+    {
+      "project": "core",
+      "title": "performance-audit.spec.js > webgl: pooled measurement labels retain positioning classes and DOM identity",
+      "file": "performance-audit.spec.js",
+      "line": 154
+    },
+    {
+      "project": "core",
+      "title": "performance-audit.spec.js > maplibre: pooled measurement labels retain positioning classes and DOM identity",
+      "file": "performance-audit.spec.js",
+      "line": 154
+    },
+    {
+      "project": "core",
+      "title": "performance-audit.spec.js > pending Quote adjustment protects existing edits and rolls back only its added row",
+      "file": "performance-audit.spec.js",
+      "line": 174
+    },
+    {
+      "project": "core",
+      "title": "planner-draft-recovery.spec.js > deleting a Planner job leaves its task as an unticked draft calendar",
+      "file": "planner-draft-recovery.spec.js",
+      "line": 6
+    },
+    {
+      "project": "core",
+      "title": "planner-task-editor.spec.js > Planner modal governs task fields and hands one Draft Planner Job to Scheduler",
+      "file": "planner-task-editor.spec.js",
+      "line": 8
+    },
+    {
+      "project": "core",
+      "title": "planner-task-editor.spec.js > Planner rows are summaries and Edit reopens every governed field",
+      "file": "planner-task-editor.spec.js",
+      "line": 112
+    },
+    {
+      "project": "core",
+      "title": "program-runtime.spec.js > NSA: local Map and PDF runtimes load on first use and are reused",
+      "file": "program-runtime.spec.js",
+      "line": 35
+    },
+    {
+      "project": "core",
+      "title": "program-runtime.spec.js > NSA: failed local Map and PDF loads can be retried",
+      "file": "program-runtime.spec.js",
+      "line": 75
+    },
+    {
+      "project": "core",
+      "title": "program-runtime.spec.js > EVT: local Map and PDF runtimes load on first use and are reused",
+      "file": "program-runtime.spec.js",
+      "line": 35
+    },
+    {
+      "project": "core",
+      "title": "program-runtime.spec.js > EVT: failed local Map and PDF loads can be retried",
+      "file": "program-runtime.spec.js",
+      "line": 75
+    },
+    {
+      "project": "core",
+      "title": "quote-first-interaction.spec.js > NSA: first deposit, reversal and evidence clicks preserve Payments",
+      "file": "quote-first-interaction.spec.js",
+      "line": 29
+    },
+    {
+      "project": "core",
+      "title": "quote-first-interaction.spec.js > EVT: first deposit, reversal and evidence clicks preserve Payments",
+      "file": "quote-first-interaction.spec.js",
+      "line": 29
+    },
+    {
+      "project": "core",
+      "title": "quote-payment-funding-workflow.spec.js > NSA: default Customer permits a first deposit without toggling funding",
+      "file": "quote-payment-funding-workflow.spec.js",
+      "line": 67
+    },
+    {
+      "project": "core",
+      "title": "quote-payment-funding-workflow.spec.js > NSA: a saved Draft deposit keeps the Quote panes aligned",
+      "file": "quote-payment-funding-workflow.spec.js",
+      "line": 108
+    },
+    {
+      "project": "core",
+      "title": "quote-payment-funding-workflow.spec.js > EVT: default Customer permits a first deposit without toggling funding",
+      "file": "quote-payment-funding-workflow.spec.js",
+      "line": 67
+    },
+    {
+      "project": "core",
+      "title": "quote-payment-funding-workflow.spec.js > EVT: a saved Draft deposit keeps the Quote panes aligned",
+      "file": "quote-payment-funding-workflow.spec.js",
+      "line": 108
+    },
+    {
+      "project": "core",
+      "title": "quote-payment-funding-workflow.spec.js > first-deposit failure keeps data and retry records one payment despite repeated submits",
+      "file": "quote-payment-funding-workflow.spec.js",
+      "line": 120
+    },
+    {
+      "project": "core",
+      "title": "quote-payment-funding-workflow.spec.js > Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+      "file": "quote-payment-funding-workflow.spec.js",
+      "line": 147
+    },
+    {
+      "project": "core",
+      "title": "quoted-lifecycle.spec.js > a newly received NSA Register does not offer Quoted as a human lifecycle action",
+      "file": "quoted-lifecycle.spec.js",
+      "line": 8
+    },
+    {
+      "project": "core",
+      "title": "quoted-lifecycle.spec.js > PC-013 Draft-first Quote Builder access allows navigating from Project with 0 Jobs, saving Draft Quote, and blocking Issue",
+      "file": "quoted-lifecycle.spec.js",
+      "line": 59
+    },
+    {
+      "project": "core",
+      "title": "quoted-lifecycle.spec.js > PC-013 C2: Quote Builder evaluates prospective customer funding and allows Quote Issue with $0 council budget",
+      "file": "quoted-lifecycle.spec.js",
+      "line": 154
+    },
+    {
+      "project": "core",
+      "title": "register-drawer-context.spec.js > opening another Register drawer cannot retain the previous Register map context",
+      "file": "register-drawer-context.spec.js",
+      "line": 9
+    },
+    {
+      "project": "core",
+      "title": "register-drawer-context.spec.js > creating a Project from a newly added Register mounts Planner in that Register drawer",
+      "file": "register-drawer-context.spec.js",
+      "line": 69
+    },
+    {
+      "project": "core",
+      "title": "register-drawer-context.spec.js > Register row shortcut remains usable while Planner is active",
+      "file": "register-drawer-context.spec.js",
+      "line": 115
+    },
+    {
+      "project": "core",
+      "title": "register-drawer-motion.spec.js > NSA drawer reveals smoothly and preserves floor at each viewport and row position",
+      "file": "register-drawer-motion.spec.js",
+      "line": 56
+    },
+    {
+      "project": "core",
+      "title": "register-drawer-motion.spec.js > EVT drawer reveals smoothly and preserves floor at each viewport and row position",
+      "file": "register-drawer-motion.spec.js",
+      "line": 56
+    },
+    {
+      "project": "core",
+      "title": "register-drawer-motion.spec.js > Register reverses continuously, switches records, handles resize and reduced motion",
+      "file": "register-drawer-motion.spec.js",
+      "line": 102
+    },
+    {
+      "project": "core",
+      "title": "register-drawer-motion.spec.js > Register rebuild during motion cannot leave stale animation or reopen a closed drawer",
+      "file": "register-drawer-motion.spec.js",
+      "line": 156
+    },
+    {
+      "project": "core",
+      "title": "register-shortcut-states.spec.js > NSA shortcuts distinguish prerequisites and saved work while retaining drawer context",
+      "file": "register-shortcut-states.spec.js",
+      "line": 7
+    },
+    {
+      "project": "core",
+      "title": "register-shortcut-states.spec.js > EVT shortcuts distinguish prerequisites and saved work while retaining drawer context",
+      "file": "register-shortcut-states.spec.js",
+      "line": 7
+    },
+    {
+      "project": "core",
+      "title": "register-status-guide.spec.js > NSA Register guide lists only its application statuses and restores keyboard focus",
+      "file": "register-status-guide.spec.js",
+      "line": 5
+    },
+    {
+      "project": "core",
+      "title": "register-status-guide.spec.js > EVT Register guide lists only its application statuses and restores keyboard focus",
+      "file": "register-status-guide.spec.js",
+      "line": 5
+    },
+    {
+      "project": "core",
+      "title": "scheduler-event-milestones.spec.js > EVT dates show scoped read-only all-day references without a Project and stay authoritative across views/reload",
+      "file": "scheduler-event-milestones.spec.js",
+      "line": 31
+    },
+    {
+      "project": "core",
+      "title": "scheduler-event-milestones.spec.js > NSA calendar does not expose Event milestones",
+      "file": "scheduler-event-milestones.spec.js",
+      "line": 88
+    },
+    {
+      "project": "core",
+      "title": "scheduler-event-milestones.spec.js > Event milestones coexist with operational jobs without editor handles, conflicts or job-count changes",
+      "file": "scheduler-event-milestones.spec.js",
+      "line": 96
+    },
+    {
+      "project": "core",
+      "title": "scheduler-multi-day.spec.js > holding a date handle at the week edge pages once and Cancel restores the original period",
+      "file": "scheduler-multi-day.spec.js",
+      "line": 39
+    },
+    {
+      "project": "core",
+      "title": "scheduler-multi-day.spec.js > Month timed extension confirms conversion; keyboard cancellation leaves hours intact",
+      "file": "scheduler-multi-day.spec.js",
+      "line": 48
+    },
+    {
+      "project": "core",
+      "title": "scheduler-multi-day.spec.js > NSA: move preserves hours; side handles convert only after confirmation and Save",
+      "file": "scheduler-multi-day.spec.js",
+      "line": 77
+    },
+    {
+      "project": "core",
+      "title": "scheduler-multi-day.spec.js > EVT: move preserves hours; side handles convert only after confirmation and Save",
+      "file": "scheduler-multi-day.spec.js",
+      "line": 77
+    },
+    {
+      "project": "core",
+      "title": "scheduler-multi-day.spec.js > Month single-row spans, cross-row linked cards, date resizing and keyboard movement",
+      "file": "scheduler-multi-day.spec.js",
+      "line": 95
+    },
+    {
+      "project": "core",
+      "title": "scheduler-side-by-side.spec.js > NSA: side-by-side overlaps retain continuous aligned time ranges",
+      "file": "scheduler-side-by-side.spec.js",
+      "line": 57
+    },
+    {
+      "project": "core",
+      "title": "scheduler-side-by-side.spec.js > NSA: Month symbols have distinct tips and selected controls never overlap",
+      "file": "scheduler-side-by-side.spec.js",
+      "line": 105
+    },
+    {
+      "project": "core",
+      "title": "scheduler-side-by-side.spec.js > EVT: side-by-side overlaps retain continuous aligned time ranges",
+      "file": "scheduler-side-by-side.spec.js",
+      "line": 57
+    },
+    {
+      "project": "core",
+      "title": "scheduler-side-by-side.spec.js > EVT: Month symbols have distinct tips and selected controls never overlap",
+      "file": "scheduler-side-by-side.spec.js",
+      "line": 105
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > NSA: unused noProject action retains application and enables both calendar scopes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 60
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > NSA: unused noProject action retains all and enables both calendar scopes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 60
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > NSA: unused emptyProject action retains application and enables both calendar scopes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 60
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > NSA: unused emptyProject action retains all and enables both calendar scopes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 60
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > NSA: Resource Calculator Scheduler entry retains its job draft across scope changes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 112
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > EVT: unused noProject action retains application and enables both calendar scopes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 60
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > EVT: unused noProject action retains all and enables both calendar scopes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 60
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > EVT: unused emptyProject action retains application and enables both calendar scopes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 60
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > EVT: unused emptyProject action retains all and enables both calendar scopes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 60
+    },
+    {
+      "project": "core",
+      "title": "scheduler-unused-action-scope.spec.js > EVT: Resource Calculator Scheduler entry retains its job draft across scope changes",
+      "file": "scheduler-unused-action-scope.spec.js",
+      "line": 112
+    },
+    {
+      "project": "core",
+      "title": "scheduler-week-viewport.spec.js > NSA Week opens at 6am and draft handles stay below the date header",
+      "file": "scheduler-week-viewport.spec.js",
+      "line": 5
+    },
+    {
+      "project": "core",
+      "title": "scheduler-week-viewport.spec.js > EVT Week opens at 6am and draft handles stay below the date header",
+      "file": "scheduler-week-viewport.spec.js",
+      "line": 5
+    },
+    {
+      "project": "core",
+      "title": "space-map-onboarding.spec.js > NSA: first-use sidebar guidance preserves guarded creation and only saved work dismisses it",
+      "file": "space-map-onboarding.spec.js",
+      "line": 30
+    },
+    {
+      "project": "core",
+      "title": "space-map-onboarding.spec.js > EVT: first-use sidebar guidance preserves guarded creation and only saved work dismisses it",
+      "file": "space-map-onboarding.spec.js",
+      "line": 30
+    },
+    {
+      "project": "core",
+      "title": "startup-status-recovery.spec.js > orphaned status event opens Settings recovery; retry remains usable and preserves raw data",
+      "file": "startup-status-recovery.spec.js",
+      "line": 34
+    },
+    {
+      "project": "core",
+      "title": "startup-status-recovery.spec.js > Danger zone backs up the damaged stored revision before deliberate deletion",
+      "file": "startup-status-recovery.spec.js",
+      "line": 54
+    },
+    {
+      "project": "core",
+      "title": "startup-status-recovery.spec.js > recovery deletion keeps a newer damaged revision when its backup becomes stale",
+      "file": "startup-status-recovery.spec.js",
+      "line": 71
+    },
+    {
+      "project": "core",
+      "title": "workspace-backup-recovery.spec.js > workspace backup is primary, deletion requires it, and no browser editing takeover is rendered",
+      "file": "workspace-backup-recovery.spec.js",
+      "line": 25
+    },
+    {
+      "project": "core",
+      "title": "workspace-backup-recovery.spec.js > stale revision cannot delete a newer workspace",
+      "file": "workspace-backup-recovery.spec.js",
+      "line": 78
+    },
+    {
+      "project": "core",
+      "title": "workspace-backup-recovery.spec.js > revision-fenced deletion clears canonical, recovery, migration, and legacy workspace state together",
+      "file": "workspace-backup-recovery.spec.js",
+      "line": 109
+    },
+    {
+      "project": "core",
+      "title": "workspace-sanitation.spec.js > NSA reload preserves operational records even without a rollout marker",
+      "file": "workspace-sanitation.spec.js",
+      "line": 13
+    },
+    {
+      "project": "core",
+      "title": "workspace-sanitation.spec.js > EVT reload preserves operational records even without a rollout marker",
+      "file": "workspace-sanitation.spec.js",
+      "line": 13
+    },
+    {
+      "project": "core",
+      "title": "workspace-sanitation.spec.js > workspace adoption preserves a local rollout marker for legacy-compatible imports",
+      "file": "workspace-sanitation.spec.js",
+      "line": 46
+    },
+    {
+      "project": "budget",
+      "title": "budget-workflow.spec.js > Budget form and all eight actions persist through approval, closure and reload",
+      "file": "budget-workflow.spec.js",
+      "line": 8
+    },
+    {
+      "project": "budget",
+      "title": "budget-workflow.spec.js > Budget UI allocates to a Register record before any Project exists",
+      "file": "budget-workflow.spec.js",
+      "line": 66
+    },
+    {
+      "project": "budget",
+      "title": "budget-workflow.spec.js > NSA Register drawer places newest-first FY allocations in the inline table",
+      "file": "budget-workflow.spec.js",
+      "line": 249
+    },
+    {
+      "project": "budget",
+      "title": "budget-workflow.spec.js > Event Register drawer keeps project-free allocations in the inline table",
+      "file": "budget-workflow.spec.js",
+      "line": 332
+    },
+    {
+      "project": "budget",
+      "title": "budget-workflow.spec.js > Carry-forward requires review and confirmation before moving unused funds",
+      "file": "budget-workflow.spec.js",
+      "line": 367
+    },
+    {
+      "project": "budget",
+      "title": "budget-workflow.spec.js > annual management transfers exact cents as a linked pair",
+      "file": "budget-workflow.spec.js",
+      "line": 448
+    },
+    {
+      "project": "budget",
+      "title": "budget-workflow.spec.js > No year-end review records the answer without a next-year budget or movement",
+      "file": "budget-workflow.spec.js",
+      "line": 490
+    },
+    {
+      "project": "metromap",
+      "title": "adaptive-map-scheduler-register.spec.js > MetroMap credentials stay outside workspace exports and preserve the editing session",
+      "file": "adaptive-map-scheduler-register.spec.js",
+      "line": 35
+    },
+    {
+      "project": "metromap",
+      "title": "adaptive-map-scheduler-register.spec.js > MetroMap manual activation survives storage failures without retry loops",
+      "file": "adaptive-map-scheduler-register.spec.js",
+      "line": 75
+    },
+    {
+      "project": "adaptive",
+      "title": "adaptive-map-scheduler-register.spec.js > NSA: adaptive Week columns align, filter and resize without disturbing drafts",
+      "file": "adaptive-map-scheduler-register.spec.js",
+      "line": 97
+    },
+    {
+      "project": "adaptive",
+      "title": "adaptive-map-scheduler-register.spec.js > EVT: adaptive Week columns align, filter and resize without disturbing drafts",
+      "file": "adaptive-map-scheduler-register.spec.js",
+      "line": 97
+    },
+    {
+      "project": "adaptive",
+      "title": "adaptive-map-scheduler-register.spec.js > EVT dates take only Title width and retain owner blue; NSA keeps its columns",
+      "file": "adaptive-map-scheduler-register.spec.js",
+      "line": 137
+    },
+    {
+      "project": "metromap",
+      "title": "metromap-activation.spec.js > NSA: MetroMap has no Paste button and its label follows activation and storage removal",
+      "file": "metromap-activation.spec.js",
+      "line": 5
+    },
+    {
+      "project": "metromap",
+      "title": "metromap-activation.spec.js > EVT: MetroMap has no Paste button and its label follows activation and storage removal",
+      "file": "metromap-activation.spec.js",
+      "line": 5
+    },
+    {
+      "project": "inspector",
+      "title": "space-map-draft-actions.spec.js > NSA: radial Undo restores completed vertex edits without saving or remounting cards",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 122
+    },
+    {
+      "project": "inspector",
+      "title": "space-map-draft-actions.spec.js > EVT: radial Undo restores completed vertex edits without saving or remounting cards",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 122
+    },
+    {
+      "project": "map-draft",
+      "title": "space-map-draft-actions.spec.js > NSA: closing either radial hub cancels active map drafts",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 39
+    },
+    {
+      "project": "map-draft",
+      "title": "space-map-draft-actions.spec.js > EVT: closing either radial hub cancels active map drafts",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 39
+    },
+    {
+      "project": "map-draft",
+      "title": "space-map-draft-actions.spec.js > NSA: radial Undo reverses Moasure movement and rotation with gesture-sized history",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 191
+    },
+    {
+      "project": "map-draft",
+      "title": "space-map-draft-actions.spec.js > EVT: radial Undo reverses Moasure movement and rotation with gesture-sized history",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 191
+    },
+    {
+      "project": "map-draft",
+      "title": "space-map-draft-actions.spec.js > NSA: radial geometry creation uses third-tier Accept and Cancel",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 216
+    },
+    {
+      "project": "map-draft",
+      "title": "space-map-draft-actions.spec.js > NSA: Location actions stage pins and mirror saving states",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 258
+    },
+    {
+      "project": "map-draft",
+      "title": "space-map-draft-actions.spec.js > EVT: radial geometry creation uses third-tier Accept and Cancel",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 216
+    },
+    {
+      "project": "map-draft",
+      "title": "space-map-draft-actions.spec.js > EVT: Location actions stage pins and mirror saving states",
+      "file": "space-map-draft-actions.spec.js",
+      "line": 258
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > NSA: radial polygon preview draws complete dashed edges on webgpu",
+      "file": "space-map-gpu.spec.js",
+      "line": 61
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > EVT: radial polygon preview draws complete dashed edges on webgl",
+      "file": "space-map-gpu.spec.js",
+      "line": 61
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > NSA: GPU adapter loads on demand, retains drawing on backend loss",
+      "file": "space-map-gpu.spec.js",
+      "line": 86
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > EVT: GPU adapter loads on demand, retains drawing on backend loss",
+      "file": "space-map-gpu.spec.js",
+      "line": 86
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > webgl: tree hub is independent, threshold gated, worker renders service holes and deduplicates cells",
+      "file": "space-map-gpu.spec.js",
+      "line": 104
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > webgpu: tree hub is independent, threshold gated, worker renders service holes and deduplicates cells",
+      "file": "space-map-gpu.spec.js",
+      "line": 104
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > GPU Moasure placement moves without changing saved geometry",
+      "file": "space-map-gpu.spec.js",
+      "line": 137
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > pin movement survives all backend losses without changing saved locations",
+      "file": "space-map-gpu.spec.js",
+      "line": 158
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > software WebGPU renders GPU points and preserves the draft when its device is lost",
+      "file": "space-map-gpu.spec.js",
+      "line": 174
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > transfer limits subdivide cells; hidden maps abort service loading and retain toggles",
+      "file": "space-map-gpu.spec.js",
+      "line": 185
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > tree outage clears only the reference layer and stops automatic retries",
+      "file": "space-map-gpu.spec.js",
+      "line": 201
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > tree malformed clears only the reference layer and stops automatic retries",
+      "file": "space-map-gpu.spec.js",
+      "line": 201
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > tree response-budget clears only the reference layer and stops automatic retries",
+      "file": "space-map-gpu.spec.js",
+      "line": 201
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > tree point-budget clears only the reference layer and stops automatic retries",
+      "file": "space-map-gpu.spec.js",
+      "line": 201
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > pan, zoom, resize and raster tiles align with the same geographic projection",
+      "file": "space-map-gpu.spec.js",
+      "line": 284
+    },
+    {
+      "project": "gpu",
+      "title": "space-map-gpu.spec.js > late worker results cannot replace the latest viewport",
+      "file": "space-map-gpu.spec.js",
+      "line": 303
+    }
+  ],
+  "counts": {
+    "core": 96,
+    "budget": 7,
+    "metromap": 4,
+    "adaptive": 3,
+    "inspector": 2,
+    "map-draft": 8,
+    "gpu": 16
+  }
+}

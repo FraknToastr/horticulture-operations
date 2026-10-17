@@ -1,0 +1,112 @@
+TAP version 13
+# Subtest: desktop release blocks excluded capabilities before invoking them
+ok 1 - desktop release blocks excluded capabilities before invoking them
+  ---
+  duration_ms: 0.994701
+  type: 'test'
+  ...
+# Subtest: desktop release retains filters for mixed files and excludes mobile Budget coverage
+ok 2 - desktop release retains filters for mixed files and excludes mobile Budget coverage
+  ---
+  duration_ms: 0.268648
+  type: 'test'
+  ...
+# Subtest: approved workspace has the audited identity and all 57 warnings
+ok 3 - approved workspace has the audited identity and all 57 warnings
+  ---
+  duration_ms: 20.618082
+  type: 'test'
+  ...
+# Subtest: global-rate migration archives obsolete Project links and keeps the candidate valid
+ok 4 - global-rate migration archives obsolete Project links and keeps the candidate valid
+  ---
+  duration_ms: 18.697961
+  type: 'test'
+  ...
+# Subtest: global-rate migration retains unresolved Project links instead of guessing a replacement
+ok 5 - global-rate migration retains unresolved Project links instead of guessing a replacement
+  ---
+  duration_ms: 5.468341
+  type: 'test'
+  ...
+# Subtest: global-rate migration never overwrites a malformed Project-link archive
+ok 6 - global-rate migration never overwrites a malformed Project-link archive
+  ---
+  duration_ms: 5.327666
+  type: 'test'
+  ...
+# Subtest: blank v5 workspaces contain canonical collections and guarded automation
+ok 7 - blank v5 workspaces contain canonical collections and guarded automation
+  ---
+  duration_ms: 11.411121
+  type: 'test'
+  ...
+# Subtest: PC-006 Project promotion creates canonical checklist Tasks but no implicit Job
+ok 8 - PC-006 Project promotion creates canonical checklist Tasks but no implicit Job
+  ---
+  duration_ms: 17.300078
+  type: 'test'
+  ...
+# Subtest: NSA startup repair preserves a current linked Project and its Planner Tasks
+ok 9 - NSA startup repair preserves a current linked Project and its Planner Tasks
+  ---
+  duration_ms: 13.46827
+  type: 'test'
+  ...
+# Subtest: v4 normalisation performs v5 status migration and JSON round-trip
+ok 10 - v4 normalisation performs v5 status migration and JSON round-trip
+  ---
+  duration_ms: 7.819518
+  type: 'test'
+  ...
+# Subtest: schema-v2 normalisation chains through exact legacy migrations to v5
+ok 11 - schema-v2 normalisation chains through exact legacy migrations to v5
+  ---
+  duration_ms: 4.542491
+  type: 'test'
+  ...
+# Subtest: schema-v3 normalisation chains through exact legacy migrations to v5
+ok 12 - schema-v3 normalisation chains through exact legacy migrations to v5
+  ---
+  duration_ms: 3.391204
+  type: 'test'
+  ...
+# Subtest: invalid canonical status is rejected without changing the source
+ok 13 - invalid canonical status is rejected without changing the source
+  ---
+  duration_ms: 5.469343
+  type: 'test'
+  ...
+# Subtest: legacy catalog rates recover all five library menus without overriding user choices
+ok 14 - legacy catalog rates recover all five library menus without overriding user choices
+  ---
+  duration_ms: 24.429712
+  type: 'test'
+  ...
+# Subtest: Rate Library CSV exports current schema and round-trips source metadata and both add paths
+ok 15 - Rate Library CSV exports current schema and round-trips source metadata and both add paths
+  ---
+  duration_ms: 9.289468
+  type: 'test'
+  ...
+# Subtest: Rate Library CSV import remains compatible with the original eight-column schema
+ok 16 - Rate Library CSV import remains compatible with the original eight-column schema
+  ---
+  duration_ms: 1.874375
+  type: 'test'
+  ...
+# Subtest: user-selected Rate Kind survives normalization when category suggests another Kind
+ok 17 - user-selected Rate Kind survives normalization when category suggests another Kind
+  ---
+  duration_ms: 9.477093
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 220.501785

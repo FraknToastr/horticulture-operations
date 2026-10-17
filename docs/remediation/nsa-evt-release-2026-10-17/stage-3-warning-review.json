@@ -1,0 +1,946 @@
+{
+  "source": {
+    "path": "src/sample/nsa-workspace-2026-27-area-pricing-v5.json",
+    "sha256": "d3424d247bca9586f1a35a7e3e584fa18b637e0bbeb44b0e29da84122c64ec5f",
+    "bytes": 173344
+  },
+  "candidate": {
+    "path": "src/sample/nsa-workspace-2026-27-global-rates-reviewed-v5.json",
+    "sha256": "347b3a039ccfe2d25804d7eff368a1ee875cf233d142232c696e50a95c821781",
+    "bytes": 254345,
+    "adopted": false
+  },
+  "original": {
+    "counts": {
+      "error": 0,
+      "warning": 57,
+      "total": 57
+    },
+    "groups": {
+      "STATUS_MIGRATION_READINESS": 1,
+      "FUNDING_OPERATIONAL_AMOUNT_MISSING": 2,
+      "RATE_LEGACY_CATALOG_ACTIVE": 54
+    }
+  },
+  "reviewed": {
+    "counts": {
+      "error": 0,
+      "warning": 3,
+      "total": 3
+    },
+    "groups": {
+      "STATUS_MIGRATION_READINESS": 1,
+      "FUNDING_OPERATIONAL_AMOUNT_MISSING": 2
+    }
+  },
+  "correctedWarnings": 54,
+  "ownerDecisions": [
+    {
+      "code": "STATUS_MIGRATION_READINESS",
+      "contractId": "PC-012",
+      "severity": "warning",
+      "collection": "migration",
+      "entityId": "status-readiness",
+      "field": "migration.statusReadiness",
+      "relatedIds": [],
+      "message": "Status migration readiness review is pending; automation remains paused until an attributed officer enables it.",
+      "repair": null,
+      "disposition": "owner-decision-required",
+      "decision": "An attributed officer must review readiness and decide whether to enable automation."
+    },
+    {
+      "code": "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "projects",
+      "entityId": "NSA-PROJ-0VCASS6",
+      "field": "funding.operationalAmount",
+      "relatedIds": [],
+      "message": "Project has no explicit Council Operational Amount.",
+      "repair": null,
+      "disposition": "owner-decision-required",
+      "decision": "Record the authorised Council operational amount; no source amount exists, including evidence for zero."
+    },
+    {
+      "code": "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "projects",
+      "entityId": "NSA-PROJ-186F3X1",
+      "field": "funding.operationalAmount",
+      "relatedIds": [],
+      "message": "Project has no explicit Council Operational Amount.",
+      "repair": null,
+      "disposition": "owner-decision-required",
+      "decision": "Record the authorised Council operational amount; no source amount exists, including evidence for zero."
+    }
+  ],
+  "inventory": [
+    {
+      "code": "STATUS_MIGRATION_READINESS",
+      "contractId": "PC-012",
+      "severity": "warning",
+      "collection": "migration",
+      "entityId": "status-readiness",
+      "field": "migration.statusReadiness",
+      "relatedIds": [],
+      "message": "Status migration readiness review is pending; automation remains paused until an attributed officer enables it.",
+      "repair": null,
+      "disposition": "owner-decision-required",
+      "decision": "An attributed officer must review readiness and decide whether to enable automation."
+    },
+    {
+      "code": "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "projects",
+      "entityId": "NSA-PROJ-0VCASS6",
+      "field": "funding.operationalAmount",
+      "relatedIds": [],
+      "message": "Project has no explicit Council Operational Amount.",
+      "repair": null,
+      "disposition": "owner-decision-required",
+      "decision": "Record the authorised Council operational amount; no source amount exists, including evidence for zero."
+    },
+    {
+      "code": "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "projects",
+      "entityId": "NSA-PROJ-186F3X1",
+      "field": "funding.operationalAmount",
+      "relatedIds": [],
+      "message": "Project has no explicit Council Operational Amount.",
+      "repair": null,
+      "disposition": "owner-decision-required",
+      "decision": "Record the authorised Council operational amount; no source amount exists, including evidence for zero."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-05FY6WQ",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-05ZOIJO",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-06AN0QW",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-06AN0QW-HA",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0718JEK",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0718JEK-HA",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-076HI8T",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0CBTMH7",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0DXVRRM",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0EOBVMR",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0EUIM9Z",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0EUIM9Z-HA",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0GDT5W7",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0GIUNH2",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0IL1509",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0IZC1HE",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0J5JQLC",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0KBYX7X",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0KP0O7S",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0NXRQ7F",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0NXRQ7F-HA",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0O3AC0C",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0OSX05Z",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0Q8AMS4",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0V5JRXB",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0VTCN2L",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0XOVMVY",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0XW5W7R",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-0YVLQ87",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-10OJY60",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-11F9QR1",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-11PWI5G",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-14ZTWST",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-15DWKFB",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-15NDP9P",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-16ITKEH",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-19I0OXP",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-19XB0BV",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1BKB96D",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1CJOOD8",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1DIRS5K",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1DZC09Z",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1EB8D73",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1F7Y69F",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1G89ECF",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1IH3NUE",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1NFODUE",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1NQ7OBY",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1PR88E5",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1PV7GWC",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1QRPQN8",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1RTL89P",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1RTW67Z",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    },
+    {
+      "code": "RATE_LEGACY_CATALOG_ACTIVE",
+      "contractId": "",
+      "severity": "warning",
+      "collection": "rateItems",
+      "entityId": "RATE-1Y866EW",
+      "field": "catalogId/catalogOwner/financialYear",
+      "relatedIds": [
+        "NSA-CAT-2026"
+      ],
+      "message": "Rate Item still carries legacy catalog eligibility metadata; run explicit global-rate migration.",
+      "repair": null,
+      "disposition": "corrected-in-candidate",
+      "decision": "Migrate legacy eligibility metadata; preserve rate IDs, source records and obsolete Project links in the migration archive."
+    }
+  ],
+  "projectCatalogLinks": [
+    {
+      "projectId": "NSA-PROJ-0VCASS6",
+      "catalogId": "NSA-CAT-2026"
+    },
+    {
+      "projectId": "NSA-PROJ-186F3X1",
+      "catalogId": "NSA-CAT-2026"
+    }
+  ],
+  "safety": {
+    "originalUntouched": true,
+    "idsPreserved": true,
+    "sourceArchivesExact": true,
+    "inputUnchanged": true,
+    "idempotent": true
+  }
+}

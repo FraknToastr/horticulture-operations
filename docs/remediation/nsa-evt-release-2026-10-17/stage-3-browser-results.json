@@ -1,0 +1,283 @@
+{
+  "config": {
+    "argv": [
+      "/home/n0rt/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/n0rt/headroom-projects/Hort Ops 23 September/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=playwright.desktop.config.cjs",
+      "--project=core",
+      "tests/browser/reviewed-workspace-recovery.spec.js",
+      "--reporter=line,json"
+    ],
+    "configFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/playwright.desktop.config.cjs",
+    "rootDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 1,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "core",
+        "name": "core",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/evt-register-delivery.spec.js",
+          "**/register-status-guide.spec.js",
+          "**/register-drawer-context.spec.js",
+          "**/drawer-scroll-ownership.spec.js",
+          "**/register-drawer-motion.spec.js",
+          "**/register-shortcut-states.spec.js",
+          "**/planner-task-editor.spec.js",
+          "**/planner-draft-recovery.spec.js",
+          "**/cost-library-legacy-grouping.spec.js",
+          "**/calculator-planner-job-isolation.spec.js",
+          "**/c4-browser-acceptance.spec.js",
+          "**/quote-payment-funding-workflow.spec.js",
+          "**/quote-first-interaction.spec.js",
+          "**/quoted-lifecycle.spec.js",
+          "**/draft-quoted-cost-deletion.spec.js",
+          "**/workspace-backup-recovery.spec.js",
+          "**/startup-status-recovery.spec.js",
+          "**/factory-reset-startup.spec.js",
+          "**/workspace-sanitation.spec.js",
+          "**/data-import-keyboard.spec.js",
+          "**/reviewed-workspace-recovery.spec.js",
+          "**/scheduler-side-by-side.spec.js",
+          "**/scheduler-multi-day.spec.js",
+          "**/scheduler-unused-action-scope.spec.js",
+          "**/scheduler-week-viewport.spec.js",
+          "**/scheduler-event-milestones.spec.js",
+          "**/space-map-onboarding.spec.js",
+          "**/program-runtime.spec.js",
+          "**/performance-audit.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "budget",
+        "name": "budget",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/budget-workflow.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "metromap",
+        "name": "metromap",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/adaptive-map-scheduler-register.spec.js",
+          "**/metromap-activation.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "adaptive",
+        "name": "adaptive",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/adaptive-map-scheduler-register.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "inspector",
+        "name": "inspector",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/space-map-draft-actions.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "map-draft",
+        "name": "map-draft",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/space-map-draft-actions.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "gpu",
+        "name": "gpu",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/space-map-gpu.spec.js"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": {
+      "command": "PORT=4199 node src/scripts/static-server.cjs",
+      "url": "http://127.0.0.1:4199/src/program-planner/index.html?workspace=NSA",
+      "reuseExistingServer": false,
+      "timeout": 15000
+    }
+  },
+  "suites": [
+    {
+      "title": "reviewed-workspace-recovery.spec.js",
+      "file": "reviewed-workspace-recovery.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "nsa-workspace-2026-27-area-pricing-v5.json: isolated import preserves IDs, lineage, JSON/ZIP round trips and reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1053,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:02:20.320Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bd52f1b0040fe662f5ce-f42cf3f33ea32482d619",
+          "file": "reviewed-workspace-recovery.spec.js",
+          "line": 8,
+          "column": 3
+        },
+        {
+          "title": "nsa-workspace-2026-27-global-rates-reviewed-v5.json: isolated import preserves IDs, lineage, JSON/ZIP round trips and reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 858,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:02:21.448Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bd52f1b0040fe662f5ce-b47667109ec5f7c38769",
+          "file": "reviewed-workspace-recovery.spec.js",
+          "line": 8,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-17T05:02:19.853Z",
+    "duration": 2513.6330000000003,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

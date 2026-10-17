@@ -1,0 +1,383 @@
+{
+  "checkedAt": "2026-10-17T05:23:37.436Z",
+  "stage": 4,
+  "status": "COMPLETE",
+  "nextStage": 5,
+  "nextStageStarted": false,
+  "assessment": "CONDITIONAL_UPGRADE_PROPOSAL",
+  "productionVerdict": "UNVERIFIED",
+  "shippedRuntimeChanged": false,
+  "dependencyInstallationPerformed": false,
+  "commitOrPushPerformed": false,
+  "scope": "NSA/EVT only; Overtime excluded",
+  "preservation": {
+    "checkedAt": "2026-10-17T05:23:37.436Z",
+    "baseline": "stage-4-preservation-baseline.json",
+    "baselineSHA256": "494cf392aba204ec589e6620cb846fe3b372dfbac2472196a3d68774cae53c8b",
+    "protectedFiles": 409,
+    "allowedExistingChanges": [
+      "docs/remediation/nsa-evt-release-2026-10-17/README.md"
+    ],
+    "differences": [],
+    "status": "PASSED"
+  },
+  "loader": {
+    "tests": 3,
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0
+  },
+  "browser": {
+    "stats": {
+      "startTime": "2026-10-17T05:17:54.055Z",
+      "duration": 13313.045999999998,
+      "expected": 7,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "cases": [
+      {
+        "title": "NSA: 6.4.299 matches shipped PDF extraction with lazy promises, real workers and no external network",
+        "status": "passed",
+        "durationMs": 1260,
+        "proofs": [
+          {
+            "name": "pdf-parity-proof",
+            "value": [
+              {
+                "port": 4199,
+                "version": "2.16.105",
+                "load": {
+                  "samePromise": true,
+                  "version": "2.16.105",
+                  "cached": true
+                },
+                "pdfRequests": 3,
+                "workersCreated": 2,
+                "workersRemaining": 0,
+                "pages": 2,
+                "fields": 0,
+                "extractionSHA256": "e0ca6caec86196df30b028fafe02ada7c796b49d96852737223aefdd7cf891b9",
+                "formFields": 1,
+                "isEvalSupported": [
+                  false,
+                  false
+                ]
+              },
+              {
+                "port": 4204,
+                "version": "6.4.299",
+                "load": {
+                  "samePromise": true,
+                  "version": "6.4.299",
+                  "cached": true
+                },
+                "pdfRequests": 3,
+                "workersCreated": 2,
+                "workersRemaining": 0,
+                "pages": 2,
+                "fields": 0,
+                "extractionSHA256": "e0ca6caec86196df30b028fafe02ada7c796b49d96852737223aefdd7cf891b9",
+                "formFields": 1,
+                "isEvalSupported": [
+                  false,
+                  false
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "NSA: failed PDF module load retries explicitly and deduplicates the retry",
+        "status": "passed",
+        "durationMs": 285,
+        "proofs": []
+      },
+      {
+        "title": "EVT: 6.4.299 matches shipped PDF extraction with lazy promises, real workers and no external network",
+        "status": "passed",
+        "durationMs": 1199,
+        "proofs": [
+          {
+            "name": "pdf-parity-proof",
+            "value": [
+              {
+                "port": 4199,
+                "version": "2.16.105",
+                "load": {
+                  "samePromise": true,
+                  "version": "2.16.105",
+                  "cached": true
+                },
+                "pdfRequests": 3,
+                "workersCreated": 2,
+                "workersRemaining": 0,
+                "pages": 2,
+                "fields": 0,
+                "extractionSHA256": "e0ca6caec86196df30b028fafe02ada7c796b49d96852737223aefdd7cf891b9",
+                "formFields": 1,
+                "isEvalSupported": [
+                  false,
+                  false
+                ]
+              },
+              {
+                "port": 4204,
+                "version": "6.4.299",
+                "load": {
+                  "samePromise": true,
+                  "version": "6.4.299",
+                  "cached": true
+                },
+                "pdfRequests": 3,
+                "workersCreated": 2,
+                "workersRemaining": 0,
+                "pages": 2,
+                "fields": 0,
+                "extractionSHA256": "e0ca6caec86196df30b028fafe02ada7c796b49d96852737223aefdd7cf891b9",
+                "formFields": 1,
+                "isEvalSupported": [
+                  false,
+                  false
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "EVT: failed PDF module load retries explicitly and deduplicates the retry",
+        "status": "passed",
+        "durationMs": 244,
+        "proofs": []
+      },
+      {
+        "title": "NSA: candidate PDF library stages and applies the real Register PDF import",
+        "status": "passed",
+        "durationMs": 571,
+        "proofs": []
+      },
+      {
+        "title": "candidate PDF load timeout stays bounded and permits an explicit retry",
+        "status": "passed",
+        "durationMs": 8322,
+        "proofs": []
+      },
+      {
+        "title": "a malformed PDF does not poison the successful candidate module cache",
+        "status": "passed",
+        "durationMs": 518,
+        "proofs": []
+      }
+    ],
+    "mediaAttachments": 0
+  },
+  "inventory": {
+    "dependencies": 7,
+    "vendorFiles": 12,
+    "missingFullLocalLicences": [
+      "maplibre-gl",
+      "pdfjs-dist"
+    ],
+    "gaps": [
+      "Full local PDF.js and MapLibre licence texts are missing, although their source headers retain notices and links",
+      "Current bundles lack a shipped package/version/build-to-asset provenance manifest",
+      "Exact Three patch and CSS version cannot be independently established from those asset banners alone",
+      "Top-level exact-version advisories are a snapshot, not a complete bundled-transitive SBOM or security certification"
+    ]
+  },
+  "advisorySnapshot": {
+    "checkedAt": "2026-10-17T05:09:08.564Z",
+    "source": "GitHub Global Security Advisories API",
+    "queries": [
+      {
+        "name": "pdfjs-dist",
+        "version": "2.16.105",
+        "matches": 1,
+        "advisories": [
+          {
+            "id": "GHSA-wgrm-67xf-hhpq",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-wgrm-67xf-hhpq"
+          }
+        ]
+      },
+      {
+        "name": "pdfjs-dist",
+        "version": "6.4.299",
+        "matches": 0,
+        "advisories": []
+      },
+      {
+        "name": "maplibre-gl",
+        "version": "5.3.0",
+        "matches": 1,
+        "advisories": [
+          {
+            "id": "GHSA-jrc7-96c5-q579",
+            "severity": "critical",
+            "url": "https://github.com/advisories/GHSA-jrc7-96c5-q579"
+          }
+        ]
+      },
+      {
+        "name": "three",
+        "version": "0.186.1",
+        "matches": 0,
+        "advisories": []
+      },
+      {
+        "name": "earcut",
+        "version": "3.2.4",
+        "matches": 0,
+        "advisories": []
+      },
+      {
+        "name": "esbuild",
+        "version": "0.28.2",
+        "matches": 0,
+        "advisories": []
+      },
+      {
+        "name": "@playwright/test",
+        "version": "1.62.0",
+        "matches": 0,
+        "advisories": []
+      },
+      {
+        "name": "fake-indexeddb",
+        "version": "6.2.4",
+        "matches": 0,
+        "advisories": []
+      }
+    ],
+    "limitation": "Exact top-level package snapshot, not a complete transitive SBOM or security certification"
+  },
+  "candidate": {
+    "version": "6.4.299",
+    "variant": "official legacy ESM build",
+    "contract": {
+      "functionName": "ensurePdf",
+      "inFlightDeduplication": true,
+      "successfulModuleReuse": true,
+      "failedModuleRetry": "new module URL per explicit retry",
+      "timeoutMs": 8000,
+      "isEvalSupported": false,
+      "documentDestroy": "compatibility bridge to PDFDocumentLoadingTask.destroy",
+      "rejectedDocumentCleanup": "destroy the loading task before propagating its error"
+    }
+  },
+  "adoptionGates": [
+    "Edge file://, other browsers and GitHub Pages not verified",
+    "Actual EVT Register import not exercised",
+    "Broader PDF corpus and optional CMap/font/WASM asset needs not assessed",
+    "Dedicated worker failure and late module completion after timeout not specifically exercised",
+    "MapLibre advisory and full local licence texts require a separate vendor update"
+  ],
+  "priorAttempts": [
+    {
+      "file": "stage-4-browser-attempt-1.json",
+      "finding": "Flattened sample has no form fields; harness corrected and source-generated AcroForm added"
+    },
+    {
+      "file": "stage-4-browser-attempt-2.json",
+      "finding": "Removed document destroy API; candidate loading-task cleanup bridge added"
+    },
+    {
+      "file": "stage-4-browser-attempt-3.json",
+      "finding": "Field objects changed to Map; parity harness normalizes representations"
+    }
+  ],
+  "artifacts": {
+    "README.md": {
+      "bytes": 5056,
+      "sha256": "e40225f701c6ab40052c748f1a10d98269f4fbd4eead278210220ce143155e82"
+    },
+    "stage-4-advisories.json": {
+      "bytes": 4124,
+      "sha256": "9d87326ca9b10014d21651c72daa3c62987468dd30a6499e6f2fe6b6f64a57ec"
+    },
+    "stage-4-browser-attempt-1.json": {
+      "bytes": 10418,
+      "sha256": "c473693700be839ffd6b3dab3e87c997b6a4df74e29d22c282cc7a3e209a0d2c"
+    },
+    "stage-4-browser-attempt-2.json": {
+      "bytes": 9467,
+      "sha256": "72ddae8c58055c6d41c5d479347479c43e6ee92ae53910adf6138ea2938de7ed"
+    },
+    "stage-4-browser-attempt-3.json": {
+      "bytes": 10496,
+      "sha256": "6a884b424137f4f2bade533fa4b36c6ee08cc711f3f18cda535a28eab01a14b5"
+    },
+    "stage-4-browser-results.json": {
+      "bytes": 11775,
+      "sha256": "9a5468389de014f220d5acf287bd2951e4cf9399fa49f92e61f781c9ddc2a554"
+    },
+    "stage-4-build.json": {
+      "bytes": 1194,
+      "sha256": "587ebd0e37cb4c30551ab8f1a136fcfa43204d54ca44e91c21fdba3464b9c08f"
+    },
+    "stage-4-checkpoint.md": {
+      "bytes": 12096,
+      "sha256": "e99e77430c060361d25d51ebebe585e2fa0042bdbe090126cd4902e8697447e4"
+    },
+    "stage-4-pdf-package.json": {
+      "bytes": 2364,
+      "sha256": "778639af79a7991b149fea9e70371019db290ebbac5b6759ea8d5aa2e14f95f2"
+    },
+    "stage-4-preservation-results.json": {
+      "bytes": 349,
+      "sha256": "7188e103f545bc3b4f106b94f47fee2dac257b43de9ef5051650fd64dfb2f984"
+    },
+    "stage-4-runtime-tests.tap": {
+      "bytes": 688,
+      "sha256": "29a0b3943ad06f606170dec52f83da671e9acabda91c3e2b8576ded338876b0f"
+    },
+    "stage-4-vendor-inventory.json": {
+      "bytes": 5796,
+      "sha256": "99b8c07e65ab1527cd4a47a40a69b4baefd1b58f967094721cb20e5dbaa3b26c"
+    },
+    "stage-4/build.cjs": {
+      "bytes": 4529,
+      "sha256": "c8f16a56fc8d836400ce06cb8cd134bf5a776ac8c1045f198881508e00f9dd23"
+    },
+    "stage-4/form-fixture.cjs": {
+      "bytes": 1313,
+      "sha256": "6331839ff5c3d3c86113bfdca7890ced7e60b6eb7d28cf6461eadbac3e554e2f"
+    },
+    "stage-4/imports.candidate.js": {
+      "bytes": 8083,
+      "sha256": "df6ca9978c01bada28d21f2ce15fbb89700c2a788d2716ec06ac0389b11f14a9"
+    },
+    "stage-4/inventory.cjs": {
+      "bytes": 4214,
+      "sha256": "19903c412322c0fd7ce70af75fdafac8aad321d7e275f5bacb93346f1bdf7e73"
+    },
+    "stage-4/pdf-compat.spec.cjs": {
+      "bytes": 9152,
+      "sha256": "1eae1f2ec91e0634ee181e95421b4b520056bd68d072b8d2c9f30eefd9f6888a"
+    },
+    "stage-4/playwright.config.cjs": {
+      "bytes": 958,
+      "sha256": "e7b23e9283e43e260212f6bf3118c0a414cbe65ab0cb0b6acd7b24958e3d8399"
+    },
+    "stage-4/prepare.cjs": {
+      "bytes": 5668,
+      "sha256": "2519f28636d3409efbab57aa5480e400f16451aed99b3d6f0a43f328716bcc87"
+    },
+    "stage-4/program-runtime.candidate.js": {
+      "bytes": 3544,
+      "sha256": "f002966f47b2394683748b10c3e5024e0b52a7208807eb631c23275d8f2fdf5d"
+    },
+    "stage-4/record-results.cjs": {
+      "bytes": 6831,
+      "sha256": "85cd4e2f25f0dc490cf834dc19ac2adf1385438d31edda78764e033077fa4a5b"
+    },
+    "stage-4/serve-isolated.cjs": {
+      "bytes": 1846,
+      "sha256": "751d555bb9547dcb5f3b40cbf148811cfba25dafd8392baa65adb89f58293dab"
+    }
+  }
+}

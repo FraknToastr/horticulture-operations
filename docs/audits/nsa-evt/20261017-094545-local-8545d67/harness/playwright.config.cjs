@@ -1,0 +1,3 @@
+const path=require('node:path');
+const source=process.env.NSA_AUDIT_SOURCE||"/tmp/nsa-evt-audit-20261017-094545";
+module.exports={testDir:path.join(source,'tests/browser'),timeout:30000,forbidOnly:true,retries:0,workers:2,outputDir:'/tmp/nsa-audit-browser-results',use:{baseURL:'http://127.0.0.1:4397',viewport:{width:1600,height:1000},headless:true,browserName:'chromium',screenshot:'off',video:'off',trace:'off'},webServer:{command:'PORT=4397 node src/scripts/static-server.cjs',cwd:source,url:'http://127.0.0.1:4397/src/program-planner/index.html?workspace=NSA',reuseExistingServer:false,timeout:15000}};

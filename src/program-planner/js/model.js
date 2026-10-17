@@ -913,6 +913,17 @@ return target;
       };
       retained.push(canonical);
     });
+    (Array.isArray(workspace.entities.projects) ? workspace.entities.projects : []).forEach(function (project) {
+      var catalogId = text(project.catalogId);
+      if (!catalogId || !catalogById[catalogId] || catalogById[catalogId].length !== 1) return;
+      var archive = workspace.migration.legacyRateMigrationArchive;
+      if (archive.projectCatalogLinks !== undefined && !Array.isArray(archive.projectCatalogLinks)) throw new Error("Legacy catalog Project-link archive must be a list.");
+      archive.projectCatalogLinks = archive.projectCatalogLinks || [];
+      if (!archive.projectCatalogLinks.some(function (link) { return link && link.projectId === project.id && link.catalogId === catalogId; })) {
+        archive.projectCatalogLinks.push({ projectId: project.id, catalogId: catalogId });
+      }
+      project.catalogId = null;
+    });
     workspace.entities.catalogs = [];
     workspace.entities.rateItems = retained;
     var unresolved = Object.keys(unresolvedByKey).sort().map(function (key) { return unresolvedByKey[key]; });

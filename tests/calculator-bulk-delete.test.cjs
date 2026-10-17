@@ -107,7 +107,7 @@ for (const owner of ['NSA', 'EVT']) {
           if (protection === 'Declined') ws = UOS.ProgramQuotes.decline(ws, quoteId);
           if (protection === 'Superseded') ws = UOS.ProgramQuotes.createRevision(ws, quoteId);
         } else {
-          ws = UOS.ProgramQuotes.recordPayment(ws, { quoteId, method: 'Bank transfer', amount: 1, reference: 'Bulk payment', paymentDate: '2026-10-02' });
+          ws = UOS.ProgramQuotes.recordPayment(ws, { quoteId, method: 'Paid with Deposit', amount: 1, reference: 'Bulk payment', paymentDate: '2026-10-02' });
           if (protection === 'allocation') ws.entities.paymentAllocations.push({ id: `${owner}-PALLOC-BULK`, owner, type: 'paymentAllocation', projectId, paymentId: ws.entities.payments[0].id, quoteId, quoteLineId: ws.entities.quoteLines[0].id, amount: 1 });
         }
       }

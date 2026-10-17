@@ -169,8 +169,15 @@ for (const owner of ["NSA", "EVT"]) {
       assert.equal(receipt.allowed, allowed, fundingMode + " " + status);
       assert.equal(receipt.paymentAllowed, allowed && status !== "Draft");
       const payment = { quoteId: quote.id, amount: 10, paymentDate: "2026-10-16", method: "Paid with Deposit", reference: "Eligibility" };
+      const before = JSON.stringify(ws);
       if (allowed) assert.equal(Q.recordPayment(ws, payment).entities.payments.length, 1);
       else assert.throws(() => Q.recordPayment(ws, payment), /No customer payment required|Declined|Superseded/);
+      for (const method of [...Q.paymentMethods.filter(method => method !== "Paid with Deposit"), undefined]) {
+        const ordinaryPayment = { ...payment, method };
+        if (allowed && status !== "Draft") assert.equal(Q.recordPayment(ws, ordinaryPayment).entities.payments.length, 1);
+        else assert.throws(() => Q.recordPayment(ws, ordinaryPayment), /No customer payment required|Issue or accept|Declined|Superseded/);
+      }
+      assert.equal(JSON.stringify(ws), before, "receipt commands must leave their input unchanged: " + fundingMode + " " + status);
       assert.equal(Q.adjustmentEligibility(ws, quote.id, projectId).allowed, status === "Draft");
       if (status === "Draft" && allowed) {
         const paid = Q.recordPayment(ws, payment);
@@ -178,19 +185,44 @@ for (const owner of ["NSA", "EVT"]) {
       }
     }
   });
+  test(owner + ": rejected receipt validation leaves all entities unchanged", () => {
+    const UOS = load(owner), Q = UOS.ProgramQuotes;
+    let { ws, projectId } = fixture(UOS, owner);
+    ws = save(UOS, ws, projectId, { fundingMode: "customer" });
+    const id = ws.entities.quotes[0].id;
+    ws = Q.issue(ws, id);
+    const before = JSON.stringify(ws);
+    const payment = { quoteId: id, amount: 10, paymentDate: "2026-10-16", method: "Bank transfer", reference: "Atomic receipt" };
+    for (const invalid of [
+      { amount: 0 }, { paymentDate: "not-a-date" }, { method: "Unsupported" }, { reference: "" },
+      { allocations: [{ quoteLineId: ws.entities.quoteLines[0].id, amount: 11 }] },
+      { allocations: [{ quoteLineId: "missing-quote-line", amount: 10 }] },
+      { allocations: [{ quoteLineId: ws.entities.quoteLines[0].id, amount: 0 }] }
+    ]) {
+      assert.throws(() => Q.recordPayment(ws, { ...payment, ...invalid }));
+      assert.equal(JSON.stringify(ws), before, "rejected receipt changed its input: " + JSON.stringify(invalid));
+    }
+  });
   test(owner + ": Declined quotes retain and reverse existing receipts but reject new ones", () => {
     const UOS = load(owner), Q = UOS.ProgramQuotes;
     let { ws, projectId } = fixture(UOS, owner);
     ws = save(UOS, ws, projectId, { fundingMode: "customer" });
     const id = ws.entities.quotes[0].id;
-    ws = Q.recordPayment(ws, { quoteId: id, amount: 10, paymentDate: "2026-10-16", method: "Paid with Deposit", reference: "Before decline" });
+    ws = Q.recordPayment(ws, { quoteId: id, amount: 10, paymentDate: "2026-10-16", method: "Paid with Deposit", reference: "Before decline", allocations: [{ quoteLineId: ws.entities.quoteLines[0].id, amount: 10 }] });
     ws = Q.decline(Q.issue(ws, id), id);
     const paymentId = ws.entities.payments[0].id;
+    const before = JSON.stringify(ws);
     assert.equal(Q.paymentSummary(ws, id).paid, 10);
     assert.throws(() => Q.recordPayment(ws, { quoteId: id, amount: 10, paymentDate: "2026-10-16", reference: "After decline" }), /Declined/);
+    assert.equal(JSON.stringify(ws), before);
     ws = Q.reversePayment(ws, paymentId, "Customer declined the offer");
     assert.equal(Q.paymentSummary(ws, id).paid, 0);
     assert.equal(ws.entities.payments[0].reversalReason, "Customer declined the offer");
+    assert.equal(ws.entities.payments.length, 1);
+    assert.equal(ws.entities.payments[0].id, paymentId);
+    assert.equal(ws.entities.paymentAllocations.length, 1);
+    assert.equal(ws.entities.paymentAllocations[0].status, "Reversed");
+    assert.equal(JSON.stringify(Q.reversePayment(ws, paymentId, "Repeated request")), JSON.stringify(ws));
   });
   test(owner + ": source comparison preserves exclusions, adjustments and explicit refresh", () => {
     const UOS = load(owner), Q = UOS.ProgramQuotes;

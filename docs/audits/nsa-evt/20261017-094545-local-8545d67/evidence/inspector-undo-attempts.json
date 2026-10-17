@@ -1,0 +1,64 @@
+{
+  "id": "S-MAP-COLLAPSE-UNDO",
+  "note": "All attempts retained. Attempts 1–4 were blocked before browser execution; no app assertion ran. Attempt 5 ran two independent fresh-context cases. No existing test was edited.",
+  "candidate": "/tmp/nsa-evt-audit-20261017-094545",
+  "sourceMismatch": {
+    "implementation": "src/program-planner/js/program-map.js:873-875 cycles full -> summary -> minimal -> full",
+    "oldTest": "tests/browser/space-map-draft-actions.spec.js:149 and :153 assumes two-state full -> summary -> full",
+    "authority": "Current approved user request for two successive collapse levels: summary retaining three rows, then header and Job Type only."
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "BLOCKED",
+      "classification": "environment",
+      "exitStatus": 1,
+      "harnessSha256": "71afe60e154d931458f749a62675b18dbdcd5e058f5092302b44d28c002fe772",
+      "reason": "Inherited PLAYWRIGHT_BROWSERS_PATH pointed to missing /usr/share/playwright/chromium_headless_shell-1234 runtime; launch failed before browser context. Tool output retained only in session; timestamp not captured.",
+      "command": "rtk proxy env NODE_OPTIONS=--require=/tmp/nsa-audit-browser-guard.cjs node /tmp/nsa-map-collapse-undo-supplement.cjs"
+    },
+    {
+      "attempt": 2,
+      "status": "BLOCKED",
+      "classification": "environment",
+      "exitStatus": 1,
+      "harnessSha256": "71afe60e154d931458f749a62675b18dbdcd5e058f5092302b44d28c002fe772",
+      "reason": "Diagnostic rerun retained same missing runtime failure in log; before browser context.",
+      "endedAtFromLogMtime": "2026-10-16T23:47:55.675Z",
+      "log": "/tmp/nsa-map-collapse-undo-supplement-attempt2.log"
+    },
+    {
+      "attempt": 3,
+      "status": "BLOCKED",
+      "classification": "harness/environment",
+      "exitStatus": 1,
+      "harnessSha256": "ec11ed5f0d290e469722963c892c76b758da69f3078d7b38134e758491b7483a",
+      "reason": "Deleting inherited browser path inside script was too late because guard had already required Playwright. Same missing runtime before browser context.",
+      "endedAtFromLogMtime": "2026-10-16T23:48:12.671Z",
+      "log": "/tmp/nsa-map-collapse-undo-supplement-attempt3.log"
+    },
+    {
+      "attempt": 4,
+      "status": "BLOCKED",
+      "classification": "environment/sandbox",
+      "exitStatus": 1,
+      "harnessSha256": "ec11ed5f0d290e469722963c892c76b758da69f3078d7b38134e758491b7483a",
+      "reason": "External env -u resolved browser; sandbox blocked Chromium with sandbox_host_linux.cc:41 Operation not permitted/SIGTRAP before context.",
+      "endedAtFromLogMtime": "2026-10-16T23:48:21.485Z",
+      "log": "/tmp/nsa-map-collapse-undo-supplement-attempt4.log"
+    },
+    {
+      "attempt": 5,
+      "status": "PASS",
+      "classification": "executed current approved behavior",
+      "exitStatus": 0,
+      "harnessSha256": "ec11ed5f0d290e469722963c892c76b758da69f3078d7b38134e758491b7483a",
+      "command": "rtk proxy env -u PLAYWRIGHT_BROWSERS_PATH NODE_OPTIONS=--require=/tmp/nsa-audit-browser-guard.cjs node /tmp/nsa-map-collapse-undo-supplement.cjs > /tmp/nsa-map-collapse-undo-supplement-attempt5.log 2>&1",
+      "execution": "approved escalation after sandbox failure; desktop Chromium 151.0.7922.34; 1600x1000; backend webgl2; fresh nonpersistent context per NSA/EVT; localhost HTTP :4403",
+      "startedAt": "2026-10-16T23:51:20.190Z",
+      "endedAt": "2026-10-16T23:51:34.227Z",
+      "log": "/tmp/nsa-map-collapse-undo-supplement-attempt5.log",
+      "result": "/tmp/nsa-map-collapse-undo-supplement-results.json"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const run=path.dirname(__dirname),root=path.resolve(run,'../../../..');
+const baseline=JSON.parse(fs.readFileSync(path.join(run,'evidence/baseline.json'),'utf8'));
+const sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const tracked=baseline.files.filter(f=>!fs.existsSync(path.join(root,f.path))||sha(path.join(root,f.path))!==f.sha256).map(f=>f.path);
+const preExisting=baseline.preExistingChanges.filter(f=>f.sha256&&(!fs.existsSync(path.join(root,f.path))||sha(path.join(root,f.path))!==f.sha256)).map(f=>f.path);
+let newPaths=[],unexpected=[];const statusFile=process.argv[2];
+if(statusFile){const status=fs.readFileSync(statusFile,'utf8').split('\0').filter(Boolean).map(s=>({status:s.slice(0,2),path:s.slice(3)}));const old=new Set(baseline.preExistingChanges.map(x=>x.path));newPaths=status.filter(x=>!old.has(x.path)).map(x=>x.path);const allowed=path.relative(root,run)+'/';unexpected=newPaths.filter(p=>!p.startsWith(allowed));}
+const result={id:'FINAL-PRESERVATION',checkedAt:new Date().toISOString(),status:tracked.length||preExisting.length||unexpected.length?'FAIL':'PASS',fingerprintedBaselineFiles:baseline.files.length,changedBaselineFiles:tracked,changedPreExistingFiles:preExisting,newPaths,unexpectedNewPaths:unexpected,allowedOutputPrefix:path.relative(root,run)+'/',policy:'Application/configuration/schema/governance/existing tests and pre-existing local edits remain unchanged. Only this new report package is authorised. Earlier snapshot integrity check is retained separately; temporary copies may be removed after testing.'};
+fs.writeFileSync(path.join(run,'evidence/final-preservation.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({status:result.status,changedBaseline:tracked.length,changedPreExisting:preExisting.length,unexpectedNewPaths:unexpected.length,newReportFiles:newPaths.length}));if(result.status==='FAIL')process.exitCode=1;

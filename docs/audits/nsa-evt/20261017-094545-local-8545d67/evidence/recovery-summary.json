@@ -1,0 +1,1197 @@
+{
+  "runId": "REC-SUPP-20261017",
+  "fixture": {
+    "path": "src/sample/nsa-workspace-2026-27-area-pricing-v5.json",
+    "bytes": 173344,
+    "sha256": "d3424d247bca9586f1a35a7e3e584fa18b637e0bbeb44b0e29da84122c64ec5f"
+  },
+  "browser": "151.0.7922.34",
+  "browserRuntime": {
+    "effectiveExecutable": "/home/n0rt/.cache/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-linux64/chrome-headless-shell",
+    "executableSHA256": "e11fc9ce65c96313476f7ee9844b6fb6a9220fb048693cfe9eee00acf4170a9f",
+    "packageVersion": "1.62.0",
+    "inheritedBrowserPathIgnored": true
+  },
+  "isolation": {
+    "disposableSource": true,
+    "freshBrowserContexts": true,
+    "operatorProfiles": false,
+    "screenshots": false,
+    "trace": false,
+    "video": false,
+    "externalRequestsBlocked": true
+  },
+  "finalDistinctScenarioPasses": [
+    {
+      "id": "REC-SUPP-NSA-ISOLATION",
+      "owner": "NSA",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:43:12.321Z",
+      "status": "PASS",
+      "observed": {
+        "emptyFreshWorkspace": true,
+        "initialRevision": 0,
+        "fixtureSource": "src/sample/nsa-workspace-2026-27-area-pricing-v5.json"
+      },
+      "durationMs": 6,
+      "finishedAt": "2026-10-16T23:43:12.327Z"
+    },
+    {
+      "id": "REC-SUPP-NSA-IMPORT",
+      "owner": "NSA",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:43:12.327Z",
+      "status": "PASS",
+      "observed": {
+        "app": "uos.horticulture.nsa",
+        "schemaVersion": 5,
+        "revision": 1,
+        "counts": {
+          "applications": 12,
+          "costingLines": 0,
+          "events": 0,
+          "geometries": 0,
+          "jobs": 0,
+          "payments": 0,
+          "projects": 2,
+          "quoteEvents": 0,
+          "quoteLines": 0,
+          "quotes": 0,
+          "rateItems": 54,
+          "tasks": 50,
+          "catalogs": 1,
+          "paymentAllocations": 0,
+          "statusEvents": 5,
+          "statusRecommendations": 0,
+          "annualBudgets": 0,
+          "budgetEntries": 0,
+          "registerAllocations": 0,
+          "allocationEntries": 0,
+          "budgetCharges": 0,
+          "budgetChangeRequests": 0,
+          "budgetDecisions": 0,
+          "budgetCarryReviews": 0
+        },
+        "duplicateIds": 0,
+        "missingLinkCount": 0,
+        "health": {
+          "status": "warning",
+          "counts": {
+            "error": 0,
+            "warning": 57,
+            "total": 57
+          },
+          "issueCodes": [
+            "STATUS_MIGRATION_READINESS",
+            "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+            "RATE_LEGACY_CATALOG_ACTIVE"
+          ]
+        },
+        "semanticHash": "49fbfd252c46d943325e021bb6fcba70ad74e114d9f15815fd42143fa30f8cdc",
+        "foreignRecords": 0
+      },
+      "durationMs": 188,
+      "finishedAt": "2026-10-16T23:43:12.515Z"
+    },
+    {
+      "id": "REC-SUPP-NSA-ROUNDTRIP",
+      "owner": "NSA",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:43:12.515Z",
+      "status": "PASS",
+      "observed": {
+        "jsonBytes": 174181,
+        "zipBytes": 146175,
+        "jsonCompleteRoundTrip": true,
+        "zipFullDataWithPrivacyOff": true,
+        "privacyOnMaskChecks": 50,
+        "privacyOnMaskFailures": 0
+      },
+      "durationMs": 185,
+      "finishedAt": "2026-10-16T23:43:12.700Z"
+    },
+    {
+      "id": "REC-SUPP-NSA-RELOAD",
+      "owner": "NSA",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:43:12.700Z",
+      "status": "PASS",
+      "observed": {
+        "semanticHash": "49fbfd252c46d943325e021bb6fcba70ad74e114d9f15815fd42143fa30f8cdc",
+        "revision": 1,
+        "counts": {
+          "applications": 12,
+          "costingLines": 0,
+          "events": 0,
+          "geometries": 0,
+          "jobs": 0,
+          "payments": 0,
+          "projects": 2,
+          "quoteEvents": 0,
+          "quoteLines": 0,
+          "quotes": 0,
+          "rateItems": 54,
+          "tasks": 50,
+          "catalogs": 1,
+          "paymentAllocations": 0,
+          "statusEvents": 5,
+          "statusRecommendations": 0,
+          "annualBudgets": 0,
+          "budgetEntries": 0,
+          "registerAllocations": 0,
+          "allocationEntries": 0,
+          "budgetCharges": 0,
+          "budgetChangeRequests": 0,
+          "budgetDecisions": 0,
+          "budgetCarryReviews": 0
+        },
+        "preserved": true
+      },
+      "durationMs": 334,
+      "finishedAt": "2026-10-16T23:43:13.034Z"
+    },
+    {
+      "id": "REC-SUPP-NSA-DANGERZONE",
+      "owner": "NSA",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:43:13.035Z",
+      "status": "PASS",
+      "observed": {
+        "backupBytes": 174628,
+        "backupSHA256": "8849c7340abfd4bf59c854ab25d2c2afb9e28d16099402a875a11d7ff9da8ad9",
+        "backedUpRevision": 1,
+        "backupGate": true,
+        "deleted": true,
+        "reloadEmpty": true,
+        "countsAfterReload": {
+          "applications": 0,
+          "events": 0,
+          "projects": 0,
+          "jobs": 0,
+          "tasks": 0,
+          "catalogs": 0,
+          "costingLines": 0,
+          "rateItems": 47,
+          "geometries": 0,
+          "quotes": 0,
+          "quoteLines": 0,
+          "payments": 0,
+          "paymentAllocations": 0,
+          "quoteEvents": 0,
+          "statusEvents": 0,
+          "statusRecommendations": 0,
+          "annualBudgets": 0,
+          "budgetEntries": 0,
+          "registerAllocations": 0,
+          "allocationEntries": 0,
+          "budgetCharges": 0,
+          "budgetChangeRequests": 0,
+          "budgetDecisions": 0,
+          "budgetCarryReviews": 0
+        },
+        "immediate": {
+          "rawAbsent": true,
+          "migrationAbsent": true
+        }
+      },
+      "durationMs": 825,
+      "finishedAt": "2026-10-16T23:43:13.860Z"
+    },
+    {
+      "id": "REC-SUPP-EVT-ISOLATION",
+      "owner": "EVT",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:44:44.150Z",
+      "status": "PASS",
+      "observed": {
+        "emptyFreshWorkspace": true,
+        "initialRevision": 0,
+        "fixtureSource": "synthetic-in-memory"
+      },
+      "durationMs": 5,
+      "finishedAt": "2026-10-16T23:44:44.155Z"
+    },
+    {
+      "id": "REC-SUPP-EVT-IMPORT",
+      "owner": "EVT",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:44:44.155Z",
+      "status": "PASS",
+      "observed": {
+        "app": "uos.horticulture.events",
+        "schemaVersion": 5,
+        "revision": 3,
+        "counts": {
+          "allocationEntries": 0,
+          "annualBudgets": 0,
+          "applications": 0,
+          "budgetCarryReviews": 0,
+          "budgetChangeRequests": 0,
+          "budgetCharges": 0,
+          "budgetDecisions": 0,
+          "budgetEntries": 0,
+          "catalogs": 0,
+          "costingLines": 0,
+          "events": 1,
+          "geometries": 0,
+          "jobs": 0,
+          "paymentAllocations": 0,
+          "payments": 0,
+          "projects": 1,
+          "quoteEvents": 0,
+          "quoteLines": 0,
+          "quotes": 0,
+          "rateItems": 47,
+          "registerAllocations": 0,
+          "statusEvents": 14,
+          "statusRecommendations": 0,
+          "tasks": 12
+        },
+        "duplicateIds": 0,
+        "missingLinkCount": 0,
+        "health": {
+          "status": "warning",
+          "counts": {
+            "error": 0,
+            "warning": 1,
+            "total": 1
+          },
+          "issueCodes": [
+            "FUNDING_OPERATIONAL_AMOUNT_MISSING"
+          ]
+        },
+        "semanticHash": "4a765c28278549073cfe38487c30b164e8974ec33bf5e24f3e9d77f89e4e233e",
+        "foreignRecords": 0
+      },
+      "durationMs": 170,
+      "finishedAt": "2026-10-16T23:44:44.325Z"
+    },
+    {
+      "id": "REC-SUPP-EVT-ROUNDTRIP",
+      "owner": "EVT",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:44:44.325Z",
+      "status": "PASS",
+      "observed": {
+        "jsonBytes": 68531,
+        "zipBytes": 61916,
+        "jsonCompleteRoundTrip": true,
+        "zipFullDataWithPrivacyOff": true,
+        "privacyOnMaskChecks": 0,
+        "privacyOnMaskFailures": 0
+      },
+      "durationMs": 66,
+      "finishedAt": "2026-10-16T23:44:44.392Z"
+    },
+    {
+      "id": "REC-SUPP-EVT-RELOAD",
+      "owner": "EVT",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:44:44.392Z",
+      "status": "PASS",
+      "observed": {
+        "semanticHash": "4a765c28278549073cfe38487c30b164e8974ec33bf5e24f3e9d77f89e4e233e",
+        "revision": 3,
+        "counts": {
+          "allocationEntries": 0,
+          "annualBudgets": 0,
+          "applications": 0,
+          "budgetCarryReviews": 0,
+          "budgetChangeRequests": 0,
+          "budgetCharges": 0,
+          "budgetDecisions": 0,
+          "budgetEntries": 0,
+          "catalogs": 0,
+          "costingLines": 0,
+          "events": 1,
+          "geometries": 0,
+          "jobs": 0,
+          "paymentAllocations": 0,
+          "payments": 0,
+          "projects": 1,
+          "quoteEvents": 0,
+          "quoteLines": 0,
+          "quotes": 0,
+          "rateItems": 47,
+          "registerAllocations": 0,
+          "statusEvents": 14,
+          "statusRecommendations": 0,
+          "tasks": 12
+        },
+        "preserved": true
+      },
+      "durationMs": 226,
+      "finishedAt": "2026-10-16T23:44:44.619Z"
+    },
+    {
+      "id": "REC-SUPP-EVT-DANGERZONE",
+      "owner": "EVT",
+      "attempt": 1,
+      "startedAt": "2026-10-16T23:44:44.619Z",
+      "status": "PASS",
+      "observed": {
+        "backupBytes": 68648,
+        "backupSHA256": "75b0b41ea98f4b03b6a9d7f3728808d1c3b19d57e9345c67ea466d725e63a599",
+        "backedUpRevision": 3,
+        "backupGate": true,
+        "deleted": true,
+        "reloadEmpty": true,
+        "countsAfterReload": {
+          "applications": 0,
+          "events": 0,
+          "projects": 0,
+          "jobs": 0,
+          "tasks": 0,
+          "catalogs": 0,
+          "costingLines": 0,
+          "rateItems": 47,
+          "geometries": 0,
+          "quotes": 0,
+          "quoteLines": 0,
+          "payments": 0,
+          "paymentAllocations": 0,
+          "quoteEvents": 0,
+          "statusEvents": 0,
+          "statusRecommendations": 0,
+          "annualBudgets": 0,
+          "budgetEntries": 0,
+          "registerAllocations": 0,
+          "allocationEntries": 0,
+          "budgetCharges": 0,
+          "budgetChangeRequests": 0,
+          "budgetDecisions": 0,
+          "budgetCarryReviews": 0
+        },
+        "immediate": {
+          "rawAbsent": true,
+          "migrationAbsent": true
+        }
+      },
+      "durationMs": 568,
+      "finishedAt": "2026-10-16T23:44:45.187Z"
+    }
+  ],
+  "allExecutionAttempts": [
+    {
+      "number": 1,
+      "path": "/tmp/nsa-audit-recovery-attempt-01-environment.json",
+      "harness": "/tmp/nsa-audit-recovery-harness-attempt02.cjs",
+      "classification": "ENVIRONMENT_BLOCKED",
+      "reason": "Chromium sandbox_host_linux operation not permitted; no scenarios executed.",
+      "resultSHA256": "d71cea360b7d65ea85832b18bb7331a4511fe327cfee27a30600ace195d392a2",
+      "harnessSHA256": "5664c54c910cdb6d539c65c5115572b22deae33bb15c6167119aa1753d5595f6",
+      "startedAt": "2026-10-16T23:40:52.566Z",
+      "finishedAt": "2026-10-16T23:40:52.699Z",
+      "status": "FAIL",
+      "attempts": []
+    },
+    {
+      "number": 2,
+      "path": "/tmp/nsa-audit-recovery-supplement-results-02.json",
+      "harness": "/tmp/nsa-audit-recovery-harness-attempt02.cjs",
+      "classification": "HARNESS_NAVIGATION_SETUP",
+      "reason": "Direct API navigation immediately after phase-ready reload returned to Register. No user-visible failure established; actual visible header click passed in attempt04.",
+      "resultSHA256": "e2d83cf1499031b532d718aede270ac648e703d8518c98f77c7434a1efd6f610",
+      "harnessSHA256": "5664c54c910cdb6d539c65c5115572b22deae33bb15c6167119aa1753d5595f6",
+      "startedAt": "2026-10-16T23:41:10.132Z",
+      "finishedAt": "2026-10-16T23:41:39.553Z",
+      "status": "FAIL",
+      "attempts": [
+        {
+          "id": "REC-SUPP-NSA-ISOLATION",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:41:10.501Z",
+          "status": "PASS",
+          "observed": {
+            "emptyFreshWorkspace": true,
+            "initialRevision": 0,
+            "fixtureSource": "src/sample/nsa-workspace-2026-27-area-pricing-v5.json"
+          },
+          "durationMs": 5,
+          "finishedAt": "2026-10-16T23:41:10.506Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-IMPORT",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:41:10.506Z",
+          "status": "PASS",
+          "observed": {
+            "app": "uos.horticulture.nsa",
+            "schemaVersion": 5,
+            "revision": 1,
+            "counts": {
+              "applications": 12,
+              "costingLines": 0,
+              "events": 0,
+              "geometries": 0,
+              "jobs": 0,
+              "payments": 0,
+              "projects": 2,
+              "quoteEvents": 0,
+              "quoteLines": 0,
+              "quotes": 0,
+              "rateItems": 54,
+              "tasks": 50,
+              "catalogs": 1,
+              "paymentAllocations": 0,
+              "statusEvents": 5,
+              "statusRecommendations": 0,
+              "annualBudgets": 0,
+              "budgetEntries": 0,
+              "registerAllocations": 0,
+              "allocationEntries": 0,
+              "budgetCharges": 0,
+              "budgetChangeRequests": 0,
+              "budgetDecisions": 0,
+              "budgetCarryReviews": 0
+            },
+            "duplicateIds": 0,
+            "missingLinkCount": 0,
+            "health": {
+              "status": "warning",
+              "counts": {
+                "error": 0,
+                "warning": 57,
+                "total": 57
+              },
+              "issueCodes": [
+                "STATUS_MIGRATION_READINESS",
+                "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+                "RATE_LEGACY_CATALOG_ACTIVE"
+              ]
+            },
+            "semanticHash": "047e241e98b80dcb1f7b5dd9a3d8c86e2ea03b49a4644493ca2b0db743c55d68",
+            "foreignRecords": 0
+          },
+          "durationMs": 171,
+          "finishedAt": "2026-10-16T23:41:10.677Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-ROUNDTRIP",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:41:10.677Z",
+          "status": "PASS",
+          "observed": {
+            "jsonBytes": 174181,
+            "zipBytes": 146175,
+            "jsonCompleteRoundTrip": true,
+            "zipFullDataWithPrivacyOff": true,
+            "privacyOnMaskChecks": 50,
+            "privacyOnMaskFailures": 0
+          },
+          "durationMs": 188,
+          "finishedAt": "2026-10-16T23:41:10.866Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-RELOAD",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:41:10.867Z",
+          "status": "PASS",
+          "observed": {
+            "semanticHash": "047e241e98b80dcb1f7b5dd9a3d8c86e2ea03b49a4644493ca2b0db743c55d68",
+            "revision": 1,
+            "counts": {
+              "applications": 12,
+              "costingLines": 0,
+              "events": 0,
+              "geometries": 0,
+              "jobs": 0,
+              "payments": 0,
+              "projects": 2,
+              "quoteEvents": 0,
+              "quoteLines": 0,
+              "quotes": 0,
+              "rateItems": 54,
+              "tasks": 50,
+              "catalogs": 1,
+              "paymentAllocations": 0,
+              "statusEvents": 5,
+              "statusRecommendations": 0,
+              "annualBudgets": 0,
+              "budgetEntries": 0,
+              "registerAllocations": 0,
+              "allocationEntries": 0,
+              "budgetCharges": 0,
+              "budgetChangeRequests": 0,
+              "budgetDecisions": 0,
+              "budgetCarryReviews": 0
+            },
+            "preserved": true
+          },
+          "durationMs": 349,
+          "finishedAt": "2026-10-16T23:41:11.216Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-DANGERZONE",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:41:11.216Z",
+          "status": "FAIL",
+          "error": {
+            "name": "TimeoutError",
+            "message": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('details.program-danger-zone summary')\u001b[22m\n\u001b[2m    - locator resolved to <summary>Danger zone</summary>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    57 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+            "stack": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('details.program-danger-zone summary')\u001b[22m\n\u001b[2m    - locator resolved to <summary>Danger zone</summary>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m"
+          },
+          "durationMs": 28284,
+          "finishedAt": "2026-10-16T23:41:39.501Z"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "path": "/tmp/nsa-audit-recovery-supplement-results-03.json",
+      "harness": "/tmp/nsa-audit-recovery-harness-attempt03.cjs",
+      "classification": "HARNESS_NAVIGATION_SETUP",
+      "reason": "Diagnostic repetition recorded data view hidden and destination Register after direct API navigation.",
+      "resultSHA256": "a95a9d6e6ed0c7c75b4842d5a5ea5fffba0509c6849e35a64bf45ada9dc8c15e",
+      "harnessSHA256": "dbe04d0e727360cfedd0ac017170565e752c4e9aa86d22cb1874aba6ea25e82b",
+      "startedAt": "2026-10-16T23:42:26.417Z",
+      "finishedAt": "2026-10-16T23:42:55.871Z",
+      "status": "FAIL",
+      "attempts": [
+        {
+          "id": "REC-SUPP-NSA-ISOLATION",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:42:26.808Z",
+          "status": "PASS",
+          "observed": {
+            "emptyFreshWorkspace": true,
+            "initialRevision": 0,
+            "fixtureSource": "src/sample/nsa-workspace-2026-27-area-pricing-v5.json"
+          },
+          "durationMs": 6,
+          "finishedAt": "2026-10-16T23:42:26.814Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-IMPORT",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:42:26.815Z",
+          "status": "PASS",
+          "observed": {
+            "app": "uos.horticulture.nsa",
+            "schemaVersion": 5,
+            "revision": 1,
+            "counts": {
+              "applications": 12,
+              "costingLines": 0,
+              "events": 0,
+              "geometries": 0,
+              "jobs": 0,
+              "payments": 0,
+              "projects": 2,
+              "quoteEvents": 0,
+              "quoteLines": 0,
+              "quotes": 0,
+              "rateItems": 54,
+              "tasks": 50,
+              "catalogs": 1,
+              "paymentAllocations": 0,
+              "statusEvents": 5,
+              "statusRecommendations": 0,
+              "annualBudgets": 0,
+              "budgetEntries": 0,
+              "registerAllocations": 0,
+              "allocationEntries": 0,
+              "budgetCharges": 0,
+              "budgetChangeRequests": 0,
+              "budgetDecisions": 0,
+              "budgetCarryReviews": 0
+            },
+            "duplicateIds": 0,
+            "missingLinkCount": 0,
+            "health": {
+              "status": "warning",
+              "counts": {
+                "error": 0,
+                "warning": 57,
+                "total": 57
+              },
+              "issueCodes": [
+                "STATUS_MIGRATION_READINESS",
+                "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+                "RATE_LEGACY_CATALOG_ACTIVE"
+              ]
+            },
+            "semanticHash": "5d98c71723ec1d51ccf8bf4fb50009d6ed70344bbf94b3372fe1a390c9710684",
+            "foreignRecords": 0
+          },
+          "durationMs": 210,
+          "finishedAt": "2026-10-16T23:42:27.025Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-ROUNDTRIP",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:42:27.026Z",
+          "status": "PASS",
+          "observed": {
+            "jsonBytes": 174181,
+            "zipBytes": 146175,
+            "jsonCompleteRoundTrip": true,
+            "zipFullDataWithPrivacyOff": true,
+            "privacyOnMaskChecks": 50,
+            "privacyOnMaskFailures": 0
+          },
+          "durationMs": 187,
+          "finishedAt": "2026-10-16T23:42:27.213Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-RELOAD",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:42:27.213Z",
+          "status": "PASS",
+          "observed": {
+            "semanticHash": "5d98c71723ec1d51ccf8bf4fb50009d6ed70344bbf94b3372fe1a390c9710684",
+            "revision": 1,
+            "counts": {
+              "applications": 12,
+              "costingLines": 0,
+              "events": 0,
+              "geometries": 0,
+              "jobs": 0,
+              "payments": 0,
+              "projects": 2,
+              "quoteEvents": 0,
+              "quoteLines": 0,
+              "quotes": 0,
+              "rateItems": 54,
+              "tasks": 50,
+              "catalogs": 1,
+              "paymentAllocations": 0,
+              "statusEvents": 5,
+              "statusRecommendations": 0,
+              "annualBudgets": 0,
+              "budgetEntries": 0,
+              "registerAllocations": 0,
+              "allocationEntries": 0,
+              "budgetCharges": 0,
+              "budgetChangeRequests": 0,
+              "budgetDecisions": 0,
+              "budgetCarryReviews": 0
+            },
+            "preserved": true
+          },
+          "durationMs": 368,
+          "finishedAt": "2026-10-16T23:42:27.581Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-DANGERZONE",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:42:27.581Z",
+          "status": "FAIL",
+          "error": {
+            "name": "TimeoutError",
+            "message": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('details.program-danger-zone summary')\u001b[22m\n\u001b[2m    - locator resolved to <summary>Danger zone</summary>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+            "stack": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('details.program-danger-zone summary')\u001b[22m\n\u001b[2m    - locator resolved to <summary>Danger zone</summary>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m"
+          },
+          "durationMs": 28254,
+          "finishedAt": "2026-10-16T23:42:55.836Z"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "path": "/tmp/nsa-audit-recovery-supplement-results-04.json",
+      "harness": "/tmp/nsa-audit-recovery-harness-attempt04.cjs",
+      "classification": "NSA_PASS_EVT_FIXTURE_INVALID",
+      "reason": "All NSA scenarios passed using visible header navigation. EVT raw Project fixture omitted canonical promotion/normalization pathway and was rejected.",
+      "resultSHA256": "43aa19956b2ad84032c4df95b0b7485ab2e3be115aefa10e2f11eb337850a814",
+      "harnessSHA256": "9ce1ca17eaaab4bc8a1e1ac6d4924ca3a4393c07f37e6710ca103e0af45f824a",
+      "startedAt": "2026-10-16T23:43:11.950Z",
+      "finishedAt": "2026-10-16T23:43:14.203Z",
+      "status": "FAIL",
+      "attempts": [
+        {
+          "id": "REC-SUPP-NSA-ISOLATION",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:43:12.321Z",
+          "status": "PASS",
+          "observed": {
+            "emptyFreshWorkspace": true,
+            "initialRevision": 0,
+            "fixtureSource": "src/sample/nsa-workspace-2026-27-area-pricing-v5.json"
+          },
+          "durationMs": 6,
+          "finishedAt": "2026-10-16T23:43:12.327Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-IMPORT",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:43:12.327Z",
+          "status": "PASS",
+          "observed": {
+            "app": "uos.horticulture.nsa",
+            "schemaVersion": 5,
+            "revision": 1,
+            "counts": {
+              "applications": 12,
+              "costingLines": 0,
+              "events": 0,
+              "geometries": 0,
+              "jobs": 0,
+              "payments": 0,
+              "projects": 2,
+              "quoteEvents": 0,
+              "quoteLines": 0,
+              "quotes": 0,
+              "rateItems": 54,
+              "tasks": 50,
+              "catalogs": 1,
+              "paymentAllocations": 0,
+              "statusEvents": 5,
+              "statusRecommendations": 0,
+              "annualBudgets": 0,
+              "budgetEntries": 0,
+              "registerAllocations": 0,
+              "allocationEntries": 0,
+              "budgetCharges": 0,
+              "budgetChangeRequests": 0,
+              "budgetDecisions": 0,
+              "budgetCarryReviews": 0
+            },
+            "duplicateIds": 0,
+            "missingLinkCount": 0,
+            "health": {
+              "status": "warning",
+              "counts": {
+                "error": 0,
+                "warning": 57,
+                "total": 57
+              },
+              "issueCodes": [
+                "STATUS_MIGRATION_READINESS",
+                "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+                "RATE_LEGACY_CATALOG_ACTIVE"
+              ]
+            },
+            "semanticHash": "49fbfd252c46d943325e021bb6fcba70ad74e114d9f15815fd42143fa30f8cdc",
+            "foreignRecords": 0
+          },
+          "durationMs": 188,
+          "finishedAt": "2026-10-16T23:43:12.515Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-ROUNDTRIP",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:43:12.515Z",
+          "status": "PASS",
+          "observed": {
+            "jsonBytes": 174181,
+            "zipBytes": 146175,
+            "jsonCompleteRoundTrip": true,
+            "zipFullDataWithPrivacyOff": true,
+            "privacyOnMaskChecks": 50,
+            "privacyOnMaskFailures": 0
+          },
+          "durationMs": 185,
+          "finishedAt": "2026-10-16T23:43:12.700Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-RELOAD",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:43:12.700Z",
+          "status": "PASS",
+          "observed": {
+            "semanticHash": "49fbfd252c46d943325e021bb6fcba70ad74e114d9f15815fd42143fa30f8cdc",
+            "revision": 1,
+            "counts": {
+              "applications": 12,
+              "costingLines": 0,
+              "events": 0,
+              "geometries": 0,
+              "jobs": 0,
+              "payments": 0,
+              "projects": 2,
+              "quoteEvents": 0,
+              "quoteLines": 0,
+              "quotes": 0,
+              "rateItems": 54,
+              "tasks": 50,
+              "catalogs": 1,
+              "paymentAllocations": 0,
+              "statusEvents": 5,
+              "statusRecommendations": 0,
+              "annualBudgets": 0,
+              "budgetEntries": 0,
+              "registerAllocations": 0,
+              "allocationEntries": 0,
+              "budgetCharges": 0,
+              "budgetChangeRequests": 0,
+              "budgetDecisions": 0,
+              "budgetCarryReviews": 0
+            },
+            "preserved": true
+          },
+          "durationMs": 334,
+          "finishedAt": "2026-10-16T23:43:13.034Z"
+        },
+        {
+          "id": "REC-SUPP-NSA-DANGERZONE",
+          "owner": "NSA",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:43:13.035Z",
+          "status": "PASS",
+          "observed": {
+            "backupBytes": 174628,
+            "backupSHA256": "8849c7340abfd4bf59c854ab25d2c2afb9e28d16099402a875a11d7ff9da8ad9",
+            "backedUpRevision": 1,
+            "backupGate": true,
+            "deleted": true,
+            "reloadEmpty": true,
+            "countsAfterReload": {
+              "applications": 0,
+              "events": 0,
+              "projects": 0,
+              "jobs": 0,
+              "tasks": 0,
+              "catalogs": 0,
+              "costingLines": 0,
+              "rateItems": 47,
+              "geometries": 0,
+              "quotes": 0,
+              "quoteLines": 0,
+              "payments": 0,
+              "paymentAllocations": 0,
+              "quoteEvents": 0,
+              "statusEvents": 0,
+              "statusRecommendations": 0,
+              "annualBudgets": 0,
+              "budgetEntries": 0,
+              "registerAllocations": 0,
+              "allocationEntries": 0,
+              "budgetCharges": 0,
+              "budgetChangeRequests": 0,
+              "budgetDecisions": 0,
+              "budgetCarryReviews": 0
+            },
+            "immediate": {
+              "rawAbsent": true,
+              "migrationAbsent": true
+            }
+          },
+          "durationMs": 825,
+          "finishedAt": "2026-10-16T23:43:13.860Z"
+        },
+        {
+          "id": "REC-SUPP-EVT-ISOLATION",
+          "owner": "EVT",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:43:14.162Z",
+          "status": "PASS",
+          "observed": {
+            "emptyFreshWorkspace": true,
+            "initialRevision": 0,
+            "fixtureSource": "synthetic-in-memory"
+          },
+          "durationMs": 5,
+          "finishedAt": "2026-10-16T23:43:14.167Z"
+        },
+        {
+          "id": "REC-SUPP-EVT-IMPORT",
+          "owner": "EVT",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:43:14.167Z",
+          "status": "FAIL",
+          "error": {
+            "name": "Error",
+            "message": "frame.evaluate: Error: Invalid status control plane:\n- EVT-TASK-1BTTKL6 status must be a canonical task code.\n- EVT-TASK-1BJTYW7 status must be a canonical task code.\n- EVT-TASK-1APS0BB status must be a canonical task code.\n- EVT-TASK-1B9UD78 status must be a canonical task code.\n- EVT-TASK-1AZURI9 status must be a canonical task code.\n- EVT-TASK-1APV5TA status must be a canonical task code.\n- EVT-TASK-1AFVK4B status must be a canonical task code.\n- EVT-TASK-1A5VYFC status must be a canonical task code.\n- EVT-TASK-19VWCQD status must be a canonical task code.\n- EVT-TASK-19LWR1E status must be a canonical task code.\n- EVT-TASK-1AFSEMC status must be a canonical task code.\n- EVT-TASK-1AZRM0A status must be a canonical task code.\n    at validateStatus (http://127.0.0.1:4401/src/program-planner/js/status-model.js?v=20261001-job-delete-v1:48:30)\n    at Object.assertValid (http://127.0.0.1:4401/src/program-planner/js/status-model.js?v=20261001-job-delete-v1:50:102)\n    at sliceWorkspace (http://127.0.0.1:4401/src/program-planner/js/data-workspace.js?v=20260913-pdf-preview-delta-v1:139:15)\n    at canonical (http://127.0.0.1:4401/src/program-planner/js/data-workspace.js?v=20260913-pdf-preview-delta-v1:380:36)\n    at Object.exportJson (http://127.0.0.1:4401/src/program-planner/js/data-workspace.js?v=20260913-pdf-preview-delta-v1:398:68)\n    at eval (eval at evaluate (:311:30), <anonymous>:6:32)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+            "stack": "frame.evaluate: Error: Invalid status control plane:\n- EVT-TASK-1BTTKL6 status must be a canonical task code.\n- EVT-TASK-1BJTYW7 status must be a canonical task code.\n- EVT-TASK-1APS0BB status must be a canonical task code.\n- EVT-TASK-1B9UD78 status must be a canonical task code.\n- EVT-TASK-1AZURI9 status must be a canonical task code."
+          },
+          "durationMs": 10,
+          "finishedAt": "2026-10-16T23:43:14.177Z"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "path": "/tmp/nsa-audit-recovery-supplement-results-05.json",
+      "harness": "/tmp/nsa-audit-recovery-harness-attempt05.cjs",
+      "classification": "EVT_FIXTURE_INVALID",
+      "reason": "Raw Project insertion via generic update API still omitted canonical promotion pathway and was rejected before import.",
+      "resultSHA256": "5c37b13748efbc79832b6454e590f280c1b197d696637664942d162f38e03ac2",
+      "harnessSHA256": "f173400d0fe71ad57953f55778c62ae185884e0f178d97d4b2ea033a899221a1",
+      "startedAt": "2026-10-16T23:43:47.045Z",
+      "finishedAt": "2026-10-16T23:43:45.620Z",
+      "status": "FAIL",
+      "attempts": [
+        {
+          "id": "REC-SUPP-EVT-ISOLATION",
+          "owner": "EVT",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:43:45.572Z",
+          "status": "PASS",
+          "observed": {
+            "emptyFreshWorkspace": true,
+            "initialRevision": 0,
+            "fixtureSource": "synthetic-in-memory"
+          },
+          "durationMs": 5,
+          "finishedAt": "2026-10-16T23:43:45.577Z"
+        },
+        {
+          "id": "REC-SUPP-EVT-IMPORT",
+          "owner": "EVT",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:43:45.577Z",
+          "status": "FAIL",
+          "error": {
+            "name": "Error",
+            "message": "frame.evaluate: Error: No valid durable workspace revision can be recovered. Original commit failure: Invalid status control plane:\n- EVT-TASK-1BTTKL6 status must be a canonical task code.\n- EVT-TASK-1BJTYW7 status must be a canonical task code.\n- EVT-TASK-1APS0BB status must be a canonical task code.\n- EVT-TASK-1B9UD78 status must be a canonical task code.\n- EVT-TASK-1AZURI9 status must be a canonical task code.\n- EVT-TASK-1APV5TA status must be a canonical task code.\n- EVT-TASK-1AFVK4B status must be a canonical task code.\n- EVT-TASK-1A5VYFC status must be a canonical task code.\n- EVT-TASK-19VWCQD status must be a canonical task code.\n- EVT-TASK-19LWR1E status must be a canonical task code.\n- EVT-TASK-1AFSEMC status must be a canonical task code.\n- EVT-TASK-1AZRM0A status must be a canonical task code.\n    at http://127.0.0.1:4401/src/program-planner/js/storage.js?v=20260829-audit-remediation-v1:101:29\n    at async eval (eval at evaluate (:311:30), <anonymous>:3:11)\n    at async <anonymous>:337:30",
+            "stack": "frame.evaluate: Error: No valid durable workspace revision can be recovered. Original commit failure: Invalid status control plane:\n- EVT-TASK-1BTTKL6 status must be a canonical task code.\n- EVT-TASK-1BJTYW7 status must be a canonical task code.\n- EVT-TASK-1APS0BB status must be a canonical task code.\n- EVT-TASK-1B9UD78 status must be a canonical task code.\n- EVT-TASK-1AZURI9 status must be a canonical task code."
+          },
+          "durationMs": 18,
+          "finishedAt": "2026-10-16T23:43:45.595Z"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "path": "/tmp/nsa-audit-recovery-supplement-results-06.json",
+      "harness": "/tmp/nsa-audit-recovery-supplement.cjs",
+      "classification": "EVT_PASS",
+      "reason": "Synthetic EVT created through actual promoteRegisterRecord pathway; every scenario passed.",
+      "resultSHA256": "c4351db360604408ec6fc38c016602ddfc70e94068bff3a064c7e48ddf6f7866",
+      "harnessSHA256": "94da6f9705a1821d023da1f4d3fa199d4c83deb3fc102e36393e4264eb9486fc",
+      "startedAt": "2026-10-16T23:44:43.627Z",
+      "finishedAt": "2026-10-16T23:44:45.218Z",
+      "status": "PASS",
+      "attempts": [
+        {
+          "id": "REC-SUPP-EVT-ISOLATION",
+          "owner": "EVT",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:44:44.150Z",
+          "status": "PASS",
+          "observed": {
+            "emptyFreshWorkspace": true,
+            "initialRevision": 0,
+            "fixtureSource": "synthetic-in-memory"
+          },
+          "durationMs": 5,
+          "finishedAt": "2026-10-16T23:44:44.155Z"
+        },
+        {
+          "id": "REC-SUPP-EVT-IMPORT",
+          "owner": "EVT",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:44:44.155Z",
+          "status": "PASS",
+          "observed": {
+            "app": "uos.horticulture.events",
+            "schemaVersion": 5,
+            "revision": 3,
+            "counts": {
+              "allocationEntries": 0,
+              "annualBudgets": 0,
+              "applications": 0,
+              "budgetCarryReviews": 0,
+              "budgetChangeRequests": 0,
+              "budgetCharges": 0,
+              "budgetDecisions": 0,
+              "budgetEntries": 0,
+              "catalogs": 0,
+              "costingLines": 0,
+              "events": 1,
+              "geometries": 0,
+              "jobs": 0,
+              "paymentAllocations": 0,
+              "payments": 0,
+              "projects": 1,
+              "quoteEvents": 0,
+              "quoteLines": 0,
+              "quotes": 0,
+              "rateItems": 47,
+              "registerAllocations": 0,
+              "statusEvents": 14,
+              "statusRecommendations": 0,
+              "tasks": 12
+            },
+            "duplicateIds": 0,
+            "missingLinkCount": 0,
+            "health": {
+              "status": "warning",
+              "counts": {
+                "error": 0,
+                "warning": 1,
+                "total": 1
+              },
+              "issueCodes": [
+                "FUNDING_OPERATIONAL_AMOUNT_MISSING"
+              ]
+            },
+            "semanticHash": "4a765c28278549073cfe38487c30b164e8974ec33bf5e24f3e9d77f89e4e233e",
+            "foreignRecords": 0
+          },
+          "durationMs": 170,
+          "finishedAt": "2026-10-16T23:44:44.325Z"
+        },
+        {
+          "id": "REC-SUPP-EVT-ROUNDTRIP",
+          "owner": "EVT",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:44:44.325Z",
+          "status": "PASS",
+          "observed": {
+            "jsonBytes": 68531,
+            "zipBytes": 61916,
+            "jsonCompleteRoundTrip": true,
+            "zipFullDataWithPrivacyOff": true,
+            "privacyOnMaskChecks": 0,
+            "privacyOnMaskFailures": 0
+          },
+          "durationMs": 66,
+          "finishedAt": "2026-10-16T23:44:44.392Z"
+        },
+        {
+          "id": "REC-SUPP-EVT-RELOAD",
+          "owner": "EVT",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:44:44.392Z",
+          "status": "PASS",
+          "observed": {
+            "semanticHash": "4a765c28278549073cfe38487c30b164e8974ec33bf5e24f3e9d77f89e4e233e",
+            "revision": 3,
+            "counts": {
+              "allocationEntries": 0,
+              "annualBudgets": 0,
+              "applications": 0,
+              "budgetCarryReviews": 0,
+              "budgetChangeRequests": 0,
+              "budgetCharges": 0,
+              "budgetDecisions": 0,
+              "budgetEntries": 0,
+              "catalogs": 0,
+              "costingLines": 0,
+              "events": 1,
+              "geometries": 0,
+              "jobs": 0,
+              "paymentAllocations": 0,
+              "payments": 0,
+              "projects": 1,
+              "quoteEvents": 0,
+              "quoteLines": 0,
+              "quotes": 0,
+              "rateItems": 47,
+              "registerAllocations": 0,
+              "statusEvents": 14,
+              "statusRecommendations": 0,
+              "tasks": 12
+            },
+            "preserved": true
+          },
+          "durationMs": 226,
+          "finishedAt": "2026-10-16T23:44:44.619Z"
+        },
+        {
+          "id": "REC-SUPP-EVT-DANGERZONE",
+          "owner": "EVT",
+          "attempt": 1,
+          "startedAt": "2026-10-16T23:44:44.619Z",
+          "status": "PASS",
+          "observed": {
+            "backupBytes": 68648,
+            "backupSHA256": "75b0b41ea98f4b03b6a9d7f3728808d1c3b19d57e9345c67ea466d725e63a599",
+            "backedUpRevision": 3,
+            "backupGate": true,
+            "deleted": true,
+            "reloadEmpty": true,
+            "countsAfterReload": {
+              "applications": 0,
+              "events": 0,
+              "projects": 0,
+              "jobs": 0,
+              "tasks": 0,
+              "catalogs": 0,
+              "costingLines": 0,
+              "rateItems": 47,
+              "geometries": 0,
+              "quotes": 0,
+              "quoteLines": 0,
+              "payments": 0,
+              "paymentAllocations": 0,
+              "quoteEvents": 0,
+              "statusEvents": 0,
+              "statusRecommendations": 0,
+              "annualBudgets": 0,
+              "budgetEntries": 0,
+              "registerAllocations": 0,
+              "allocationEntries": 0,
+              "budgetCharges": 0,
+              "budgetChangeRequests": 0,
+              "budgetDecisions": 0,
+              "budgetCarryReviews": 0
+            },
+            "immediate": {
+              "rawAbsent": true,
+              "migrationAbsent": true
+            }
+          },
+          "durationMs": 568,
+          "finishedAt": "2026-10-16T23:44:45.187Z"
+        }
+      ]
+    }
+  ],
+  "confirmedApplicationDefects": [],
+  "limitations": [
+    "Local HTTP desktop Chromium only; no Edge/file or published certification.",
+    "Direct API navigation immediately after phase-ready reload exhibited setup timing behavior, but actual visible toolbar navigation passed.",
+    "Existing storage-failure and stale-deletion tests were assigned to root and not repeated here."
+  ],
+  "observations": [
+    {
+      "owner": "NSA",
+      "stage": "before-danger-zone",
+      "visibility": {
+        "destination": "data",
+        "busy": false,
+        "dataViewHidden": false,
+        "ancestors": []
+      }
+    },
+    {
+      "owner": "NSA",
+      "blockedExternalRequests": 0
+    },
+    {
+      "owner": "EVT",
+      "blockedExternalRequests": 0
+    },
+    {
+      "owner": "EVT",
+      "stage": "before-danger-zone",
+      "visibility": {
+        "destination": "data",
+        "busy": false,
+        "dataViewHidden": false,
+        "ancestors": []
+      }
+    },
+    {
+      "owner": "EVT",
+      "blockedExternalRequests": 0
+    }
+  ],
+  "reproduction": {
+    "harness": "/tmp/nsa-audit-recovery-supplement.cjs",
+    "command": "PORT=4401 node src/scripts/static-server.cjs .; SOURCE_ROOT=/tmp/nsa-evt-audit-20261017-094545 AUDIT_BASE_URL=http://127.0.0.1:4401 node /tmp/nsa-audit-recovery-supplement.cjs",
+    "sourceOriginalsReconstructedForAttempts": [
+      1,
+      2,
+      3
+    ]
+  },
+  "completedAt": "2026-10-16T23:45:18.435Z"
+}

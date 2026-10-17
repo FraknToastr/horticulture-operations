@@ -1,0 +1,63 @@
+{
+  "checkedAt": "2026-10-17T05:09:07.135Z",
+  "name": "pdfjs-dist",
+  "version": "6.4.299",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22.13.0 || >=24"
+  },
+  "dist": {
+    "shasum": "4a46f5146ac6505564c1a5d472900be4df8bf628",
+    "tarball": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+    "fileCount": 554,
+    "integrity": "sha512-AVl138zALtfaAPvADulE0PZThbYzCBS79nL4pOSL/6Sm/4AH5A21BD9VHt97OlCuzJuCpmeZtAtkinisF4Vb1g==",
+    "signatures": [
+      {
+        "sig": "MEUCIANFOtvvvNGmxlVa6Y9QCzq37pTxqJ158DtYT7YLMpwDAiEAoiTHdJrCono0hv72HNRa7TL6/cK0rLKKsStkjlNtWSQ=",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      },
+      {
+        "sig": "MEYCIQDh61X2sPdS5BlBMRK+soD+Xde+4PMDdwVWIB0xMy1W5QIhAMBAYDXPhYnoShHZTMrVgSn8t8R/YYIdNFnTyk6eYJ6Y",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "attestations": {
+      "url": "https://registry.npmjs.org/-/npm/v1/attestations/pdfjs-dist@6.4.299",
+      "provenance": {
+        "predicateType": "https://slsa.dev/provenance/v1"
+      }
+    },
+    "unpackedSize": 34913648
+  },
+  "archiveSHA256": "86269b40170eb41740ea05ad2102d71d33de4f122b34eb2f478be0ea7779c415",
+  "archiveBytes": 8539589,
+  "selectedFiles": {
+    "package/LICENSE": {
+      "bytes": 10174,
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    "package/package.json": {
+      "bytes": 711,
+      "sha256": "8103b756525a79ec119558e9796062228290acfd5178a6b7fc93e6979511f604"
+    },
+    "package/build/pdf.min.mjs": {
+      "bytes": 458904,
+      "sha256": "57456c8e0c81e46be31174b499ef77f2b9f5ee46d04412ba627320a36755d4c2"
+    },
+    "package/legacy/build/pdf.min.mjs": {
+      "bytes": 523774,
+      "sha256": "bccc24ea711db8e44503629519904a5292d73b9daaa214bbe7cdcc282b0f4259"
+    },
+    "package/build/pdf.worker.min.mjs": {
+      "bytes": 1264342,
+      "sha256": "9536359f1b8367850d485731ca1d5e45c159a7b7a0912325e539937aa21ceb18"
+    },
+    "package/legacy/build/pdf.worker.min.mjs": {
+      "bytes": 1321307,
+      "sha256": "145d2dd3ab0c86151011dba95acfa2d5336e2accd59388ea43dbee0efddaaec6"
+    }
+  },
+  "isolatedBuildRoot": "/tmp/nsa-evt-stage4-pdfjs-6.4.299",
+  "repositoryDependenciesChanged": false,
+  "notice": "The published package does not include a root NOTICE file; no NOTICE is invented."
+}

@@ -1,0 +1,1539 @@
+[
+  {
+    "path": "tests/area-pricing.test.cjs",
+    "sha256": "1775a41ea3905f118b4fbe47545793f1ff804221035e1d30b736236ab87daf84",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/adaptive-map-scheduler-register.spec.js",
+    "sha256": "5ecfa804cea1b4f0a8bbaf46e26090745d10d55a2106b50e24449a0599d95e49",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/area-pricing.spec.js",
+    "sha256": "8e80c1c45c93bf496e03055544805ed1f3a6da77ee2fd87ee0cb16534ad2761f",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/budget-workflow.spec.js",
+    "sha256": "a9129d1720d1eb5ed6e4571beff98a3e5ab177b0293941d134dbd58961c5517e",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 64,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-BUDGET",
+    "selection": "Budget form all eight actions"
+  },
+  {
+    "path": "tests/browser/business-dates.spec.js",
+    "sha256": "d41e6902da4621cfa5c6b9ef13ccdb1db5f50fca640545898c9cb508625f03ee",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/c4-browser-acceptance.spec.js",
+    "sha256": "868fc447cc07681deebd6cd9e5bab6fc2ac835e5ec88e41e47189c6ceaf3f13d",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/c5-status-history.spec.js",
+    "sha256": "c298cddc36af1e85aa4e6f97e24122c696b7bfd11dfe20db90bb94d5daa5bc24",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/c6-work-type-rate-mapping.spec.js",
+    "sha256": "9b6d4170d52e406a4cde0814af2fcde11c04b407491fef8ee4c983823d02d446",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/calculator-bulk-tools.spec.js",
+    "sha256": "017d7ef8f8fc564c5573d52485f3b0038cbfdc8300190719899abd62e06cdbfe",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 53,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 61,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/calculator-headers-quote-position.spec.js",
+    "sha256": "c0c202e0482deef204e0b7423351d5f26780749702c5fbd19b118cc455d47a3a",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 110,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/calculator-keyboard-focus.spec.js",
+    "sha256": "d2ed04c88bdbbdee437cc5e3986494376f4787f024107b9f959e484794b2cfa1",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/calculator-line-deletion.spec.js",
+    "sha256": "ed09674e5b7b91ec747b9db5eb641aac93f583c78379ad09a38c9f32da393b82",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/calculator-planner-job-isolation.spec.js",
+    "sha256": "cd944431e429f8ac5c6fdc5a1a774e8323d674862ed270411aa7ba1d6e66b5fc",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/calculator-render-scope.spec.js",
+    "sha256": "312f5216cfda191ad668df4d4ead19eff911e390ed10dacd5af838de6754a937",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/canonical-costing.spec.js",
+    "sha256": "148abaff7a9af49afa4a7b5c20eae546c04da6f6a6bb735834d5df794caf9965",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/client-demo-fixes.spec.js",
+    "sha256": "f6522eeeb9de82ca6df5733e9ce27c645d9d7db29fbe9f6ce737f6b8742507cb",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/cost-calculator-targeted-ui.spec.js",
+    "sha256": "f9cfbc3ab0f9de59305850ea13140a8a551bbf62c57f011920a36b4a4a0ff050",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 34,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/cost-library-focus-stability.spec.js",
+    "sha256": "fd48cb3aa4e8f47f837da3aba7786b8b719975e508ef91c691a2981dc738bdae",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 6,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/cost-library-layout.spec.js",
+    "sha256": "8c23f276b5dc05f3b4148cc579753afc75abdb1165b9f18ea6fa07c82ef4e6cf",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 36,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/cost-library-legacy-grouping.spec.js",
+    "sha256": "f4b020e08371f8538cdad65d14788f81ab04b14b67e4010ca065e63222da9096",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/current-year-backup-recovery.spec.js",
+    "sha256": "d2136ac015cc1e68a8b5018f0735ffdb83c6a87c90ced4fcdb36267572666e19",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/data-import-keyboard.spec.js",
+    "sha256": "4e84e7843327f6de51a0d50ae4a805ed44819ee27de66f8385340ba9363e2bb1",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/delete-register.spec.js",
+    "sha256": "d0216068d830ce40ac24c871e55fb308240b322c13d267c77b21462563620686",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/delete-warning-audit.spec.js",
+    "sha256": "8a00ab1eeb65d414385613320c70883e2eb58dec422f1d6b8acfef6f85d25ec7",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/draft-quoted-cost-deletion.spec.js",
+    "sha256": "e44d4f633b4f2cb7698f46acd12d04de42312bf28298c4f700ac4a574cf0b347",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/drawer-scroll-ownership.spec.js",
+    "sha256": "c33db98c6e04e732922cd8d73bb55dcd97743ca34e5d704012cd000c2f6e4771",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/drawer-viewport-floor.spec.js",
+    "sha256": "64e07a36127e8138c6011efc29861a3cec7dbf5b5cd09a8aecba89caf8a323fd",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/evt-register-delivery.spec.js",
+    "sha256": "d85a5e444e659684d4d919498c6e602febe195c8a8b636a417aa75453511f961",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/factory-reset-startup.spec.js",
+    "sha256": "2a457566dc03f06d39bd7d38d1326193b894e0d2426a23010e4b79e4bb0092ec",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/floating-draw-toolbar.spec.js",
+    "sha256": "4e4d8178b5dd6e49c8bb452c2f7b42055258b234d096f6fc8e0b154d67956952",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/framed-table-emphasis.spec.js",
+    "sha256": "453896321a787c777d5dca4aaf284bc178da744af78ef564f63a4dd494da4223",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/lifecycle-modal-dismissal.spec.js",
+    "sha256": "b6fc5dfafbd7f8625cbb15c566c72e8ea68548535c91b12d103f5a0d0299d04b",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/lifecycle-regressions.spec.js",
+    "sha256": "e9fb03e697ecf8bdf2e4587fcc24873a65bec9d4811ba8ed434b91cacc473692",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/location-active-register.spec.js",
+    "sha256": "711034f70f342713698c34017c99afe436ea8b69dbb01274097047caa210716f",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/location-filter.spec.js",
+    "sha256": "b1650d63cce3213b604b068e5be22a46fd0e796b773cec13c2e2f175a7c3ea4e",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/map-drawing-lifecycle.spec.js",
+    "sha256": "1ed595abcc0a19cddf531b53f07db0de6e5ec60c72d6df8bbe2211144fcf7bf5",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/map-reimport-focus.spec.js",
+    "sha256": "d3d199c53aec868dd7df447278829ca763a61ab751b2a28f8c05ab0db0f0c96f",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/metromap-activation.spec.js",
+    "sha256": "f9d84f784cb1583c4bf78514f91e605dc6082a5a420346d6ad2b6131dfd97b99",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/moasure-map.spec.js",
+    "sha256": "1a548b62c374783509b035f61338b695357aa2fdf92b4001b12ab0db56adedca",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 194,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/modal-focus-clearance.spec.js",
+    "sha256": "f26337c3049905d09e15a92e1e151ca4968dd769d55a5d16acbcbbf9d65adbff",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 31,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/nsa-pdf-import.spec.js",
+    "sha256": "f4d8ad3ec05247e72b8fcf00fc321c1b886e0366bef85092479155de92b3cf94",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/performance-audit.spec.js",
+    "sha256": "ca81f1fcfa611950a64697f4b7c92451de9c8f1851dd0076de983af65b959b75",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/planner-current-state.spec.js",
+    "sha256": "9821ce1e344a8c55415e6508bd01b686465eb949b91a7f8d7035f2180dd88a9c",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 137,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/planner-draft-recovery.spec.js",
+    "sha256": "dcfcbf0ebf9613272e741075a18e5df62bffe33b9b537fca043b2711d878f4fd",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/planner-editor-controls.spec.js",
+    "sha256": "f64122e029b309c2f834e0de36eabed062dd57211e51d0e6319d6fee36c501ca",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 5,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 70,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/planner-reset-history.spec.js",
+    "sha256": "d045d09de1aae7d0fcf0d50c3001fbc6fea920d9fb1885f84fadeba0df49fd07",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 109,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 110,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 117,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 144,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 145,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 153,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/planner-responsive-columns.spec.js",
+    "sha256": "034eb8db8c20eca60eaf0689b3e9b0e5a6e693707532eeac7691d9f1fabc2991",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/planner-scheduler-visual-and-delete.spec.js",
+    "sha256": "30e0a5c851fb9c67bbbe4992c11bdafe89c7e0dc3b5028867eeabc2b4531c8b0",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/planner-section-headers.spec.js",
+    "sha256": "c8761811bf994a0967b06279a42335a806d8558a8d1e921a8ce059898e71acd5",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 117,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/planner-task-editor.spec.js",
+    "sha256": "6bf63380596f54e9c90a2122525b74ec6731692ddcf1acdddec8c040217889b8",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/polygon-inspector-editing.spec.js",
+    "sha256": "aad84a2329eb941e4ac86658219dc4dd55cdb6d79dd89838ec811d1eaae37204",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 37,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 159,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/polygon-job-promotion.spec.js",
+    "sha256": "c31222ac18a6a726f37836c538e54acba1ec94ea96087aec874f86b9cc0b55ea",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/program-runtime.spec.js",
+    "sha256": "50306e0cd85656312247bc465f4a0065c50a7a18761827bc21d8c55482b38083",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/quote-customer-issue-workflow.spec.js",
+    "sha256": "ca32281cec762f8c36ce0e2a711f3c5cc635ff0d7663f765ad382b80110a486b",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 62,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/quote-editor-reset.spec.js",
+    "sha256": "e715d7ee922ae091c6482d9f13d029edd19a04a419c251aff9c75d75f43f8862",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 119,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 146,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/quote-first-interaction.spec.js",
+    "sha256": "5d57a6187e59b1bb600a4534290c57be3f99aec28db7a5f7fcc3408b42c59fa9",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/quote-funding.spec.js",
+    "sha256": "779955ce927b5d6ae57586961383fed663c78380e4856889fdb6bcd02f5063af",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 166,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/quote-itemisation-layout.spec.js",
+    "sha256": "ca316004524b9a1c6c477a097148e1b6563242bc22a93ea289f84f8254925980",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/quote-payment-funding-workflow.spec.js",
+    "sha256": "e23630c25041db7ee3a79c3f659ac3f54b0c10fdecc1863efb97a651f371c6f0",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/quote-print-layout.spec.js",
+    "sha256": "29b9f838ac89062a99e947105585d00967f0c39edb9c44551e0866ac37aa4d0b",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 80,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/quote-section-navigation.spec.js",
+    "sha256": "9b20ca65b573ed009a15d87bedd0fcd320c44f28c9d231093e06ff39673cf54b",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 107,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 143,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/quote-status-pills.spec.js",
+    "sha256": "d159d36eed6698e3628a2b803edf1602d7d230c6f0d18caa79ed37cc2e825b2d",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 35,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 96,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 97,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 159,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 170,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 196,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/quoted-lifecycle.spec.js",
+    "sha256": "006862f99bdaf014b1f1c286818dfeacb328148f24cd2cfcdc2dea34921e128c",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/rate-category-frames.spec.js",
+    "sha256": "db8da7d7502d646b4464483f1629053a38fa29a32e700fedea3e6879a0e586f7",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 4,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 68,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/rate-editor-layout.spec.js",
+    "sha256": "53a670281172782605e623096d907530e993a563ed49f2b22132eeade35e3127",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 5,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 103,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/rate-library-interactions.spec.js",
+    "sha256": "b06caa0cad6f371eb4a3066c7d65e21062101c5eff0b4482f9ce82a361480636",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/register-drawer-context.spec.js",
+    "sha256": "3702f9c3538eeefbddafa32d419e863e8a8b502a3feadd86f7cc9c77513d1a9d",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/register-drawer-motion.spec.js",
+    "sha256": "f71837773ff8d1a5b18d5ae18a9ebaa44bca557114fb292de0142e7596048831",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/register-framed-layout.spec.js",
+    "sha256": "7e910d43e55013719aa53709fc7fd51f0a54af516a727be21ea4d58b0e92067a",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 147,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/register-open-project-audit.spec.js",
+    "sha256": "03c1269ec686270d9ed93e43a819abb8ade581d008715db1e32e17a9e2a1776c",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/register-project-status-colours.spec.js",
+    "sha256": "78db0f2c3edb01c107ea04946b7992945effbd5c405da2e55726069d3c16e3ba",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/register-row-header-regressions.spec.js",
+    "sha256": "bbae4322da700e38029668fc0b53d3029300bd7c1c96622c0557961036c5f3b5",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/register-shortcut-states.spec.js",
+    "sha256": "e1361f795508f0f126e390b319e6691f26807595e708e74ee3915b95b105e6ef",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/register-status-guide.spec.js",
+    "sha256": "99040a58c7cea8405bc843fbd702e27b303e2b701a9e4bf6cae067c54d829420",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/scheduler-application-nomination.spec.js",
+    "sha256": "da6c890becc233a353c3736a76f70b38de3a646b0cd5d9f205d0eaab27759b65",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/scheduler-calendar-scope.spec.js",
+    "sha256": "398e8b05534d3ecbde7cd69f387878a3de460a62c7727edb8304510364dc06b9",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 52,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 103,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 140,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 144,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 170,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/scheduler-costing-refinements.spec.js",
+    "sha256": "074c9974d6ab2ac86936719bc44fc0ed672dda583512dd988e27d4901e7cddb1",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 5,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 99,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/scheduler-event-milestones.spec.js",
+    "sha256": "5ba085bbc1c987e10c11b6a631520f5de70aa3aff50b5bc65779f04c2996f52b",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/scheduler-hourly-outlook.spec.js",
+    "sha256": "eefd0fa3cf20ebcbd60e988d75c4f188f7ef4c3e8e135214c79a8c93b9fd32d5",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 44,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/scheduler-multi-day.spec.js",
+    "sha256": "0d1c90c33f9559d6d304a4e3aaa0be88646e4ad6f7483af02f113675816a24e3",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/scheduler-side-by-side.spec.js",
+    "sha256": "30ccbb028e0201fe495ef41d9956d7f071571d75d785e826c3c3fe68b1f8dfff",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/scheduler-unused-action-scope.spec.js",
+    "sha256": "8bfd6591da3ec74fb23030a14346554c3cef751df7eafb9693109ef3f311f247",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/scheduler-week-editing.spec.js",
+    "sha256": "a9bb8a6858679bb7f34389a3fd5ec9242eb67e3d03414a46b3312ff73278bea9",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 60,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/scheduler-week-viewport.spec.js",
+    "sha256": "13aab9347f8682c4c86daf11dadb7ee0d8e60c1c12c2f1dddea5f1877b956227",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/shared-tooltip-clearance.spec.js",
+    "sha256": "74e679da1565a56dc571058cc06424e2cb071519b1591fff0fbc5c66e755ea91",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 4,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/space-map-draft-actions.spec.js",
+    "sha256": "7a429ee9fe02361d09bfd15539a179229e51fc42fe2a437bcd2cebd9bcafd2cf",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 357,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-MAP-DRAFT",
+    "selection": "closing either radial hub|radial Undo restores completed vertex edits|radial Undo reverses Moasure|geometry creation uses third-tier|Location actions stage pins"
+  },
+  {
+    "path": "tests/browser/space-map-editor.spec.js",
+    "sha256": "65883465abf0d00087875141f63e792ad90e0456509d0c74900eacbc3fea52fb",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 84,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/space-map-gpu.spec.js",
+    "sha256": "29f2e9e6147706d547992c93c93573a522bb8b6803d6cbf4b0c17d80f9f81084",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 53,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 55,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 56,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 57,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 271,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-GPU",
+    "selection": "local-file entry|local launcher"
+  },
+  {
+    "path": "tests/browser/space-map-onboarding.spec.js",
+    "sha256": "7db1546b130fbd4773031b622cd1edb2318a3b17801e056f4a9897c71a07702b",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/space-map-radial.spec.js",
+    "sha256": "39d5a0a80e92de8d5bf21884869e6c7cc97e9084a3f3a48f283c3482f1094fd1",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/space-map-sidebar.spec.js",
+    "sha256": "1f9185b33b4f5f12f65643d1d9a25946f94e4972192e737984fda489bd0fbc80",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 292,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/startup-status-recovery.spec.js",
+    "sha256": "96b8bf03cba08becaae5288bf560dbc288a765b189ba24f1ebd9471cf7fa396a",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/status-ui.spec.js",
+    "sha256": "e8644d8f6d58bdae4c2dba0504c9f616cc1fff812ba064bf7b9c0e4edd0b134c",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/unified-commercial-rows.spec.js",
+    "sha256": "a67c9c818fd61e699e6d804bbd18dbe9b4ecb477a0b95a1a1f5556d5f491b923",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 5,
+        "reason": "viewport/touch/media review needed"
+      },
+      {
+        "line": 107,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 115,
+        "reason": "screenshot call or assertion"
+      },
+      {
+        "line": 135,
+        "reason": "screenshot call or assertion"
+      }
+    ],
+    "status": "NOT TESTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection"
+  },
+  {
+    "path": "tests/browser/workspace-backup-recovery.spec.js",
+    "sha256": "db844339a949817b1667c64092d61136ba693aaa5059a27b3f680d214888fb7f",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/workspace-preview-counts.spec.js",
+    "sha256": "2f58061784fbbc9a6213937f0b773d03af53541843ab1ac495d8af48aa88d1af",
+    "kind": "browser",
+    "forbiddenReview": [
+      {
+        "line": 36,
+        "reason": "viewport/touch/media review needed"
+      }
+    ],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/browser/workspace-sanitation.spec.js",
+    "sha256": "41e675d825f4846237f7a0c7788516e6b038871cc5134c78964a6a3fa305e475",
+    "kind": "browser",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-CORE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/budget-governance.test.cjs",
+    "sha256": "35a312ba6b2184933fb81d78ac285e4e159279135a3f06a2f2af318ecd5e4f4a",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/budget-model.test.cjs",
+    "sha256": "9bc7ccec60024a49be2830d524c6e482defcd6a945144d0bacd4844b083e9016",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/business-dates.test.cjs",
+    "sha256": "d52e6c811637e4f46371d4554c966fbca532a4caac85e69d5623954f828141a8",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/c5-canonical-status-history.test.cjs",
+    "sha256": "f80fb8ccac2503fc3ddea41c9e9712078c21ed62b90b8bd1987580f353c49208",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/c6-multirate-corrective.test.cjs",
+    "sha256": "27c8b68d5a1d14050b0a68353b78862223827c20be0bf091023943913a9dba0d",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/calculator-bulk-delete.test.cjs",
+    "sha256": "8d4705e56240b6a2cd69964ee39f67dac3d25d5aae85609261553401793219a5",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/canonical-costing-commands.test.cjs",
+    "sha256": "9b2cf14b3efbd5f0cad83ec13451d346fda402aa81d605c591b6b51cf0d348c7",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/canonical-work-governance.test.cjs",
+    "sha256": "3b361f341c8992a8ea2b2568e33f27fab002fb134a48f97cb20f8d8fbbc7eac0",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/costing-adjustments.test.cjs",
+    "sha256": "9cfb9b684a2b8ed200fb8092657abe80395a67315ad3337eeb8a97ceda745911",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/current-year-backup-recovery.test.cjs",
+    "sha256": "4e46daae7596da849e5c48c3f751ed060e69290d0df196bb8032097a23654066",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/data-roundtrip.test.cjs",
+    "sha256": "f547d8aae64862c443424eab8f42a6c5d74288d2daaba79d5ce0ec63db0ca26a",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/delete-register-v5.test.cjs",
+    "sha256": "8ae3456c233c739169026f275953fee77de78ebbb96e12547ee299706baecb6a",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/delete-safety.test.cjs",
+    "sha256": "2d71d344d0c99fc97334ab3a98178eb73a4faa3a8ca9e39eedb58bd0f93afb6f",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/empty-operational-baseline.test.cjs",
+    "sha256": "a2c3b4779c4b79f6760720bedd5102a73054e022c4cfcf29709928f35f39ff53",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/evt-register-model.test.cjs",
+    "sha256": "99441b4be8b50061ac60b7771bc687dfc8dbd4820dad9a03d13cf173237c4264",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/governed-remediation.test.cjs",
+    "sha256": "c6ee50cfe5395930477d3c4e486dbc9ef5d303711dbc296c15c3cc5097b7958c",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/location-polygon-sidebar.test.cjs",
+    "sha256": "b60786d2ae44a9703fe321687924d1a8e953cdcee1b76711c2fadab7632c9d62",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/metromap-credentials.test.cjs",
+    "sha256": "091c291f2b580e17080d4e5fc55b5d03e9923441baa44b3876da36707ba4b9d7",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/moasure-geometry.test.cjs",
+    "sha256": "dc0f4805b0485abd626b6a06888c0277cfd848cf5e868128d634f8d089f1bc13",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/model-v5.test.cjs",
+    "sha256": "0008f97a3ab1beb000a2a9224336411d5009328273bde1d21e6791b58e4845ff",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/nsa-pdf-import-preview.test.cjs",
+    "sha256": "94667ea3ae481d598cd816811b6bf2364ebc6325de34d3c5c4e5a93227de4b0f",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/planner-current-state.test.cjs",
+    "sha256": "7e202ebc0addd73d52b0415ea36b892d5fe529c09041bf9010bb1b7b3285285b",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/planner-draft-job.test.cjs",
+    "sha256": "da4768767deefe8e82b3b33113cbb4bf1f65ff9200a347a3ecceb15fdbe5e2f4",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/planner-reset-history.test.cjs",
+    "sha256": "5aa251dd218dbcabc256556d40bc77c3eb05f83b8414014db98dfce8e9973c49",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/program-runtime.test.cjs",
+    "sha256": "a851ab4e2a46e6bc8b7381cb0e66565007b423984fcf933fd1e14ee14e736234",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/quote-calculator-membership.test.cjs",
+    "sha256": "ab366d3d314568eca3d090ab7f26dd8852393e22fbbb263e2d8b032ae2ce0c82",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/quote-funding.test.cjs",
+    "sha256": "3fdf13d84f2d7e21adae0372359c3d0801931348ce5d16091604bd0c6358e7dd",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/rate-library-schema.test.cjs",
+    "sha256": "c41e84312e139a756719a30824cd82bec69056eb6f7261073f67ed66ccedf14e",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/register-status-guide.test.cjs",
+    "sha256": "2f5f853a3fcf79c553ec69cceae2a760f795502c9781b11c90a00047cf6bbdce",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/scheduler-application-nomination.test.cjs",
+    "sha256": "a69a7fdcdd3608c4254a566ef571c73668e128ab589296d4f152fc68655ca399",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/scheduler-calendar-tools.test.cjs",
+    "sha256": "93b45ec9718fabd0217b50824dfc19a0a775235ec644d6cf6b481aa1dacc6e5a",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/scheduler-date-ranges.test.cjs",
+    "sha256": "8f50939c2fde491ec268ad5736f713384028c0654ec7140648347eb0acdff9e4",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/scheduler-event-milestones.test.cjs",
+    "sha256": "09d434a9d540186da4f91dfb18e8751501a244581eceafb8cbecf6bd7fd9756f",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/scheduler-week-editing.test.cjs",
+    "sha256": "c5dee501065978099d966fcb7638b495ffb658bd3d8d8aacaedcc117148c3d1a",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/sidebar-architecture.test.cjs",
+    "sha256": "459181bfb47742015278540ce062a7077d25c04f4313b625f54c0d22964a98c3",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/space-map-dashes.test.cjs",
+    "sha256": "bc8d979fac097fd0005b72c9198931bc653457283718cacaa5fd27181556ab2f",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/space-map-tree.test.cjs",
+    "sha256": "6a52791e47c67e73e7fe039f9b989eddd5032a6dbb873bf318aa3a9c2fcdfd44",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/status.test.cjs",
+    "sha256": "f0958008bff322b39736bf26cabbae5a2103be2b39e3d9a748afb38ab7444461",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/tree-reference-selection.test.cjs",
+    "sha256": "dbcd63022473e2732bbc7e634f93122f1ba8489612213bf95fd617d5e4183ffe",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/workspace-import-signature.test.cjs",
+    "sha256": "a88ee3bba997470952756d96babeda3d5ed60c4086d5309f571d4196cdf67d96",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  },
+  {
+    "path": "tests/workspace-sanitation.test.cjs",
+    "sha256": "3b75d586ae4800d218b12dbb4c429c61a628c4c41a04f45e30112b14c64a2fe3",
+    "kind": "node",
+    "forbiddenReview": [],
+    "status": "SELECTED",
+    "writes": "Disposable snapshot and profiles only; inspected before selection",
+    "batch": "B-NODE",
+    "selection": "whole file"
+  }
+]

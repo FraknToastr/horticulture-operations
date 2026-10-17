@@ -1,0 +1,83 @@
+{
+  "reviewedAt": "2026-10-16T23:52:48.309Z",
+  "npm": {
+    "attempt1": "DNS EAI_AGAIN under sandbox; no advisory result",
+    "attempt2": "Read-only registry query outside sandbox",
+    "result": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "dependencies": {
+        "prod": 1,
+        "dev": 34,
+        "optional": 27,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 34
+      }
+    }
+  },
+  "vendored": [
+    {
+      "name": "PDF.js",
+      "version": "2.16.105",
+      "path": "src/shared/vendor/pdfjs/pdf.min.js"
+    },
+    {
+      "name": "MapLibre GL JS",
+      "version": "5.3.0",
+      "path": "src/shared/vendor/maplibre/maplibre-gl.js"
+    },
+    {
+      "name": "JSZip",
+      "version": "3.10.1",
+      "path": "src/GeoForge-MapLibre-KML-KMZ-GeoJSON/geo-converter/vendor/jszip.min.js"
+    }
+  ],
+  "advisories": [
+    {
+      "id": "CVE-2024-4367",
+      "url": "https://github.com/mozilla/pdf.js/security/advisories/GHSA-wgrm-67xf-hhpq",
+      "source": "Official Mozilla PDF.js maintainer advisory",
+      "affected": "pdfjs-dist <=4.1.392",
+      "patched": "4.2.67",
+      "localMitigation": "src/shared/js/imports.js:28 sets isEvalSupported:false, the advisory workaround",
+      "exploitDemonstrated": false
+    },
+    {
+      "id": "CVE-2026-16633",
+      "url": "https://github.com/mozilla/pdf.js/security/advisories/GHSA-hq66-cqwq-w95j",
+      "source": "Official Mozilla PDF.js maintainer advisory",
+      "affected": ">=5.6.83; patched 6.2.108",
+      "appliesToBundledVersion": false
+    }
+  ],
+  "sourceChecks": [
+    {
+      "requirement": "Untrusted PDF evaluation disabled",
+      "passed": true,
+      "evidence": "src/shared/js/imports.js:28"
+    },
+    {
+      "requirement": "Tree detail text is not interpreted as HTML",
+      "evidence": "src/program-planner/js/tree-hub.js:12–28",
+      "method": "Manual source review"
+    },
+    {
+      "requirement": "MetroMap credentials are user managed",
+      "evidence": "src/remediation-planner/config/metromaps-provider.js; metromap-credentials.test.cjs; metromap-activation.spec.js",
+      "method": "Source and executed model/browser checks"
+    }
+  ],
+  "limitations": [
+    "Lockfile audit does not cover all vendored libraries",
+    "No malicious PDF exploit executed",
+    "No complete penetration-testing or historical Git credential-revocation claim",
+    "External advisory pages checked on audit date; absence of additional findings is not proof of absence"
+  ]
+}

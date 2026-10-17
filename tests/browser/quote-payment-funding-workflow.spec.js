@@ -117,9 +117,23 @@ for(const owner of ['NSA','EVT']) {
   });
 }
 
-test('first-deposit failure keeps data and retry records one payment despite repeated submits',async({page})=>{
-  const {frame}=await setup(page);
+for(const owner of ['NSA','EVT']) {
+  test(`${owner}: first-deposit failure keeps data and retry records one payment despite repeated submits`,async({page})=>{
+  const {frame,ids}=await setup(page,owner);
   const before=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities));
+  const rejected=await frame.evaluate(async projectId=>{
+    try {
+      await UOS.ProgramApp.updateWorkspace(w=>{
+        w=UOS.ProgramQuotes.saveDraft(w,{projectId,fundingMode:'customer'});
+        const quote=w.entities.quotes.find(q=>q.projectId===projectId);
+        return UOS.ProgramQuotes.recordPayment(w,{quoteId:quote.id,amount:20,paymentDate:'2026-10-13',method:'Bank transfer',reference:'REJECT-DRAFT-PAYMENT'});
+      });
+      return '';
+    } catch(error) { return error.message; }
+  },ids.projectId);
+  expect(rejected).toContain('Issue or accept the Quote');
+  expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(before);
+  expect(await frame.evaluate(async()=>{const w=await UOS.ProgramStorage.get();return {quotes:w.entities.quotes.length,payments:w.entities.payments.length};})).toEqual({quotes:0,payments:0});
   await frame.evaluate(()=>{
     window.paymentCommit=UOS.storage.commitRevision;
     UOS.storage.commitRevision=()=>Promise.reject(new Error('Synthetic payment commit failure'));
@@ -143,6 +157,8 @@ test('first-deposit failure keeps data and retry records one payment despite rep
   await expect.poll(()=>frame.evaluate(()=>{const w=UOS.ProgramApp.workspace();return {quotes:w.entities.quotes.length,payments:w.entities.payments.length,amount:w.entities.payments[0]?.amount};})).toEqual({quotes:1,payments:1,amount:20});
   expect(await frame.evaluate(async()=>{const w=await UOS.ProgramStorage.get();return {quotes:w.entities.quotes.length,payments:w.entities.payments.length,amount:w.entities.payments[0]?.amount};})).toEqual({quotes:1,payments:1,amount:20});
 });
+
+}
 
 test('Accepted Quote handles an overpayment and reversal without changing its commercial snapshot',async({page})=>{
   const {frame,ids}=await setup(page);

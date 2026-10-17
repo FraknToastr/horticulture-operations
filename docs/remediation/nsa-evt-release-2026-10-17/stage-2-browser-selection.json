@@ -1,0 +1,83 @@
+{
+  "args": [
+    "test",
+    "--config=playwright.desktop.config.cjs",
+    "--project=core",
+    "tests/browser/quote-payment-funding-workflow.spec.js",
+    "tests/browser/quote-first-interaction.spec.js",
+    "tests/browser/performance-audit.spec.js",
+    "--grep",
+    "default Customer|saved Draft deposit|first-deposit failure|Accepted Quote handles|first deposit, reversal and evidence clicks|Declined receipts stay disabled",
+    "--list",
+    "--reporter=json"
+  ],
+  "count": 11,
+  "cases": [
+    {
+      "file": "performance-audit.spec.js",
+      "title": "NSA: quote adjustments roll back, snapshots disclose source changes and Declined receipts stay disabled",
+      "project": "core",
+      "line": 93
+    },
+    {
+      "file": "performance-audit.spec.js",
+      "title": "EVT: quote adjustments roll back, snapshots disclose source changes and Declined receipts stay disabled",
+      "project": "core",
+      "line": 93
+    },
+    {
+      "file": "quote-first-interaction.spec.js",
+      "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+      "project": "core",
+      "line": 29
+    },
+    {
+      "file": "quote-first-interaction.spec.js",
+      "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+      "project": "core",
+      "line": 29
+    },
+    {
+      "file": "quote-payment-funding-workflow.spec.js",
+      "title": "NSA: default Customer permits a first deposit without toggling funding",
+      "project": "core",
+      "line": 67
+    },
+    {
+      "file": "quote-payment-funding-workflow.spec.js",
+      "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+      "project": "core",
+      "line": 108
+    },
+    {
+      "file": "quote-payment-funding-workflow.spec.js",
+      "title": "EVT: default Customer permits a first deposit without toggling funding",
+      "project": "core",
+      "line": 67
+    },
+    {
+      "file": "quote-payment-funding-workflow.spec.js",
+      "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+      "project": "core",
+      "line": 108
+    },
+    {
+      "file": "quote-payment-funding-workflow.spec.js",
+      "title": "NSA: first-deposit failure keeps data and retry records one payment despite repeated submits",
+      "project": "core",
+      "line": 121
+    },
+    {
+      "file": "quote-payment-funding-workflow.spec.js",
+      "title": "EVT: first-deposit failure keeps data and retry records one payment despite repeated submits",
+      "project": "core",
+      "line": 121
+    },
+    {
+      "file": "quote-payment-funding-workflow.spec.js",
+      "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+      "project": "core",
+      "line": 163
+    }
+  ]
+}

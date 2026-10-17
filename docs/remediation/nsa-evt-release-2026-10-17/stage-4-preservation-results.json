@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-17T05:23:37.436Z",
+  "baseline": "stage-4-preservation-baseline.json",
+  "baselineSHA256": "494cf392aba204ec589e6620cb846fe3b372dfbac2472196a3d68774cae53c8b",
+  "protectedFiles": 409,
+  "allowedExistingChanges": [
+    "docs/remediation/nsa-evt-release-2026-10-17/README.md"
+  ],
+  "differences": [],
+  "status": "PASSED"
+}

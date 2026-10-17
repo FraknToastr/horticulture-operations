@@ -1,0 +1,550 @@
+{
+  "recordedAt": "2026-10-17T05:28:05.022Z",
+  "stage": 5,
+  "status": "DEFERRED_BY_OWNER",
+  "reason": "Waiting for a quota top-up",
+  "implementationStarted": false,
+  "testsRunForThisHandoff": false,
+  "resumeRequiresOwnerRequest": true,
+  "commitOrPushPerformed": false,
+  "branch": "main",
+  "upstream": "origin/main",
+  "baseCommit": "8545d675921297349123e9828e62035981d34889",
+  "workingTree": "Uncommitted prior-stage and unrelated changes exist; preserve them",
+  "plan": {
+    "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-5-resume-plan.md",
+    "bytes": 12543,
+    "sha256": "61bf18b0a9cc6d6677a917e4978490b06421c06940d9a8e38a4f2c78c80d3d17"
+  },
+  "readme": {
+    "path": "docs/remediation/nsa-evt-release-2026-10-17/README.md",
+    "bytes": 5229,
+    "sha256": "4a2796b8e634666871167f30c6c2a2093ccbf9f265eb0814bb41947359ca9eda"
+  },
+  "preservation": {
+    "baseline": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-preservation-baseline.json",
+    "protectedFiles": 409,
+    "differences": [],
+    "readmeIsAllowedExistingChange": true
+  },
+  "priorStageSummary": {
+    "complete": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "stage4": {
+      "browserPassed": 7,
+      "loaderPassed": 3,
+      "shippedRuntimeChanged": false,
+      "assessment": "CONDITIONAL_UPGRADE_PROPOSAL"
+    },
+    "productionVerdict": "UNVERIFIED",
+    "stage3CandidateAdopted": false,
+    "stage3OwnerDecisionsRemaining": 3
+  },
+  "openItems": [
+    "Governance conflicts with accepted 1 October explicit-calendar decision",
+    "Named officer required for new reversals; historical actors must not be invented",
+    "CSS cleanup requires proof of redundancy and computed-style parity",
+    "Critical MapLibre advisory and full local licence texts remain open; separate vendor update",
+    "PDF.js candidate adoption needs entry-point, browser and broader PDF checks",
+    "Stage 3 owner decisions remain pending"
+  ],
+  "evidenceAnchors": [
+    {
+      "path": "docs/audits/nsa-evt/20261017-094545-local-8545d67/report.md",
+      "matches": [
+        {
+          "line": 111,
+          "text": "### F-004 — Superseded automatic-Job wording remains in gate documents"
+        },
+        {
+          "line": 143,
+          "text": "### F-006 — CSS override density increases maintenance cost"
+        },
+        {
+          "line": 159,
+          "text": "### F-007 — Reversal evidence does not identify the reversing officer"
+        }
+      ]
+    },
+    {
+      "path": "src/governance/DECISIONS.md",
+      "matches": [
+        {
+          "line": 114,
+          "text": "## Explicit Planner calendar creation — 2026-10-01"
+        }
+      ]
+    },
+    {
+      "path": "src/program-planner/js/quote-model.js",
+      "matches": [
+        {
+          "line": 474,
+          "text": "function reversePayment(inputWorkspace, paymentId, reason) {"
+        }
+      ]
+    },
+    {
+      "path": "src/program-planner/js/quote-builder.js",
+      "matches": [
+        {
+          "line": 123,
+          "text": "function reversePaymentWithReason(paymentId) {"
+        }
+      ]
+    },
+    {
+      "path": "src/program-planner/js/planner.js",
+      "matches": [
+        {
+          "line": 102,
+          "text": "function sessionOperator() { try { return text(sessionStorage.getItem(\"uos.program.statusOperator\")); } catch (error) { return \"\"; } }"
+        },
+        {
+          "line": 103,
+          "text": "function rememberSessionOperator(value) { try { sessionStorage.setItem(\"uos.program.statusOperator\", text(value)); } catch (error) {} }"
+        }
+      ]
+    },
+    {
+      "path": "src/program-planner/js/status-ui.js",
+      "matches": [
+        {
+          "line": 220,
+          "text": "dialog.querySelector(\"[data-status-reason-actor]\").textContent = payment.reversedBy || \"Not recorded\";"
+        }
+      ]
+    }
+  ],
+  "priorStageArtifacts": [
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-1-browser-results.json",
+      "bytes": 25618,
+      "sha256": "76ac20c8dcf4205345ed250d3d304e9aef64d4598732a826b386d84656c8d91f"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-1-checkpoint.md",
+      "bytes": 4500,
+      "sha256": "7499376c0d13599565b5da72bc3a3c49d56119653f6931c58dc385331b3cfcc1"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-1-inspector-results.json",
+      "bytes": 8688,
+      "sha256": "68d585c02f8e4b319fa24560610490f2fd6cead7aeb648b7ae048a873179cfff"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-1-policy-tests.tap",
+      "bytes": 556,
+      "sha256": "e9a9e61f3240e7f3d0f0f7924c1a40edf21467993aefd010b717901211e80f5e"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-1-preservation-baseline.json",
+      "bytes": 26483,
+      "sha256": "6d94871635c5a98e9707472e77cc9f311a4e582ea4d786ccfa0ae26220f1f5ae"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-1-preservation-results.json",
+      "bytes": 189,
+      "sha256": "acc3ecc41fcdf421a71df3a93e563f66a4a983334e0a3e42971985a1928dbc3c"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-1-results.json",
+      "bytes": 6397,
+      "sha256": "9c35bb6b6fd8e6a2a16b93de8e64727fc7e0308acdb84348c98343089ea7a19f"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-1-selection.json",
+      "bytes": 33361,
+      "sha256": "8103b1aec310fddae7a758e10de8e4fee9bb0e76ca2ba6287923b3df4a38a01a"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-2-browser-results.json",
+      "bytes": 19163,
+      "sha256": "73171f2c51de5933d3bbb8767a60a64770b321bc720004e7698a94590d971b3f"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-2-browser-selection.json",
+      "bytes": 2767,
+      "sha256": "34eca89be0c8caee38ff96e5f528136e01230dc7cf9b3934c1a7d4af3a2a04a7"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-2-checkpoint.md",
+      "bytes": 5089,
+      "sha256": "c282bc63fb9555b201218dd8eaebbe111ec2382c795d832800c5b38f42b1e101"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-2-model-before.tap",
+      "bytes": 457,
+      "sha256": "d6b969bda1854483bafc0be1c2760ffd0b4affc41bcf349a2038e33e2d4016d3"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-2-model-results.tap",
+      "bytes": 9529,
+      "sha256": "ba2e7f210a5c21bb99d5fa59aeb765d148c01bce90367a235751011a7e0b1be2"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-2-preservation-baseline.json",
+      "bytes": 49019,
+      "sha256": "863cd912c237a4d97efa53461f94e3f33ff12a3c9423f3c7090a970a615171ac"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-2-preservation-results.json",
+      "bytes": 189,
+      "sha256": "8e8d1a1f2e010ffde408184dc2f8a0cc7da7e22ceecf45a10725481c5ac0e4e1"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-2-results.json",
+      "bytes": 5495,
+      "sha256": "9feeaa9beb6dcde7cad72f9b70227278333537988b3d50fb4db949443570da2d"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-browser-attempt-1.json",
+      "bytes": 11575,
+      "sha256": "864a8e916772874758cc05405a82115575c830ac5e69ea243358766785a922e4"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-browser-attempt-2.json",
+      "bytes": 15889,
+      "sha256": "a38334e47ef37f0ef4c229d56ccc3600e4cd57904ce3715de4211d8632299fe8"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-browser-results.json",
+      "bytes": 8858,
+      "sha256": "2215bf610a4a8e595922821b2d2cd63b39cc42780359988882efe6de1302e865"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-checkpoint.md",
+      "bytes": 6656,
+      "sha256": "9686d58ad904eaac48d73ddff51a5e296d9ffddc3d47385bc5a3878759640a02"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-model-before.tap",
+      "bytes": 1399,
+      "sha256": "294f30ede21cacced0a2cafe3f6300fcae577b665e89e2cd67e88f5a24bfbcb7"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-model-results.tap",
+      "bytes": 3898,
+      "sha256": "bff651027cdf5f9abe7794a033f121c1230c4cd365445f87d2367b755fe29f7a"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-preservation-baseline.json",
+      "bytes": 50258,
+      "sha256": "3c9c39120419cf96f367ba46a3d96e4394eedbe6477ce299411c3ddfccc656d5"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-preservation-results.json",
+      "bytes": 195,
+      "sha256": "0fcdfee7085d48d47290a333c217a637842902b56842fcaa221fa849d9c2cf19"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-results.json",
+      "bytes": 6576,
+      "sha256": "336cf30301eb6aeb16fafce8d2fd58be27a6c9154e83b8b5bdde9a91ffb1f054"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-warning-review.json",
+      "bytes": 37796,
+      "sha256": "a24df70d0a294e7745d58421fe43b00c09d372c0301e43fe92fb8fcc9eb37ce9"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-advisories.json",
+      "bytes": 4124,
+      "sha256": "9d87326ca9b10014d21651c72daa3c62987468dd30a6499e6f2fe6b6f64a57ec"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-browser-attempt-1.json",
+      "bytes": 10418,
+      "sha256": "c473693700be839ffd6b3dab3e87c997b6a4df74e29d22c282cc7a3e209a0d2c"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-browser-attempt-2.json",
+      "bytes": 9467,
+      "sha256": "72ddae8c58055c6d41c5d479347479c43e6ee92ae53910adf6138ea2938de7ed"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-browser-attempt-3.json",
+      "bytes": 10496,
+      "sha256": "6a884b424137f4f2bade533fa4b36c6ee08cc711f3f18cda535a28eab01a14b5"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-browser-results.json",
+      "bytes": 11775,
+      "sha256": "9a5468389de014f220d5acf287bd2951e4cf9399fa49f92e61f781c9ddc2a554"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-build.json",
+      "bytes": 1194,
+      "sha256": "587ebd0e37cb4c30551ab8f1a136fcfa43204d54ca44e91c21fdba3464b9c08f"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-checkpoint.md",
+      "bytes": 12096,
+      "sha256": "e99e77430c060361d25d51ebebe585e2fa0042bdbe090126cd4902e8697447e4"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-pdf-package.json",
+      "bytes": 2364,
+      "sha256": "778639af79a7991b149fea9e70371019db290ebbac5b6759ea8d5aa2e14f95f2"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-preservation-baseline.json",
+      "bytes": 52315,
+      "sha256": "494cf392aba204ec589e6620cb846fe3b372dfbac2472196a3d68774cae53c8b"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-preservation-results.json",
+      "bytes": 349,
+      "sha256": "7188e103f545bc3b4f106b94f47fee2dac257b43de9ef5051650fd64dfb2f984"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-results.json",
+      "bytes": 12232,
+      "sha256": "137736f21da369cee3fc3832520bdfbc2b4f192cafc3e5483b534cf9ba235ff0"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-runtime-tests.tap",
+      "bytes": 688,
+      "sha256": "29a0b3943ad06f606170dec52f83da671e9acabda91c3e2b8576ded338876b0f"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4-vendor-inventory.json",
+      "bytes": 5796,
+      "sha256": "99b8c07e65ab1527cd4a47a40a69b4baefd1b58f967094721cb20e5dbaa3b26c"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/build.cjs",
+      "bytes": 4529,
+      "sha256": "c8f16a56fc8d836400ce06cb8cd134bf5a776ac8c1045f198881508e00f9dd23"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/form-fixture.cjs",
+      "bytes": 1313,
+      "sha256": "6331839ff5c3d3c86113bfdca7890ced7e60b6eb7d28cf6461eadbac3e554e2f"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/imports.candidate.js",
+      "bytes": 8083,
+      "sha256": "df6ca9978c01bada28d21f2ce15fbb89700c2a788d2716ec06ac0389b11f14a9"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/inventory.cjs",
+      "bytes": 4214,
+      "sha256": "19903c412322c0fd7ce70af75fdafac8aad321d7e275f5bacb93346f1bdf7e73"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/pdf-compat.spec.cjs",
+      "bytes": 9152,
+      "sha256": "1eae1f2ec91e0634ee181e95421b4b520056bd68d072b8d2c9f30eefd9f6888a"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/playwright.config.cjs",
+      "bytes": 958,
+      "sha256": "e7b23e9283e43e260212f6bf3118c0a414cbe65ab0cb0b6acd7b24958e3d8399"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/prepare.cjs",
+      "bytes": 5668,
+      "sha256": "2519f28636d3409efbab57aa5480e400f16451aed99b3d6f0a43f328716bcc87"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/program-runtime.candidate.js",
+      "bytes": 3544,
+      "sha256": "f002966f47b2394683748b10c3e5024e0b52a7208807eb631c23275d8f2fdf5d"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/record-results.cjs",
+      "bytes": 6831,
+      "sha256": "85cd4e2f25f0dc490cf834dc19ac2adf1385438d31edda78764e033077fa4a5b"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-4/serve-isolated.cjs",
+      "bytes": 1846,
+      "sha256": "751d555bb9547dcb5f3b40cbf148811cfba25dafd8392baa65adb89f58293dab"
+    }
+  ],
+  "originalAudit": [
+    {
+      "path": "docs/audits/nsa-evt/20261017-094545-local-8545d67/README.md",
+      "bytes": 1783,
+      "sha256": "f96fd6ad8c3e4269fcb469f1e83698133ba2615cba19f693669e097a816032e5"
+    },
+    {
+      "path": "docs/audits/nsa-evt/20261017-094545-local-8545d67/report.md",
+      "bytes": 31989,
+      "sha256": "e844ea895f2e3e982adcacb41bc10208e3264e3905478bd21b6f84f4444eb761"
+    },
+    {
+      "path": "docs/audits/nsa-evt/20261017-094545-local-8545d67/report.html",
+      "bytes": 435375,
+      "sha256": "99ab1dc4781c14b4d95d2d37fa6a59c72b93cbd83e4f7a1980a8dc439a630915"
+    },
+    {
+      "path": "docs/audits/nsa-evt/20261017-094545-local-8545d67/results.json",
+      "bytes": 632734,
+      "sha256": "6365f770d62a0a55fff4d203e2dfd212b00fa9c6a164714d63a95b6064390358"
+    }
+  ],
+  "sourceInputs": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 3389,
+      "sha256": "29af892a240fde39939e0c0e73113e4d5ab38c542715dd13cd57ced96e8f51c2"
+    },
+    {
+      "path": "src/governance/DECISIONS.md",
+      "bytes": 11084,
+      "sha256": "bbd555768310e3f54277d34de386396b4ac4a8514eaaf0d30c68cdf1e73ac6ff"
+    },
+    {
+      "path": "src/governance/PRODUCT_CONTRACTS.md",
+      "bytes": 17653,
+      "sha256": "8e76d7b015b239ecbbc53726df68a8c0d22bafcdf1e732bf3e469e578376adf8"
+    },
+    {
+      "path": "src/governance/PRODUCT_CONSTITUTION.md",
+      "bytes": 61551,
+      "sha256": "ad73ba4cecd6e46d81e0dc62afc3d02b6f719f10593f117f3da00627dd94a4e5"
+    },
+    {
+      "path": "src/governance/RELEASE_GATES.md",
+      "bytes": 18612,
+      "sha256": "ec7ca28b7bd4d5b8e04d3f1e411b2a4c3a924b39df09b598da03fcb8d5ef02c8"
+    },
+    {
+      "path": "src/program-planner/js/quote-model.js",
+      "bytes": 44815,
+      "sha256": "a1152622f3e2dc686b87874a1b10169e64fff5c53783e2729f050a57019c2ba8"
+    },
+    {
+      "path": "src/program-planner/js/quote-builder.js",
+      "bytes": 114971,
+      "sha256": "3593a54426cd322343271f7fed34b8697e5a0a01ce0f5565ba6ba1b5d24bc7cc"
+    },
+    {
+      "path": "src/program-planner/js/planner.js",
+      "bytes": 78259,
+      "sha256": "2260dfa111e9f7eb03d6f81a4bfc69b58907c8c572dcb4cf65b80a81d74b5aa0"
+    },
+    {
+      "path": "src/program-planner/js/status.js",
+      "bytes": 31246,
+      "sha256": "ed52bee7d8c7cca2a34b3ec665dca6f725e7c908704e6f2caaeb1144057e9dc0"
+    },
+    {
+      "path": "src/program-planner/js/status-ui.js",
+      "bytes": 33175,
+      "sha256": "e3720ca58dd11fb0e98b5a248adcc9c98205a6d5448fa5df21236bc1c4cf1b49"
+    },
+    {
+      "path": "src/program-planner/js/status-model.js",
+      "bytes": 13790,
+      "sha256": "478824189669406687854b30ff6f65e9e9e74e2fadfd16a857af7b32e02d307d"
+    },
+    {
+      "path": "src/program-planner/js/model.js",
+      "bytes": 174390,
+      "sha256": "904b49d6f5f07daa1215058cbe95a896f351dd8db0432cce32baa2fe2bedd20c"
+    },
+    {
+      "path": "src/program-planner/js/storage.js",
+      "bytes": 19710,
+      "sha256": "cea3b8e4b37e7ff78e8846d152295632fbc7f5a3e52be3d2f88262c6391c5051"
+    },
+    {
+      "path": "src/program-planner/js/program-map.js",
+      "bytes": 199302,
+      "sha256": "899d8d0e0e055fb3e23194738ee373d41067d730893ba11dd0d95cf5c7c7732d"
+    },
+    {
+      "path": "src/program-planner/space-map-editor.css",
+      "bytes": 29226,
+      "sha256": "008deedca010c1e2329f9ad4c9fcd209d92a08567f543b23e8bdd576e62bb655"
+    },
+    {
+      "path": "src/program-planner/styles.css",
+      "bytes": 388715,
+      "sha256": "503fff1902b004bce6de74f02e7243a16825258e054fe3f48934d8adde60dbce"
+    },
+    {
+      "path": "src/program-planner/client-demo-fixes.css",
+      "bytes": 4432,
+      "sha256": "f4f00f21648247dad076e77a50fcd34c151274e2a759e6fb017449a360203a01"
+    },
+    {
+      "path": "src/shared/css/tokens.css",
+      "bytes": 3410,
+      "sha256": "494a1340fca227d2a620ffe8b03044aaea3de6da78550657e5d988f9cd576f20"
+    },
+    {
+      "path": "src/shared/css/components.css",
+      "bytes": 17835,
+      "sha256": "5180b3b38ced89a35f1315869e01c7d79a722925082b5d97ecfe243b2cdeefb8"
+    },
+    {
+      "path": "tests/quote-funding.test.cjs",
+      "bytes": 17210,
+      "sha256": "e6582268324afdbf4e1859b6df881509ba0b32b3950c774c82f3979ebb4965f3"
+    },
+    {
+      "path": "tests/browser/quote-first-interaction.spec.js",
+      "bytes": 6764,
+      "sha256": "5d57a6187e59b1bb600a4534290c57be3f99aec28db7a5f7fcc3408b42c59fa9"
+    },
+    {
+      "path": "tests/browser/quote-payment-funding-workflow.spec.js",
+      "bytes": 13684,
+      "sha256": "aed87f5359b1e615eefbe349ec0b8cc9b7a9a77a7f5726d02f69d292b18fa01b"
+    },
+    {
+      "path": "tests/browser/performance-audit.spec.js",
+      "bytes": 14025,
+      "sha256": "ca81f1fcfa611950a64697f4b7c92451de9c8f1851dd0076de983af65b959b75"
+    },
+    {
+      "path": "tests/browser/space-map-editor.spec.js",
+      "bytes": 16898,
+      "sha256": "65883465abf0d00087875141f63e792ad90e0456509d0c74900eacbc3fea52fb"
+    },
+    {
+      "path": "tests/browser/space-map-sidebar.spec.js",
+      "bytes": 34869,
+      "sha256": "1f9185b33b4f5f12f65643d1d9a25946f94e4972192e737984fda489bd0fbc80"
+    },
+    {
+      "path": "tests/canonical-work-governance.test.cjs",
+      "bytes": 4133,
+      "sha256": "3b361f341c8992a8ea2b2568e33f27fab002fb134a48f97cb20f8d8fbbc7eac0"
+    },
+    {
+      "path": "playwright.desktop.config.cjs",
+      "bytes": 634,
+      "sha256": "29e657685eb21df39fe4ebb8fca596b154c13889a7e1f5bb62655fb823f5e2d4"
+    },
+    {
+      "path": "scripts/desktop-browser-guard.cjs",
+      "bytes": 2393,
+      "sha256": "ab31c7d0ba1dfa343e6cebe691927996bf0094c9c83c0d8d4a8dcc0d660a5dc0"
+    },
+    {
+      "path": "src/governance/PC-020 — Planner Task Management and Delivery Lineage.md",
+      "bytes": 34925,
+      "sha256": "eb9301780a0c9b36a258f72ff36c1bc7a2b57584f4e025aef1492a1e76a5583a"
+    }
+  ],
+  "recorder": {
+    "path": "docs/remediation/nsa-evt-release-2026-10-17/record-stage-5-handoff.cjs",
+    "bytes": 6432,
+    "sha256": "aad5b33bba75ce94b0b5b9cbe7521f87c0bb2f6f3b0dded7cf71bd403504e02c"
+  },
+  "limitations": [
+    "This manifest inventories existing evidence; no new application tests were run",
+    "Evidence describes local desktop HTTP checks, not GitHub Pages or Edge file:// certification",
+    "No Stage 5 code, CSS or governance changes have been implemented",
+    "Historical manifests retain their original README hash; this handoff records the updated README separately"
+  ]
+}

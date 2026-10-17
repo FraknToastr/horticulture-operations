@@ -1,0 +1,124 @@
+{
+  "id": "S-MAP-COLLAPSE-UNDO",
+  "candidate": "disposable local working-tree snapshot /tmp/nsa-evt-audit-20261017-094545",
+  "procedure": "Independent current three-level card disclosure plus vertex Undo procedure; existing failing test is retained unchanged.",
+  "harnessSha256": "ec11ed5f0d290e469722963c892c76b758da69f3078d7b38134e758491b7483a",
+  "helper": {
+    "file": "tests/browser/space-map-draft-actions.spec.js",
+    "sha256": "7a429ee9fe02361d09bfd15539a179229e51fc42fe2a437bcd2cebd9bcafd2cf",
+    "lines": [
+      "1-37",
+      "82-87"
+    ]
+  },
+  "startedAt": "2026-10-16T23:51:20.190Z",
+  "browser": {
+    "version": "151.0.7922.34"
+  },
+  "cases": [
+    {
+      "owner": "NSA",
+      "startedAt": "2026-10-16T23:51:20.242Z",
+      "checks": [
+        "Pointer vertex edit changes preview; Undo restores it without saving.",
+        "Undo while summary is collapsed reverses both coordinate edits, preserves card node and saved geometry.",
+        "Disclosure cycles full -> summary (3 rows + 6 tools) -> minimal (header + Job Type value only) -> full, preserving card node.",
+        "After reopening full level, vertex deletion and Undo restore four vertices without saving."
+      ],
+      "levels": [
+        {
+          "level": "full",
+          "rows": 3,
+          "tools": 6,
+          "drawerVisible": true,
+          "firstLabelVisible": true,
+          "jobType": "Turfing area",
+          "header": true
+        },
+        {
+          "level": "summary",
+          "rows": 3,
+          "tools": 6,
+          "drawerVisible": false,
+          "firstLabelVisible": true,
+          "jobType": "Turfing area",
+          "header": true
+        },
+        {
+          "level": "minimal",
+          "rows": 1,
+          "tools": 0,
+          "drawerVisible": false,
+          "firstLabelVisible": false,
+          "jobType": "Turfing area",
+          "header": true
+        },
+        {
+          "level": "full",
+          "rows": 3,
+          "tools": 6,
+          "drawerVisible": true,
+          "firstLabelVisible": true,
+          "jobType": "Turfing area",
+          "header": true
+        }
+      ],
+      "backend": "webgl2",
+      "status": "PASS",
+      "endedAt": "2026-10-16T23:51:25.368Z"
+    },
+    {
+      "owner": "EVT",
+      "startedAt": "2026-10-16T23:51:25.373Z",
+      "checks": [
+        "Pointer vertex edit changes preview; Undo restores it without saving.",
+        "Undo while summary is collapsed reverses both coordinate edits, preserves card node and saved geometry.",
+        "Disclosure cycles full -> summary (3 rows + 6 tools) -> minimal (header + Job Type value only) -> full, preserving card node.",
+        "After reopening full level, vertex deletion and Undo restore four vertices without saving."
+      ],
+      "levels": [
+        {
+          "level": "full",
+          "rows": 3,
+          "tools": 6,
+          "drawerVisible": true,
+          "firstLabelVisible": true,
+          "jobType": "Turfing area",
+          "header": true
+        },
+        {
+          "level": "summary",
+          "rows": 3,
+          "tools": 6,
+          "drawerVisible": false,
+          "firstLabelVisible": true,
+          "jobType": "Turfing area",
+          "header": true
+        },
+        {
+          "level": "minimal",
+          "rows": 1,
+          "tools": 0,
+          "drawerVisible": false,
+          "firstLabelVisible": false,
+          "jobType": "Turfing area",
+          "header": true
+        },
+        {
+          "level": "full",
+          "rows": 3,
+          "tools": 6,
+          "drawerVisible": true,
+          "firstLabelVisible": true,
+          "jobType": "Turfing area",
+          "header": true
+        }
+      ],
+      "backend": "webgl2",
+      "status": "PASS",
+      "endedAt": "2026-10-16T23:51:30.127Z"
+    }
+  ],
+  "endedAt": "2026-10-16T23:51:34.227Z",
+  "status": "PASS"
+}

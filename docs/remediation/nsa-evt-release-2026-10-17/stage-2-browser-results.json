@@ -1,0 +1,608 @@
+{
+  "config": {
+    "argv": [
+      "/home/n0rt/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/n0rt/headroom-projects/Hort Ops 23 September/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=playwright.desktop.config.cjs",
+      "--project=core",
+      "tests/browser/quote-payment-funding-workflow.spec.js",
+      "tests/browser/quote-first-interaction.spec.js",
+      "tests/browser/performance-audit.spec.js",
+      "--grep",
+      "default Customer|saved Draft deposit|first-deposit failure|Accepted Quote handles|first deposit, reversal and evidence clicks|Declined receipts stay disabled",
+      "--reporter=line,json"
+    ],
+    "configFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/playwright.desktop.config.cjs",
+    "rootDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 1,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "core",
+        "name": "core",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/evt-register-delivery.spec.js",
+          "**/register-status-guide.spec.js",
+          "**/register-drawer-context.spec.js",
+          "**/drawer-scroll-ownership.spec.js",
+          "**/register-drawer-motion.spec.js",
+          "**/register-shortcut-states.spec.js",
+          "**/planner-task-editor.spec.js",
+          "**/planner-draft-recovery.spec.js",
+          "**/cost-library-legacy-grouping.spec.js",
+          "**/calculator-planner-job-isolation.spec.js",
+          "**/c4-browser-acceptance.spec.js",
+          "**/quote-payment-funding-workflow.spec.js",
+          "**/quote-first-interaction.spec.js",
+          "**/quoted-lifecycle.spec.js",
+          "**/draft-quoted-cost-deletion.spec.js",
+          "**/workspace-backup-recovery.spec.js",
+          "**/startup-status-recovery.spec.js",
+          "**/factory-reset-startup.spec.js",
+          "**/workspace-sanitation.spec.js",
+          "**/data-import-keyboard.spec.js",
+          "**/scheduler-side-by-side.spec.js",
+          "**/scheduler-multi-day.spec.js",
+          "**/scheduler-unused-action-scope.spec.js",
+          "**/scheduler-week-viewport.spec.js",
+          "**/scheduler-event-milestones.spec.js",
+          "**/space-map-onboarding.spec.js",
+          "**/program-runtime.spec.js",
+          "**/performance-audit.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "budget",
+        "name": "budget",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/budget-workflow.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "metromap",
+        "name": "metromap",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/adaptive-map-scheduler-register.spec.js",
+          "**/metromap-activation.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "adaptive",
+        "name": "adaptive",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/adaptive-map-scheduler-register.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "inspector",
+        "name": "inspector",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/space-map-draft-actions.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "map-draft",
+        "name": "map-draft",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/space-map-draft-actions.spec.js"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "gpu",
+        "name": "gpu",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/space-map-gpu.spec.js"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": {
+      "command": "PORT=4199 node src/scripts/static-server.cjs",
+      "url": "http://127.0.0.1:4199/src/program-planner/index.html?workspace=NSA",
+      "reuseExistingServer": false,
+      "timeout": 15000
+    }
+  },
+  "suites": [
+    {
+      "title": "performance-audit.spec.js",
+      "file": "performance-audit.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: quote adjustments roll back, snapshots disclose source changes and Declined receipts stay disabled",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1395,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:51:55.340Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d939e007a0f3c09b919c-6d4808ead558e5026f92",
+          "file": "performance-audit.spec.js",
+          "line": 93,
+          "column": 37
+        },
+        {
+          "title": "EVT: quote adjustments roll back, snapshots disclose source changes and Declined receipts stay disabled",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3636,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:51:56.904Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d939e007a0f3c09b919c-db788d1d55d02807e856",
+          "file": "performance-audit.spec.js",
+          "line": 93,
+          "column": 37
+        }
+      ]
+    },
+    {
+      "title": "quote-first-interaction.spec.js",
+      "file": "quote-first-interaction.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2907,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:52:00.937Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1edc7dcddcb19ea1fd52-b5977571b2f8700035b4",
+          "file": "quote-first-interaction.spec.js",
+          "line": 29,
+          "column": 2
+        },
+        {
+          "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2593,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:52:03.918Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1edc7dcddcb19ea1fd52-5277b2ffd7098fbf8024",
+          "file": "quote-first-interaction.spec.js",
+          "line": 29,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "title": "quote-payment-funding-workflow.spec.js",
+      "file": "quote-payment-funding-workflow.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: default Customer permits a first deposit without toggling funding",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6871,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:52:04.960Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-48aaed46250f8310d96b",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 67,
+          "column": 3
+        },
+        {
+          "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1072,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:52:11.836Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-d0589499018cdc2d8368",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 108,
+          "column": 3
+        },
+        {
+          "title": "EVT: default Customer permits a first deposit without toggling funding",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6364,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:52:12.914Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-05b69a756fea888ac01c",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 67,
+          "column": 3
+        },
+        {
+          "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1021,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:52:19.284Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-3e5f1aa8ba2ab20c5087",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 108,
+          "column": 3
+        },
+        {
+          "title": "NSA: first-deposit failure keeps data and retry records one payment despite repeated submits",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1350,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:52:20.317Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-1a9587bc2259ad95bcdc",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 121,
+          "column": 3
+        },
+        {
+          "title": "EVT: first-deposit failure keeps data and retry records one payment despite repeated submits",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1354,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:52:21.677Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-d37f389879b8d7b2846a",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 121,
+          "column": 3
+        },
+        {
+          "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "core",
+              "projectName": "core",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1647,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T04:52:23.036Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-022709b4552cc4402458",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 163,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-17T04:51:54.914Z",
+    "duration": 31392.831,
+    "expected": 11,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

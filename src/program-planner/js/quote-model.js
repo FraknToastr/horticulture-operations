@@ -447,6 +447,7 @@ function recordPayment(inputWorkspace, input) {
     if (!validPaymentDate(paymentDate)) throw new Error("Payment date must be a valid date.");
     var method = text(input.method) || "Other";
     if (PAYMENT_METHODS.indexOf(method) < 0) throw new Error("Payment method is not supported.");
+    if (method !== "Paid with Deposit" && !eligibility.paymentAllowed) throw new Error("Issue or accept the Quote before recording other payments.");
     var reference = text(input.reference);
     if (!reference) throw new Error("Payment reference is required.");
     var id = model().stableId(quote.owner, "payment", quote.id + ":" + Date.now().toString(36) + ":" + Math.random().toString(36).slice(2));

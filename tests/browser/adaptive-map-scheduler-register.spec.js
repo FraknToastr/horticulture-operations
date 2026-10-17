@@ -49,14 +49,14 @@ test('MetroMap credentials stay outside workspace exports and preserve the editi
   const sizes=await footer.evaluate(node=>{const [a,b]=node.querySelectorAll('button');return {left:a.getBoundingClientRect().width,right:b.getBoundingClientRect().width,height:node.getBoundingClientRect().height};});
   expect(sizes.left).toBeCloseTo(sizes.right,0);expect(sizes.height).toBeLessThanOrEqual(120);
   await expect(frame.locator('#moasureImportButton')).toContainText('Drop Moasure CSV or click to add');
+  await expect(frame.locator('[data-metro-label]')).toHaveText('Activate Metromap');
   await frame.locator('#activateMetroMap').click();const modal=frame.locator('#metroMapActivation');
   await expect(modal.locator('#metroMapKey')).toHaveAttribute('type','password');
   await modal.locator('#metroMapKey').fill('test-browser-key');
-  await frame.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{readText:()=>Promise.reject(Error('denied'))}}));
-  await modal.getByRole('button',{name:'Paste',exact:true}).click();
-  await expect(modal.locator('[data-metro-status]')).toContainText('Paste the key manually');
+  await expect(modal.getByRole('button',{name:'Paste',exact:true})).toHaveCount(0);
   await expect(modal.locator('#metroMapKey')).toHaveValue('test-browser-key');
   await modal.locator('[data-metro-save]').check();await modal.getByRole('button',{name:'Activate',exact:true}).click();
+  await expect(frame.locator('[data-metro-label]')).toHaveText('Metromap Active');
   await expect.poll(()=>frame.evaluate(()=>UOS.ProgramMapController.getMapController().getRendererAdapter().getSource('uos-basemap')?.tiles?.[0]?.includes('api.metromap.com.au'))).toBe(true);
   expect(await frame.evaluate(()=>({same:__activationMap===UOS.ProgramMapController.getMapController(),draft:__activationDraft===JSON.stringify(__activationMap.getDrawing()),camera:__activationCamera===JSON.stringify(__activationMap.getLocationSnapshot())}))).toEqual({same:true,draft:true,camera:true});
   expect(await frame.evaluate(()=>JSON.stringify({workspace:UOS.ProgramApp.workspace(),json:UOS.ProgramData.exportJson(UOS.ProgramApp.workspace()),bundle:new TextDecoder().decode(UOS.ProgramData.exportBundle(UOS.ProgramApp.workspace())),metrics:__activationMap.getRendererMetrics(),operational:__activationMap.getOperationalSnapshot()}))).not.toContain('test-browser-key');
@@ -64,6 +64,7 @@ test('MetroMap credentials stay outside workspace exports and preserve the editi
   expect(await next.evaluate(()=>UOS.MetroMapCredentials.status().active)).toBe(true);
   await navigate(next,'map',ids.records[0]);await next.locator('#activateMetroMap').click();
   await next.locator('[data-metro-forget]').click();
+  await expect(next.locator('[data-metro-label]')).toHaveText('Activate Metromap');
   expect(await next.evaluate(()=>UOS.MetroMapCredentials.status())).toMatchObject({active:true,saved:false});
   await next.getByRole('button',{name:'Cancel',exact:true}).click();
   await page.reload();const last=page.frames().find(f=>f!==page.mainFrame());await last.waitForFunction(()=>UOS.ProgramApp?.snapshot().phase==='ready');
@@ -71,22 +72,22 @@ test('MetroMap credentials stay outside workspace exports and preserve the editi
   expect(errors).toEqual([]);
 });
 
-test('MetroMap manual activation survives clipboard and storage failures without retry loops',async({page})=>{
+test('MetroMap manual activation survives storage failures without retry loops',async({page})=>{
   await page.addInitScript(()=>{
     for(const method of ['getItem','setItem','removeItem']){
       const original=Storage.prototype[method];Storage.prototype[method]=function(key,...args){if(key==='uos.metromap.user-key')throw Error('Storage blocked');return original.call(this,key,...args);};
     }
-    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{readText:async()=> 'test-storage-failure-key'}});
   });
   let requests=0;await page.route('**/api.metromap.com.au/**',route=>{requests++;return route.fulfill({status:403,body:'Unavailable'});});
   const {frame,errors}=await open(page,'NSA');const ids=await seed(frame,'NSA');await navigate(frame,'map',ids.records[0]);
   await frame.waitForFunction(()=>UOS.ProgramMapController.getMapController()?.ready());
   await frame.locator('#activateMetroMap').click();const modal=frame.locator('#metroMapActivation');
   await expect(modal.locator('[data-metro-status]')).toContainText('storage is unavailable');
-  await modal.getByRole('button',{name:'Paste',exact:true}).click();await expect(modal.locator('#metroMapKey')).toHaveValue('test-storage-failure-key');
+  await expect(modal.getByRole('button',{name:'Paste',exact:true})).toHaveCount(0);
+  await modal.locator('#metroMapKey').fill('test-storage-failure-key');
   await modal.getByRole('button',{name:'Cancel',exact:true}).click();expect(await frame.evaluate(()=>UOS.MetroMapCredentials.status().active)).toBe(false);
   await frame.locator('#activateMetroMap').click();await expect(modal.locator('#metroMapKey')).toHaveValue('');
-  await modal.getByRole('button',{name:'Paste',exact:true}).click();await modal.locator('[data-metro-save]').check();await modal.getByRole('button',{name:'Activate',exact:true}).click();
+  await modal.locator('#metroMapKey').fill('test-storage-failure-key');await modal.locator('[data-metro-save]').check();await modal.getByRole('button',{name:'Activate',exact:true}).click();
   expect(await frame.evaluate(()=>UOS.MetroMapCredentials.status())).toMatchObject({active:true,saved:false,storageUnavailable:true});
   await expect(frame.locator('#mapNotice')).toContainText('offline grid');
   const count=requests;await page.waitForTimeout(350);expect(requests).toBe(count);expect(count).toBeGreaterThan(0);

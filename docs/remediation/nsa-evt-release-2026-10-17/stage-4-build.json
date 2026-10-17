@@ -1,0 +1,29 @@
+{
+  "pdfVersion": "6.4.299",
+  "variant": "official legacy ESM build",
+  "shippedFilesChanged": false,
+  "api": "package/legacy/build/pdf.min.mjs",
+  "worker": "package/legacy/build/pdf.worker.min.mjs",
+  "sources": {
+    "runtime": "b0b98fd0fd58f16c100e61545a675895e4d7ff81aaecb0f00e34ee9f329d5e41",
+    "imports": "084898f4392ebe6b24de1578e06030b8699c228149b591a6d4863dbaf9480619"
+  },
+  "candidate": {
+    "runtime": "f002966f47b2394683748b10c3e5024e0b52a7208807eb631c23275d8f2fdf5d",
+    "imports": "df6ca9978c01bada28d21f2ce15fbb89700c2a788d2716ec06ac0389b11f14a9"
+  },
+  "contract": {
+    "functionName": "ensurePdf",
+    "inFlightDeduplication": true,
+    "successfulModuleReuse": true,
+    "failedModuleRetry": "new module URL per explicit retry",
+    "timeoutMs": 8000,
+    "isEvalSupported": false,
+    "documentDestroy": "compatibility bridge to PDFDocumentLoadingTask.destroy",
+    "rejectedDocumentCleanup": "destroy the loading task before propagating its error"
+  },
+  "limits": [
+    "HTTP desktop assessment only; module scripts can change file:// compatibility",
+    "No viewer, scripting manager, CMaps, standard fonts, WASM decoders or image PDF corpus certification"
+  ]
+}

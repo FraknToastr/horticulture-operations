@@ -1,0 +1,176 @@
+{
+  "stage": 1,
+  "status": "COMPLETE",
+  "stoppedAfterStage": 1,
+  "nextStage": 2,
+  "productionReleaseVerdict": "UNVERIFIED",
+  "commit": "8545d675921297349123e9828e62035981d34889",
+  "branch": "main",
+  "upstream": "origin/main",
+  "target": "local HTTP desktop Chromium",
+  "environment": {
+    "node": "v22.23.2",
+    "playwright": "1.62.0",
+    "browser": "Google Chrome for Testing 151.0.7922.34"
+  },
+  "browserLatest": {
+    "passed": 13,
+    "total": 13,
+    "cases": [
+      {
+        "project": "budget",
+        "file": "budget-workflow.spec.js",
+        "title": "Budget form and all eight actions persist through approval, closure and reload",
+        "status": "passed",
+        "durationMs": 1211,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "budget",
+        "file": "budget-workflow.spec.js",
+        "title": "Budget UI allocates to a Register record before any Project exists",
+        "status": "passed",
+        "durationMs": 1687,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "budget",
+        "file": "budget-workflow.spec.js",
+        "title": "NSA Register drawer places newest-first FY allocations in the inline table",
+        "status": "passed",
+        "durationMs": 603,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "budget",
+        "file": "budget-workflow.spec.js",
+        "title": "Event Register drawer keeps project-free allocations in the inline table",
+        "status": "passed",
+        "durationMs": 423,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "budget",
+        "file": "budget-workflow.spec.js",
+        "title": "Carry-forward requires review and confirmation before moving unused funds",
+        "status": "passed",
+        "durationMs": 964,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "budget",
+        "file": "budget-workflow.spec.js",
+        "title": "annual management transfers exact cents as a linked pair",
+        "status": "passed",
+        "durationMs": 561,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "budget",
+        "file": "budget-workflow.spec.js",
+        "title": "No year-end review records the answer without a next-year budget or movement",
+        "status": "passed",
+        "durationMs": 510,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "metromap",
+        "file": "adaptive-map-scheduler-register.spec.js",
+        "title": "MetroMap credentials stay outside workspace exports and preserve the editing session",
+        "status": "passed",
+        "durationMs": 4302,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "metromap",
+        "file": "adaptive-map-scheduler-register.spec.js",
+        "title": "MetroMap manual activation survives storage failures without retry loops",
+        "status": "passed",
+        "durationMs": 2292,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "metromap",
+        "file": "metromap-activation.spec.js",
+        "title": "NSA: MetroMap has no Paste button and its label follows activation and storage removal",
+        "status": "passed",
+        "durationMs": 3329,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "metromap",
+        "file": "metromap-activation.spec.js",
+        "title": "EVT: MetroMap has no Paste button and its label follows activation and storage removal",
+        "status": "passed",
+        "durationMs": 3083,
+        "evidence": "stage-1-browser-results.json"
+      },
+      {
+        "project": "inspector",
+        "file": "space-map-draft-actions.spec.js",
+        "title": "NSA: radial Undo restores completed vertex edits without saving or remounting cards",
+        "status": "passed",
+        "durationMs": 9755,
+        "evidence": "stage-1-inspector-results.json"
+      },
+      {
+        "project": "inspector",
+        "file": "space-map-draft-actions.spec.js",
+        "title": "EVT: radial Undo restores completed vertex edits without saving or remounting cards",
+        "status": "passed",
+        "durationMs": 8416,
+        "evidence": "stage-1-inspector-results.json"
+      }
+    ]
+  },
+  "policyChecks": {
+    "passed": 2,
+    "failed": 0,
+    "evidence": "stage-1-policy-tests.tap"
+  },
+  "attempts": [
+    {
+      "file": "stage-1-browser-results.json",
+      "stats": {
+        "startTime": "2026-10-17T04:44:38.510Z",
+        "duration": 26844.654,
+        "expected": 11,
+        "skipped": 1,
+        "unexpected": 1,
+        "flaky": 0
+      }
+    },
+    {
+      "file": "stage-1-inspector-results.json",
+      "stats": {
+        "startTime": "2026-10-17T04:45:29.925Z",
+        "duration": 18803.589,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "excludedMediaAttachments": 0,
+  "preservation": {
+    "checkedAt": "2026-10-17T04:46:24.187Z",
+    "protectedFiles": 210,
+    "changedProtectedFiles": [],
+    "applicationRuntimeChanges": 0,
+    "originalAuditChanged": false,
+    "status": "PASS"
+  },
+  "sourceHashes": {
+    "package.json": "5598ca8442ebf0bae401b360b2f6d78ebc3a3e0fb09616aa602e5170cc9ff924",
+    "playwright.desktop.config.cjs": "29e657685eb21df39fe4ebb8fca596b154c13889a7e1f5bb62655fb823f5e2d4",
+    "scripts/desktop-release-plan.cjs": "46408383d805d8a64570444b8989a7ebd42e0d94da452a999511c6a319ef83de",
+    "scripts/desktop-browser-guard.cjs": "ab31c7d0ba1dfa343e6cebe691927996bf0094c9c83c0d8d4a8dcc0d660a5dc0",
+    "scripts/run_desktop_release_gates.cjs": "f1bcb0f4ed068a203152a7d1cef6f0fd067bc37e776183fcc74cec2602669aee",
+    "tests/desktop-release-policy.test.cjs": "3739a399b28f7448c4a7566b5a572628c50fd64254b7885989f34e4533b99bfd",
+    "tests/browser/adaptive-map-scheduler-register.spec.js": "dcb83e092b43cc5253fbdf2ff26c173a1587941b919d2fe8bcefd17ebd6cd5ef",
+    "tests/browser/space-map-draft-actions.spec.js": "fa20e21f2d72d2d627dfe3d4afe9acf42d94dd84e8555758651e1c26631b7d21",
+    "tests/browser/budget-workflow.spec.js": "06c23a3945272873d5e4f179f1c841be7204f798918cc31049387689fd401b06",
+    "tests/browser/budget-mobile-layout.spec.js": "9598b2e2fd879a9d7d4e9f8df34b57e06b27e8b5f864affd064bce6b8040ffc1"
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "checkedAt": "2026-10-17T05:09:08.564Z",
+  "source": "GitHub Global Security Advisories API",
+  "packages": [
+    {
+      "name": "pdfjs-dist",
+      "version": "2.16.105",
+      "use": "shipped-runtime",
+      "url": "https://api.github.com/advisories?ecosystem=npm&affects=pdfjs-dist%402.16.105&per_page=100",
+      "checkedAt": "2026-10-17T05:09:07.709Z",
+      "completeFirstPage": true,
+      "advisories": [
+        {
+          "ghsaId": "GHSA-wgrm-67xf-hhpq",
+          "cveId": "CVE-2024-4367",
+          "summary": "PDF.js vulnerable to arbitrary JavaScript execution upon opening a malicious PDF",
+          "severity": "high",
+          "url": "https://github.com/advisories/GHSA-wgrm-67xf-hhpq",
+          "publishedAt": "2024-05-07T10:25:08Z",
+          "updatedAt": "2026-05-13T15:25:02Z",
+          "withdrawnAt": null,
+          "vulnerabilities": [
+            {
+              "package": {
+                "ecosystem": "npm",
+                "name": "pdfjs-dist"
+              },
+              "vulnerable_version_range": "<= 4.1.392",
+              "first_patched_version": "4.2.67",
+              "vulnerable_functions": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pdfjs-dist",
+      "version": "6.4.299",
+      "use": "assessment-only",
+      "url": "https://api.github.com/advisories?ecosystem=npm&affects=pdfjs-dist%406.4.299&per_page=100",
+      "checkedAt": "2026-10-17T05:09:08.006Z",
+      "completeFirstPage": true,
+      "advisories": []
+    },
+    {
+      "name": "maplibre-gl",
+      "version": "5.3.0",
+      "use": "shipped-runtime",
+      "url": "https://api.github.com/advisories?ecosystem=npm&affects=maplibre-gl%405.3.0&per_page=100",
+      "checkedAt": "2026-10-17T05:09:07.024Z",
+      "completeFirstPage": true,
+      "advisories": [
+        {
+          "ghsaId": "GHSA-jrc7-96c5-q579",
+          "cveId": "CVE-2026-85061",
+          "summary": "MapLibre GL JS: XSS Sanitizer Bypass in DOM.sanitize() via Live NamedNodeMap Removal Skip",
+          "severity": "critical",
+          "url": "https://github.com/advisories/GHSA-jrc7-96c5-q579",
+          "publishedAt": "2026-09-08T20:50:47Z",
+          "updatedAt": "2026-09-08T20:50:48Z",
+          "withdrawnAt": null,
+          "vulnerabilities": [
+            {
+              "package": {
+                "ecosystem": "npm",
+                "name": "maplibre-gl"
+              },
+              "vulnerable_version_range": "<= 6.4.0",
+              "first_patched_version": "6.4.1",
+              "vulnerable_functions": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "three",
+      "version": "0.186.1",
+      "use": "shipped-bundle",
+      "url": "https://api.github.com/advisories?ecosystem=npm&affects=three%400.186.1&per_page=100",
+      "checkedAt": "2026-10-17T05:09:07.315Z",
+      "completeFirstPage": true,
+      "advisories": []
+    },
+    {
+      "name": "earcut",
+      "version": "3.2.4",
+      "use": "shipped-bundle",
+      "url": "https://api.github.com/advisories?ecosystem=npm&affects=earcut%403.2.4&per_page=100",
+      "checkedAt": "2026-10-17T05:09:07.618Z",
+      "completeFirstPage": true,
+      "advisories": []
+    },
+    {
+      "name": "esbuild",
+      "version": "0.28.2",
+      "use": "build-only",
+      "url": "https://api.github.com/advisories?ecosystem=npm&affects=esbuild%400.28.2&per_page=100",
+      "checkedAt": "2026-10-17T05:09:07.921Z",
+      "completeFirstPage": true,
+      "advisories": []
+    },
+    {
+      "name": "@playwright/test",
+      "version": "1.62.0",
+      "use": "test-only",
+      "url": "https://api.github.com/advisories?ecosystem=npm&affects=%40playwright%2Ftest%401.62.0&per_page=100",
+      "checkedAt": "2026-10-17T05:09:08.281Z",
+      "completeFirstPage": true,
+      "advisories": []
+    },
+    {
+      "name": "fake-indexeddb",
+      "version": "6.2.4",
+      "use": "test-only",
+      "url": "https://api.github.com/advisories?ecosystem=npm&affects=fake-indexeddb%406.2.4&per_page=100",
+      "checkedAt": "2026-10-17T05:09:08.563Z",
+      "completeFirstPage": true,
+      "advisories": []
+    }
+  ]
+}

@@ -201,6 +201,18 @@
     }
   }
 
+  function toggleRadialMenu() {
+    updateRadialControls();
+    if(radialExpanded){
+      // Closing the creation menu is also Cancel for its active map operation.
+      // A save already in progress must finish before it can be dismissed.
+      if(mapBusy() || switchPending || locationRemovalPending)return;
+      cancelActiveMapInteraction();
+      updateRadialControls();
+      setRadialExpanded(false);
+    }else setRadialExpanded(true);
+  }
+
   function updateRadialControls() {
     updateDraftActions();
     var hub=one("#spaceRadialToggle");if(!hub)return;
@@ -832,7 +844,7 @@ function setMapCanvasCursor(cursor) {
   function handleSpaceEditorClick(event){
     var target=event.target;
     if(target.closest('[data-space-onboarding-add]')){
-      updateRadialControls();setRadialExpanded(!radialExpanded);
+      toggleRadialMenu();
       var first=radialExpanded && one('#spaceRadialActions [data-space-create]:not(:disabled)');
       if(first)first.focus({preventScroll:true});
       return true;
@@ -2535,7 +2547,7 @@ var selectedSpatialFilter = null;
     one('#spaceUndoDraft').addEventListener('click',function(){try{undoActiveDraft();}catch(error){showError(error);}});
     one("#spaceRadialToggle").addEventListener("click",function(event){
       event.preventDefault();event.stopPropagation();
-      updateRadialControls();setRadialExpanded(!radialExpanded);
+      toggleRadialMenu();
     });
     one("#spaceRadialActions").addEventListener("click",async function(event){
       var button=event.target.closest("[data-space-create]");if(!button)return;

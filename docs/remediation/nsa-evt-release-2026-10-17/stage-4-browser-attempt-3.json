@@ -1,0 +1,274 @@
+{
+  "config": {
+    "argv": [
+      "/home/n0rt/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/n0rt/headroom-projects/Hort Ops 23 September/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=docs/remediation/nsa-evt-release-2026-10-17/stage-4/playwright.config.cjs"
+    ],
+    "configFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4/playwright.config.cjs",
+    "rootDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 1,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/nsa-evt-stage4-playwright-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4",
+        "testIgnore": [],
+        "testMatch": [
+          "pdf-compat.spec.cjs"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4-browser-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "pdf-compat.spec.cjs",
+      "file": "pdf-compat.spec.cjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: 6.4.299 matches shipped PDF extraction with lazy promises, real workers and no external network",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 1269,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\nExpected: \u001b[32m[{\"type\": \"text\", \"value\": \"A3330\"}]\u001b[39m\nReceived: \u001b[31mundefined\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\nExpected: \u001b[32m[{\"type\": \"text\", \"value\": \"A3330\"}]\u001b[39m\nReceived: \u001b[31mundefined\u001b[39m\n    at /home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4/pdf-compat.spec.cjs:73:37",
+                    "location": {
+                      "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4/pdf-compat.spec.cjs",
+                      "column": 37,
+                      "line": 73
+                    },
+                    "snippet": "  71 |         expect(requests).toHaveLength(2);\n  72 |         const form = await parse(frame, formSample);\n> 73 |         expect(form.fields.Receipt).toEqual([{ value: 'A3330', type: 'text' }]);\n     |                                     ^\n  74 |         expect(form.calls).toEqual([false]);\n  75 |         expect(workers).toHaveLength(2);\n  76 |         await expect.poll(() => page.workers().length).toBe(0);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4/pdf-compat.spec.cjs",
+                        "column": 37,
+                        "line": 73
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\nExpected: \u001b[32m[{\"type\": \"text\", \"value\": \"A3330\"}]\u001b[39m\nReceived: \u001b[31mundefined\u001b[39m\n\n  71 |         expect(requests).toHaveLength(2);\n  72 |         const form = await parse(frame, formSample);\n> 73 |         expect(form.fields.Receipt).toEqual([{ value: 'A3330', type: 'text' }]);\n     |                                     ^\n  74 |         expect(form.calls).toEqual([false]);\n  75 |         expect(workers).toHaveLength(2);\n  76 |         await expect.poll(() => page.workers().length).toBe(0);\n    at /home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4/pdf-compat.spec.cjs:73:37"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T05:16:14.868Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/tmp/nsa-evt-stage4-playwright-results/pdf-compat-NSA-6-4-299-mat-b4aa0-ers-and-no-external-network/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-4/pdf-compat.spec.cjs",
+                    "column": 37,
+                    "line": 73
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-106038dc89adb33d4a89",
+          "file": "pdf-compat.spec.cjs",
+          "line": 43,
+          "column": 3
+        },
+        {
+          "title": "NSA: failed PDF module load retries explicitly and deduplicates the retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-a55cab544b9450059071",
+          "file": "pdf-compat.spec.cjs",
+          "line": 89,
+          "column": 3
+        },
+        {
+          "title": "EVT: 6.4.299 matches shipped PDF extraction with lazy promises, real workers and no external network",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-3118d7ccca8d53707487",
+          "file": "pdf-compat.spec.cjs",
+          "line": 43,
+          "column": 3
+        },
+        {
+          "title": "EVT: failed PDF module load retries explicitly and deduplicates the retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-2a8c80c1cabe032f55a9",
+          "file": "pdf-compat.spec.cjs",
+          "line": 89,
+          "column": 3
+        },
+        {
+          "title": "NSA: candidate PDF library stages and applies the real Register PDF import",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-2ec21b85c572d18e3fa6",
+          "file": "pdf-compat.spec.cjs",
+          "line": 106,
+          "column": 1
+        },
+        {
+          "title": "candidate PDF load timeout stays bounded and permits an explicit retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-70d169964aa092c60996",
+          "file": "pdf-compat.spec.cjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "a malformed PDF does not poison the successful candidate module cache",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "8f64fcb87362904a09fd-1b0e52ade6fb1621355b",
+          "file": "pdf-compat.spec.cjs",
+          "line": 138,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "message": "\u001b[31mTesting stopped early after 1 maximum allowed failures.\u001b[39m"
+    }
+  ],
+  "stats": {
+    "startTime": "2026-10-17T05:16:14.409Z",
+    "duration": 1844.789,
+    "expected": 0,
+    "skipped": 6,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

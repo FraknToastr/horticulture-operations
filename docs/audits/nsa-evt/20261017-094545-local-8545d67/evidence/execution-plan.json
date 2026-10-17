@@ -1,0 +1,176 @@
+{
+  "createdAt": "2026-10-16T23:39:05.508Z",
+  "batches": [
+    {
+      "id": "B-NODE",
+      "kind": "node",
+      "files": [
+        "tests/area-pricing.test.cjs",
+        "tests/budget-governance.test.cjs",
+        "tests/budget-model.test.cjs",
+        "tests/business-dates.test.cjs",
+        "tests/c5-canonical-status-history.test.cjs",
+        "tests/c6-multirate-corrective.test.cjs",
+        "tests/calculator-bulk-delete.test.cjs",
+        "tests/canonical-costing-commands.test.cjs",
+        "tests/canonical-work-governance.test.cjs",
+        "tests/costing-adjustments.test.cjs",
+        "tests/current-year-backup-recovery.test.cjs",
+        "tests/data-roundtrip.test.cjs",
+        "tests/delete-register-v5.test.cjs",
+        "tests/delete-safety.test.cjs",
+        "tests/empty-operational-baseline.test.cjs",
+        "tests/evt-register-model.test.cjs",
+        "tests/governed-remediation.test.cjs",
+        "tests/location-polygon-sidebar.test.cjs",
+        "tests/metromap-credentials.test.cjs",
+        "tests/moasure-geometry.test.cjs",
+        "tests/model-v5.test.cjs",
+        "tests/nsa-pdf-import-preview.test.cjs",
+        "tests/planner-current-state.test.cjs",
+        "tests/planner-draft-job.test.cjs",
+        "tests/planner-reset-history.test.cjs",
+        "tests/program-runtime.test.cjs",
+        "tests/quote-calculator-membership.test.cjs",
+        "tests/quote-funding.test.cjs",
+        "tests/rate-library-schema.test.cjs",
+        "tests/register-status-guide.test.cjs",
+        "tests/scheduler-application-nomination.test.cjs",
+        "tests/scheduler-calendar-tools.test.cjs",
+        "tests/scheduler-date-ranges.test.cjs",
+        "tests/scheduler-event-milestones.test.cjs",
+        "tests/scheduler-week-editing.test.cjs",
+        "tests/sidebar-architecture.test.cjs",
+        "tests/space-map-dashes.test.cjs",
+        "tests/space-map-tree.test.cjs",
+        "tests/status.test.cjs",
+        "tests/tree-reference-selection.test.cjs",
+        "tests/workspace-import-signature.test.cjs",
+        "tests/workspace-sanitation.test.cjs"
+      ],
+      "reason": "One full model baseline is justified for the release-wide canonical integrity assessment"
+    },
+    {
+      "id": "B-CORE",
+      "kind": "browser",
+      "files": [
+        "tests/browser/evt-register-delivery.spec.js",
+        "tests/browser/register-status-guide.spec.js",
+        "tests/browser/register-drawer-context.spec.js",
+        "tests/browser/drawer-scroll-ownership.spec.js",
+        "tests/browser/register-drawer-motion.spec.js",
+        "tests/browser/register-shortcut-states.spec.js",
+        "tests/browser/planner-task-editor.spec.js",
+        "tests/browser/planner-draft-recovery.spec.js",
+        "tests/browser/cost-library-legacy-grouping.spec.js",
+        "tests/browser/calculator-planner-job-isolation.spec.js",
+        "tests/browser/c4-browser-acceptance.spec.js",
+        "tests/browser/quote-payment-funding-workflow.spec.js",
+        "tests/browser/quote-first-interaction.spec.js",
+        "tests/browser/quoted-lifecycle.spec.js",
+        "tests/browser/draft-quoted-cost-deletion.spec.js",
+        "tests/browser/workspace-backup-recovery.spec.js",
+        "tests/browser/startup-status-recovery.spec.js",
+        "tests/browser/factory-reset-startup.spec.js",
+        "tests/browser/workspace-sanitation.spec.js",
+        "tests/browser/data-import-keyboard.spec.js",
+        "tests/browser/scheduler-side-by-side.spec.js",
+        "tests/browser/scheduler-multi-day.spec.js",
+        "tests/browser/scheduler-unused-action-scope.spec.js",
+        "tests/browser/scheduler-week-viewport.spec.js",
+        "tests/browser/scheduler-event-milestones.spec.js",
+        "tests/browser/metromap-activation.spec.js",
+        "tests/browser/space-map-onboarding.spec.js",
+        "tests/browser/program-runtime.spec.js",
+        "tests/browser/performance-audit.spec.js"
+      ],
+      "reason": "Desktop business, financial, recovery, isolation and current regression coverage"
+    },
+    {
+      "id": "B-BUDGET",
+      "kind": "browser",
+      "files": [
+        "tests/browser/budget-workflow.spec.js"
+      ],
+      "grepInvert": "Budget form all eight actions",
+      "reason": "Remaining desktop budget gates; first mixed mobile case excluded"
+    },
+    {
+      "id": "B-MAP-DRAFT",
+      "kind": "browser",
+      "files": [
+        "tests/browser/space-map-draft-actions.spec.js"
+      ],
+      "grep": "closing either radial hub|radial Undo restores completed vertex edits|radial Undo reverses Moasure|geometry creation uses third-tier|Location actions stage pins",
+      "reason": "Operation and draft lifecycle checks; excludes mobile responsive tests"
+    },
+    {
+      "id": "B-GPU",
+      "kind": "browser",
+      "files": [
+        "tests/browser/space-map-gpu.spec.js"
+      ],
+      "grepInvert": "local-file entry|local launcher",
+      "reason": "Software WebGPU, fallback, camera, tree and draft buffers; screenshot cases excluded"
+    }
+  ],
+  "preflightFlags": [
+    {
+      "file": "tests/browser/budget-workflow.spec.js",
+      "batch": "B-BUDGET",
+      "selection": "Budget form all eight actions",
+      "lines": [
+        {
+          "line": 64,
+          "source": "await page.setViewportSize({ width: 480, height: 720 });"
+        }
+      ]
+    },
+    {
+      "file": "tests/browser/space-map-draft-actions.spec.js",
+      "batch": "B-MAP-DRAFT",
+      "selection": "closing either radial hub|radial Undo restores completed vertex edits|radial Undo reverses Moasure|geometry creation uses third-tier|Location actions stage pins",
+      "lines": [
+        {
+          "line": 357,
+          "source": "const {frame,errors}=await setup(page);await page.setViewportSize({width:390,height:700});"
+        }
+      ]
+    },
+    {
+      "file": "tests/browser/space-map-gpu.spec.js",
+      "batch": "B-GPU",
+      "selection": "local-file entry|local launcher",
+      "lines": [
+        {
+          "line": 53,
+          "source": "const canvas=frame.locator('.maplibregl-canvas'), bounds=await canvas.boundingBox(), before=await canvas.screenshot();"
+        },
+        {
+          "line": 55,
+          "source": "await expect.poll(async()=>Buffer.compare(before,await canvas.screenshot())).not.toBe(0);"
+        },
+        {
+          "line": 56,
+          "source": "const panned=await canvas.screenshot();await page.mouse.wheel(0,-200);"
+        },
+        {
+          "line": 57,
+          "source": "await expect.poll(async()=>Buffer.compare(panned,await canvas.screenshot())).not.toBe(0);"
+        },
+        {
+          "line": 271,
+          "source": "const screenshot = await frame.locator('.maplibregl-canvas').screenshot();"
+        }
+      ]
+    }
+  ],
+  "policy": "Explicit screenshot/mobile/touch/video/trace calls are blocked by a process-level audit guard. A policy block is not a product failure. Files with mixed cases are title-selected.",
+  "isolation": {
+    "sourceCopy": "/tmp/nsa-evt-audit-20261017-094545",
+    "moduleDependencies": "Read-only installed project node_modules via symlink",
+    "profiles": "Playwright disposable contexts; no operator profile",
+    "outputs": "Transient logs, profiles and test outputs in /tmp only",
+    "fixtures": "Synthetic and disposable copies of approved fixture; original bytes retained"
+  }
+}
