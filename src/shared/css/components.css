@@ -29,6 +29,13 @@
 .uos-button:disabled, .uos-icon-button:disabled { opacity: .44; transform: none; }
 .uos-button--primary:disabled { border-color: var(--uos-border-strong); color: var(--uos-text-muted); background: var(--uos-surface-muted); }
 .uos-icon-button { width: 36px; height: 36px; min-height: 36px; display: inline-grid; place-items: center; padding: 0; }
+.maplibregl-ctrl-group.uos-map-navigation { display: grid; margin: 10px; overflow: hidden; border: 1px solid var(--uos-border); border-radius: 4px; background: var(--uos-surface); color: var(--uos-text); pointer-events: auto; }
+.maplibregl-ctrl-group.uos-map-navigation button { display: grid; place-items: center; width: 28px; min-width: 28px; height: 28px; min-height: 28px; padding: 0; border: 0; border-radius: 0; background: transparent; color: inherit; cursor: pointer; }
+.maplibregl-ctrl-group.uos-map-navigation button + button { border-top: 1px solid var(--uos-border); }
+.maplibregl-ctrl-group.uos-map-navigation button:enabled:hover { background: var(--uos-brand-soft); color: var(--uos-brand-text); }
+.maplibregl-ctrl-group.uos-map-navigation button:focus-visible { outline: 2px solid var(--uos-brand-text); outline-offset: -3px; }
+.maplibregl-ctrl-group.uos-map-navigation button svg { width: 16px; height: 16px; }
+@media (pointer: coarse) { .maplibregl-ctrl-group.uos-map-navigation button { width: 44px; min-width: 44px; height: 44px; min-height: 44px; } }
 .uos-icon-button svg, .uos-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 .uos-input, .uos-select, .uos-textarea { width: 100%; min-width: 0; padding: 0 9px; }

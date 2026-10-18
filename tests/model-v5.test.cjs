@@ -14,7 +14,7 @@ function load(owner = "NSA") {
 test("blank v5 workspaces contain canonical collections and guarded automation", () => {
   const model = load(); const ws = model.blank("2026-09-12T00:00:00.000Z");
   assert.equal(ws.schemaVersion, 5); assert.deepEqual(Array.from(ws.entities.statusEvents), []); assert.deepEqual(Array.from(ws.entities.statusRecommendations), []);
-  assert.equal(ws.statusControl.automationEnabled, true); assert.doesNotThrow(() => model.assertValid(ws));
+  assert.equal(ws.statusControl.automationEnabled, false); assert.doesNotThrow(() => model.assertValid(ws));
 });
 
 test("PC-006 Project promotion creates canonical checklist Tasks but no implicit Job", () => {

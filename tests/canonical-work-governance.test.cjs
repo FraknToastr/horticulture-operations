@@ -7,6 +7,25 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 
+test("active Planner governance requires explicit calendar creation without automatic save side effects", () => {
+  const active = [
+    "PRODUCT_CONSTITUTION.md", "PRODUCT_CONTRACTS.md", "RELEASE_GATES.md",
+    "PROJECT_TEST_PROFILE.md", "PC-020 — Planner Task Management and Delivery Lineage.md",
+    "PRODUCT_CONSTITUTION_VIEWER.html"
+  ];
+  for (const file of active) {
+    const text = read(`src/governance/${file}`).replace(/\s+/g, " ");
+    assert.ok(/Explicit Planner calendar creation — 2026-10-01/.test(text), `${file} must identify the controlling accepted decision`);
+    assert.ok(/[Ee]ligibility only/.test(text), `${file} must distinguish Task Purpose from Job creation`);
+    assert.ok(/never create or recreate Jobs|must not create or recreate a Job|no Job creation or recreation on ordinary saves/i.test(text), `${file} must prohibit ordinary-save Job creation or recreation`);
+    assert.ok(!/Operational classification creates\/resolves|automatic Draft Job creation remains|Operational Task automatically (?:obtains|provisions|owns)/i.test(text), `${file} must not restore the superseded automatic provisioning rule`);
+  }
+  const decisions = read("src/governance/DECISIONS.md");
+  assert.match(decisions, /Historical decision; automatic Draft Job provisioning superseded/);
+  assert.match(decisions, /## Explicit Planner calendar creation — 2026-10-01/);
+  assert.match(read("src/governance/PLANNER_BUDGET_UI_TEST_ACCEPTANCE_2026-09-29.md"), /Historical acceptance record/);
+});
+
 test("canonical work governance supersedes mandatory Job rules in source and viewer", () => {
   for (const file of ["CANONICAL_MODEL.md", "PRODUCT_CONSTITUTION.md", "PRODUCT_CONTRACTS.md", "PRODUCT_CONSTITUTION_VIEWER.html"]) {
     const text = read(`src/governance/${file}`);

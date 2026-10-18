@@ -1,5 +1,22 @@
 # Stage 3 checkpoint — review complete, stopped
 
+## Owner resolution — 18 October 2026
+
+**All three owner decisions are closed.** The client has not received a
+release-ready version and will receive a clean app with no saved workspace.
+The missing Council amounts for `NSA-PROJ-0VCASS6` and `NSA-PROJ-186F3X1` are
+therefore not applicable to that release. Do not invent amounts or set them to
+zero in the historical sample. The owner explicitly directed that automated
+status processing remain paused; no enabling approval or officer name is needed.
+
+The [dated owner decision record](stage-3-owner-decisions-2026-10-18.json)
+supersedes the pending-decision wording below. The original 57-warning inventory,
+three remaining sample warnings, original workspace and reviewed candidate are
+retained as historical evidence. None is adopted as the client's starting data.
+Stage 5 is now authorised to proceed, including paused defaults for clean starts.
+
+## Original review — 17 October 2026
+
 All **57 warnings** in the latest approved NSA workspace have been reviewed.
 A separately named candidate resolves **54** legacy catalogue warnings and retains
 **three owner decisions**. No financial amount was invented and status automation

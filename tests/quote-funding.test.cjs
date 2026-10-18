@@ -24,10 +24,29 @@ function save(UOS, ws, projectId, values = {}) {
   return UOS.ProgramQuotes.saveDraft(ws, { projectId, quoteDate: "2026-10-01", scopeNotes: "Delivery of horticultural work", ...values });
 }
 for (const owner of ["NSA", "EVT"]) {
+  test(`${owner}: new Quotes use the owner funding default without changing saved arrangements`, () => {
+    const UOS = load(owner), Q = UOS.ProgramQuotes;
+    const { ws, projectId } = fixture(UOS, owner);
+    const created = save(UOS, ws, projectId);
+    const quote = created.entities.quotes[0];
+    assert.equal(quote.fundingMode, owner === "NSA" ? "city" : "customer");
+    assert.equal(ws.entities.quotes.length, 0, "choosing a default must not mutate the input workspace");
+    for (const mode of ["city", "customer", "mixed", null]) {
+      const explicit = save(UOS, ws, projectId, { fundingMode: mode });
+      const saved = explicit.entities.quotes[0];
+      assert.equal(saved.fundingMode, mode);
+      const updated = save(UOS, explicit, projectId, { id: saved.id, scopeNotes: "Updated scope" });
+      assert.equal(updated.entities.quotes[0].fundingMode, mode, "saving a draft must retain its explicit arrangement");
+    }
+    delete quote.fundingMode;
+    const legacy = save(UOS, created, projectId, { id: quote.id });
+    assert.equal(legacy.entities.quotes[0].fundingMode, null, "legacy Quotes still require an explicit selection");
+  });
+
   test(`${owner}: three funding arrangements, exact coverage, shortfall and surplus`, () => {
     const UOS = load(owner), Q = UOS.ProgramQuotes, F = UOS.ProjectFunding;
     let { ws, projectId } = fixture(UOS, owner);
-    ws = save(UOS, ws, projectId);
+    ws = save(UOS, ws, projectId, { fundingMode: "customer" });
     let quote = ws.entities.quotes[0];
     assert.equal(quote.fundingMode, "customer");
     assert.equal(F.deliveryCost(ws, projectId), 100);
@@ -114,7 +133,7 @@ for (const owner of ["NSA", "EVT"]) {
 test("Customer-only shortfalls cannot use City allocation; declines are not confirmed funding", () => {
   const UOS = load(), Q = UOS.ProgramQuotes, F = UOS.ProjectFunding;
   let { ws, projectId } = fixture(UOS, "NSA", 500);
-  ws = save(UOS, ws, projectId, { discountRate: 10 });
+  ws = save(UOS, ws, projectId, { fundingMode: "customer", discountRate: 10 });
   const quote = ws.entities.quotes[0];
   assert.throws(() => Q.issue(ws, quote.id), /funding gap/i);
   ws = save(UOS, ws, projectId, { id: quote.id, discountRate: 0, discountAmount: 0 });
@@ -135,7 +154,7 @@ test("Funding commercial values lock with deposits/allocations and unlock after 
   assert.throws(() => save(UOS, ws, projectId, { id: quote.id, proposedCustomerContribution: 80 }), /Reverse active payments/);
   assert.equal(ws.entities.paymentAllocations[0].status, "Active");
   assert.equal(Q.commerciallyLocked(ws, quote.id), true);
-  ws = Q.reversePayment(ws, ws.entities.payments[0].id, "Customer cancelled deposit");
+  ws = Q.reversePayment(ws, ws.entities.payments[0].id, "Customer cancelled deposit", "Funding test officer");
   ws = save(UOS, ws, projectId, { id: quote.id, fundingMode: "city" });
   assert.equal(Q.paymentSummary(ws, quote.id).balanceDue, 0);
   assert.equal(ws.entities.payments[0].status, "Reversed");
@@ -215,7 +234,7 @@ for (const owner of ["NSA", "EVT"]) {
     assert.equal(Q.paymentSummary(ws, id).paid, 10);
     assert.throws(() => Q.recordPayment(ws, { quoteId: id, amount: 10, paymentDate: "2026-10-16", reference: "After decline" }), /Declined/);
     assert.equal(JSON.stringify(ws), before);
-    ws = Q.reversePayment(ws, paymentId, "Customer declined the offer");
+    ws = Q.reversePayment(ws, paymentId, "Customer declined the offer", "Funding test officer");
     assert.equal(Q.paymentSummary(ws, id).paid, 0);
     assert.equal(ws.entities.payments[0].reversalReason, "Customer declined the offer");
     assert.equal(ws.entities.payments.length, 1);

@@ -1,0 +1,119 @@
+{
+  "checkedAt": "2026-10-17T23:53:27.830Z",
+  "stage": 5,
+  "status": "PASSED",
+  "applicationBrowserCasesPassed": 17,
+  "reportBrowserCasesPassed": 2,
+  "reportDataMatches": true,
+  "markdownDataHashMatches": true,
+  "externalRuntimeDependencies": 0,
+  "offlineProof": {
+    "browserVersion": "151.0.7922.34",
+    "dataSHA256": "234f0c2cefb9bddde49f96d190da26d67174b9867aed252226cc93b2fe5bd6e3",
+    "stageCount": 5,
+    "findingCount": 8,
+    "networkRequests": 0,
+    "pageErrors": 0
+  },
+  "javascriptDisabledContentPassed": true,
+  "localLinksChecked": 31,
+  "missingLinks": [],
+  "mediaAttachments": 0,
+  "baselineFilesChecked": 959,
+  "unexpectedChanges": [],
+  "artifacts": {
+    "final-remediation-report.md": {
+      "bytes": 8445,
+      "sha256": "be110e2ecc1eb90a3929503ea925bb54582380d4effef8e32bbe114c34b9f28d"
+    },
+    "final-remediation-report.html": {
+      "bytes": 32109,
+      "sha256": "5b371996f7175598d7b079f1decc21547db5c97c82e277c9cedbfd5feeb6a130"
+    },
+    "stage-5-results.json": {
+      "bytes": 12342,
+      "sha256": "234f0c2cefb9bddde49f96d190da26d67174b9867aed252226cc93b2fe5bd6e3"
+    },
+    "stage-5-checkpoint.md": {
+      "bytes": 7855,
+      "sha256": "c7067b1b872287dd9c6fe9536d24680c89db4e987d405c128578e280c4ea15f1"
+    },
+    "stage-3-owner-decisions-2026-10-18.json": {
+      "bytes": 1425,
+      "sha256": "84c40decb3b36bc9de6b1c5360fef77d44d7549e5c8e5988996631cf28414d6b"
+    },
+    "stage-5-preservation-baseline.json": {
+      "bytes": 127963,
+      "sha256": "50a8fc99e72f9ec7b4f1c966b3691a54d73668a057e483cb8436fa5e5f20b982"
+    },
+    "stage-5-preservation-results.json": {
+      "bytes": 6100,
+      "sha256": "3077e419991f8d01e72e364dcf10e0fe69dfe9940ec85110a141ff86228a5664"
+    },
+    "stage-5-report-browser-results.json": {
+      "bytes": 5806,
+      "sha256": "d38d522da4e261c4b859399ab4c5bf0e84b03671765d1f609b327f1dad489c76"
+    },
+    "stage-5-report-browser-attempt-1.json": {
+      "bytes": 6772,
+      "sha256": "daf0fef54c19754025ab6358f5f3a1e9f261714a7f67b504011d99a4fe0dd5fa"
+    },
+    "stage-5-actor-model-results.json": {
+      "bytes": 4510,
+      "sha256": "8000f5578b04183c2e79979cf6ff75e664a803e4df862404023384fd34d9d292"
+    },
+    "stage-5-governance-tests.tap": {
+      "bytes": 3970,
+      "sha256": "6873e541a17ad99631a56572729ecc101bb3063f5d9517969d9ccbf6757e7a40"
+    },
+    "stage-5-default-model-results.tap": {
+      "bytes": 646,
+      "sha256": "c0939f7de9662a04119e24c2327ff2434e541e8010a83a356d17d95164417287"
+    },
+    "stage-5-clean-default-tests.tap": {
+      "bytes": 1772,
+      "sha256": "7d6c887bacfd7613fd30444063d03d3f92be77a39c7cb16302276ad0868c76dc"
+    },
+    "stage-5-browser-attempt-1.json": {
+      "bytes": 2639,
+      "sha256": "37ed06349cf11190714fc4e8ba17c9ccde7220472335af033befedf80c5c7af3"
+    },
+    "stage-5-browser-attempt-2.json": {
+      "bytes": 18246,
+      "sha256": "ef18002022a628ef6ed560a23733df6db6f4576b6236d09cf93cb0732a6db745"
+    },
+    "stage-5-browser-attempt-3.json": {
+      "bytes": 25621,
+      "sha256": "6974f8484b97030bd55e98b580247e7f317d69d52d3a01cc5a7213ecd8de6bec"
+    },
+    "stage-5-inspector-browser-attempt-1.json": {
+      "bytes": 7995,
+      "sha256": "1f0d664b68fedaecc319249973e00c75685d18152f17109b4c8aa379a692afa9"
+    },
+    "stage-5-inspector-browser-results.json": {
+      "bytes": 5028,
+      "sha256": "3f814f153af1a38587f8b03119cf992ca8fd222020b6ca46046e3a56a206d65f"
+    },
+    "stage-5/build-report.cjs": {
+      "bytes": 28294,
+      "sha256": "c7c4f5eb6c8285e36c313ab1b9435e5c518d333891814027c95e569b01f71196"
+    },
+    "stage-5/playwright.config.cjs": {
+      "bytes": 880,
+      "sha256": "cacc93d09ceca45b6f68bf3453116ff4a64d124615af6622f874366ea1ee90f9"
+    },
+    "stage-5/validate-report.cjs": {
+      "bytes": 5469,
+      "sha256": "07bc34b9f144407f3f46f2cc8fa162bf302a285c2493fd7873340b4531720260"
+    }
+  },
+  "testSources": {
+    "tests/payment-reversal-attribution.test.cjs": "da2f29af0f46d0e694bd823bf08fa786f38b42baf37953ab18ef88382044dccf",
+    "tests/browser/payment-reversal-attribution.spec.js": "77590aaa94b19c525b919d5c0604dfdc3cd9e38eecd6e316084282695ae2c149",
+    "tests/browser/stage5-clean-start.spec.js": "0b8a486c23372f6043c2e8b1df39413fc1da4c4bd38a1e1ab7f1070212b1a36e",
+    "tests/browser/stage5-inspector-styles.spec.js": "a4bc0318029aa985b13caf76612ad3a1ed284edbfda56f61ec691b6fbcbb3cad",
+    "tests/browser/stage5-remediation-report.spec.js": "b7934cab47923e71290543967114ba2d9a184223622edb8de371144587dac5fb"
+  },
+  "releaseReadiness": "UNVERIFIED",
+  "commitOrPushPerformed": false
+}

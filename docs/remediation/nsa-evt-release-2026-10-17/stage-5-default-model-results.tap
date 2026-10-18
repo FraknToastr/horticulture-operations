@@ -1,0 +1,34 @@
+TAP version 13
+# Subtest: tests/empty-operational-baseline.test.cjs
+ok 1 - tests/empty-operational-baseline.test.cjs
+  ---
+  duration_ms: 85.940928
+  type: 'test'
+  ...
+# Subtest: tests/model-v5.test.cjs
+ok 2 - tests/model-v5.test.cjs
+  ---
+  duration_ms: 89.237553
+  type: 'test'
+  ...
+# Subtest: tests/status.test.cjs
+ok 3 - tests/status.test.cjs
+  ---
+  duration_ms: 34.688941
+  type: 'test'
+  ...
+# Subtest: tests/workspace-sanitation.test.cjs
+ok 4 - tests/workspace-sanitation.test.cjs
+  ---
+  duration_ms: 61.718156
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 97.612411

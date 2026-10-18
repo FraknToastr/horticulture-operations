@@ -1,0 +1,487 @@
+{
+  "config": {
+    "argv": [
+      "/home/n0rt/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/n0rt/headroom-projects/Hort Ops 23 September/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=docs/ui-refinements-2026-10-18/playwright.config.cjs"
+    ],
+    "configFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/ui-refinements-2026-10-18/playwright.config.cjs",
+    "rootDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 1,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/nsa-evt-ui-refinements-browser-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "ui-refinements-desktop",
+        "name": "ui-refinements-desktop",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "map-navigation-refinements.spec.js",
+          "header-status-refinements.spec.js",
+          "quote-payment-funding-workflow.spec.js",
+          "quote-first-interaction.spec.js"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/ui-refinements-2026-10-18/browser-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": {
+      "command": "PORT=4199 node src/scripts/static-server.cjs",
+      "url": "http://127.0.0.1:4199/src/program-planner/index.html?workspace=NSA",
+      "reuseExistingServer": false,
+      "timeout": 15000,
+      "cwd": "/home/n0rt/headroom-projects/Hort Ops 23 September"
+    }
+  },
+  "suites": [
+    {
+      "title": "header-status-refinements.spec.js",
+      "file": "header-status-refinements.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA header titles are enlarged and keep descenders within the accent height",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 5422,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('iframe').contentFrame().locator('#program-header-module')\nExpected: \u001b[32m\"\u001b[7mProject Plann\u001b[27mer\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mRegist\u001b[27mer\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('iframe').contentFrame().locator('#program-header-module')\u001b[22m\n\u001b[2m    14 × locator resolved to <span data-header-module=\"\" class=\"uos-brand__module\" id=\"program-header-module\">Register</span>\u001b[22m\n\u001b[2m       - unexpected value \"Register\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('iframe').contentFrame().locator('#program-header-module')\nExpected: \u001b[32m\"\u001b[7mProject Plann\u001b[27mer\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mRegist\u001b[27mer\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('iframe').contentFrame().locator('#program-header-module')\u001b[22m\n\u001b[2m    14 × locator resolved to <span data-header-module=\"\" class=\"uos-brand__module\" id=\"program-header-module\">Register</span>\u001b[22m\n\u001b[2m       - unexpected value \"Register\"\u001b[22m\n\n    at /home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/header-status-refinements.spec.js:16:59",
+                    "location": {
+                      "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/header-status-refinements.spec.js",
+                      "column": 59,
+                      "line": 16
+                    },
+                    "snippet": "  14 |     const { child, frame } = await openProgram(page, owner);\n  15 |     await frame.locator('.program-header-nav [data-program-destination=\"planner\"]').click();\n> 16 |     await expect(frame.locator(\"#program-header-module\")).toHaveText(\"Project Planner\");\n     |                                                           ^\n  17 |     await expect(frame.locator(\"#program-header-title\")).toHaveText(owner === \"EVT\" ? \"Event Space Remediation\" : \"Nature Strip Applications\");\n  18 |\n  19 |     for (const font of [\"standard\", \"dyslexic\"]) {"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/header-status-refinements.spec.js",
+                        "column": 59,
+                        "line": 16
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('iframe').contentFrame().locator('#program-header-module')\nExpected: \u001b[32m\"\u001b[7mProject Plann\u001b[27mer\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mRegist\u001b[27mer\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('iframe').contentFrame().locator('#program-header-module')\u001b[22m\n\u001b[2m    14 × locator resolved to <span data-header-module=\"\" class=\"uos-brand__module\" id=\"program-header-module\">Register</span>\u001b[22m\n\u001b[2m       - unexpected value \"Register\"\u001b[22m\n\n\n  14 |     const { child, frame } = await openProgram(page, owner);\n  15 |     await frame.locator('.program-header-nav [data-program-destination=\"planner\"]').click();\n> 16 |     await expect(frame.locator(\"#program-header-module\")).toHaveText(\"Project Planner\");\n     |                                                           ^\n  17 |     await expect(frame.locator(\"#program-header-title\")).toHaveText(owner === \"EVT\" ? \"Event Space Remediation\" : \"Nature Strip Applications\");\n  18 |\n  19 |     for (const font of [\"standard\", \"dyslexic\"]) {\n    at /home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/header-status-refinements.spec.js:16:59"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-18T00:05:06.953Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/tmp/nsa-evt-ui-refinements-browser-output/header-status-refinements--d3602-rs-within-the-accent-height-ui-refinements-desktop/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/header-status-refinements.spec.js",
+                    "column": 59,
+                    "line": 16
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "6db645e55916cd4de51a-213132c115ce8ed5fde2",
+          "file": "header-status-refinements.spec.js",
+          "line": 13,
+          "column": 3
+        },
+        {
+          "title": "EVT header titles are enlarged and keep descenders within the accent height",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "6db645e55916cd4de51a-bdf4f9e8806e213cd432",
+          "file": "header-status-refinements.spec.js",
+          "line": 13,
+          "column": 3
+        },
+        {
+          "title": "EVT Status Guide scrolls only its contents and keeps both close controls reachable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "6db645e55916cd4de51a-feb40caa23cef8a75850",
+          "file": "header-status-refinements.spec.js",
+          "line": 60,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "map-navigation-refinements.spec.js",
+      "file": "map-navigation-refinements.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: compact SVG map controls are inset and zoom/home preserve map data on webgl",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "a4c38be0e5a489e8d2eb-79fb9cfb8903d79a6363",
+          "file": "map-navigation-refinements.spec.js",
+          "line": 7,
+          "column": 3
+        },
+        {
+          "title": "EVT: compact SVG map controls are inset and zoom/home preserve map data on maplibre",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "a4c38be0e5a489e8d2eb-3b70add780d84457b0e5",
+          "file": "map-navigation-refinements.spec.js",
+          "line": 7,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "quote-first-interaction.spec.js",
+      "file": "quote-first-interaction.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "1edc7dcddcb19ea1fd52-2338ced234b297165fbc",
+          "file": "quote-first-interaction.spec.js",
+          "line": 29,
+          "column": 2
+        },
+        {
+          "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "1edc7dcddcb19ea1fd52-34bed440c4842db0003c",
+          "file": "quote-first-interaction.spec.js",
+          "line": 29,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "title": "quote-payment-funding-workflow.spec.js",
+      "file": "quote-payment-funding-workflow.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: owner funding default and saved override survive reopening",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-008a642434e03eff554c",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 68,
+          "column": 3
+        },
+        {
+          "title": "NSA: Customer funding permits a first deposit and lifecycle reversals",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-2c7b2d5899877bad71f3",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 87,
+          "column": 3
+        },
+        {
+          "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-9e54e6c7ecf0394dff19",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 129,
+          "column": 3
+        },
+        {
+          "title": "EVT: owner funding default and saved override survive reopening",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-74a5e169b7725e204850",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 68,
+          "column": 3
+        },
+        {
+          "title": "EVT: Customer funding permits a first deposit and lifecycle reversals",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-097171c62e26d3642bfd",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 87,
+          "column": 3
+        },
+        {
+          "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-9c1a1ee3f52b670e29fe",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 129,
+          "column": 3
+        },
+        {
+          "title": "NSA: first-deposit failure keeps data and retry records one payment despite repeated submits",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-7c3e723f43d99b005d33",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 142,
+          "column": 3
+        },
+        {
+          "title": "EVT: first-deposit failure keeps data and retry records one payment despite repeated submits",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-e0368f4044d4cab770a5",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 142,
+          "column": 3
+        },
+        {
+          "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "ui-refinements-desktop",
+              "projectName": "ui-refinements-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-3042713b5a31301f6b65",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 186,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "message": "\u001b[31mTesting stopped early after 1 maximum allowed failures.\u001b[39m"
+    }
+  ],
+  "stats": {
+    "startTime": "2026-10-18T00:05:06.555Z",
+    "duration": 6114.044,
+    "expected": 0,
+    "skipped": 15,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

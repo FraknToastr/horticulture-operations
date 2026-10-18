@@ -88,15 +88,13 @@ html[data-suite-theme="dark"] .space-editor { --space-surface:#242b31; --space-f
 .space-editor__table th:nth-child(5) { width:19%; }
 .space-editor__geometry-summary { cursor:pointer; background:var(--space-field); }
 .space-editor__geometry-summary:hover, .space-editor__table tbody.is-selected > .space-editor__geometry-summary { background:color-mix(in srgb,var(--space-active) 12%,var(--space-field)); }
-.space-editor__geometry-summary button { border:0; background:none; color:inherit; cursor:pointer; min-height:28px; }
 .space-editor__drawer > td { padding:0; }
-.space-editor .space-editor__inspector { margin:0; padding:8px; background:var(--space-surface); border:0; border-radius:0; box-shadow:none; outline:0; }
+.space-editor .space-editor__inspector { margin:0; padding:var(--uos-space-2); background:var(--space-surface); border:0; border-radius:0; box-shadow:none; outline:0; }
 .space-editor .program-shape-card__head { display:none; }
 .space-editor .program-shape-card__controls { display:grid; grid-template-columns:minmax(0,1fr) minmax(80px,.5fr); gap:6px; }
 .space-editor .program-shape-card__controls > label:last-child { grid-column:1/-1; }
 .space-editor .space-editor__inspector .uos-field { margin:0; min-width:0; font-size:12px; }
 .space-editor .space-editor__inspector .uos-select, .space-editor .space-editor__inspector .uos-input { width:100%; min-width:0; height:var(--space-control); border-radius:2px; background:var(--space-field); color:var(--space-ink); }
-.space-editor .program-shape-actions { display:flex; gap:4px; margin-top:6px; }
 .space-editor .program-shape-actions--labelled > button { flex:1; }
 .space-editor .program-shape-card__job-row { margin-top:8px; }
 .space-editor .program-shape-card__job-row button { width:100%; }
@@ -229,7 +227,7 @@ html[data-suite-theme="dark"] .space-editor[data-space-owner="EVT"] { --space-ac
 .space-editor__geometry-card.is-selected { border-color:var(--space-active); box-shadow:none; }
 .space-editor__geometry-card .space-editor__geometry-summary { display:flex; align-items:center; gap:8px; padding:4px 8px; border-bottom:1px solid var(--space-line); }
 .space-editor__geometry-summary h3 { flex:1; margin:0; min-width:0; font-size:12px; font-weight:700; }
-.space-editor__geometry-summary button { display:flex; align-items:center; justify-content:center; width:var(--space-control); height:var(--space-control); border:0; padding:0; color:var(--space-ink); background:transparent; cursor:pointer; }
+.space-editor__geometry-summary button { display:flex; align-items:center; justify-content:center; width:var(--space-control); height:var(--space-control); min-height:28px; border:0; padding:0; color:var(--space-ink); background:transparent; cursor:pointer; }
 .space-editor__geometry-card.is-selected .space-editor__geometry-summary { background:color-mix(in srgb,var(--space-active) 12%,var(--space-field)); }
 .space-editor__fields { width:100%; table-layout:auto; border-collapse:collapse; font-size:12px; color:var(--space-ink); }
 .space-editor__fields :is(th,td) { padding:4px 8px; text-align:left; border-bottom:1px solid var(--space-line); overflow-wrap:anywhere; white-space:normal; }
@@ -238,10 +236,9 @@ html[data-suite-theme="dark"] .space-editor[data-space-owner="EVT"] { --space-ac
 .space-editor .space-editor__drawer :is(.uos-select,.uos-input), .space-editor .space-editor__geometry-card > .program-shape-actions .uos-button { border:1px solid var(--space-line); border-radius:2px; }
 .space-editor .space-editor__geometry-card > .program-shape-actions .uos-button.is-active { border-color:var(--space-active); }
 .space-editor .space-editor__inspector .program-shape-card__job-row { border-top:1px solid var(--space-line); }
-.space-editor .space-editor__geometry-card > .program-shape-actions { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; padding:8px; margin:0; border-top:1px solid var(--space-line); }
+.space-editor .space-editor__geometry-card > .program-shape-actions { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:var(--uos-space-2); padding:var(--uos-space-2); margin:0; border-top:1px solid var(--space-line); }
 .space-editor .space-editor__geometry-card > .program-shape-actions button { width:100%; padding:0; }
 .space-editor .space-editor__drawer { border-top:1px solid var(--space-line); }
-.space-editor .space-editor__inspector { padding:8px; }
 .space-editor__geometry-card[data-space-draft] p { margin:8px; font-size:12px; }
 .tree-layer-menu { position:absolute; z-index:6; bottom:18px; left:50%; transform:translateX(-50%); }
 .tree-layer-menu button { color:var(--uos-text); background:var(--uos-surface); border:1px solid var(--uos-border); box-shadow:0 3px 12px #0002; cursor:pointer; min-width:44px; min-height:44px; font:inherit; }

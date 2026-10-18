@@ -43,9 +43,23 @@ for (const owner of ["NSA", "EVT"]) {
       if (collection !== "rateItems") assert.deepEqual(json(workspace.entities[collection]), [], collection);
     }
     assert.equal(workspace.migration.emptyOperationalBaseline.id, model.emptyOperationalBaselineId);
-    assert.equal(workspace.statusControl.automationEnabled, true);
+    assert.equal(workspace.statusControl.automationEnabled, false);
     assert.equal(workspace.statusControl.operatorName, "");
+    assert.equal(workspace.statusControl.enabledBy, "");
+    assert.equal(workspace.statusControl.enabledAt, "");
     assert.doesNotThrow(() => model.assertValid(workspace));
+  });
+
+  test(`${owner} normalization keeps explicit automation preferences and defaults missing controls to paused`, () => {
+    const model = load(owner);
+    for (const enabled of [true, false]) {
+      const workspace = model.blank("2026-10-18T00:00:00.000Z");
+      workspace.statusControl = { automationEnabled: enabled, operatorName: "Existing officer", enabledBy: "Earlier approval", enabledAt: "2026-10-01T00:00:00.000Z" };
+      assert.deepEqual(json(model.normalize(workspace).statusControl), json(workspace.statusControl));
+    }
+    const missing = model.blank("2026-10-18T00:00:00.000Z");
+    delete missing.statusControl;
+    assert.deepEqual(json(model.normalize(missing).statusControl), { automationEnabled: false, operatorName: "", enabledBy: "", enabledAt: "" });
   });
 }
 
@@ -80,8 +94,10 @@ test("one-time reset destroys operational state, restores rates, and is idempote
   assert.equal(result.workspace.referenceData.dirty, undefined);
   assert.equal(result.workspace.workspace.destination, "register");
   assert.equal(result.workspace.workspace.selectedEntityId, null);
-  assert.equal(result.workspace.statusControl.automationEnabled, true);
+  assert.equal(result.workspace.statusControl.automationEnabled, false);
   assert.equal(result.workspace.statusControl.operatorName, "");
+  assert.equal(result.workspace.statusControl.enabledBy, "");
+  assert.equal(result.workspace.statusControl.enabledAt, "");
   assert.equal(result.workspace.migration.recovery, undefined);
   assert.equal(result.workspace.migration.unresolvedLinks, undefined);
   assert.equal(result.report.rateItemCount, 47);

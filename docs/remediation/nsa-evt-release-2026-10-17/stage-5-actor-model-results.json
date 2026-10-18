@@ -1,0 +1,63 @@
+{
+  "stage": 5,
+  "recordedDate": "2026-10-18",
+  "runner": "Codex sub-agent /root/stage5_actor_tests",
+  "scope": "Focused NSA/EVT payment-reversal officer attribution and directly affected quote-funding model regressions",
+  "evidenceMethod": "Transcribed from successful existing tool outputs; no tests were rerun to generate this record.",
+  "runs": [
+    {
+      "command": "rtk proxy node --test tests/payment-reversal-attribution.test.cjs tests/quote-funding.test.cjs",
+      "exitCode": 0,
+      "reportedUnit": "test files",
+      "tests": 2,
+      "passed": 2,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "durationMs": 1492.061315,
+      "files": [
+        {"path": "tests/payment-reversal-attribution.test.cjs", "status": "passed", "durationMs": 262.295491},
+        {"path": "tests/quote-funding.test.cjs", "status": "passed", "durationMs": 1485.713151}
+      ],
+      "qualification": "This invocation emitted two file-level TAP results. It does not establish a count of individual quote-funding cases."
+    },
+    {
+      "command": "rtk proxy node tests/payment-reversal-attribution.test.cjs",
+      "exitCode": 0,
+      "reportedUnit": "individual test cases",
+      "tests": 10,
+      "passed": 10,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "durationMs": 235.290687,
+      "qualification": "Latest direct run, after explicit assertions that legacy absent reversedBy properties remain absent. The full TAP summary was recovered from the retained output, not from a new test run.",
+      "cases": [
+        {"owner": "NSA", "name": "new reversal records a trimmed officer and reason without mutating the input", "status": "passed", "durationMs": 28.106684},
+        {"owner": "NSA", "name": "missing officer or reason rejects atomically before any receipt or allocation changes", "status": "passed", "durationMs": 30.894272},
+        {"owner": "NSA", "name": "reversal evidence survives canonical normalization and exported-workspace reload", "status": "passed", "durationMs": 26.051662},
+        {"owner": "NSA", "name": "repeated reversal preserves the first evidence before validating new arguments", "status": "passed", "durationMs": 21.472858},
+        {"owner": "NSA", "name": "legacy reversal reload and repeated commands retain missing historical attribution", "status": "passed", "durationMs": 22.153122},
+        {"owner": "EVT", "name": "new reversal records a trimmed officer and reason without mutating the input", "status": "passed", "durationMs": 15.26458},
+        {"owner": "EVT", "name": "missing officer or reason rejects atomically before any receipt or allocation changes", "status": "passed", "durationMs": 24.062535},
+        {"owner": "EVT", "name": "reversal evidence survives canonical normalization and exported-workspace reload", "status": "passed", "durationMs": 21.822694},
+        {"owner": "EVT", "name": "repeated reversal preserves the first evidence before validating new arguments", "status": "passed", "durationMs": 19.348378},
+        {"owner": "EVT", "name": "legacy reversal reload and repeated commands retain missing historical attribution", "status": "passed", "durationMs": 17.415062}
+      ]
+    }
+  ],
+  "fixtureCorrections": [
+    {
+      "path": "tests/browser/draft-quoted-cost-deletion.spec.js",
+      "trigger": "Root desktop run stopped because two legacy synthetic receipts omitted the payment method and therefore attempted ordinary payment on a Draft Quote, prohibited by the retained Stage 2 rule.",
+      "change": "Set method to Paid with Deposit on both the direct and allocated Draft receipt fixtures.",
+      "rationale": "The test explicitly checks Draft deposit financial protection and release of that protection after reversal. Issuing the Quote would preserve separate snapshot protection and invalidate the expected unprotected reversed-Draft branch. Explicit deposits retain the intended lifecycle and eligibility rule; production eligibility was not changed.",
+      "execution": "Root retains the failed attempt and owns the corrected focused desktop rerun. This sub-agent did not execute browser tests."
+    }
+  ],
+  "browserExecution": "No browser tests were executed by this sub-agent; desktop browser verification is owned by the root agent.",
+  "excluded": ["screenshots", "mobile-device tests", "touch tests", "video", "traces", "Overtime tests", "full-suite reruns"],
+  "publication": "No commit or push performed by this sub-agent."
+}

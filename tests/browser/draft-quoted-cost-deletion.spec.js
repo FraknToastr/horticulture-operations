@@ -27,10 +27,11 @@ for (const owner of ['NSA', 'EVT']) {
       const issued = quotes.issue(original, quoteId);
       const accepted = quotes.accept(issued, quoteId);
       const declined = quotes.decline(issued, quoteId);
-      const paid = quotes.recordPayment(original, { quoteId, amount: 10, paymentDate: '2026-10-02', reference: 'TEST-DEPOSIT' });
-      const reversed = quotes.reversePayment(paid, paid.entities.payments[0].id, 'Test reversal');
-      const allocated = quotes.recordPayment(original, { quoteId, amount: 10, paymentDate: '2026-10-02', reference: 'ALLOCATED-DEPOSIT', allocations: [{ quoteLineId: original.entities.quoteLines[0].id, amount: 10 }] });
-      const reversedAllocation = quotes.reversePayment(allocated, allocated.entities.payments[0].id, 'Test allocation reversal');
+ // These Draft fixtures exercise deposit protection, not ordinary payment eligibility.
+ const paid = quotes.recordPayment(original, { quoteId, amount: 10, paymentDate: '2026-10-02', method: 'Paid with Deposit', reference: 'TEST-DEPOSIT' });
+ const reversed = quotes.reversePayment(paid, paid.entities.payments[0].id, 'Test reversal', 'Deletion test officer');
+ const allocated = quotes.recordPayment(original, { quoteId, amount: 10, paymentDate: '2026-10-02', method: 'Paid with Deposit', reference: 'ALLOCATED-DEPOSIT', allocations: [{ quoteLineId: original.entities.quoteLines[0].id, amount: 10 }] });
+ const reversedAllocation = quotes.reversePayment(allocated, allocated.entities.payments[0].id, 'Test allocation reversal', 'Deletion test officer');
       const actual = structuredClone(original); actual.entities.costingLines[0].actualCost = 0;
       const mixed = quotes.saveDraft(original, { id: quoteId, projectId, fundingMode: 'mixed', proposedCustomerContribution: 200 });
       const removed = costs.removeLine(mixed, lineId);

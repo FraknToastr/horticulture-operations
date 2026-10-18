@@ -1,0 +1,735 @@
+{
+  "config": {
+    "argv": [
+      "/home/n0rt/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/n0rt/headroom-projects/Hort Ops 23 September/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=docs/remediation/nsa-evt-release-2026-10-17/stage-5/playwright.config.cjs"
+    ],
+    "configFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-5/playwright.config.cjs",
+    "rootDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 1,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/nsa-evt-stage5-browser-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "stage5-desktop",
+        "name": "stage5-desktop",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "quote-first-interaction.spec.js",
+          "quote-payment-funding-workflow.spec.js",
+          "draft-quoted-cost-deletion.spec.js",
+          "payment-reversal-attribution.spec.js",
+          "stage5-inspector-styles.spec.js",
+          "stage5-clean-start.spec.js"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-5-browser-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": {
+      "command": "PORT=4199 node src/scripts/static-server.cjs",
+      "url": "http://127.0.0.1:4199/src/program-planner/index.html?workspace=NSA",
+      "reuseExistingServer": false,
+      "timeout": 15000,
+      "cwd": "/home/n0rt/headroom-projects/Hort Ops 23 September"
+    }
+  },
+  "suites": [
+    {
+      "title": "draft-quoted-cost-deletion.spec.js",
+      "file": "draft-quoted-cost-deletion.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: Draft-quoted unscheduled costs can be removed while financial history remains protected",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1282,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:43:58.789Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "51c22ec2af6226b73d2e-576dd372ed8d8405a283",
+          "file": "draft-quoted-cost-deletion.spec.js",
+          "line": 5,
+          "column": 3
+        },
+        {
+          "title": "EVT: Draft-quoted unscheduled costs can be removed while financial history remains protected",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1004,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:00.148Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "51c22ec2af6226b73d2e-9da9445aa8583cad4e8b",
+          "file": "draft-quoted-cost-deletion.spec.js",
+          "line": 5,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "payment-reversal-attribution.spec.js",
+      "file": "payment-reversal-attribution.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: manual officer works without session storage and reversal commit failure is atomic and retryable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1213,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:01.159Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f70ea2cd12c98e75490e-856a9128f30d1551fd9d",
+          "file": "payment-reversal-attribution.spec.js",
+          "line": 5,
+          "column": 3
+        },
+        {
+          "title": "EVT: manual officer works without session storage and reversal commit failure is atomic and retryable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1170,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:02.378Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f70ea2cd12c98e75490e-9eaf656281780facecf3",
+          "file": "payment-reversal-attribution.spec.js",
+          "line": 5,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "quote-first-interaction.spec.js",
+      "file": "quote-first-interaction.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2858,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:03.556Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1edc7dcddcb19ea1fd52-13de0c7e6652660cfb87",
+          "file": "quote-first-interaction.spec.js",
+          "line": 29,
+          "column": 2
+        },
+        {
+          "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2725,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:06.419Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1edc7dcddcb19ea1fd52-7f612fc976f0d8ef47a1",
+          "file": "quote-first-interaction.spec.js",
+          "line": 29,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "title": "quote-payment-funding-workflow.spec.js",
+      "file": "quote-payment-funding-workflow.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: default Customer permits a first deposit without toggling funding",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6461,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:09.152Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-50e732494f85b12f1e40",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 68,
+          "column": 3
+        },
+        {
+          "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1050,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:15.618Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-f239572a78b69b66fa42",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 109,
+          "column": 3
+        },
+        {
+          "title": "EVT: default Customer permits a first deposit without toggling funding",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6079,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:16.673Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-ef6c019c0621b97b9b98",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 68,
+          "column": 3
+        },
+        {
+          "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1003,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:22.758Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-e16adbbf054eaf5ba074",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 109,
+          "column": 3
+        },
+        {
+          "title": "NSA: first-deposit failure keeps data and retry records one payment despite repeated submits",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1329,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:23.766Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-3e1eaa4c5552ebef6df3",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 122,
+          "column": 3
+        },
+        {
+          "title": "EVT: first-deposit failure keeps data and retry records one payment despite repeated submits",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1245,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:25.100Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-ffd176eb69711d9640e4",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 122,
+          "column": 3
+        },
+        {
+          "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1613,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:26.350Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c21e5e66fb635bdc086-5ffc45c0c6a83b061eff",
+          "file": "quote-payment-funding-workflow.spec.js",
+          "line": 164,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "stage5-clean-start.spec.js",
+      "file": "stage5-clean-start.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: clean client start has no operational data and automation stays paused after reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 341,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:27.969Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "32223444e417bc40c0c6-25209a59706ddfacdd89",
+          "file": "stage5-clean-start.spec.js",
+          "line": 5,
+          "column": 3
+        },
+        {
+          "title": "EVT: clean client start has no operational data and automation stays paused after reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 341,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:28.315Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "32223444e417bc40c0c6-371c086dfcd13ad0df03",
+          "file": "stage5-clean-start.spec.js",
+          "line": 5,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "stage5-inspector-styles.spec.js",
+      "file": "stage5-inspector-styles.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NSA: inspector spacing, action contrast and collapse levels retain their desktop styles",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 1188,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"rgb(\u001b[7m255, 255, 255\u001b[27m)\"\u001b[39m\nReceived: \u001b[31m\"rgb(\u001b[7m7, 27, 60\u001b[27m)\"\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"rgb(\u001b[7m255, 255, 255\u001b[27m)\"\u001b[39m\nReceived: \u001b[31m\"rgb(\u001b[7m7, 27, 60\u001b[27m)\"\u001b[39m\n    at /home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/stage5-inspector-styles.spec.js:103:35",
+                    "location": {
+                      "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/stage5-inspector-styles.spec.js",
+                      "column": 35,
+                      "line": 103
+                    },
+                    "snippet": "  101 |       expect(styles.selectRadius).toBe('2px');\n  102 |       expect(styles.summaryButton).toEqual({ height: '32px', minHeight: '28px', border: '0px', color: styles.ink });\n> 103 |       expect(styles.active.color).toBe(styles.onAction);\n      |                                   ^\n  104 |       expect(styles.active.stroke).toBe(styles.onAction);\n  105 |\n  106 |       for (const level of ['full', 'summary', 'minimal']) {"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/stage5-inspector-styles.spec.js",
+                        "column": 35,
+                        "line": 103
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"rgb(\u001b[7m255, 255, 255\u001b[27m)\"\u001b[39m\nReceived: \u001b[31m\"rgb(\u001b[7m7, 27, 60\u001b[27m)\"\u001b[39m\n\n  101 |       expect(styles.selectRadius).toBe('2px');\n  102 |       expect(styles.summaryButton).toEqual({ height: '32px', minHeight: '28px', border: '0px', color: styles.ink });\n> 103 |       expect(styles.active.color).toBe(styles.onAction);\n      |                                   ^\n  104 |       expect(styles.active.stroke).toBe(styles.onAction);\n  105 |\n  106 |       for (const level of ['full', 'summary', 'minimal']) {\n    at /home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/stage5-inspector-styles.spec.js:103:35"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:44:28.665Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/tmp/nsa-evt-stage5-browser-output/stage5-inspector-styles-NS-40524-retain-their-desktop-styles-stage5-desktop/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/stage5-inspector-styles.spec.js",
+                    "column": 35,
+                    "line": 103
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "b13d41aaa4e4f7ff8227-2a9c635d7e07797a06e5",
+          "file": "stage5-inspector-styles.spec.js",
+          "line": 47,
+          "column": 3
+        },
+        {
+          "title": "EVT: inspector spacing, action contrast and collapse levels retain their desktop styles",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "b13d41aaa4e4f7ff8227-6447515baa7852598cd0",
+          "file": "stage5-inspector-styles.spec.js",
+          "line": 47,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "message": "\u001b[31mTesting stopped early after 1 maximum allowed failures.\u001b[39m"
+    }
+  ],
+  "stats": {
+    "startTime": "2026-10-17T23:43:58.343Z",
+    "duration": 31547.924000000003,
+    "expected": 15,
+    "skipped": 1,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

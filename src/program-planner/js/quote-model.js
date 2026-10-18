@@ -11,6 +11,7 @@
   function clone(value) { return value === undefined ? undefined : JSON.parse(JSON.stringify(value)); }
   function text(value) { return String(value == null ? "" : value).trim(); }
   function money(value) { var number = Number(value); return Number.isFinite(number) ? Math.round((number + Number.EPSILON) * 100) / 100 : 0; }
+  function defaultFundingMode(owner) { return owner === "EVT" ? "customer" : "city"; }
   function validPaymentDate(value) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
     var parsed = new Date(value + "T00:00:00Z");
@@ -185,7 +186,7 @@ function valueOrExisting(input, name, existing) {
     var previousQuoteId = text(input.previousQuoteId || (existing && existing.previousQuoteId)) || null;
     var auditNumber = text(input.auditNumber || (existing && existing.auditNumber)) || revisionAuditNumber(auditRootNumber, revision);
   var financialLock = Boolean(existing && commerciallyLocked(result, existing.id));
-  var fundingMode = input.fundingMode === undefined ? (existing ? existing.fundingMode : "customer") : input.fundingMode;
+    var fundingMode = input.fundingMode === undefined ? (existing ? existing.fundingMode : defaultFundingMode(project.owner)) : input.fundingMode;
   if (fundingMode != null && fundingMode !== "" && ["city", "customer", "mixed"].indexOf(fundingMode) < 0) throw new Error("Unsupported funding arrangement.");
   fundingMode = fundingMode || null;
   var proposed = valueOrExisting(input, "proposedCustomerContribution", existing);
@@ -471,15 +472,18 @@ function recordPayment(inputWorkspace, input) {
     return model().normalize(result);
   }
 
-  function reversePayment(inputWorkspace, paymentId, reason) {
+  function reversePayment(inputWorkspace, paymentId, reason, actor) {
     var result = workspace(inputWorkspace);
     var payment = find(result.entities.payments, text(paymentId), "Payment");
     if (payment.status === "Reversed") return result;
     var reversalReason = text(reason);
     if (!reversalReason) throw new Error("A reversal reason is required.");
+    var reversalActor = text(actor);
+    if (!reversalActor) throw new Error("A reversing officer name is required.");
     payment.status = "Reversed";
     payment.reversedAt = new Date().toISOString();
     payment.reversalReason = reversalReason;
+    payment.reversedBy = reversalActor;
     (result.entities.paymentAllocations || []).forEach(function (allocation) { if (allocation.paymentId === payment.id && allocation.status !== "Reversed") { allocation.status = "Reversed"; allocation.reversedAt = payment.reversedAt; allocation.reversalReason = reversalReason; } });
     return model().normalize(result);
   }
@@ -556,6 +560,7 @@ function recordPayment(inputWorkspace, input) {
   UOS.ProgramQuotes = { statuses: STATUSES.slice(), paymentMethods: PAYMENT_METHODS.slice(), inheritProject: inheritProject, evaluateReadiness: evaluateReadiness, commerciallyLocked: function (inputWorkspace, quoteId) { return commerciallyLocked(workspace(inputWorkspace), text(quoteId)); }, saveDraft: saveDraft, updateDraft: saveDraft, refreshDraftFromCurrentCosts: refreshDraftFromCurrentCosts, commercialProjection: commercialProjection, setStatus: setStatus, issue: issue, accept: accept, decline: decline, createRevision: createRevision, lifecycleActions: lifecycleActions, projectQuotes: projectQuotes, quoteRoots: quoteRoots, quoteSnapshot: quoteSnapshot, quoteViewModel: quoteViewModel, recordPayment: recordPayment, reversePayment: reversePayment, paymentSummary: paymentSummary, deletionImpact: deletionImpact, removeQuote: removeQuote, totals: totals };
   UOS.ProgramQuotes.adjustmentEligibility = adjustmentEligibility;
   UOS.ProgramQuotes.receiptEligibility = receiptEligibility;
+  UOS.ProgramQuotes.defaultFundingMode = defaultFundingMode;
   UOS.ProgramQuotes.sourceChanges = sourceChanges;
   UOS.ProgramQuotes.customerAmounts = customerAmounts;
   UOS.ProgramQuotes.setDraftCostingLineIncluded = setDraftCostingLineIncluded;

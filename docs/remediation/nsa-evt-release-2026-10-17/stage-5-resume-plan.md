@@ -1,5 +1,11 @@
 # Stage 5 — deferred implementation handoff
 
+**Resumed by the owner on 18 October 2026.** The Stage 3 budget decisions are
+closed as irrelevant to a clean client release; automated status processing must
+remain paused. See the [dated resolution](stage-3-owner-decisions-2026-10-18.json).
+The text below preserves the original handoff and is superseded where it says
+Stage 5 is still deferred or the three Stage 3 decisions are pending.
+
 Recorded 17 October 2026 at the owner's request to wait for a quota top-up.
 **Deferred; implementation and tests have not started.** Resume only when the
 owner requests it. This document and the accompanying evidence manifest preserve

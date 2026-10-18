@@ -78,15 +78,21 @@ The local server cannot be reused, preventing verification against a stale serve
 
 ## Current checkpoint
 
-**Stages 1–4 complete; stopped as requested.** See the
+**Stages 1–5 complete locally; stopped on 18 October 2026.** See the
 [Stage 1 checkpoint](stage-1-checkpoint.md), [Stage 2 checkpoint](stage-2-checkpoint.md)
 and [Stage 3 checkpoint](stage-3-checkpoint.md), followed by the
 [Stage 4 dependency assessment](stage-4-checkpoint.md).
-**Stage 5 is deferred at the owner's request pending a quota top-up.** It has
-not started. Resume only when requested, using the
+The owner authorised Stage 5 after the quota deferral, using the
 [Stage 5 plan and handoff](stage-5-resume-plan.md) and its
 [saved evidence manifest](stage-5-deferred-evidence.json).
-Stage 3 produced a separate workspace candidate with three documented owner
-decisions still pending; the approved original remains unchanged.
+Stage 3 produced a separate workspace candidate. Its three owner decisions are
+now closed in the [18 October decision record](stage-3-owner-decisions-2026-10-18.json):
+the sample budgets do not apply to a clean client release, and status automation
+must stay paused. The original and candidate remain unchanged and are not adopted.
 Stage 4 assessed an isolated PDF.js upgrade; shipped PDF.js and MapLibre remain
 unchanged. Its dependency advisories and adoption limits remain open.
+
+[Final remediation report](final-remediation-report.md) and
+[self-contained interactive report](final-remediation-report.html) record the
+completed work, verification and remaining release limits. No commit or push
+was performed for Stage 5. See the [Stage 5 checkpoint](stage-5-checkpoint.md).

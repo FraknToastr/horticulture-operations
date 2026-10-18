@@ -1,0 +1,87 @@
+{
+  "assessmentDate": "2026-10-18",
+  "scope": "NSA Council / EVT Customer defaults for new Quotes and directly related financial protections",
+  "recordingMethod": "Summary of observed command results from this implementation session. Passing tests were not rerun to generate this record; this file is not a raw TAP log.",
+  "runtime": "Node.js v22.23.2",
+  "status": "PASS",
+  "totals": { "tests": 121, "passed": 121, "failed": 0, "skipped": 0 },
+  "commands": [
+    "rtk proxy node tests/quote-funding.test.cjs",
+    "rtk proxy node -e 'const {spawnSync}=require(\"node:child_process\");for(const file of [\"governed-remediation\",\"quote-calculator-membership\",\"payment-reversal-attribution\",\"business-dates\",\"calculator-bulk-delete\",\"canonical-costing-commands\",\"c6-multirate-corrective\"]){const r=spawnSync(process.execPath,[\"tests/\"+file+\".test.cjs\"],{encoding:\"utf8\"});console.log(JSON.stringify({file,status:r.status,summary:r.stdout.split(\"\\n\").filter(x=>/^# (tests|pass|fail|skipped)|^not ok|error:/.test(x)).join(\"\\n\"),stderr:r.stderr}));}'",
+    "rtk proxy node -e 'const {spawnSync}=require(\"node:child_process\");for(const file of [\"governed-remediation\",\"calculator-bulk-delete\"]){const r=spawnSync(process.execPath,[\"tests/\"+file+\".test.cjs\"],{encoding:\"utf8\"});console.log(JSON.stringify({file,status:r.status,summary:r.stdout.split(\"\\n\").filter(x=>/^# (tests|pass|fail|skipped)|^not ok|error:/.test(x)).join(\"\\n\"),stderr:r.stderr}));}'"
+  ],
+  "finalSelections": [
+    { "file": "tests/quote-funding.test.cjs", "tests": 21, "passed": 21, "failed": 0 },
+    { "file": "tests/governed-remediation.test.cjs", "tests": 32, "passed": 32, "failed": 0 },
+    { "file": "tests/quote-calculator-membership.test.cjs", "tests": 3, "passed": 3, "failed": 0 },
+    { "file": "tests/payment-reversal-attribution.test.cjs", "tests": 10, "passed": 10, "failed": 0 },
+    { "file": "tests/business-dates.test.cjs", "tests": 4, "passed": 4, "failed": 0 },
+    { "file": "tests/calculator-bulk-delete.test.cjs", "tests": 24, "passed": 24, "failed": 0 },
+    { "file": "tests/canonical-costing-commands.test.cjs", "tests": 13, "passed": 13, "failed": 0 },
+    { "file": "tests/c6-multirate-corrective.test.cjs", "tests": 14, "passed": 14, "failed": 0 }
+  ],
+  "earlierAttempts": [
+    {
+      "file": "tests/quote-funding.test.cjs",
+      "commands": ["rtk proxy node --test tests/quote-funding.test.cjs", "rtk proxy node tests/quote-funding.test.cjs"],
+      "result": "The initial --test command reported a failing file; direct execution exposed the individual failed assertion.",
+      "tests": 21,
+      "passed": 20,
+      "failed": 1,
+      "cause": "The Customer-only shortfall fixture omitted fundingMode and inherited the newly requested NSA Council default.",
+      "resolution": "Set fundingMode: customer explicitly in the synthetic Customer-only fixture. Retained the funding-gap, decline and agreement assertions. Final direct rerun passed all 21."
+    },
+    {
+      "file": "tests/governed-remediation.test.cjs",
+      "tests": 32,
+      "passed": 28,
+      "failed": 4,
+      "cause": "Customer-funded readiness fixtures implicitly depended on the former NSA Customer default.",
+      "resolution": "Made the synthetic Customer funding arrangement explicit in the shared readiness fixture and the full/partial/unrelated/superseded/committed customer-funding cases. Preserved all funding-gap and committed-funding assertions. Final rerun passed all 32."
+    },
+    {
+      "file": "tests/calculator-bulk-delete.test.cjs",
+      "tests": 24,
+      "passed": 18,
+      "failed": 6,
+      "cause": "The synthetic protected Quote fixture omitted fundingMode; new NSA Council funding prevented its customer receipt or issue setup.",
+      "resolution": "Set fundingMode: customer explicitly for the protected Quote setup. Preserved Issued, Accepted, Declined, Superseded, payment and allocation deletion protections. Final rerun passed all 24."
+    }
+  ],
+  "additionalChecks": {
+    "syntax": {
+      "status": "PASS",
+      "method": "Compile source with vm.Script without executing it",
+      "files": [
+        "src/program-planner/js/quote-model.js",
+        "src/program-planner/js/quote-builder.js",
+        "tests/browser/quote-funding.spec.js",
+        "tests/browser/quote-first-interaction.spec.js",
+        "tests/browser/quote-payment-funding-workflow.spec.js"
+      ]
+    },
+    "diffCheck": {
+      "status": "PASS",
+      "command": "rtk proxy git diff --check -- src/program-planner/js/quote-builder.js src/program-planner/js/quote-model.js tests/quote-funding.test.cjs tests/calculator-bulk-delete.test.cjs tests/governed-remediation.test.cjs tests/browser/quote-funding.spec.js tests/browser/quote-first-interaction.spec.js tests/browser/quote-payment-funding-workflow.spec.js"
+    },
+    "stage5FixtureReview": {
+      "method": "Read-only inspection; no additional tests run",
+      "files": [
+        "tests/browser/payment-reversal-attribution.spec.js",
+        "tests/browser/stage5-clean-start.spec.js",
+        "tests/browser/stage5-inspector-styles.spec.js",
+        "tests/browser/stage5-remediation-report.spec.js",
+        "tests/payment-reversal-attribution.test.cjs"
+      ],
+      "finding": "Both payment reversal attribution fixtures already specify fundingMode: customer. The other reviewed Stage 5 tests have no synthetic Customer default assumption requiring correction. No further edits required."
+    }
+  },
+  "browserExecution": "Not performed by this worker. Parent agent owns the focused browser batch and its separate result evidence.",
+  "boundaries": {
+    "screenshots": false,
+    "mobileOrTouchTests": false,
+    "videosOrTraces": false,
+    "overtimeChanges": false,
+    "commitOrPush": false
+  }
+}

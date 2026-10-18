@@ -96,8 +96,8 @@ DELIVERY PROJECT
         v                   v                   v                  v
      Tasks            Work Geometry           Jobs              Quotes
         |                   |                   ^                  |
-        | Operational       | explicit          |                  |
-        | classification    | promotion         |                  |
+        | explicit Planner  | explicit          |                  |
+        | calendar action   | promotion         |                  |
         +------------------>|-------------------+                  |
                             |                                      |
                             v                                      v
@@ -480,7 +480,7 @@ The Register's carry-forward Yes/No answer opens a review for that Register and 
 
 ## T-019 --- Planner Draft Jobs precede scheduling and costing
 
-An Operational Planner Task creates or resolves exactly one canonical Planner-origin Job in Draft, preserving Task, Project, Register and owner lineage. Draft creation is a preparation step. Scheduling and costing are later, distinct, explicit actions over that same Job; neither is implied by Task classification, Draft Job creation or viewing a module. Costing requires a selected, evidenced basis and creates a snapshot under PC-007. Quote inclusion requires an eligible Costing lineage and a deliberate commercial decision; Issue remains subject to PC-013. Inert Tasks create no Job.
+Task Purpose controls eligibility only. Ordinary Task saves never create or recreate Jobs. Under the accepted **Explicit Planner calendar creation — 2026-10-01** decision in `DECISIONS.md`, creating, editing or promoting an Operational Planner Task does not create or recreate a Job. Its explicit Planner calendar action creates or opens at most one canonical Planner-origin Job, preserving Task, Project, Register and owner lineage. New Jobs begin in Draft. Scheduling and costing are later, distinct, explicit actions over the same Job; neither is implied by Task classification, Draft Job creation or viewing a module. Costing requires a selected, evidenced basis and creates a snapshot under PC-007. Quote inclusion requires eligible Costing lineage and a deliberate commercial decision; Issue remains subject to PC-013. Inert Tasks create no Job.
 
 Each Job has exactly one explainable origin: Planner Task, Calculator work, or Space Map geometry. Its origin identity is immutable. A Job must not acquire a second origin to make a workflow convenient. Scheduler state is a projection of that same canonical Job. Existing historical records with unknown or legacy origin require review, not invented source links.
 

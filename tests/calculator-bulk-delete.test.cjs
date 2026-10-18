@@ -99,7 +99,7 @@ for (const owner of ['NSA', 'EVT']) {
       let ws = api.createWork(workspace, projectId, protection === 'planner' ? 'RATE-COMMAND-LABOUR' : 'RATE-COMMAND-MATERIAL', { quantity: 1 }, { operationId: 'protected' });
       const protectedLine = ws.entities.costingLines[0];
       if (['Issued', 'Accepted', 'Declined', 'Superseded', 'payment', 'allocation'].includes(protection)) {
-        ws = UOS.ProgramQuotes.saveDraft(ws, { projectId, quoteDate: '2026-10-02' });
+        ws = UOS.ProgramQuotes.saveDraft(ws, { projectId, quoteDate: '2026-10-02', fundingMode: 'customer' });
         const quoteId = ws.entities.quotes[0].id;
         if (['Issued', 'Accepted', 'Declined', 'Superseded'].includes(protection)) {
           ws = UOS.ProgramQuotes.issue(ws, quoteId);

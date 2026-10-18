@@ -28,6 +28,8 @@ body.program-planner .uos-app,
 }
 
 .program-header {
+  --program-header-accent-height: 32px;
+  --program-header-title-size: 26px;
   position: relative;
   grid-template-columns: auto minmax(0, 1fr) auto;
   box-shadow: none;
@@ -235,7 +237,7 @@ html[data-suite-theme="dark"] .program-filter-drawer-toggle[aria-expanded="true"
 
 .uos-brand__divider {
   width: 2px !important;
-  height: 32px !important;
+  height: var(--program-header-accent-height) !important;
   flex: 0 0 2px !important;
   margin: 0 !important;
   margin-left: 0 !important;
@@ -244,12 +246,16 @@ html[data-suite-theme="dark"] .program-filter-drawer-toggle[aria-expanded="true"
   border-radius: 1px !important;
 }
 
+.uos-brand__headline,
+.uos-brand__module {
+  font-size: var(--program-header-title-size) !important;
+  line-height: var(--program-header-accent-height) !important;
+}
+
 .uos-brand__headline {
   margin: 0 !important;
   color: var(--program-owner-strong, #166534) !important;
-  font-size: 17px !important;
   font-weight: 800 !important;
-  line-height: 1.1 !important;
   white-space: nowrap !important;
   letter-spacing: -0.02em !important;
 }
@@ -257,9 +263,7 @@ html[data-suite-theme="dark"] .program-filter-drawer-toggle[aria-expanded="true"
 .uos-brand__module {
   margin: 0 !important;
   color: var(--program-owner-strong, #166534) !important;
-  font-size: 15px !important;
   font-weight: 700 !important;
-  line-height: 1.1 !important;
   white-space: nowrap !important;
   letter-spacing: -0.01em !important;
   transition: color 0.15s ease !important;

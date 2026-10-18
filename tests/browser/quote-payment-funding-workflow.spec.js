@@ -45,6 +45,7 @@ async function reverse(frame, reference) {
   await frame.locator(`[data-payment-reverse="${id}"]`).click();
   const dialog=frame.getByRole('dialog');
   await dialog.locator('textarea').fill('Synthetic workflow reversal');
+  await dialog.locator('[data-payment-reversal-actor]').fill('Payment workflow officer');
   await dialog.getByRole('button',{name:'Reverse payment',exact:true}).click();
   await expect.poll(()=>frame.evaluate(id=>UOS.ProgramApp.workspace().entities.payments.find(p=>p.id===id).status,id)).toBe('Reversed');
 }
@@ -64,8 +65,28 @@ async function aligned(frame) {
   })).toBe(true);
 }
 for(const owner of ['NSA','EVT']) {
-  test(`${owner}: default Customer permits a first deposit without toggling funding`,async({page})=>{
+  test(`${owner}: owner funding default and saved override survive reopening`,async({page})=>{
     const {frame,ids}=await setup(page,owner);
+    const defaultMode=owner==='NSA'?'city':'customer';
+    await expect(frame.locator(`[data-quote-funding-mode][value="${defaultMode}"]`)).toBeChecked();
+    await frame.locator('[data-quote-section-link="5"]').click();
+    if(owner==='NSA') await expect(frame.locator('[data-deposit-record]')).toBeDisabled();
+    else await expect(frame.locator('[data-deposit-record]')).toBeEnabled();
+    await expect(frame.locator('[data-payment-record]')).toBeDisabled();
+    expect(await frame.evaluate(()=>UOS.ProgramApp.workspace().entities.quotes.length)).toBe(0);
+    const override=owner==='NSA'?'customer':'city';
+    await funding(frame,override);
+    await page.reload();
+    const restored=page.frames().find(f=>f!==page.mainFrame());
+    await restored.waitForFunction(()=>UOS.ProgramApp?.snapshot().phase==='ready');
+    await restored.locator(`[data-register-record="${ids.recordId}"] [data-register-action="quotes"]`).click();
+    await expect(restored.locator(`[data-quote-funding-mode][value="${override}"]`)).toBeChecked();
+    expect(await restored.evaluate(id=>UOS.ProgramApp.workspace().entities.quotes.find(q=>q.projectId===id).fundingMode,ids.projectId)).toBe(override);
+  });
+
+  test(`${owner}: Customer funding permits a first deposit and lifecycle reversals`,async({page})=>{
+    const {frame,ids}=await setup(page,owner);
+    if(owner==='NSA') await funding(frame,'customer');
     await expect(frame.locator('[data-quote-funding-mode][value="customer"]')).toBeChecked();
     await expect(frame.locator('[data-deposit-record]')).toBeEnabled();
     await deposit(frame,20,'FIRST-DEPOSIT');
@@ -120,6 +141,8 @@ for(const owner of ['NSA','EVT']) {
 for(const owner of ['NSA','EVT']) {
   test(`${owner}: first-deposit failure keeps data and retry records one payment despite repeated submits`,async({page})=>{
   const {frame,ids}=await setup(page,owner);
+    if(owner==='NSA') await funding(frame,'customer');
+    const initialQuoteCount=owner==='NSA'?1:0;
   const before=await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities));
   const rejected=await frame.evaluate(async projectId=>{
     try {
@@ -133,7 +156,7 @@ for(const owner of ['NSA','EVT']) {
   },ids.projectId);
   expect(rejected).toContain('Issue or accept the Quote');
   expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(before);
-  expect(await frame.evaluate(async()=>{const w=await UOS.ProgramStorage.get();return {quotes:w.entities.quotes.length,payments:w.entities.payments.length};})).toEqual({quotes:0,payments:0});
+    expect(await frame.evaluate(async()=>{const w=await UOS.ProgramStorage.get();return {quotes:w.entities.quotes.length,payments:w.entities.payments.length};})).toEqual({quotes:initialQuoteCount,payments:0});
   await frame.evaluate(()=>{
     window.paymentCommit=UOS.storage.commitRevision;
     UOS.storage.commitRevision=()=>Promise.reject(new Error('Synthetic payment commit failure'));
@@ -141,7 +164,7 @@ for(const owner of ['NSA','EVT']) {
   await fillPayment(frame,20,'RETRY-DEPOSIT');await frame.locator('[data-deposit-record]').click();
   await expect(frame.getByRole('dialog')).toContainText('Synthetic payment commit failure');
   expect(await frame.evaluate(()=>JSON.stringify(UOS.ProgramApp.workspace().entities))).toBe(before);
-  expect(await frame.evaluate(async()=>{const w=await UOS.ProgramStorage.get();return {quotes:w.entities.quotes.length,payments:w.entities.payments.length};})).toEqual({quotes:0,payments:0});
+    expect(await frame.evaluate(async()=>{const w=await UOS.ProgramStorage.get();return {quotes:w.entities.quotes.length,payments:w.entities.payments.length};})).toEqual({quotes:initialQuoteCount,payments:0});
   await frame.evaluate(()=>UOS.storage.commitRevision=window.paymentCommit);
   await frame.getByRole('dialog').getByRole('button',{name:'OK',exact:true}).click();
   await expect(frame.locator('[data-deposit-record]')).toBeEnabled();

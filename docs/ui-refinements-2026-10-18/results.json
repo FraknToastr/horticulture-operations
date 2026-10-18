@@ -1,0 +1,224 @@
+{
+  "checkedAt": "2026-10-18T00:09:56.139Z",
+  "status": "PASSED",
+  "scope": "NSA/EVT funding and UI refinements",
+  "modelCasesPassed": 121,
+  "distinctBrowserCasesPassed": 16,
+  "browserCases": [
+    {
+      "title": "NSA header titles are enlarged and keep descenders within the accent height",
+      "status": "passed",
+      "durationMs": 631,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "EVT header titles are enlarged and keep descenders within the accent height",
+      "status": "passed",
+      "durationMs": 474,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "EVT Status Guide scrolls only its contents and keeps both close controls reachable",
+      "status": "passed",
+      "durationMs": 430,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "NSA: compact SVG map controls are inset and zoom/home preserve map data on webgl",
+      "status": "passed",
+      "durationMs": 712,
+      "source": "map-browser-results.json"
+    },
+    {
+      "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+      "status": "passed",
+      "durationMs": 3014,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+      "status": "passed",
+      "durationMs": 2757,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "NSA: owner funding default and saved override survive reopening",
+      "status": "passed",
+      "durationMs": 1418,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "NSA: Customer funding permits a first deposit and lifecycle reversals",
+      "status": "passed",
+      "durationMs": 6656,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+      "status": "passed",
+      "durationMs": 1012,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "EVT: owner funding default and saved override survive reopening",
+      "status": "passed",
+      "durationMs": 1388,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "EVT: Customer funding permits a first deposit and lifecycle reversals",
+      "status": "passed",
+      "durationMs": 6111,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+      "status": "passed",
+      "durationMs": 982,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "NSA: first-deposit failure keeps data and retry records one payment despite repeated submits",
+      "status": "passed",
+      "durationMs": 1457,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "EVT: first-deposit failure keeps data and retry records one payment despite repeated submits",
+      "status": "passed",
+      "durationMs": 1253,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+      "status": "passed",
+      "durationMs": 1523,
+      "source": "browser-attempt-2.json"
+    },
+    {
+      "title": "EVT: compact SVG map controls are inset and zoom/home preserve map data on maplibre",
+      "status": "passed",
+      "durationMs": 3865,
+      "source": "map-browser-results.json"
+    }
+  ],
+  "mediaAttachments": 0,
+  "preservation": {
+    "baselineFilesChecked": 959,
+    "comparedWith": "Stage 5 completed source hashes plus its unchanged-file baseline",
+    "authorisedFollowupChanges": [
+      {
+        "path": "src/program-planner/index.html",
+        "before": "a15092b3a42f9aa2d30a328a29c389f642fbe722cd1169bb055bd0e96a9d2261",
+        "after": "c1e02dc17d03fcad3c498073d912581683532de603c90e460126540c295cb738"
+      },
+      {
+        "path": "src/program-planner/js/quote-builder.js",
+        "before": "61fbdf84ebf2696dbe1c843811856c92cacf7f6d71024e2383a90c56a4310f96",
+        "after": "6b135277267dfbce1c92932b24747dbf7841aa9c056c6f972cb92053d00ce924"
+      },
+      {
+        "path": "src/program-planner/js/quote-model.js",
+        "before": "7b1c3721e1c4876dcef468ea5c41270780aea6a42843191f4b2aae2c85b30eca",
+        "after": "14f3ac54670372d4f7adaf46277ec89b343247fe8c5e9d4207ca919ddab70ad5"
+      },
+      {
+        "path": "src/program-planner/status-v5.css",
+        "before": "2994fbca27568a11ac3f6905e627e3cce9e916053a3f9e7376ff7385afe96449",
+        "after": "fe5eb2c6fa9bca94e636112d845a4ba860faf5b0fc1e1b73bef153160720f9a5"
+      },
+      {
+        "path": "src/program-planner/styles.css",
+        "before": "503fff1902b004bce6de74f02e7243a16825258e054fe3f48934d8adde60dbce",
+        "after": "efd6c26103336f13d06b0a31c71132486ae2dd66f8a848ca338e507223c2ecb1"
+      },
+      {
+        "path": "src/remediation-planner/js/map.js",
+        "before": "e8e4e685a4ccc9ecf91102a8424c7b5231a34853be749e4bf9ec829407144416",
+        "after": "d17e61f56b996510d3b43220fbd5cd7c8ba7608199881e400dbb33e152ecbdee"
+      },
+      {
+        "path": "src/shared/css/components.css",
+        "before": "5180b3b38ced89a35f1315869e01c7d79a722925082b5d97ecfe243b2cdeefb8",
+        "after": "91ee2d28c897ec80e2f94ec037b549fdc5dda825e1b4518f161a44294167a46e"
+      },
+      {
+        "path": "tests/browser/quote-first-interaction.spec.js",
+        "before": "a494f1cd26645f487a1de6479b407116b2b0f1d7e77ff672654c39a7f661942e",
+        "after": "210b287806418f2e2e2b1529a23faad1bca51e797711529e3f89c25be5c6b909"
+      },
+      {
+        "path": "tests/browser/quote-funding.spec.js",
+        "before": "779955ce927b5d6ae57586961383fed663c78380e4856889fdb6bcd02f5063af",
+        "after": "9cabaa2a38250194ca25b7100613020267933319d91c61abe65228bc6af0fb1f"
+      },
+      {
+        "path": "tests/browser/quote-payment-funding-workflow.spec.js",
+        "before": "0988d578f9c1ff1f7efd2d27d6cb1d5d73573e775a6b0e12e2340282c7baa1f9",
+        "after": "4d562c494b1181d03de9d6a6922caddd26be43646eb34859bd409302fe539547"
+      },
+      {
+        "path": "tests/calculator-bulk-delete.test.cjs",
+        "before": "0d06a85cb2f9e6563d0002dbac1a461f32688e44ff7551a539bb24d29be35e1d",
+        "after": "823a837227cb272a89b4d030d9abb501e92b3351ca1b128439f02d049be0369c"
+      },
+      {
+        "path": "tests/governed-remediation.test.cjs",
+        "before": "c6ee50cfe5395930477d3c4e486dbc9ef5d303711dbc296c15c3cc5097b7958c",
+        "after": "16db76349fbf4d2bb927497941c7630b851a79e65d0c5e1d4f7507cfe3e53d6e"
+      },
+      {
+        "path": "tests/quote-funding.test.cjs",
+        "before": "49e59f22bb9d7f00f9014dfd2d161ea38a85d55b642367bc0df928772235601d",
+        "after": "9837f7c5da5f7dcd8047796bdb142ef459be3d17bc4ffd5f5e4552eba904eda8"
+      }
+    ],
+    "unexpectedChanges": [],
+    "overtimeUnchanged": true,
+    "originalSamplesAndVendorFilesUnchanged": true
+  },
+  "artifacts": {
+    "README.md": {
+      "bytes": 3646,
+      "sha256": "8e8799c3b1d17a64b2fb77dc662f4889035e2c11445364320c967c77a5d75f7c"
+    },
+    "browser-attempt-1.json": {
+      "bytes": 19477,
+      "sha256": "ea8c58c98587edadbfbaa10546249d58db6e4c35c475fb4937855dc67d0bfa10"
+    },
+    "browser-attempt-2.json": {
+      "bytes": 26104,
+      "sha256": "c654df7ed55a4586a0cc933ec2c265c1346ef7e2b102acdc00dc93012daae4ef"
+    },
+    "browser-results.json": {
+      "bytes": 26104,
+      "sha256": "c654df7ed55a4586a0cc933ec2c265c1346ef7e2b102acdc00dc93012daae4ef"
+    },
+    "browser-selection.json": {
+      "bytes": 13684,
+      "sha256": "db3d7eeffedc275bfc1cf8ee915b6209bf74241cc922330040ba1cfb80b0a2fe"
+    },
+    "map-browser-results.json": {
+      "bytes": 4871,
+      "sha256": "c6c30cc5db01c3358b02c0ac777e3f5c2c9ba2ce76607a4e9adbd02ece4f94a4"
+    },
+    "model-results.json": {
+      "bytes": 5799,
+      "sha256": "864023847cadb080c46f188cb79af2ff8882f220d73dc89d379fcddc1d7ed048"
+    },
+    "playwright.config.cjs": {
+      "bytes": 712,
+      "sha256": "a4dbf22dac2494a86bf2623d926388f1a7f7a68d448f6722e41e6f940de57535"
+    },
+    "record-results.cjs": {
+      "bytes": 4244,
+      "sha256": "e25cb6190abcfa33faf470d5d95639c2d8eb8ca23fa652734de16f3fda964ac2"
+    }
+  },
+  "newTests": {
+    "tests/browser/map-navigation-refinements.spec.js": "2a722a5a26be1204eea3255fbe87f4d6b52f455679f19469cbd0afc30c7b47df",
+    "tests/browser/header-status-refinements.spec.js": "1a9f667363eb6a360b09949b8060339ff2a1fd99b954745fe810ec2e122fb548"
+  },
+  "commitOrPushPerformed": false,
+  "limits": "Local desktop Chromium HTTP proof; no screenshots/mobile/touch/video/traces or deployment certification"
+}

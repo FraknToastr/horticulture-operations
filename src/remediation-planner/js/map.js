@@ -1074,7 +1074,42 @@
       return { success: true };
     }
 
-    function initialize() {
+  function navigationControl() {
+    var element;
+    return {
+      onAdd: function (camera) {
+        element = document.createElement("div");
+        element.className = "maplibregl-ctrl maplibregl-ctrl-group uos-map-navigation";
+        element.setAttribute("role", "group");
+        element.setAttribute("aria-label", "Map navigation");
+        var magnifier = '<circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/>';
+        [
+          { label: "Zoom in", delta: 1, icon: magnifier + '<path d="M7 10.5h7m-3.5-3.5v7"/>' },
+          { label: "Zoom out", delta: -1, icon: magnifier + '<path d="M7 10.5h7"/>' },
+          { label: "Home", icon: '<path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-8h6v8"/>' }
+        ].forEach(function (action) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.setAttribute("aria-label", action.label);
+          button.setAttribute("data-uos-tooltip", action.label);
+          button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + action.icon + '</svg>';
+          button.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (action.delta) camera.easeTo({ zoom: camera.getZoom() + action.delta, duration: animDuration(150), originalEvent: { type: "control" } });
+            else resetView();
+          });
+          element.appendChild(button);
+        });
+        element.addEventListener("pointerdown", function (event) { event.stopPropagation(); });
+        element.addEventListener("mousedown", function (event) { event.stopPropagation(); });
+        return element;
+      },
+      onRemove: function () { if (element) element.remove(); element = null; }
+    };
+  }
+
+  function initialize() {
       if (!container || !maplibregl) {
         if (typeof options.onUnavailable === "function") options.onUnavailable();
         return;
@@ -1097,7 +1132,7 @@
         initializationTimer = setTimeout(function () {
           failInitialization(new Error("MapLibre initialization timed out."));
         }, map.isSpaceMapAdapter ? 30000 : timeoutValue(config.initializationTimeoutMs, 10000));
-        map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+      map.addControl(navigationControl(), "top-right");
         map.on("unavailable", function (event) {
           // Keep controller state and unfinished drafts intact after all backends fail.
           ready = false;

@@ -1,0 +1,33 @@
+{
+  "recordedDate": "2026-10-18",
+  "authority": "Explicit repository-owner instruction in this conversation",
+  "stage": 3,
+  "ownerDecisionsRemaining": 0,
+  "releaseDataPolicy": "The client has not received the release-ready app. The release will start with no saved workspace; the historical reviewed sample is not client starting data.",
+  "decisions": [
+    {
+      "code": "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+      "entityId": "NSA-PROJ-0VCASS6",
+      "status": "closed-not-applicable-to-clean-release",
+      "action": "Retain the missing historical sample amount. Do not assume zero or invent a budget."
+    },
+    {
+      "code": "FUNDING_OPERATIONAL_AMOUNT_MISSING",
+      "entityId": "NSA-PROJ-186F3X1",
+      "status": "closed-not-applicable-to-clean-release",
+      "action": "Retain the missing historical sample amount. Do not assume zero or invent a budget."
+    },
+    {
+      "code": "STATUS_MIGRATION_READINESS",
+      "entityId": "status-readiness",
+      "status": "closed-keep-automation-paused",
+      "action": "Do not enable status automation. Clean workspace and reset defaults must be paused. No officer attribution for enabling is invented."
+    }
+  ],
+  "historicalEvidence": "stage-3-warning-review.json",
+  "historicalEvidenceUnchanged": true,
+  "workspaceAmountsChanged": false,
+  "reviewedCandidateAdopted": false,
+  "existingOperatorWorkspaceDeleted": false,
+  "stage5Authorised": true
+}

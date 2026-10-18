@@ -1,0 +1,308 @@
+{
+  "reportVersion": 1,
+  "recordedDate": "2026-10-18",
+  "baseCommit": "b4e5db9516cb6df3900f1b6ad6d08f2bcf68a35a",
+  "scope": "NSA/EVT working tree; Overtime excluded",
+  "roadmapComplete": true,
+  "releaseReadiness": "UNVERIFIED",
+  "ownerDecisionsRemaining": 0,
+  "cleanAutomationDefault": "paused",
+  "originalAudit": "../../audits/nsa-evt/20261017-094545-local-8545d67/report.md",
+  "environment": {
+    "node": "v22.23.2",
+    "playwright": "1.62.0",
+    "browser": "Installed desktop Chromium",
+    "viewport": "1600 × 1000",
+    "transport": "Local HTTP"
+  },
+  "stages": [
+    {
+      "id": 1,
+      "title": "Desktop test alignment",
+      "status": "Complete",
+      "description": "Manual MetroMap activation, current inspector collapse levels and guarded desktop release selection.",
+      "evidence": "stage-1-checkpoint.md"
+    },
+    {
+      "id": 2,
+      "title": "Canonical receipt eligibility",
+      "status": "Complete",
+      "description": "Draft deposits remain allowed. Ordinary payments require Issued or Accepted; Declined blocks new receipts.",
+      "evidence": "stage-2-checkpoint.md"
+    },
+    {
+      "id": 3,
+      "title": "Workspace review and owner decisions",
+      "status": "Complete",
+      "description": "54 sample warnings corrected in a separate candidate. All three owner decisions closed: sample budgets do not apply to the clean release; automation stays paused.",
+      "evidence": "stage-3-checkpoint.md"
+    },
+    {
+      "id": 4,
+      "title": "Dependency assessment",
+      "status": "Complete",
+      "description": "Inventory and isolated PDF.js 6.4.299 compatibility proposal retained. Shipped runtimes unchanged; dependency risks remain open.",
+      "evidence": "stage-4-checkpoint.md"
+    },
+    {
+      "id": 5,
+      "title": "Governance, officers and CSS",
+      "status": "Complete",
+      "description": "Explicit-calendar contracts, named officers for new reversals, paused clean defaults, bounded inspector CSS consolidation and final reports.",
+      "evidence": "stage-5-checkpoint.md"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "stage": 1,
+      "title": "Stale release checks",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "Desktop selection and guarded tests match the current manual-key and inspector workflows. Screenshot/mobile aggregates remain excluded."
+    },
+    {
+      "id": "F-002",
+      "stage": 2,
+      "title": "Receipt command eligibility",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "The command and UI agree on deposits, ordinary payments and Declined Quotes. Historical receipts and reversals remain accessible."
+    },
+    {
+      "id": "F-003",
+      "stage": 3,
+      "title": "Historical sample warnings",
+      "state": "owner-closed",
+      "label": "Owner decisions closed",
+      "detail": "Two absent sample budgets are irrelevant to a release with no saved workspace. No amounts were invented. The owner confirmed automation must stay paused; historical sample warnings remain truthful."
+    },
+    {
+      "id": "F-004",
+      "stage": 5,
+      "title": "Automatic Job governance drift",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "Active contracts now require the explicit Planner calendar action. Purpose changes and normal saves affect eligibility without creating or recreating Jobs. Historical rules are retained as superseded."
+    },
+    {
+      "id": "F-005",
+      "stage": 4,
+      "title": "Vendored dependency risks",
+      "state": "open",
+      "label": "Open vendor update",
+      "detail": "MapLibre 5.3.0 matches critical GHSA-jrc7-96c5-q579. Current attribution is curated, but the affected library still ships. PDF.js 2.16.105 retains its explicit isEvalSupported:false mitigation. Full local licence texts and a separately verified vendor upgrade remain outstanding."
+    },
+    {
+      "id": "F-006",
+      "stage": 5,
+      "title": "Inspector CSS duplication",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "Consolidated proven duplicate declarations and removed an overridden action-row rule. Existing 8px tokens replace equivalent literals; both owner themes and all three collapse levels were checked using computed styles."
+    },
+    {
+      "id": "F-007",
+      "stage": 5,
+      "title": "Payment reversal officer",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "New reversals require a trimmed officer name and reason in the UI and canonical command. Session names prefill an editable field. Evidence survives reload; old missing actors remain missing and repeated commands preserve the first evidence."
+    },
+    {
+      "id": "RELEASE",
+      "stage": 0,
+      "title": "Release environment verification",
+      "state": "unverified",
+      "label": "Not verified",
+      "detail": "These are local desktop Chromium HTTP checks. GitHub Pages, Edge file:// and the broader PDF corpus are not certified. A clean client handover requires fresh or deliberately cleared browser storage; this work does not erase an existing operator workspace."
+    }
+  ],
+  "verification": [
+    {
+      "name": "Reversal attribution, atomic validation, persistence and idempotence",
+      "passed": 10,
+      "unit": "individual model cases",
+      "source": "stage-5-actor-model-results.json"
+    },
+    {
+      "name": "Actor and existing funding regressions",
+      "passed": 2,
+      "unit": "model file gates; overlaps the actor cases above",
+      "source": "stage-5-actor-model-results.json"
+    },
+    {
+      "name": "Clean/reset defaults and explicit saved preferences",
+      "passed": 7,
+      "unit": "individual model cases",
+      "source": "stage-5-clean-default-tests.tap"
+    },
+    {
+      "name": "Affected model, baseline sanitation and status engine",
+      "passed": 4,
+      "unit": "model file gates; not an individual-case total",
+      "source": "stage-5-default-model-results.tap"
+    },
+    {
+      "name": "Governance and explicit Planner Job lineage",
+      "passed": 17,
+      "unit": "individual cases",
+      "source": "stage-5-governance-tests.tap"
+    },
+    {
+      "name": "Reversal/funding UI, clean startup and inspector styles",
+      "passed": 17,
+      "unit": "distinct browser cases across the retained run and focused inspector rerun",
+      "source": "stage-5-browser-attempt-3.json + stage-5-inspector-browser-results.json"
+    }
+  ],
+  "browser": {
+    "passed": 17,
+    "selected": 17,
+    "sources": [
+      "stage-5-browser-attempt-3.json",
+      "stage-5-inspector-browser-results.json"
+    ],
+    "cases": [
+      {
+        "title": "NSA: Draft-quoted unscheduled costs can be removed while financial history remains protected",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1282
+      },
+      {
+        "title": "EVT: Draft-quoted unscheduled costs can be removed while financial history remains protected",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1004
+      },
+      {
+        "title": "NSA: manual officer works without session storage and reversal commit failure is atomic and retryable",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1213
+      },
+      {
+        "title": "EVT: manual officer works without session storage and reversal commit failure is atomic and retryable",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1170
+      },
+      {
+        "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 2858
+      },
+      {
+        "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 2725
+      },
+      {
+        "title": "NSA: default Customer permits a first deposit without toggling funding",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 6461
+      },
+      {
+        "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1050
+      },
+      {
+        "title": "EVT: default Customer permits a first deposit without toggling funding",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 6079
+      },
+      {
+        "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1003
+      },
+      {
+        "title": "NSA: first-deposit failure keeps data and retry records one payment despite repeated submits",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1329
+      },
+      {
+        "title": "EVT: first-deposit failure keeps data and retry records one payment despite repeated submits",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1245
+      },
+      {
+        "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1613
+      },
+      {
+        "title": "NSA: clean client start has no operational data and automation stays paused after reload",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 341
+      },
+      {
+        "title": "EVT: clean client start has no operational data and automation stays paused after reload",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 341
+      },
+      {
+        "title": "NSA: inspector spacing, action contrast and collapse levels retain their desktop styles",
+        "status": "passed",
+        "source": "stage-5-inspector-browser-results.json",
+        "durationMs": 2796
+      },
+      {
+        "title": "EVT: inspector spacing, action contrast and collapse levels retain their desktop styles",
+        "status": "passed",
+        "source": "stage-5-inspector-browser-results.json",
+        "durationMs": 2423
+      }
+    ],
+    "mediaAttachments": 0
+  },
+  "preservation": {
+    "trackedFilesChecked": 959,
+    "authorisedChanges": 24,
+    "unchangedFiles": 935,
+    "unexpectedChanges": 0,
+    "evidence": "stage-5-preservation-results.json"
+  },
+  "priorAttempts": [
+    {
+      "source": "stage-5-browser-attempt-1.json",
+      "outcome": "No tests ran: nested config needed an explicit server working directory. Corrected configuration."
+    },
+    {
+      "source": "stage-5-browser-attempt-2.json",
+      "outcome": "Stopped on stale Draft ordinary-payment fixtures. Corrected fixtures to their intended allowed deposit method; production eligibility unchanged."
+    },
+    {
+      "source": "stage-5-browser-attempt-3.json",
+      "outcome": "15 passed; inspector probe sampled the start of a colour transition. Corrected probe to exercise real Edit/Cancel with test-only transitions disabled; reran only the two inspector cases."
+    },
+    {
+      "source": "stage-5-inspector-browser-attempt-1.json",
+      "outcome": "Inspector-only probe then exposed its separate hover/focus expectation error. Checked owner-soft hover/focus colours and resting active colours independently; both final owner cases passed without further production CSS changes."
+    },
+    {
+      "source": "stage-5-report-browser-attempt-1.json",
+      "outcome": "Report keyboard check found an ambiguous Stage select label. Added explicit accessible filter names and reran only the two offline report checks."
+    }
+  ],
+  "boundaries": [
+    "No screenshots, mobile, touch, video or traces",
+    "No vendor upgrade or Stage 3 sample adoption",
+    "No existing operator workspace erased",
+    "No commit, push or publication for Stage 5"
+  ],
+  "next": "Separately scope the outstanding vendor/licence work and target deployment checks before calling the client release ready."
+}

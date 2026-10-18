@@ -18,7 +18,7 @@ function readyWorkspace(UOS) {
   ws.entities.projects.push({ id: "NSA-PROJ-READY", owner: "NSA", type: "project", applicationId: "NSA-APP-READY", funding: { operationalAmount: 100 }, status: "planning" });
   ws.entities.jobs.push({ id: "NSA-JOB-READY", owner: "NSA", type: "job", projectId: "NSA-PROJ-READY", status: "Draft", sourceKind: "calculator", sourceEntityId: "rate-1" });
   ws.entities.costingLines.push({ id: "NSA-COST-READY", owner: "NSA", type: "costingLine", projectId: "NSA-PROJ-READY", jobId: "NSA-JOB-READY", description: "Tree work", quantity: 1, unitRate: 100, estimatedTotal: 100 });
-  return UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-READY", quoteDate: "2026-09-14", scopeNotes: "Remove one tree", refreshCosts: true });
+  return UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-READY", quoteDate: "2026-09-14", scopeNotes: "Remove one tree", refreshCosts: true, fundingMode: "customer" });
 }
 
 test("PC-001 through PC-028 are represented once in executable governance", () => {
@@ -77,7 +77,7 @@ test("PC-013 C2: Fully customer-funded candidate Quote satisfies readiness and i
   ws.entities.costingLines.push({ id: "NSA-COST-C2-FULL", owner: "NSA", type: "costingLine", projectId: "NSA-PROJ-C2-FULL", jobId: "NSA-JOB-C2-FULL", description: "Arborist works", quantity: 1, unitRate: 250, estimatedTotal: 250 });
 
   // Candidate draft quote generated from costing lines ($250 ex-GST, $25 GST, $275 grand total)
-  let updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-FULL", quoteDate: "2026-09-14", scopeNotes: "Full arborist scope", refreshCosts: true });
+  let updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-FULL", quoteDate: "2026-09-14", scopeNotes: "Full arborist scope", refreshCosts: true, fundingMode: "customer" });
   const draftQuote = updatedWs.entities.quotes[0];
   assert.equal(draftQuote.status, "Draft");
 
@@ -107,7 +107,7 @@ test("PC-013 C2: Partial customer contribution maintains accurate funding gap", 
   ws.entities.costingLines.push({ id: "NSA-COST-C2-PART", owner: "NSA", type: "costingLine", projectId: "NSA-PROJ-C2-PART", jobId: "NSA-JOB-C2-PART", description: "Horticultural work", quantity: 1, unitRate: 200, estimatedTotal: 200 });
 
   // Quote with $80 discount -> $120 ex-GST contribution against $200 delivery cost
-  const updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-PART", quoteDate: "2026-09-14", scopeNotes: "Partial scope", refreshCosts: true, discountAmount: 80 });
+  const updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-PART", quoteDate: "2026-09-14", scopeNotes: "Partial scope", refreshCosts: true, discountAmount: 80, fundingMode: "customer" });
   const draftQuote = updatedWs.entities.quotes[0];
 
   const readiness = UOS.ProgramQuotes.evaluateReadiness(updatedWs, draftQuote.id);
@@ -127,7 +127,7 @@ test("PC-013 C2: Unrelated Draft Quotes in workspace do not count as committed f
   ws.entities.costingLines.push({ id: "NSA-COST-C2-UNRELATED", owner: "NSA", type: "costingLine", projectId: "NSA-PROJ-C2-UNRELATED", jobId: "NSA-JOB-C2-UNRELATED", description: "Tree work", quantity: 1, unitRate: 150, estimatedTotal: 150 });
 
   // Save a draft quote
-  const updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-UNRELATED", quoteDate: "2026-09-14", scopeNotes: "Draft work", refreshCosts: true });
+  const updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-UNRELATED", quoteDate: "2026-09-14", scopeNotes: "Draft work", refreshCosts: true, fundingMode: "customer" });
 
   // Query general position WITHOUT candidate option
   const position = UOS.ProjectFunding.position(updatedWs, "NSA-PROJ-C2-UNRELATED");
@@ -145,7 +145,7 @@ test("PC-013 C2: Superseded candidate quotes cannot contribute to funding", () =
   ws.entities.jobs.push({ id: "NSA-JOB-C2-SUPER", owner: "NSA", type: "job", projectId: "NSA-PROJ-C2-SUPER", status: "Draft", sourceKind: "calculator", sourceEntityId: "rate-1" });
   ws.entities.costingLines.push({ id: "NSA-COST-C2-SUPER", owner: "NSA", type: "costingLine", projectId: "NSA-PROJ-C2-SUPER", jobId: "NSA-JOB-C2-SUPER", description: "Tree work", quantity: 1, unitRate: 100, estimatedTotal: 100 });
 
-  const updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-SUPER", quoteDate: "2026-09-14", scopeNotes: "Tree work", refreshCosts: true });
+  const updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-SUPER", quoteDate: "2026-09-14", scopeNotes: "Tree work", refreshCosts: true, fundingMode: "customer" });
   const draftQuote = updatedWs.entities.quotes[0];
   draftQuote.supersededByQuoteId = "NSA-QUOTE-NEWER";
 
@@ -162,7 +162,7 @@ test("PC-013 C2: Existing Issued and Accepted quotes retain established committe
   ws.entities.jobs.push({ id: "NSA-JOB-C2-COMMITTED", owner: "NSA", type: "job", projectId: "NSA-PROJ-C2-COMMITTED", status: "Draft", sourceKind: "calculator", sourceEntityId: "rate-1" });
   ws.entities.costingLines.push({ id: "NSA-COST-C2-COMMITTED", owner: "NSA", type: "costingLine", projectId: "NSA-PROJ-C2-COMMITTED", jobId: "NSA-JOB-C2-COMMITTED", description: "Work", quantity: 1, unitRate: 100, estimatedTotal: 100 });
 
-  let updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-COMMITTED", quoteDate: "2026-09-14", scopeNotes: "Work", refreshCosts: true });
+  let updatedWs = UOS.ProgramQuotes.saveDraft(ws, { projectId: "NSA-PROJ-C2-COMMITTED", quoteDate: "2026-09-14", scopeNotes: "Work", refreshCosts: true, fundingMode: "customer" });
   const quoteId = updatedWs.entities.quotes[0].id;
   updatedWs = UOS.ProgramQuotes.issue(updatedWs, quoteId);
 

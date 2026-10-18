@@ -31,7 +31,7 @@
     discountRate: 0,
     contingencyRate: 0,
     operationalAmount: 0,
-    fundingMode: "customer",
+  fundingMode: null,
     proposedCustomerContribution: null,
     suppressCouncilDisclosure: false,
     scopeNotes: "",
@@ -124,36 +124,54 @@ function hasLifecycleAction(actions, names) {
     if (reversalPending) return Promise.resolve(null);
     reversalPending = true;
     var dialogs = window.UOS && window.UOS.dialogs;
+    var fields = document.createElement("div");
+    var actorField = document.createElement("label");
+    actorField.className = "program-payment-reversal-field";
+    actorField.textContent = "Reversing officer";
+    var actorInput = document.createElement("input");
+    actorInput.className = "uos-input uos-input--sm";
+    actorInput.type = "text";
+    actorInput.autocomplete = "name";
+    actorInput.required = true;
+    actorInput.setAttribute("data-payment-reversal-actor", "");
+    try { actorInput.value = text(sessionStorage.getItem("uos.program.statusOperator")); } catch (error) {}
+    actorField.appendChild(actorInput);
+    fields.appendChild(actorField);
     var reasonField = document.createElement("label");
-    reasonField.className = "program-payment-reversal-field";
+    reasonField.className = "program-payment-reversal-field uos-field--spaced";
     reasonField.textContent = "Reason for reversal";
     var textarea = document.createElement("textarea");
     textarea.className = "uos-textarea uos-textarea--sm";
     textarea.maxLength = 240;
     textarea.required = true;
     reasonField.appendChild(textarea);
+    fields.appendChild(reasonField);
     var confirmation = dialogs && typeof dialogs.open === "function"
-      ? dialogs.open({ title: "Reverse payment?", node: reasonField, actions: [
+      ? dialogs.open({ title: "Reverse payment?", node: fields, actions: [
           { label: "Keep payment", value: false },
           { label: "Reverse payment", value: true, danger: true }
         ] })
       : Promise.resolve(window.confirm("Reverse this payment?") ? true : false);
-    var reversalModal = reasonField.closest(".uos-modal");
+    var reversalModal = fields.closest(".uos-modal");
     if (reversalModal) reversalModal.addEventListener("click", function (event) {
       if (!event.target.closest(".uos-button--danger")) return;
+      actorInput.setCustomValidity(text(actorInput.value) ? "" : "Enter the reversing officer's name.");
       textarea.setCustomValidity(text(textarea.value) ? "" : "Enter a reversal reason.");
-      if (!textarea.reportValidity()) {
+      if (!actorInput.reportValidity() || !textarea.reportValidity()) {
         event.preventDefault();
         event.stopPropagation();
       }
     }, true);
+    actorInput.addEventListener("input", function () { actorInput.setCustomValidity(""); });
     textarea.addEventListener("input", function () { textarea.setCustomValidity(""); });
     return confirmation.then(function (confirmed) {
       if (!confirmed) return null;
+      var actor = text(!reversalModal && typeof window.prompt === "function" ? window.prompt("Reversing officer name", actorInput.value) : actorInput.value);
+      if (!actor) throw new Error("A reversing officer name is required.");
       var reason = text(textarea.value || (typeof window.prompt === "function" ? window.prompt("Reason for reversal") : ""));
       if (!reason) throw new Error("A reversal reason is required.");
       return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
-        return window.UOS.ProgramQuotes.reversePayment(workspace, paymentId, reason);
+        return window.UOS.ProgramQuotes.reversePayment(workspace, paymentId, reason, actor);
       }).then(function (workspace) {
         state.workspace = workspace || state.workspace;
         var quote = workspace && workspace.entities && (workspace.entities.quotes || []).find(function (item) { return item.id === state.quoteId; });
@@ -1020,7 +1038,7 @@ function renderPreview() {
     state.expiryDate = quote ? quote.expiryDate || state.expiryDate : state.expiryDate;
     state.discountRate = quote ? Number(quote.discountRate) || 0 : 0;
     state.contingencyRate = quote ? Number(quote.contingencyRate) || 0 : 0;
-    state.fundingMode = quote ? quote.fundingMode || null : "customer";
+  state.fundingMode = quote ? quote.fundingMode || null : UOS.ProgramQuotes.defaultFundingMode(entity.owner);
     state.proposedCustomerContribution = quote && quote.proposedCustomerContribution != null ? Number(quote.proposedCustomerContribution) : null;
     state.suppressCouncilDisclosure = Boolean(quote && quote.suppressCouncilDisclosure);
     state.scopeNotes = quote ? quote.scopeNotes || "" : "";
@@ -1787,7 +1805,7 @@ function renderPreview() {
     state.discountRate = 0;
     state.contingencyRate = 0;
     state.operationalAmount = 0;
-    state.fundingMode = "customer";
+  state.fundingMode = null;
     state.proposedCustomerContribution = null;
     state.suppressCouncilDisclosure = false;
     state.lines = [];

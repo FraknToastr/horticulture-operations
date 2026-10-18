@@ -276,7 +276,7 @@
     });
     setHidden("#workspace-empty", collection("applications").length + collection("events").length + collection("projects").length + collection("jobs").length > 0 || active !== "dashboard");
     var owner = state.workspace ? workingOwner(state.workspace) : "NSA";
-    var labels = { dashboard: "Dashboard", register: "Register", planner: "Project Planner", scheduler: "Job Scheduler", costing: "Cost Calculator", map: "Space Map", quotes: "Quote Builder", reports: "Reports & Financials", data: "Data & Settings" };
+    var labels = { dashboard: "Dashboard", budget: "Budget", register: "Register", planner: "Project Planner", scheduler: "Job Scheduler", costing: "Cost Calculator", map: "Space Map", quotes: "Quote Builder", reports: "Reports & Financials", data: "Data & Settings" };
     setText("#program-header-title", owner === "EVT" ? "Event Space Remediation" : "Nature Strip Applications");
     setText("#program-header-module", labels[active] || "Dashboard");
     var ctxTitle = one("#context-title");

@@ -692,6 +692,7 @@
       item.status = text(item.status) || "Recorded";
       item.reversedAt = text(item.reversedAt);
       item.reversalReason = text(item.reversalReason);
+      if (Object.prototype.hasOwnProperty.call(item, "reversedBy")) item.reversedBy = text(item.reversedBy);
     }
     if (collection === "tasks") {
       item.projectId = text(item.projectId) || null;

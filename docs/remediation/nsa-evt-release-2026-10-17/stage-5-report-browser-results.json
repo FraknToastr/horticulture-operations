@@ -1,0 +1,183 @@
+{
+  "config": {
+    "argv": [
+      "/home/n0rt/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/n0rt/headroom-projects/Hort Ops 23 September/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=docs/remediation/nsa-evt-release-2026-10-17/stage-5/playwright.config.cjs",
+      "stage5-remediation-report.spec.js"
+    ],
+    "configFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-5/playwright.config.cjs",
+    "rootDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 1,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/nsa-evt-stage5-browser-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "stage5-desktop",
+        "name": "stage5-desktop",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "quote-first-interaction.spec.js",
+          "quote-payment-funding-workflow.spec.js",
+          "draft-quoted-cost-deletion.spec.js",
+          "payment-reversal-attribution.spec.js",
+          "stage5-inspector-styles.spec.js",
+          "stage5-clean-start.spec.js",
+          "stage5-remediation-report.spec.js"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "docs/remediation/nsa-evt-release-2026-10-17/stage-5-report-browser-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": {
+      "command": "PORT=4199 node src/scripts/static-server.cjs",
+      "url": "http://127.0.0.1:4199/src/program-planner/index.html?workspace=NSA",
+      "reuseExistingServer": false,
+      "timeout": 15000,
+      "cwd": "/home/n0rt/headroom-projects/Hort Ops 23 September"
+    }
+  },
+  "suites": [
+    {
+      "title": "stage5-remediation-report.spec.js",
+      "file": "stage5-remediation-report.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "remediation report is self-contained, matches Markdown/data and supports keyboard filtering",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 296,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:52:01.311Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "report-proof",
+                      "contentType": "application/json",
+                      "body": "eyJicm93c2VyVmVyc2lvbiI6IjE1MS4wLjc5MjIuMzQiLCJkYXRhU0hBMjU2IjoiMjM0ZjBjMmNlZmI5YmRkZGU0OWY5NmQxOTBkYTI2ZDY3MTc0Yjk4NjdhZWQyNTIyMjZjYzkzYjJmZTViZDZlMyIsInN0YWdlQ291bnQiOjUsImZpbmRpbmdDb3VudCI6OCwibmV0d29ya1JlcXVlc3RzIjowLCJwYWdlRXJyb3JzIjowfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7a863914e9151d8c5c63-151c8be8a5cf53cd4456",
+          "file": "stage5-remediation-report.spec.js",
+          "line": 19,
+          "column": 1
+        }
+      ],
+      "suites": [
+        {
+          "title": "without JavaScript",
+          "file": "stage5-remediation-report.spec.js",
+          "line": 59,
+          "column": 6,
+          "specs": [
+            {
+              "title": "essential report content and native disclosures remain usable offline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "stage5-desktop",
+                  "projectName": "stage5-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 78,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-17T23:52:01.681Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7a863914e9151d8c5c63-cea26de72b18be45c4b8",
+              "file": "stage5-remediation-report.spec.js",
+              "line": 61,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-17T23:52:00.948Z",
+    "duration": 868.113,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

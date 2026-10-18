@@ -55,6 +55,8 @@ for (const owner of ['NSA', 'EVT']) {
     const frame = page.frameLocator('iframe');
     const radio = mode => frame.locator(`[data-quote-funding-mode][value="${mode}"]`);
     const agreementPill = frame.locator('[data-funding-agreement-pill]');
+    await expect(radio(owner === 'NSA' ? 'city' : 'customer')).toBeChecked();
+    if (owner === 'NSA') await radio('customer').check();
     await expect(radio('customer')).toBeChecked();
     await expect(agreementPill).toHaveText('Proposed');
     await expect(frame.locator('[data-proposed-coverage-note]')).toHaveCount(0);

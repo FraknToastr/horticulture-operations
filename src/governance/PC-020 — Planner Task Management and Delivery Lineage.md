@@ -2,9 +2,9 @@
 
 **Criticality:** Critical
 
-## 2026-09-28 binding amendment — Draft Job boundary
+## 2026-10-01 binding amendment — Explicit Planner calendar creation
 
-PC-020 predates the agreed separation of Planner Draft Job creation, scheduling and costing. Wherever the older text below says that Operational classification or promotion automatically creates Costing or inherited Draft Quote Lines, read it as eligibility after a separate explicit costing action on the same Job, followed by deliberate inclusion in a Draft Quote. Automatic Draft Job creation remains required. No Job is scheduled, costed, or quoted merely by classifying a Task as Operational. This amendment governs any conflicting workflow examples or acceptance items below; PC-026 through PC-028 and ADR-015 record the controlling rule.
+The accepted **Explicit Planner calendar creation — 2026-10-01** decision in `DECISIONS.md` supersedes the automatic Draft Job provisioning portion of ADR-015 and the former 2026-09-28 amendment. Task Purpose (Reminder Task / Add to Scheduler) controls eligibility only. Ordinary Task creation, saves, edits and promotion never create or recreate Jobs. The explicit Planner calendar action creates one canonical Draft Job or opens its existing Job; retries reuse that identity. Save & Open Scheduler is removed. Existing Jobs, source identity, financial protections and audit history remain intact. Scheduling, costing and deliberate Draft Quote inclusion remain separate governed actions. This amendment controls any conflicting historical examples or acceptance language below; PC-026 through PC-028 retain their lineage protections.
 
 ## Protected invariant
 
@@ -91,7 +91,7 @@ An Operational Task represents deliverable work intended to participate in downs
 An Operational Task:
 
 - remains a canonical Project Task;
-- automatically establishes the Draft delivery lineage governed by this contract;
+- permits explicit Planner calendar creation or opening of its governed delivery lineage;
 - owns at most one canonical Planner Job;
 - may establish Resource Calculator/Costing lineage after explicit costing;
 - may establish eligible Draft Quote Line lineage after deliberate Quote inclusion;
@@ -154,7 +154,7 @@ On successful promotion:
 1. the existing canonical Task identity is retained;
 2. no replacement Task is created;
 3. the Task becomes eligible for downstream delivery lineage;
-4. exactly one canonical Draft Planner Job is created or resolved;
+4. the Task becomes eligible for the explicit Planner calendar action; promotion itself creates no Job;
 5. Costing eligibility is exposed without creating a Costing Line;
 6. Draft Quote inclusion remains a later deliberate action;
 7. the promotion is auditable.
@@ -165,11 +165,11 @@ Repeated promotion attempts, rendering, navigation or synchronisation must not c
 
 ---
 
-# 6. Automatic Draft delivery lineage
+# 6. Explicit Planner calendar delivery lineage
 
-An Operational Task automatically owns **at most one canonical Planner Job**.
+An Operational Task may own **at most one canonical Planner Job**, created or opened through its explicit Planner calendar action.
 
-When an Operational Task is created, or an Inert Task is promoted to Operational, Planner automatically creates or resolves its linked Planner Job in **Draft** state.
+Creating or promoting an Operational Task changes eligibility only. Ordinary Task saves never create or recreate Jobs. The explicit Planner calendar action creates a linked Planner Job in **Draft** state if none exists, or opens the existing Job without resetting its lifecycle or schedule. Repeated calendar actions reuse that canonical Job.
 
 The Job:
 
@@ -179,7 +179,7 @@ The Job:
 - is not equivalent to a scheduled or authorised Job merely because it exists;
 - must not be duplicated by repeated Task edits, Planner rendering, navigation or repeated synchronisation.
 
-Automatic creation of a Draft Job is a preparation action, not approval to schedule or deliver the work.
+Explicit calendar creation of a Draft Job is a preparation action; scheduling or delivery authorisation requires its own governed action.
 
 ---
 
@@ -786,7 +786,7 @@ PC-020 is satisfied only when automated and browser-level proof demonstrates all
 
 ## Operational Task behaviour
 
-11. A newly created Operational Task automatically obtains exactly one Draft Planner Job.
+11. A newly created or saved Operational Task remains Job-free until its explicit Planner calendar action creates or opens the canonical Job.
 12. The Job is visible to Scheduler and retains exact Task/Project lineage.
 13. Repeated Task edits do not create duplicate Jobs.
 14. Appropriate Task changes update permitted Draft Job attributes.
@@ -797,9 +797,9 @@ PC-020 is satisfied only when automated and browser-level proof demonstrates all
 ## Promotion
 
 18. Promoting Inert → Operational retains the same canonical Task identity.
-19. Promotion creates or resolves exactly one Draft Planner Job.
+19. Promotion changes calendar eligibility only; it creates no Job. The explicit Planner calendar action creates or opens at most one canonical Planner Job.
 20. Repeated promotion does not create duplicate downstream records.
-21. Promotion establishes Task → Draft Job lineage; later explicit Costing and deliberate Quote inclusion retain that lineage.
+21. Explicit calendar creation establishes Task → Draft Job lineage; later explicit Costing and deliberate Quote inclusion retain that lineage. Ordinary Task saves after Job deletion never recreate it.
 
 ## Customer Treatment
 
@@ -896,11 +896,8 @@ It operates with:
 - PC-013 `QUOTE_READINESS`;
 - PC-016 `SCHEDULER_INTERACTION_SCOPE`.
 
-PC-020 also amends the former Planner workflow rule that creation of a Planner Job necessarily requires a separate explicit scheduling action.
-
-Under PC-020:
-
-**creation of an Operational Task automatically provisions one canonical Draft Planner Job.**
+The accepted **Explicit Planner calendar creation — 2026-10-01** decision supersedes the former automatic Draft Job provisioning rule. Under PC-020:
+**Task Purpose controls eligibility only; the explicit Planner calendar action creates or opens the canonical Planner Job. Ordinary Task saves never create or recreate Jobs.**
 
 An Inert Task creates no downstream delivery lineage.
 
@@ -913,7 +910,7 @@ The operational distinction is:
 
 versus:
 
-**Operational Task → canonical Planner Task → one Draft Planner Job → explicit Costing lineage → deliberate inherited Draft Quote Line inclusion**
+**Operational Task → canonical Planner Task → explicit Planner calendar action → one canonical Planner Job → explicit Costing lineage → deliberate inherited Draft Quote Line inclusion**
 
 The commercial presentation then becomes:
 

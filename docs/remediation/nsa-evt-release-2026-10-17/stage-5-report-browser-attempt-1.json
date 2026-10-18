@@ -1,0 +1,189 @@
+{
+  "config": {
+    "argv": [
+      "/home/n0rt/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/n0rt/headroom-projects/Hort Ops 23 September/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=docs/remediation/nsa-evt-release-2026-10-17/stage-5/playwright.config.cjs",
+      "stage5-remediation-report.spec.js"
+    ],
+    "configFile": "/home/n0rt/headroom-projects/Hort Ops 23 September/docs/remediation/nsa-evt-release-2026-10-17/stage-5/playwright.config.cjs",
+    "rootDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 1,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/nsa-evt-stage5-browser-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "stage5-desktop",
+        "name": "stage5-desktop",
+        "testDir": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "quote-first-interaction.spec.js",
+          "quote-payment-funding-workflow.spec.js",
+          "draft-quoted-cost-deletion.spec.js",
+          "payment-reversal-attribution.spec.js",
+          "stage5-inspector-styles.spec.js",
+          "stage5-clean-start.spec.js",
+          "stage5-remediation-report.spec.js"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "docs/remediation/nsa-evt-release-2026-10-17/stage-5-report-browser-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": {
+      "command": "PORT=4199 node src/scripts/static-server.cjs",
+      "url": "http://127.0.0.1:4199/src/program-planner/index.html?workspace=NSA",
+      "reuseExistingServer": false,
+      "timeout": 15000,
+      "cwd": "/home/n0rt/headroom-projects/Hort Ops 23 September"
+    }
+  },
+  "suites": [
+    {
+      "title": "stage5-remediation-report.spec.js",
+      "file": "stage5-remediation-report.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "remediation report is self-contained, matches Markdown/data and supports keyboard filtering",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage5-desktop",
+              "projectName": "stage5-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 30020,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "/home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/stage5-remediation-report.spec.js",
+                        "column": 51,
+                        "line": 31
+                      },
+                      "message": "Error: locator.selectOption: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('Stage', { exact: true })\u001b[22m\n\n\n  29 |   expect(data.releaseReadiness).toBe('UNVERIFIED');\n  30 |   await expect(page.locator('.stage:visible')).toHaveCount(5);\n> 31 |   await page.getByLabel('Stage', { exact: true }).selectOption('5');\n     |                                                   ^\n  32 |   await expect(page.locator('.stage:visible')).toHaveCount(1);\n  33 |   await expect(page.locator('.finding:visible')).toHaveCount(3);\n  34 |   await page.getByLabel('Stage', { exact: true }).selectOption('all');\n    at /home/n0rt/headroom-projects/Hort Ops 23 September/tests/browser/stage5-remediation-report.spec.js:31:51"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-17T23:50:57.643Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/tmp/nsa-evt-stage5-browser-output/stage5-remediation-report--1b244-supports-keyboard-filtering-stage5-desktop/error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "7a863914e9151d8c5c63-151c8be8a5cf53cd4456",
+          "file": "stage5-remediation-report.spec.js",
+          "line": 19,
+          "column": 1
+        }
+      ],
+      "suites": [
+        {
+          "title": "without JavaScript",
+          "file": "stage5-remediation-report.spec.js",
+          "line": 59,
+          "column": 6,
+          "specs": [
+            {
+              "title": "essential report content and native disclosures remain usable offline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "stage5-desktop",
+                  "projectName": "stage5-desktop",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "7a863914e9151d8c5c63-cea26de72b18be45c4b8",
+              "file": "stage5-remediation-report.spec.js",
+              "line": 61,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "message": "\u001b[31mTesting stopped early after 1 maximum allowed failures.\u001b[39m"
+    }
+  ],
+  "stats": {
+    "startTime": "2026-10-17T23:50:57.227Z",
+    "duration": 30571.393,
+    "expected": 0,
+    "skipped": 1,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

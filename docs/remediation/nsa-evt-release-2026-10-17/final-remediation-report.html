@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="report-data-sha256" content="234f0c2cefb9bddde49f96d190da26d67174b9867aed252226cc93b2fe5bd6e3"><title>NSA / EVT — Remediation review</title>
+<style>
+:root{color-scheme:light;--ink:#11243b;--muted:#52637a;--green:#087c5c;--blue:#137998;--line:#d8e1e8;--paper:#fff;--canvas:#f3f6f8;--focus:#2254c5;--space:8px}*{box-sizing:border-box}body{margin:0;background:var(--canvas);color:var(--ink);font:16px/1.55 "Segoe UI",Calibri,sans-serif}a{color:var(--blue);text-underline-offset:3px}a:hover{color:var(--green)}button,input,select{font:inherit}button,a,input,select,summary{outline-offset:4px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--focus)}[hidden]{display:none!important}header,main,footer{max-width:1180px;margin:auto;padding:32px}header{padding-top:48px;padding-bottom:24px}.eyebrow{margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green)}h1{font-size:clamp(30px,4vw,44px);line-height:1.15;margin:0 0 16px;letter-spacing:-.025em}h2{font-size:24px;line-height:1.25;margin:0 0 20px}h3{font-size:18px;line-height:1.35;margin:4px 0 8px}p{margin:0 0 16px;text-wrap:pretty}.lede{max-width:800px;color:var(--muted)}.release-note{padding:20px 24px;border:1px solid #c8d9e5;background:#edf5fa;border-radius:6px}.release-note strong{display:block;margin-bottom:4px}.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0 0}.fact{padding:20px;background:var(--paper);border:1px solid var(--line);border-radius:6px}.fact b{display:block;font-size:26px;line-height:1.2;margin-bottom:6px}.fact span{color:var(--muted);font-size:14px}main{padding-top:8px}.section{margin-bottom:32px;padding:24px;background:var(--paper);border:1px solid var(--line);border-radius:6px}.tools{display:flex;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:20px}.tools label{display:grid;gap:6px;font-size:14px;font-weight:600}.tools input,.tools select{min-height:42px;padding:8px 10px;color:var(--ink);background:var(--paper);border:1px solid #aebdca;border-radius:4px}.tools input{width:260px}.tools button{min-height:42px;border:1px solid #aebdca;background:#fff;color:var(--ink);padding:8px 14px;border-radius:4px;cursor:pointer}.tools button:hover{background:#eaf6ef}.stages{display:grid;gap:0}.stage{display:grid;grid-template-columns:36px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--line)}.stage:first-child{border-top:0;padding-top:0}.stage-number{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#e8f5ee;color:#075c44;font-weight:700}.stage p:not(.status){color:var(--muted);margin-bottom:8px}.stage a{font-size:14px}.status{color:var(--green);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin:0}.finding{border-top:1px solid var(--line)}.finding:last-child{border-bottom:1px solid var(--line)}summary{cursor:pointer;padding:18px 4px;display:flex;gap:16px;align-items:center;justify-content:space-between}summary small{display:block;font-size:12px;letter-spacing:.03em;color:var(--muted)}summary strong{display:block;font-size:17px}summary::after{content:"+";color:var(--muted);font-size:24px}.finding[open]>summary::after{content:"−"}.finding p{max-width:900px;color:var(--muted);padding:0 4px 8px}.badge{margin-left:auto;white-space:nowrap;border-radius:4px;padding:4px 8px;font-size:12px;font-weight:700;background:#edf1f5;color:#33475f}.badge.fixed,.badge.owner-closed{background:#e4f4e9;color:#075c44}.badge.open{background:#fff0d3;color:#704600}.badge.unverified{background:#e9effb;color:#244474}.count{font-size:14px;color:var(--muted);margin-bottom:12px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--line)}thead th{background:#f4f7f9;color:var(--muted);font-size:12px;text-transform:uppercase}tbody th{font-weight:600;min-width:220px}td:nth-child(2){white-space:nowrap;color:var(--green);font-weight:700}.evidence{columns:2;column-gap:32px;padding-left:20px}.evidence li{break-inside:avoid;margin:0 0 8px}.fine{color:var(--muted);font-size:14px}footer{padding-top:0;color:var(--muted);font-size:13px}.js-only{display:none}.js .js-only{display:flex}@media(max-width:800px){header,main,footer{padding:20px}.facts{grid-template-columns:repeat(2,1fr)}.section{padding:20px}.evidence{columns:1}summary{flex-wrap:wrap}.badge{margin-left:0}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style></head><body>
+<header><p class="eyebrow">Horticulture operations · 18 October 2026</p><h1>NSA / EVT remediation review</h1><p class="lede">All five roadmap stages are complete locally. This report keeps the remaining release risks visible and records the owner's clean-start decision.</p><div class="release-note"><strong>Release readiness remains unverified</strong>Dependency updates and target deployment checks remain outstanding. Completion of this roadmap does not certify the GitHub Pages or Edge local-file release.</div><div class="facts"><div class="fact"><b>5 of 5</b><span>Roadmap stages complete</span></div><div class="fact"><b>0</b><span>Owner decisions outstanding</span></div><div class="fact"><b>Paused</b><span>Clean-start status automation</span></div><div class="fact"><b>17 passed</b><span>Distinct Stage 5 browser checks</span></div></div></header>
+<main><section class="section" aria-labelledby="roadmap-heading"><h2 id="roadmap-heading">Roadmap</h2><div class="tools js-only"><label>Stage<select id="stage-filter" aria-label="Stage"><option value="all">All stages</option><option value="1">1 · Desktop test alignment</option><option value="2">2 · Canonical receipt eligibility</option><option value="3">3 · Workspace review and owner decisions</option><option value="4">4 · Dependency assessment</option><option value="5">5 · Governance, officers and CSS</option></select></label></div><div class="stages"><article class="stage" data-stage="1"><div class="stage-number">1</div><div><p class="status">Complete</p><h3>Desktop test alignment</h3><p>Manual MetroMap activation, current inspector collapse levels and guarded desktop release selection.</p><a href="stage-1-checkpoint.md">Stage 1 checkpoint</a></div></article><article class="stage" data-stage="2"><div class="stage-number">2</div><div><p class="status">Complete</p><h3>Canonical receipt eligibility</h3><p>Draft deposits remain allowed. Ordinary payments require Issued or Accepted; Declined blocks new receipts.</p><a href="stage-2-checkpoint.md">Stage 2 checkpoint</a></div></article><article class="stage" data-stage="3"><div class="stage-number">3</div><div><p class="status">Complete</p><h3>Workspace review and owner decisions</h3><p>54 sample warnings corrected in a separate candidate. All three owner decisions closed: sample budgets do not apply to the clean release; automation stays paused.</p><a href="stage-3-checkpoint.md">Stage 3 checkpoint</a></div></article><article class="stage" data-stage="4"><div class="stage-number">4</div><div><p class="status">Complete</p><h3>Dependency assessment</h3><p>Inventory and isolated PDF.js 6.4.299 compatibility proposal retained. Shipped runtimes unchanged; dependency risks remain open.</p><a href="stage-4-checkpoint.md">Stage 4 checkpoint</a></div></article><article class="stage" data-stage="5"><div class="stage-number">5</div><div><p class="status">Complete</p><h3>Governance, officers and CSS</h3><p>Explicit-calendar contracts, named officers for new reversals, paused clean defaults, bounded inspector CSS consolidation and final reports.</p><a href="stage-5-checkpoint.md">Stage 5 checkpoint</a></div></article></div></section>
+<section class="section" aria-labelledby="findings-heading"><h2 id="findings-heading">Findings and release limits</h2><div class="tools js-only"><label>Finding status<select id="status-filter" aria-label="Finding status"><option value="all">All statuses</option><option value="fixed">Remediated</option><option value="owner-closed">Owner decisions closed</option><option value="open">Open vendor update</option><option value="unverified">Not verified</option></select></label><label>Search findings<input id="finding-search" type="search" placeholder="Title, reference or detail"></label><button id="expand-all" type="button">Expand visible findings</button><button id="collapse-all" type="button">Collapse findings</button></div><p class="count" id="finding-count" role="status" aria-live="polite">8 findings and release limits</p><details class="finding" data-stage="1" data-state="fixed" data-search="f-001 stale release checks desktop selection and guarded tests match the current manual-key and inspector workflows. screenshot/mobile aggregates remain excluded."><summary><span><small>F-001 · Stage 1</small><strong>Stale release checks</strong></span><span class="badge fixed">Remediated</span></summary><p>Desktop selection and guarded tests match the current manual-key and inspector workflows. Screenshot/mobile aggregates remain excluded.</p></details><details class="finding" data-stage="2" data-state="fixed" data-search="f-002 receipt command eligibility the command and ui agree on deposits, ordinary payments and declined quotes. historical receipts and reversals remain accessible."><summary><span><small>F-002 · Stage 2</small><strong>Receipt command eligibility</strong></span><span class="badge fixed">Remediated</span></summary><p>The command and UI agree on deposits, ordinary payments and Declined Quotes. Historical receipts and reversals remain accessible.</p></details><details class="finding" data-stage="3" data-state="owner-closed" data-search="f-003 historical sample warnings two absent sample budgets are irrelevant to a release with no saved workspace. no amounts were invented. the owner confirmed automation must stay paused; historical sample warnings remain truthful."><summary><span><small>F-003 · Stage 3</small><strong>Historical sample warnings</strong></span><span class="badge owner-closed">Owner decisions closed</span></summary><p>Two absent sample budgets are irrelevant to a release with no saved workspace. No amounts were invented. The owner confirmed automation must stay paused; historical sample warnings remain truthful.</p></details><details class="finding" data-stage="5" data-state="fixed" data-search="f-004 automatic job governance drift active contracts now require the explicit planner calendar action. purpose changes and normal saves affect eligibility without creating or recreating jobs. historical rules are retained as superseded."><summary><span><small>F-004 · Stage 5</small><strong>Automatic Job governance drift</strong></span><span class="badge fixed">Remediated</span></summary><p>Active contracts now require the explicit Planner calendar action. Purpose changes and normal saves affect eligibility without creating or recreating Jobs. Historical rules are retained as superseded.</p></details><details class="finding" data-stage="4" data-state="open" data-search="f-005 vendored dependency risks maplibre 5.3.0 matches critical ghsa-jrc7-96c5-q579. current attribution is curated, but the affected library still ships. pdf.js 2.16.105 retains its explicit isevalsupported:false mitigation. full local licence texts and a separately verified vendor upgrade remain outstanding."><summary><span><small>F-005 · Stage 4</small><strong>Vendored dependency risks</strong></span><span class="badge open">Open vendor update</span></summary><p>MapLibre 5.3.0 matches critical GHSA-jrc7-96c5-q579. Current attribution is curated, but the affected library still ships. PDF.js 2.16.105 retains its explicit isEvalSupported:false mitigation. Full local licence texts and a separately verified vendor upgrade remain outstanding.</p></details><details class="finding" data-stage="5" data-state="fixed" data-search="f-006 inspector css duplication consolidated proven duplicate declarations and removed an overridden action-row rule. existing 8px tokens replace equivalent literals; both owner themes and all three collapse levels were checked using computed styles."><summary><span><small>F-006 · Stage 5</small><strong>Inspector CSS duplication</strong></span><span class="badge fixed">Remediated</span></summary><p>Consolidated proven duplicate declarations and removed an overridden action-row rule. Existing 8px tokens replace equivalent literals; both owner themes and all three collapse levels were checked using computed styles.</p></details><details class="finding" data-stage="5" data-state="fixed" data-search="f-007 payment reversal officer new reversals require a trimmed officer name and reason in the ui and canonical command. session names prefill an editable field. evidence survives reload; old missing actors remain missing and repeated commands preserve the first evidence."><summary><span><small>F-007 · Stage 5</small><strong>Payment reversal officer</strong></span><span class="badge fixed">Remediated</span></summary><p>New reversals require a trimmed officer name and reason in the UI and canonical command. Session names prefill an editable field. Evidence survives reload; old missing actors remain missing and repeated commands preserve the first evidence.</p></details><details class="finding" data-stage="0" data-state="unverified" data-search="release release environment verification these are local desktop chromium http checks. github pages, edge file:// and the broader pdf corpus are not certified. a clean client handover requires fresh or deliberately cleared browser storage; this work does not erase an existing operator workspace."><summary><span><small>RELEASE</small><strong>Release environment verification</strong></span><span class="badge unverified">Not verified</span></summary><p>These are local desktop Chromium HTTP checks. GitHub Pages, Edge file:// and the broader PDF corpus are not certified. A clean client handover requires fresh or deliberately cleared browser storage; this work does not erase an existing operator workspace.</p></details></section>
+<section class="section" aria-labelledby="verification-heading"><h2 id="verification-heading">Focused verification</h2><p class="fine">These rows use different units and overlap. They are not added into a single test total. The 17 browser cases comprise 15 passes from the retained run and two passes from the inspector-only rerun.</p><div class="table-wrap"><table><thead><tr><th scope="col">Check</th><th scope="col">Result</th><th scope="col">Evidence unit</th></tr></thead><tbody><tr><th scope="row">Reversal attribution, atomic validation, persistence and idempotence</th><td>10 passed</td><td>individual model cases</td></tr><tr><th scope="row">Actor and existing funding regressions</th><td>2 passed</td><td>model file gates; overlaps the actor cases above</td></tr><tr><th scope="row">Clean/reset defaults and explicit saved preferences</th><td>7 passed</td><td>individual model cases</td></tr><tr><th scope="row">Affected model, baseline sanitation and status engine</th><td>4 passed</td><td>model file gates; not an individual-case total</td></tr><tr><th scope="row">Governance and explicit Planner Job lineage</th><td>17 passed</td><td>individual cases</td></tr><tr><th scope="row">Reversal/funding UI, clean startup and inspector styles</th><td>17 passed</td><td>distinct browser cases across the retained run and focused inspector rerun</td></tr></tbody></table></div><p class="fine">Desktop Chromium over local HTTP · 1600 × 1000 · Node v22.23.2 · Playwright 1.62.0. No screenshots, mobile, touch, video or traces.</p></section>
+<section class="section" aria-labelledby="evidence-heading"><h2 id="evidence-heading">Evidence and handover</h2><p>The client will receive a clean start with no saved operational workspace. The two historical sample budgets are not release decisions; no financial amounts were invented. Fresh and reset workspaces keep status automation paused. Ordinary normalization preserves explicit saved preferences.</p><ul class="evidence"><li><a href="stage-3-owner-decisions-2026-10-18.json">Dated owner decisions</a></li><li><a href="stage-5-checkpoint.md">Stage 5 checkpoint</a></li><li><a href="stage-5-results.json">Structured remediation data</a></li><li><a href="stage-5-preservation-results.json">Preservation verification</a></li><li><a href="final-remediation-report.md">Markdown counterpart</a></li><li><a href="../../audits/nsa-evt/20261017-094545-local-8545d67/report.md">Original immutable audit</a></li></ul><details><summary><strong>Earlier attempts and corrections</strong></summary><p><a href="stage-5-browser-attempt-1.json">stage-5-browser-attempt-1.json</a>: No tests ran: nested config needed an explicit server working directory. Corrected configuration.</p><p><a href="stage-5-browser-attempt-2.json">stage-5-browser-attempt-2.json</a>: Stopped on stale Draft ordinary-payment fixtures. Corrected fixtures to their intended allowed deposit method; production eligibility unchanged.</p><p><a href="stage-5-browser-attempt-3.json">stage-5-browser-attempt-3.json</a>: 15 passed; inspector probe sampled the start of a colour transition. Corrected probe to exercise real Edit/Cancel with test-only transitions disabled; reran only the two inspector cases.</p><p><a href="stage-5-inspector-browser-attempt-1.json">stage-5-inspector-browser-attempt-1.json</a>: Inspector-only probe then exposed its separate hover/focus expectation error. Checked owner-soft hover/focus colours and resting active colours independently; both final owner cases passed without further production CSS changes.</p><p><a href="stage-5-report-browser-attempt-1.json">stage-5-report-browser-attempt-1.json</a>: Report keyboard check found an ambiguous Stage select label. Added explicit accessible filter names and reran only the two offline report checks.</p></details><p class="fine">All substantive report data, styles and interactions are embedded in this file. Evidence links are optional local repository documents. No network request is needed to use the report.</p></section></main><footer>Working tree after b4e5db9 · Overtime excluded · No Stage 5 commit or push. 959 tracked baseline files checked; 24 authorised changes and no unexpected changes.</footer>
+<script type="application/json" id="report-data">{
+  "reportVersion": 1,
+  "recordedDate": "2026-10-18",
+  "baseCommit": "b4e5db9516cb6df3900f1b6ad6d08f2bcf68a35a",
+  "scope": "NSA/EVT working tree; Overtime excluded",
+  "roadmapComplete": true,
+  "releaseReadiness": "UNVERIFIED",
+  "ownerDecisionsRemaining": 0,
+  "cleanAutomationDefault": "paused",
+  "originalAudit": "../../audits/nsa-evt/20261017-094545-local-8545d67/report.md",
+  "environment": {
+    "node": "v22.23.2",
+    "playwright": "1.62.0",
+    "browser": "Installed desktop Chromium",
+    "viewport": "1600 × 1000",
+    "transport": "Local HTTP"
+  },
+  "stages": [
+    {
+      "id": 1,
+      "title": "Desktop test alignment",
+      "status": "Complete",
+      "description": "Manual MetroMap activation, current inspector collapse levels and guarded desktop release selection.",
+      "evidence": "stage-1-checkpoint.md"
+    },
+    {
+      "id": 2,
+      "title": "Canonical receipt eligibility",
+      "status": "Complete",
+      "description": "Draft deposits remain allowed. Ordinary payments require Issued or Accepted; Declined blocks new receipts.",
+      "evidence": "stage-2-checkpoint.md"
+    },
+    {
+      "id": 3,
+      "title": "Workspace review and owner decisions",
+      "status": "Complete",
+      "description": "54 sample warnings corrected in a separate candidate. All three owner decisions closed: sample budgets do not apply to the clean release; automation stays paused.",
+      "evidence": "stage-3-checkpoint.md"
+    },
+    {
+      "id": 4,
+      "title": "Dependency assessment",
+      "status": "Complete",
+      "description": "Inventory and isolated PDF.js 6.4.299 compatibility proposal retained. Shipped runtimes unchanged; dependency risks remain open.",
+      "evidence": "stage-4-checkpoint.md"
+    },
+    {
+      "id": 5,
+      "title": "Governance, officers and CSS",
+      "status": "Complete",
+      "description": "Explicit-calendar contracts, named officers for new reversals, paused clean defaults, bounded inspector CSS consolidation and final reports.",
+      "evidence": "stage-5-checkpoint.md"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "stage": 1,
+      "title": "Stale release checks",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "Desktop selection and guarded tests match the current manual-key and inspector workflows. Screenshot/mobile aggregates remain excluded."
+    },
+    {
+      "id": "F-002",
+      "stage": 2,
+      "title": "Receipt command eligibility",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "The command and UI agree on deposits, ordinary payments and Declined Quotes. Historical receipts and reversals remain accessible."
+    },
+    {
+      "id": "F-003",
+      "stage": 3,
+      "title": "Historical sample warnings",
+      "state": "owner-closed",
+      "label": "Owner decisions closed",
+      "detail": "Two absent sample budgets are irrelevant to a release with no saved workspace. No amounts were invented. The owner confirmed automation must stay paused; historical sample warnings remain truthful."
+    },
+    {
+      "id": "F-004",
+      "stage": 5,
+      "title": "Automatic Job governance drift",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "Active contracts now require the explicit Planner calendar action. Purpose changes and normal saves affect eligibility without creating or recreating Jobs. Historical rules are retained as superseded."
+    },
+    {
+      "id": "F-005",
+      "stage": 4,
+      "title": "Vendored dependency risks",
+      "state": "open",
+      "label": "Open vendor update",
+      "detail": "MapLibre 5.3.0 matches critical GHSA-jrc7-96c5-q579. Current attribution is curated, but the affected library still ships. PDF.js 2.16.105 retains its explicit isEvalSupported:false mitigation. Full local licence texts and a separately verified vendor upgrade remain outstanding."
+    },
+    {
+      "id": "F-006",
+      "stage": 5,
+      "title": "Inspector CSS duplication",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "Consolidated proven duplicate declarations and removed an overridden action-row rule. Existing 8px tokens replace equivalent literals; both owner themes and all three collapse levels were checked using computed styles."
+    },
+    {
+      "id": "F-007",
+      "stage": 5,
+      "title": "Payment reversal officer",
+      "state": "fixed",
+      "label": "Remediated",
+      "detail": "New reversals require a trimmed officer name and reason in the UI and canonical command. Session names prefill an editable field. Evidence survives reload; old missing actors remain missing and repeated commands preserve the first evidence."
+    },
+    {
+      "id": "RELEASE",
+      "stage": 0,
+      "title": "Release environment verification",
+      "state": "unverified",
+      "label": "Not verified",
+      "detail": "These are local desktop Chromium HTTP checks. GitHub Pages, Edge file:// and the broader PDF corpus are not certified. A clean client handover requires fresh or deliberately cleared browser storage; this work does not erase an existing operator workspace."
+    }
+  ],
+  "verification": [
+    {
+      "name": "Reversal attribution, atomic validation, persistence and idempotence",
+      "passed": 10,
+      "unit": "individual model cases",
+      "source": "stage-5-actor-model-results.json"
+    },
+    {
+      "name": "Actor and existing funding regressions",
+      "passed": 2,
+      "unit": "model file gates; overlaps the actor cases above",
+      "source": "stage-5-actor-model-results.json"
+    },
+    {
+      "name": "Clean/reset defaults and explicit saved preferences",
+      "passed": 7,
+      "unit": "individual model cases",
+      "source": "stage-5-clean-default-tests.tap"
+    },
+    {
+      "name": "Affected model, baseline sanitation and status engine",
+      "passed": 4,
+      "unit": "model file gates; not an individual-case total",
+      "source": "stage-5-default-model-results.tap"
+    },
+    {
+      "name": "Governance and explicit Planner Job lineage",
+      "passed": 17,
+      "unit": "individual cases",
+      "source": "stage-5-governance-tests.tap"
+    },
+    {
+      "name": "Reversal/funding UI, clean startup and inspector styles",
+      "passed": 17,
+      "unit": "distinct browser cases across the retained run and focused inspector rerun",
+      "source": "stage-5-browser-attempt-3.json + stage-5-inspector-browser-results.json"
+    }
+  ],
+  "browser": {
+    "passed": 17,
+    "selected": 17,
+    "sources": [
+      "stage-5-browser-attempt-3.json",
+      "stage-5-inspector-browser-results.json"
+    ],
+    "cases": [
+      {
+        "title": "NSA: Draft-quoted unscheduled costs can be removed while financial history remains protected",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1282
+      },
+      {
+        "title": "EVT: Draft-quoted unscheduled costs can be removed while financial history remains protected",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1004
+      },
+      {
+        "title": "NSA: manual officer works without session storage and reversal commit failure is atomic and retryable",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1213
+      },
+      {
+        "title": "EVT: manual officer works without session storage and reversal commit failure is atomic and retryable",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1170
+      },
+      {
+        "title": "NSA: first deposit, reversal and evidence clicks preserve Payments",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 2858
+      },
+      {
+        "title": "EVT: first deposit, reversal and evidence clicks preserve Payments",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 2725
+      },
+      {
+        "title": "NSA: default Customer permits a first deposit without toggling funding",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 6461
+      },
+      {
+        "title": "NSA: a saved Draft deposit keeps the Quote panes aligned",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1050
+      },
+      {
+        "title": "EVT: default Customer permits a first deposit without toggling funding",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 6079
+      },
+      {
+        "title": "EVT: a saved Draft deposit keeps the Quote panes aligned",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1003
+      },
+      {
+        "title": "NSA: first-deposit failure keeps data and retry records one payment despite repeated submits",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1329
+      },
+      {
+        "title": "EVT: first-deposit failure keeps data and retry records one payment despite repeated submits",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1245
+      },
+      {
+        "title": "Accepted Quote handles an overpayment and reversal without changing its commercial snapshot",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 1613
+      },
+      {
+        "title": "NSA: clean client start has no operational data and automation stays paused after reload",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 341
+      },
+      {
+        "title": "EVT: clean client start has no operational data and automation stays paused after reload",
+        "status": "passed",
+        "source": "stage-5-browser-attempt-3.json",
+        "durationMs": 341
+      },
+      {
+        "title": "NSA: inspector spacing, action contrast and collapse levels retain their desktop styles",
+        "status": "passed",
+        "source": "stage-5-inspector-browser-results.json",
+        "durationMs": 2796
+      },
+      {
+        "title": "EVT: inspector spacing, action contrast and collapse levels retain their desktop styles",
+        "status": "passed",
+        "source": "stage-5-inspector-browser-results.json",
+        "durationMs": 2423
+      }
+    ],
+    "mediaAttachments": 0
+  },
+  "preservation": {
+    "trackedFilesChecked": 959,
+    "authorisedChanges": 24,
+    "unchangedFiles": 935,
+    "unexpectedChanges": 0,
+    "evidence": "stage-5-preservation-results.json"
+  },
+  "priorAttempts": [
+    {
+      "source": "stage-5-browser-attempt-1.json",
+      "outcome": "No tests ran: nested config needed an explicit server working directory. Corrected configuration."
+    },
+    {
+      "source": "stage-5-browser-attempt-2.json",
+      "outcome": "Stopped on stale Draft ordinary-payment fixtures. Corrected fixtures to their intended allowed deposit method; production eligibility unchanged."
+    },
+    {
+      "source": "stage-5-browser-attempt-3.json",
+      "outcome": "15 passed; inspector probe sampled the start of a colour transition. Corrected probe to exercise real Edit/Cancel with test-only transitions disabled; reran only the two inspector cases."
+    },
+    {
+      "source": "stage-5-inspector-browser-attempt-1.json",
+      "outcome": "Inspector-only probe then exposed its separate hover/focus expectation error. Checked owner-soft hover/focus colours and resting active colours independently; both final owner cases passed without further production CSS changes."
+    },
+    {
+      "source": "stage-5-report-browser-attempt-1.json",
+      "outcome": "Report keyboard check found an ambiguous Stage select label. Added explicit accessible filter names and reran only the two offline report checks."
+    }
+  ],
+  "boundaries": [
+    "No screenshots, mobile, touch, video or traces",
+    "No vendor upgrade or Stage 3 sample adoption",
+    "No existing operator workspace erased",
+    "No commit, push or publication for Stage 5"
+  ],
+  "next": "Separately scope the outstanding vendor/licence work and target deployment checks before calling the client release ready."
+}
+</script>
+<script>
+'use strict';document.documentElement.classList.add('js');const stageFilter=document.getElementById('stage-filter'),statusFilter=document.getElementById('status-filter'),search=document.getElementById('finding-search'),findings=[...document.querySelectorAll('.finding')];function filter(){const stage=stageFilter.value,state=statusFilter.value,term=search.value.trim().toLowerCase();document.querySelectorAll('.stage').forEach(card=>card.hidden=stage!=='all'&&card.dataset.stage!==stage);let visible=0;for(const item of findings){item.hidden=(stage!=='all'&&item.dataset.stage!==stage)||(state!=='all'&&item.dataset.state!==state)||!item.dataset.search.includes(term);if(!item.hidden)visible++;}document.getElementById('finding-count').textContent=visible+' of '+findings.length+' findings shown';}stageFilter.addEventListener('change',filter);statusFilter.addEventListener('change',filter);search.addEventListener('input',filter);document.getElementById('expand-all').addEventListener('click',()=>findings.filter(item=>!item.hidden).forEach(item=>item.open=true));document.getElementById('collapse-all').addEventListener('click',()=>findings.forEach(item=>item.open=false));filter();
+</script></body></html>

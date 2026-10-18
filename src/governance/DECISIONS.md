@@ -73,6 +73,8 @@ An active-project Job selected from the Job row-table or calendar opens Schedule
 **Reason:** financial history must be reconstructable across correction and year end without retroactive silent edits.
 
 ## ADR-015 — Planner Draft Job precedes scheduling and costing
+
+**Historical decision; automatic Draft Job provisioning superseded by Explicit Planner calendar creation — 2026-10-01 below.** The retained 2026-09-28 wording records the former rule, not current authority. Separate scheduling, costing and Quote inclusion protections remain in force.
 **Accepted — 2026-09-28; amends PC-020 sections 5–8, 17, 22 and acceptance criteria where they imply automatic costing or Quote inclusion.** Inert Task has no Job. Operational Task creation/promotion creates or resolves exactly one Planner-origin Draft Job. Scheduling and costing are separate explicit actions on that Job; costing snapshots an evidenced basis. Inclusion of an eligible Costing Line in a Draft Quote is deliberate. The three Job origins are Planner Task, Calculator work and Space Map geometry; source identity must be exact and immutable.
 
 **Reason:** Draft delivery intent, scheduled commitment, priced work and customer-facing commercial inclusion are separate decisions. Existing records and issued Quote history remain protected; migration of mixed or unknown legacy origins requires review. Gate Q is the acceptance proof.

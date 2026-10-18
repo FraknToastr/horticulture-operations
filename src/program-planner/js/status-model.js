@@ -14,13 +14,13 @@
   function normalize(input) {
     var migrated = original.normalize(input);
     var output = migrated;
-    output.statusControl = clone(migrated.statusControl || { automationEnabled: true, operatorName: "", enabledBy: "", enabledAt: "" });
+    output.statusControl = clone(migrated.statusControl || { automationEnabled: false, operatorName: "", enabledBy: "", enabledAt: "" });
     return output;
   }
 function blank(at) {
   var result = original.blank(at); result.schemaVersion = 5;
     result.entities.statusEvents = []; result.entities.statusRecommendations = [];
-    result.statusControl = { automationEnabled: true, operatorName: "", enabledBy: "", enabledAt: "" };
+    result.statusControl = { automationEnabled: false, operatorName: "", enabledBy: "", enabledAt: "" };
     result.migration = result.migration && typeof result.migration === "object" ? result.migration : {};
   result.migration.registerBaselineSanitation = { id: "register-baseline-2026-07-01", version: 1, cutoffDate: "2026-07-01", appliedAt: text(at) || new Date().toISOString(), retainedRegisterIds: [], purgedRegisterIds: [], purgedArtifacts: {} };
   result.migration.emptyOperationalBaseline = { id: "empty-operational-baseline-2026-09-12", version: 1, appliedAt: text(at) || new Date().toISOString(), purgedEntities: {}, rateCatalogVersion: 1, rateItemCount: result.entities.rateItems.length };
@@ -160,7 +160,7 @@ function sanitizeRegisterBaseline(input, options) {
     });
     var blankWorkspace = original.blank(at);
     output.workspace = clone(blankWorkspace.workspace || {});
-    output.statusControl = { automationEnabled: true, operatorName: "", enabledBy: "Status engine", enabledAt: at };
+    output.statusControl = { automationEnabled: false, operatorName: "", enabledBy: "", enabledAt: "" };
     output.migration = output.migration && typeof output.migration === "object" ? output.migration : {};
     delete output.migration.unresolvedWorkLineage;
     delete output.migration.unresolvedQuoteLifecycle;

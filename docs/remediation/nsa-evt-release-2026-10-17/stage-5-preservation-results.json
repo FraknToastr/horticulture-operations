@@ -1,0 +1,133 @@
+{
+  "checkedAt": "2026-10-17T23:52:00.626Z",
+  "baseline": "stage-5-preservation-baseline.json",
+  "trackedFilesChecked": 959,
+  "authorisedChanges": [
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/README.md",
+      "before": "4a2796b8e634666871167f30c6c2a2093ccbf9f265eb0814bb41947359ca9eda",
+      "after": "954020400da921eb653f36bb23c32f5adc33018a0abeaf863855122eff575fea"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-3-checkpoint.md",
+      "before": "9686d58ad904eaac48d73ddff51a5e296d9ffddc3d47385bc5a3878759640a02",
+      "after": "a68f1b7f4d0bc3dfd779bbfbc4154c6ff798daf05084844cdf5fabf6d0805118"
+    },
+    {
+      "path": "docs/remediation/nsa-evt-release-2026-10-17/stage-5-resume-plan.md",
+      "before": "61bf18b0a9cc6d6677a917e4978490b06421c06940d9a8e38a4f2c78c80d3d17",
+      "after": "13da205bd7fd339ec4b861d77f5c9dccb53990265df242273f57787a9b916bfc"
+    },
+    {
+      "path": "src/governance/DECISIONS.md",
+      "before": "bbd555768310e3f54277d34de386396b4ac4a8514eaaf0d30c68cdf1e73ac6ff",
+      "after": "db58178dbc23eb0d6b5fa5cca57141691c9e05a9fb760411064a3d18ea539514"
+    },
+    {
+      "path": "src/governance/PC-020 — Planner Task Management and Delivery Lineage.md",
+      "before": "eb9301780a0c9b36a258f72ff36c1bc7a2b57584f4e025aef1492a1e76a5583a",
+      "after": "e0e82caac6b2ca5e16e8a7de98e7e65d3d7341e932d76068829151240e5d367c"
+    },
+    {
+      "path": "src/governance/PLANNER_BUDGET_UI_TEST_ACCEPTANCE_2026-09-29.md",
+      "before": "b6ff0171a272d768c0787293d123c2cf0874b988383a24041609b37c4f7f915e",
+      "after": "036dccf173cdffe595ca9287e8ed9f2204c26c3034d79e5f2262ee575ed65a6a"
+    },
+    {
+      "path": "src/governance/PRODUCT_CONSTITUTION.md",
+      "before": "ad73ba4cecd6e46d81e0dc62afc3d02b6f719f10593f117f3da00627dd94a4e5",
+      "after": "7534830e7f3404a7019b6ebd2f2c7ca53bf4e7ca76fe71739ee626eec0e20916"
+    },
+    {
+      "path": "src/governance/PRODUCT_CONSTITUTION_VIEWER.html",
+      "before": "4ba3ea9a8c75192704a4260b85bb4ee8b9f918982a4ee4bf6ae2266029a4e6eb",
+      "after": "664784466717e35d076eb50785ce94eb0a336ae227b51bf7630edae7d9880340"
+    },
+    {
+      "path": "src/governance/PRODUCT_CONTRACTS.md",
+      "before": "8e76d7b015b239ecbbc53726df68a8c0d22bafcdf1e732bf3e469e578376adf8",
+      "after": "55d5279c760f60cac21e484bc7d2e0ec8316e145b7ed5044ec70d72d2ebbd8c3"
+    },
+    {
+      "path": "src/governance/PROJECT_TEST_PROFILE.md",
+      "before": "e6e24fee0d8ab6a48650f7aec72ee9bef5ff27959b324b485e16b1667d99f383",
+      "after": "391b71ddef1fa8cd0aeb58ecd248464216020e44ecc491f5b2eff3035911afd7"
+    },
+    {
+      "path": "src/governance/RELEASE_GATES.md",
+      "before": "ec7ca28b7bd4d5b8e04d3f1e411b2a4c3a924b39df09b598da03fcb8d5ef02c8",
+      "after": "59e48efb2a34b011548b1c3da3da6cf52e2359c0afb9781887976305f53083fe"
+    },
+    {
+      "path": "src/program-planner/index.html",
+      "before": "52cba6a5acdd260ec2c5b28be012fc4450dfab1dada98801d7af49fefa031168",
+      "after": "a15092b3a42f9aa2d30a328a29c389f642fbe722cd1169bb055bd0e96a9d2261"
+    },
+    {
+      "path": "src/program-planner/js/model.js",
+      "before": "904b49d6f5f07daa1215058cbe95a896f351dd8db0432cce32baa2fe2bedd20c",
+      "after": "849712aba70980d70fb1c50193fc2e2685245c65bfb9635107eead580c1b86fd"
+    },
+    {
+      "path": "src/program-planner/js/quote-builder.js",
+      "before": "3593a54426cd322343271f7fed34b8697e5a0a01ce0f5565ba6ba1b5d24bc7cc",
+      "after": "61fbdf84ebf2696dbe1c843811856c92cacf7f6d71024e2383a90c56a4310f96"
+    },
+    {
+      "path": "src/program-planner/js/quote-model.js",
+      "before": "a1152622f3e2dc686b87874a1b10169e64fff5c53783e2729f050a57019c2ba8",
+      "after": "7b1c3721e1c4876dcef468ea5c41270780aea6a42843191f4b2aae2c85b30eca"
+    },
+    {
+      "path": "src/program-planner/js/status-model.js",
+      "before": "478824189669406687854b30ff6f65e9e9e74e2fadfd16a857af7b32e02d307d",
+      "after": "71a32b97fde63b9e150f8978ef2208bb8eb7be5d199224d32d4f71dacd685fcb"
+    },
+    {
+      "path": "src/program-planner/space-map-editor.css",
+      "before": "008deedca010c1e2329f9ad4c9fcd209d92a08567f543b23e8bdd576e62bb655",
+      "after": "5a53a06900e0530032e84d040ec2add350bf6255acb47eb45aaf33d4ef07ea8e"
+    },
+    {
+      "path": "tests/browser/draft-quoted-cost-deletion.spec.js",
+      "before": "e44d4f633b4f2cb7698f46acd12d04de42312bf28298c4f700ac4a574cf0b347",
+      "after": "3484e2051605ded422c25f532eed034abb42d705229e2eb83024f4f403a16068"
+    },
+    {
+      "path": "tests/browser/quote-first-interaction.spec.js",
+      "before": "5d57a6187e59b1bb600a4534290c57be3f99aec28db7a5f7fcc3408b42c59fa9",
+      "after": "a494f1cd26645f487a1de6479b407116b2b0f1d7e77ff672654c39a7f661942e"
+    },
+    {
+      "path": "tests/browser/quote-payment-funding-workflow.spec.js",
+      "before": "aed87f5359b1e615eefbe349ec0b8cc9b7a9a77a7f5726d02f69d292b18fa01b",
+      "after": "0988d578f9c1ff1f7efd2d27d6cb1d5d73573e775a6b0e12e2340282c7baa1f9"
+    },
+    {
+      "path": "tests/canonical-work-governance.test.cjs",
+      "before": "3b361f341c8992a8ea2b2568e33f27fab002fb134a48f97cb20f8d8fbbc7eac0",
+      "after": "5c17b91ca6fc895b55c92ccde97d5ccdc050a710881065d61b6543b7734fc5f7"
+    },
+    {
+      "path": "tests/empty-operational-baseline.test.cjs",
+      "before": "a2c3b4779c4b79f6760720bedd5102a73054e022c4cfcf29709928f35f39ff53",
+      "after": "b95b3fb02f39e550e8e2a68fc1597dca1ecffbc15dd989f98036236f42ac66c1"
+    },
+    {
+      "path": "tests/model-v5.test.cjs",
+      "before": "0008f97a3ab1beb000a2a9224336411d5009328273bde1d21e6791b58e4845ff",
+      "after": "69f69a24d4f1b4110253e63b3a6de83e6a34c5d7a5dc18abe13da2a7e71a39be"
+    },
+    {
+      "path": "tests/quote-funding.test.cjs",
+      "before": "e6582268324afdbf4e1859b6df881509ba0b32b3950c774c82f3979ebb4965f3",
+      "after": "49e59f22bb9d7f00f9014dfd2d161ea38a85d55b642367bc0df928772235601d"
+    }
+  ],
+  "unchangedFiles": 935,
+  "unexpectedChanges": [],
+  "originalAuditUnchanged": true,
+  "overtimeUnchanged": true,
+  "originalSampleUnchanged": true,
+  "reviewedCandidateUnchanged": true
+}

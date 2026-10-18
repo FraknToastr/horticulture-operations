@@ -1,0 +1,112 @@
+TAP version 13
+# Subtest: active Planner governance requires explicit calendar creation without automatic save side effects
+ok 1 - active Planner governance requires explicit calendar creation without automatic save side effects
+  ---
+  duration_ms: 4.825322
+  type: 'test'
+  ...
+# Subtest: canonical work governance supersedes mandatory Job rules in source and viewer
+ok 2 - canonical work governance supersedes mandatory Job rules in source and viewer
+  ---
+  duration_ms: 1.122361
+  type: 'test'
+  ...
+# Subtest: executable contracts preserve optional links, stable identities and atomic command ownership
+ok 3 - executable contracts preserve optional links, stable identities and atomic command ownership
+  ---
+  duration_ms: 0.177339
+  type: 'test'
+  ...
+# Subtest: Calculator additions and mapped creation enter the canonical command layer
+ok 4 - Calculator additions and mapped creation enter the canonical command layer
+  ---
+  duration_ms: 1.405307
+  type: 'test'
+  ...
+# Subtest: governance defines informational library calendars and command-owned Scheduler deletion
+ok 5 - governance defines informational library calendars and command-owned Scheduler deletion
+  ---
+  duration_ms: 2.734633
+  type: 'test'
+  ...
+# Subtest: custom checklist tasks require an explicit operational mark
+ok 6 - custom checklist tasks require an explicit operational mark
+  ---
+  duration_ms: 53.370648
+  type: 'test'
+  ...
+# Subtest: Create Draft Job links only jobId and is idempotent
+ok 7 - Create Draft Job links only jobId and is idempotent
+  ---
+  duration_ms: 27.072921
+  type: 'test'
+  ...
+# Subtest: scheduling reuses the draft and only then links schedulerJobId
+ok 8 - scheduling reuses the draft and only then links schedulerJobId
+  ---
+  duration_ms: 31.579657
+  type: 'test'
+  ...
+# Subtest: existing scheduled Planner jobs are reused even when the task link is missing
+ok 9 - existing scheduled Planner jobs are reused even when the task link is missing
+  ---
+  duration_ms: 31.853159
+  type: 'test'
+  ...
+# Subtest: reopening a draft dated in Scheduler backfills the scheduled task link
+ok 10 - reopening a draft dated in Scheduler backfills the scheduled task link
+  ---
+  duration_ms: 23.622132
+  type: 'test'
+  ...
+# Subtest: duplicated operational tasks do not inherit job links
+ok 11 - duplicated operational tasks do not inherit job links
+  ---
+  duration_ms: 32.203297
+  type: 'test'
+  ...
+# Subtest: governed editor saves are job-free until explicit creation and retain existing Job identity
+ok 12 - governed editor saves are job-free until explicit creation and retain existing Job identity
+  ---
+  duration_ms: 44.649046
+  type: 'test'
+  ...
+# Subtest: governed editor save keeps inert tasks job-free and allows confirmed Job-backed demotion
+ok 13 - governed editor save keeps inert tasks job-free and allows confirmed Job-backed demotion
+  ---
+  duration_ms: 49.045523
+  type: 'test'
+  ...
+# Subtest: Scheduler model confirms a Planner draft Job without regressing later scheduling edits
+ok 14 - Scheduler model confirms a Planner draft Job without regressing later scheduling edits
+  ---
+  duration_ms: 26.556047
+  type: 'test'
+  ...
+# Subtest: deleting a Planner Job clears task links and its status audit without affecting other records
+ok 15 - deleting a Planner Job clears task links and its status audit without affecting other records
+  ---
+  duration_ms: 28.438993
+  type: 'test'
+  ...
+# Subtest: Job deletion still refuses protected Budget and issued Quote history
+ok 16 - Job deletion still refuses protected Budget and issued Quote history
+  ---
+  duration_ms: 21.395933
+  type: 'test'
+  ...
+# Subtest: Scheduler deletion command owns optional Planner task removal and template suppression
+ok 17 - Scheduler deletion command owns optional Planner task removal and template suppression
+  ---
+  duration_ms: 43.015466
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 451.61762

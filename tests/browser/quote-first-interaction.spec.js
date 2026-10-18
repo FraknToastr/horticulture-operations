@@ -28,6 +28,7 @@ async function position(f){
 for(const owner of ['NSA','EVT']){
  test(owner+': first deposit, reversal and evidence clicks preserve Payments',async({page})=>{
   await suppressBackupModalForFunctionalTest(page);
+  await page.addInitScript(() => sessionStorage.setItem('uos.program.statusOperator', 'Session Test Officer'));
   const entry='/src/program-planner/'+(owner==='NSA'?'nsa':'events')+'.html';
   await page.goto(process.env.QUOTE_FILE_MODE?pathToFileURL(path.join(process.cwd(),entry)).href:entry);
   let f=page.frames().find(x=>x!==page.mainFrame());
@@ -47,6 +48,12 @@ for(const owner of ['NSA','EVT']){
   await f.locator('[data-costing-add-rate="RATE-FIRST-CLICK"]').click();
   await expect.poll(()=>f.evaluate(()=>UOS.ProgramApp.workspace().entities.costingLines.length)).toBe(1);
   await row.locator('[data-register-action="quotes"]').click();
+    if(owner==='NSA') {
+      await expect(f.locator('[data-quote-funding-mode][value="city"]')).toBeChecked();
+      await f.locator('[data-quote-section-link="4"]').click();
+      await f.locator('[data-quote-funding-mode][value="customer"]').check();
+      await expect.poll(()=>f.evaluate(()=>UOS.ProgramApp.workspace().entities.quotes[0]?.fundingMode)).toBe('customer');
+    }
   await expect(f.locator('[data-quote-funding-mode][value="customer"]')).toBeChecked();
   await f.locator('[data-quote-section-link="5"]').click();
   await expect(f.locator('[data-deposit-record]')).toBeEnabled();
@@ -62,9 +69,11 @@ for(const owner of ['NSA','EVT']){
   await physicalClick(page,reverse,f);
   const dialog=f.locator('.uos-modal[role="dialog"]');
   await expect(dialog).toContainText('Reverse payment?');
+  await expect(dialog.locator('[data-payment-reversal-actor]')).toHaveValue('Session Test Officer');
   expect(await position(f)).toEqual(before);
   await dialog.getByRole('button',{name:'Keep payment',exact:true}).click();
   await expect(dialog).toHaveCount(0);
+  expect(await f.evaluate(()=>UOS.ProgramApp.workspace().entities.payments[0].reversedBy || '')).toBe('');
   await expect(reverse).toBeFocused();
   expect(await position(f)).toEqual(before);
   await physicalClick(page,reverse);
@@ -75,8 +84,14 @@ for(const owner of ['NSA','EVT']){
   await expect(dialog).toBeVisible();
   expect(await f.evaluate(()=>UOS.ProgramApp.workspace().entities.payments[0].status)).not.toBe('Reversed');
   await dialog.locator('textarea').fill('Incorrect deposit reference');
+  await dialog.locator('[data-payment-reversal-actor]').fill('   ');
+  await dialog.getByRole('button',{name:'Reverse payment',exact:true}).click();
+  await expect(dialog).toBeVisible();
+  expect(await f.evaluate(()=>UOS.ProgramApp.workspace().entities.payments[0].status)).not.toBe('Reversed');
+  await dialog.locator('[data-payment-reversal-actor]').fill('  Reversing Test Officer  ');
   await dialog.getByRole('button',{name:'Reverse payment',exact:true}).click();
   await expect(f.locator('[data-payment-paid]')).toHaveText('$0.00');
+  expect(await f.evaluate(()=>UOS.ProgramApp.workspace().entities.payments[0].reversedBy)).toBe('Reversing Test Officer');
   const evidence=f.getByRole('button',{name:'View payment reversal reason',exact:true});
   await expect(evidence).toBeFocused();
   await evidence.scrollIntoViewIfNeeded();
@@ -84,6 +99,7 @@ for(const owner of ['NSA','EVT']){
   await physicalClick(page,evidence,f);
   await expect(f.locator('[data-status-reason-dialog]')).toBeVisible();
   await expect(f.locator('[data-status-reason-text]')).toHaveText('Incorrect deposit reference');
+  await expect(f.locator('[data-status-reason-actor]')).toHaveText('Reversing Test Officer');
   expect(await position(f)).toEqual(beforeEvidence);
   await expect(f.locator('[data-status-reason-time]')).not.toHaveText('Not recorded');
   await f.getByRole('button',{name:'Close',exact:true}).click();
@@ -104,6 +120,7 @@ for(const owner of ['NSA','EVT']){
   await physicalClick(page,restored);
   await expect(f.locator('[data-status-reason-dialog]')).toBeVisible();
   await expect(f.locator('[data-status-reason-text]')).toHaveText('Incorrect deposit reference');
+  await expect(f.locator('[data-status-reason-actor]')).toHaveText('Reversing Test Officer');
   expect(await position(f)).toEqual(restoredPosition);
   const timestamp=await f.evaluate(id=>new Date(UOS.ProgramApp.workspace().entities.payments.find(p=>p.id===id).reversedAt).toLocaleString('en-AU'),payment.id);
   await expect(f.locator('[data-status-reason-time]')).toHaveText(timestamp);

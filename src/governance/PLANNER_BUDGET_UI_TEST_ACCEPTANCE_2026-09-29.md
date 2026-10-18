@@ -1,5 +1,7 @@
 # Planner and Budget UI acceptance — 29 September 2026
 
+**Historical acceptance record.** The Planner automatic Draft Job creation and Save & Open Scheduler criteria below were superseded by the accepted **Explicit Planner calendar creation — 2026-10-01** decision in `DECISIONS.md`. Current Task Purpose controls eligibility only; ordinary saves never create or recreate Jobs. The explicit Planner calendar action creates or opens the canonical Job. Budget criteria are unaffected by this Planner amendment.
+
 ## Planner Task editor
 
 - Add and Edit open the same modal and expose title, description, section, classification, status, assignee, due date, notes and order.
