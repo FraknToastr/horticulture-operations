@@ -17,6 +17,17 @@ test("domain vocabularies use stable codes and preserve the EVT report label", (
   assert.equal(Status.codeFor("task", "N/A"), "not_applicable");
 });
 
+test("Planner tasks can complete directly without weakening other domain transitions", () => {
+  const ws = workspace();
+  ws.entities.tasks.push({ id: "NSA-TASK-DIRECT", owner: "NSA", type: "task", projectId: "NSA-PROJ-1", title: "Inspection", status: "not_started" });
+  const result = Status.transition(ws, { entityId: "NSA-TASK-DIRECT", to: "complete", actor: "A. Officer" });
+  assert.equal(result.entities.tasks[0].status, "complete");
+  assert.equal(result.entities.statusEvents.at(-1).fromStatus, "not_started");
+  assert.equal(result.entities.statusEvents.at(-1).actor, "A. Officer");
+  assert.equal(Status.canTransition("project", "draft", "complete"), false);
+  assert.equal(Status.canTransition("job", "draft", "completed"), false);
+  assert.equal(Status.reasonRequired("task", "complete", "not_started"), true);
+});
 test("human transitions require attribution and guarded reasons", () => {
   const ws = workspace();
   assert.throws(() => Status.transition(ws, { entityId: "NSA-PROJ-1", to: "in_delivery" }), /operator name/i);

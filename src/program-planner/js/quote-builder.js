@@ -9,6 +9,8 @@
   var quoteStatusFilters = [];
   var preserveProjectListUntil = 0;
   var pendingDraftSaves = 0;
+  var draftEditVersion = 0, savedDraftEditVersion = 0;
+  var operationalAmountDirty = false, dirtyQuoteField = null;
   var paymentSavePending = false;
   var adjustmentSavePending = false;
 
@@ -1168,13 +1170,19 @@ function renderPreview() {
   function saveToWorkspace(guard) {
     if (!state.selectedEntityId || !window.UOS || !window.UOS.ProgramQuotes || !window.UOS.ProgramApp || typeof window.UOS.ProgramApp.updateWorkspace !== "function") return Promise.resolve(null);
     var draftInput = quoteDraftInput();
+    var editVersion = draftEditVersion;
+    var operationalAmount = operationalAmountDirty ? state.operationalAmount : null;
     pendingDraftSaves += 1;
     return window.UOS.ProgramApp.updateWorkspace(function (workspace) {
       if (guard) guard(workspace);
       // Capture the user's offer before asynchronous persistence re-renders the form.
       if (!draftInput.id && state.selectedEntityId === draftInput.projectId) draftInput.id = state.quoteId || undefined;
-      return window.UOS.ProgramQuotes.saveDraft(workspace, draftInput);
+      var next = window.UOS.ProgramQuotes.saveDraft(workspace, draftInput);
+      if (operationalAmount !== null && UOS.ProjectFunding) next = UOS.ProjectFunding.setOperationalAmount(next, draftInput.projectId, operationalAmount);
+      return next;
     }).then(function (workspace) {
+      savedDraftEditVersion = Math.max(savedDraftEditVersion, editVersion);
+      if (draftEditVersion === editVersion) { operationalAmountDirty = false; dirtyQuoteField = null; }
       state.workspace = workspace;
       var quote = workspace && workspace.entities.quotes.filter(function (item) { return item.projectId === state.selectedEntityId && item.status === "Draft"; }).sort(function (a, b) { return Number(b.revision) - Number(a.revision); })[0];
       if (quote && state.selectedEntityId === draftInput.projectId) {
@@ -1188,6 +1196,15 @@ function renderPreview() {
     }).finally(function () { pendingDraftSaves -= 1; });
   }
 
+  function hasPendingFieldEdit() { return draftEditVersion > savedDraftEditVersion; }
+  function flushFieldEdit() {
+    if (!hasPendingFieldEdit()) return Promise.resolve(null);
+    if (dirtyQuoteField && dirtyQuoteField.isConnected && !dirtyQuoteField.validity.valid) {
+      dirtyQuoteField.reportValidity();
+      return Promise.reject(new Error("Correct the Quote field before leaving it."));
+    }
+    return saveToWorkspace();
+  }
   function onInput(event) {
     if (event.target.closest("[data-payment-form]")) return;
     if (event.target.matches("[data-quote-project-search]")) {
@@ -1198,6 +1215,8 @@ function renderPreview() {
     var target = event.target;
     if (!target || adjustmentSavePending) return;
     if (!target.isConnected) return;
+    var previousDraft = JSON.stringify(quoteDraftInput());
+    var previousOperationalAmount = state.operationalAmount;
 
     if (target.matches("[data-quote-num]")) state.quoteNumber = target.value;
     else if (target.matches("[data-quote-date]")) state.quoteDate = target.value;
@@ -1219,7 +1238,7 @@ function renderPreview() {
       if (state.fundingMode !== "mixed") state.suppressCouncilDisclosure = false;
     }
     else if (target.matches("[data-quote-customer-contribution]")) {
-      if (!target.validity.valid || target.value === "") return;
+      if (!target.validity.valid || target.value === "") { draftEditVersion += 1; dirtyQuoteField = target; return; }
       if (["Issued", "Accepted", "Declined", "Superseded"].indexOf(state.status) >= 0 || state.quoteId && UOS.ProgramQuotes.commerciallyLocked(workspaceSnapshot(), state.quoteId)) return;
       state.proposedCustomerContribution = Math.round(Number(target.value) * 100) / 100;
     }
@@ -1234,11 +1253,7 @@ function renderPreview() {
     else if (target.matches("[data-operational-amount]")) {
       if (window.UOS.ProgramBudget && workspaceSnapshot().entities.annualBudgets.length) return;
       state.operationalAmount = Math.max(0, num(target.value));
-      renderBuilder();
-      if (state.selectedEntityId && window.UOS.ProjectFunding && window.UOS.ProgramApp) {
-        window.UOS.ProgramApp.updateWorkspace(function (workspace) { return window.UOS.ProjectFunding.setOperationalAmount(workspace, state.selectedEntityId, state.operationalAmount); });
-      }
-      return;
+      operationalAmountDirty = operationalAmountDirty || previousOperationalAmount !== state.operationalAmount;
     }
     else if (target.matches("[data-line-field]")) {
       var tr = target.closest("[data-line-id]");
@@ -1254,8 +1269,11 @@ function renderPreview() {
       }
     }
 
-    renderBuilder();
-    saveToWorkspace();
+    if (previousDraft !== JSON.stringify(quoteDraftInput()) || previousOperationalAmount !== state.operationalAmount) {
+      draftEditVersion += 1;
+      dirtyQuoteField = target;
+    }
+    if (!hasPendingFieldEdit()) renderBuilder();
   }
 
   var revisionDialogPending = false;
@@ -1787,6 +1805,9 @@ function renderPreview() {
   }
 
   function resetQuoteEditor() {
+    savedDraftEditVersion = draftEditVersion;
+    operationalAmountDirty = false;
+    dirtyQuoteField = null;
     state.selectedEntityId = "";
     state.quoteId = "";
     state.auditNumber = "";
@@ -1890,6 +1911,7 @@ function renderPreview() {
     rootNode = document.querySelector("[data-program-view='quotes']");
     if (!rootNode) return;
     initialized = true;
+    if (UOS.ProgramFieldCommits) UOS.ProgramFieldCommits.register({ isDirty: hasPendingFieldEdit, flush: flushFieldEdit });
     initQuoteSectionNavigation();
     window.addEventListener("beforeprint", function () {
       var workspace = workspaceSnapshot();
@@ -1903,6 +1925,14 @@ function renderPreview() {
     document.addEventListener("change", function (event) {
       if (!event.target.closest("[data-program-view='quotes']")) return;
       if (event.target.matches("[data-client-picker]")) {
+        if (hasPendingFieldEdit()) {
+          var projectId = event.target.value;
+          UOS.ProgramFieldCommits.flushAll().then(function () {
+            if (projectId) populateClientFromEntity(projectId, false);
+            else clearSelectedClient();
+          }).catch(ledgerError);
+          return;
+        }
         if (event.target.value) {
           populateClientFromEntity(event.target.value, false);
         } else {
@@ -1913,7 +1943,19 @@ function renderPreview() {
       }
     }, true);
     document.addEventListener("click", function (event) {
-      if (event.target.closest("[data-program-view='quotes']")) onClick(event);
+      if (!event.target.closest("[data-program-view='quotes']")) return;
+      if (hasPendingFieldEdit() && event.target.closest("button,a") && !event.target.closest("dialog,[data-payment-form]")) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        UOS.ProgramFieldCommits.flushAll().then(function () { onClick(event); }).catch(ledgerError);
+        return;
+      }
+      onClick(event);
+    }, true);
+    document.addEventListener("focusout", function (event) {
+      if (event.target.closest("[data-program-view='quotes']") && hasPendingFieldEdit() && UOS.ProgramFieldCommits) {
+        UOS.ProgramFieldCommits.flushAll().catch(ledgerError);
+      }
     }, true);
     document.addEventListener("pointerdown", function (event) {
       if (event.button !== 0) return;
@@ -1932,8 +1974,13 @@ function renderPreview() {
     document.addEventListener("pointercancel", releasePaymentPointer, true);
     window.addEventListener("blur", releasePaymentPointer);
     document.addEventListener("uos:privacy-changed", renderBuilder);
-    document.addEventListener("submit", function (event) {
+    document.addEventListener("submit", function submitQuoteForm(event) {
       if (!event.target.closest("[data-program-view='quotes']")) return;
+      if (hasPendingFieldEdit()) {
+        event.preventDefault();
+        UOS.ProgramFieldCommits.flushAll().then(function () { submitQuoteForm(event); }).catch(ledgerError);
+        return;
+      }
       var form = event.target.closest("[data-payment-form]");
       if (!form) return;
       event.preventDefault();
@@ -1982,7 +2029,7 @@ function renderPreview() {
       renderUI();
     }
     if (ws.workspace.destination !== "quotes") return;
-      if (pendingDraftSaves && ws.workspace.selectedProjectId === state.selectedEntityId) { renderBuilder(); return; }
+      if ((pendingDraftSaves || hasPendingFieldEdit()) && ws.workspace.selectedProjectId === state.selectedEntityId) { renderBuilder(); return; }
       if (ws.entities) {
         var contextProjectId = ws.workspace && ws.workspace.selectedProjectId || "";
         var contextProject = (ws.entities.projects || []).find(function (project) { return project.id === contextProjectId; });

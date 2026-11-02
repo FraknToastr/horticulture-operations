@@ -866,12 +866,12 @@ function button(label, kind, attribute, value) { var node = root.document.create
       return result;
     });
   }
-  function updateLine(id) {
+function updateLine(id, capturedChanges, capturedQuoteId) {
     try { requireCalculatorEditable(); } catch (error) { showError(error); return; }
-    var quoteId = calculatorQuoteView().quote && calculatorQuoteView().quote.id;
+var quoteId = capturedChanges ? capturedQuoteId : calculatorQuoteView().quote && calculatorQuoteView().quote.id;
     var quantity = one('[data-costing-line-quantity="' + id + '"]'), rate = one('[data-costing-line-rate="' + id + '"]'), unit = one('[data-costing-line-unit="' + id + '"]');
-    mutate(function (api, workspace) {
-      var changes = { quantity: quantity ? quantity.value : undefined, unitRate: rate ? rate.value : undefined, unit: unit ? unit.value : undefined };
+var changes = capturedChanges || { quantity: quantity ? quantity.value : undefined, unitRate: rate ? rate.value : undefined, unit: unit ? unit.value : undefined };
+return mutate(function (api, workspace) {
       var line = (workspace.entities.costingLines || []).find(function (item) { return item.id === id; });
       var geometryId = line && text(line.sourceGeometryId);
       var geometry = geometryId && (workspace.entities.geometries || []).find(function (item) { return item.id === geometryId; });
@@ -1216,6 +1216,35 @@ function saveAdjustments(source) {
 }
 function bind() {
  if (state.bound || !root.document) return; state.bound = true;
+var pendingCalculatorFields = new Map();
+var calculatorFieldSelector = '[data-costing-line-quantity],[data-costing-line-rate],[data-costing-line-unit],[data-costing-preliminaries],[data-costing-margin]';
+function queueCalculatorField(input) {
+  var id = input.getAttribute('data-costing-line-quantity') || input.getAttribute('data-costing-line-rate') || input.getAttribute('data-costing-line-unit');
+  var row = input.closest('tr'), changes;
+  if (id && row) {
+    changes = {};
+    [['quantity', 'data-costing-line-quantity'], ['unitRate', 'data-costing-line-rate'], ['unit', 'data-costing-line-unit']].forEach(function (pair) {
+      var field = row.querySelector('[' + pair[1] + ']'); if (field) changes[pair[0]] = field.value;
+    });
+  }
+  pendingCalculatorFields.set(input, { value: input.value, id: id, changes: changes, quoteId: calculatorQuoteView().quote && calculatorQuoteView().quote.id });
+}
+function flushCalculatorFields() {
+  return Array.from(pendingCalculatorFields.entries()).reduce(function (previous, entry) {
+    return previous.then(function () {
+      var input = entry[0], value = entry[1], id = value.id;
+      return Promise.resolve(id ? updateLine(id, value.changes, value.quoteId) : saveAdjustments(input)).then(function (saved) {
+        if (id && !saved) throw new Error('The calculator edit could not be saved.');
+        if (pendingCalculatorFields.get(input) === value) pendingCalculatorFields.delete(input);
+      });
+    });
+  }, Promise.resolve());
+}
+if (root.UOS.ProgramFieldCommits) root.UOS.ProgramFieldCommits.register({ isDirty: function () { return pendingCalculatorFields.size > 0; }, flush: flushCalculatorFields });
+root.document.addEventListener('input', function (event) { if (event.target.matches(calculatorFieldSelector)) queueCalculatorField(event.target); });
+root.document.addEventListener('focusout', function (event) {
+  if (pendingCalculatorFields.has(event.target)) (root.UOS.ProgramFieldCommits ? root.UOS.ProgramFieldCommits.flushAll() : flushCalculatorFields()).catch(showError);
+});
     var areaDialog = one("[data-costing-area-dialog]"), areaForm = one("[data-costing-area-form]");
     all("[data-costing-area-cancel]").forEach(function (button) { button.addEventListener("click", function () { areaDialog.close(); }); });
     areaForm.addEventListener("submit", function (event) {
@@ -1312,18 +1341,18 @@ function bind() {
  all("[data-costing-preliminaries],[data-costing-margin]").forEach(function (input) {
   input.addEventListener("change", function (event) {
    event.stopPropagation();
-   saveAdjustments(event.target);
+queueCalculatorField(event.target);
   });
  });
  root.document.addEventListener("change", function (event) {
   if (!event.target.matches("[data-costing-preliminaries],[data-costing-margin]")) return;
   event.stopImmediatePropagation();
-  saveAdjustments(event.target);
+queueCalculatorField(event.target);
  }, true);
  root.document.addEventListener("change", function (event) {
       if (event.target.matches("[data-costing-category]")) { state.category = event.target.value; renderCatalog(); }
-  else if (event.target.matches("[data-costing-preliminaries],[data-costing-margin]")) { state.preliminaries = Math.max(0, Number(one("[data-costing-preliminaries]").value) || 0); state.margin = Math.max(0, Number(one("[data-costing-margin]").value) || 0); if (state.jobId && typeof model().updateJobAdjustments === "function") mutate(function (api, workspace) { var result = api.updateJobAdjustments(workspace, state.jobId, { preliminariesPercent: state.preliminaries, marginPercent: state.margin }); var selectedProject = (result.entities.projects || []).find(function (project) { return project.id === state.selectedProjectId; }); result.workspace.costing = { jobId: state.jobId, section: state.section, mode: state.mode, selectedProjectId: state.selectedProjectId }; result.workspace.selectedProjectId = state.selectedProjectId; result.workspace.selectedEntityId = selectedProject ? (selectedProject.applicationId || selectedProject.eventId || selectedProject.id) : ""; if (selectedProject) result.workspace.ownerMode = selectedProject.owner; return result; }); else renderCalculator(); }
-      else if (event.target.matches("[data-costing-line-quantity],[data-costing-line-rate],[data-costing-line-unit]")) updateLine(event.target.getAttribute("data-costing-line-quantity") || event.target.getAttribute("data-costing-line-rate") || event.target.getAttribute("data-costing-line-unit"));
+else if (event.target.matches("[data-costing-preliminaries],[data-costing-margin]")) queueCalculatorField(event.target);
+else if (event.target.matches("[data-costing-line-quantity],[data-costing-line-rate],[data-costing-line-unit]")) queueCalculatorField(event.target);
     });
      root.document.addEventListener("click", function (event) {
       var calendar = event.target.closest("[data-costing-line-calendar]");

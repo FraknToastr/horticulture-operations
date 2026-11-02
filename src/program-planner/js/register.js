@@ -547,7 +547,15 @@
     }
 
     if (virtualScrollCleanup) { virtualScrollCleanup(); virtualScrollCleanup = null; }
-    clear(tbody);
+    // Keep the mounted module connected while autosave refreshes Register rows.
+    // Detaching its drawer blurs the active field, even if the node is restored.
+    var mountedDrawers = Object.create(null);
+    var destination = state.workspace && state.workspace.workspace && state.workspace.workspace.destination;
+    tbody.querySelectorAll(".program-register-drawer-row").forEach(function (row) {
+      var host = row.querySelector("[data-register-drawer-record]");
+      var module = row.querySelector("[data-program-view]");
+      if (host && module && module.getAttribute("data-program-view") === destination) mountedDrawers[host.getAttribute("data-register-drawer-record")] = row;
+    });
     var fragment = document.createDocumentFragment();
     var disclosureApi = window.UOS && window.UOS.ProgramDisclosureRows;
 
@@ -638,10 +646,21 @@
 
       fragment.appendChild(summaryRow);
       fragment.appendChild(drawerRow);
-      if (disclosureApi && disclosureApi.isOpen(key)) renderDetail(record, drawerHost);
+      if (!mountedDrawers[record.id] && disclosureApi && disclosureApi.isOpen(key)) renderDetail(record, drawerHost);
     });
 
-  tbody.appendChild(fragment);
+    var desiredRows = Array.prototype.map.call(fragment.children, function (row) {
+      var host = row.querySelector("[data-register-drawer-record]");
+      return host && mountedDrawers[host.getAttribute("data-register-drawer-record")] || row;
+    });
+    Array.prototype.slice.call(tbody.children).forEach(function (row) {
+      if (desiredRows.indexOf(row) < 0) tbody.removeChild(row);
+    });
+    var cursor = tbody.firstChild;
+    desiredRows.forEach(function (row) {
+      if (row === cursor) cursor = cursor.nextSibling;
+      else tbody.insertBefore(row, cursor);
+    });
   measureRegisterColumns(tbody.closest("table"));
   if (preserveTableScroll) {
     tableScroller.scrollTop = priorTableScrollTop;
@@ -2178,7 +2197,7 @@
       proposed[key] = val;
       var dateErrors = window.UOS.ProgramModel.validateEventDates(proposed);
       showDateError(editInput, dateErrors.join(" "));
-      if (dateErrors.length) return;
+if (dateErrors.length) return Promise.reject(new Error(dateErrors.join(" ")));
       var dateScope = editInput.closest(".program-register-event-detail");
       if (dateScope) dateScope.querySelectorAll('[data-register-edit-key="bumpInDate"], [data-register-edit-key="bumpOutDate"]').forEach(function (input) {
         if (input === editInput || input.value === text(proposed[input.getAttribute("data-register-edit-key")])) showDateError(input, "");
@@ -2237,12 +2256,11 @@
         }
       }
       patchRegisterSummary(record);
-      persistWorkspaceEntity(record, "area", combinedVal);
-      return;
+return persistWorkspaceEntity(record, "area", combinedVal);
     }
 
     patchRegisterSummary(record);
-    persistWorkspaceEntity(record, key, val, editInput);
+return persistWorkspaceEntity(record, key, val, editInput);
   }
 
   function persistWorkspaceEntity(record, key, val, editInput) {
@@ -2250,7 +2268,7 @@
     if (!app || typeof app.updateWorkspace !== "function") return;
     var patch = { recordId: record.id, key: key, requiresRender: localEditRequiresRender(key) };
     state.pendingLocalPatches.push(patch);
-    app.updateWorkspace(function (candidate) {
+return app.updateWorkspace(function (candidate) {
       var entities = candidate.entities || {};
       var listName = record.owner === "EVT" ? "events" : "applications";
       var list = Array.isArray(entities[listName]) ? entities[listName] : [];
@@ -2303,11 +2321,30 @@
         record[key] = record.raw[key];
         showDateError(editInput, error.message || "The Event date could not be saved.");
       }
+      throw error;
     });
   }
 
   function bind() {
-    if (state.bound || typeof document === "undefined") return; state.bound = true;
+if (state.bound || typeof document === "undefined") return; state.bound = true;
+var pendingFields = new Map();
+function queueField(input) {
+  if (!input || input.closest('.program-register-protected-edit')) return;
+  if (!input.getAttribute('data-register-edit-id')) input.setAttribute('data-register-edit-id', state.selectedId || '');
+  pendingFields.set(input, input.type === 'checkbox' ? input.checked : input.value);
+}
+function flushFields() {
+  return Array.from(pendingFields.entries()).reduce(function (previous, entry) {
+    return previous.then(function () {
+      var input = entry[0], value = entry[1];
+      return Promise.resolve(handleFieldEdit(input)).then(function () { if (pendingFields.get(input) === value) pendingFields.delete(input); });
+    });
+  }, Promise.resolve());
+}
+if (root.UOS.ProgramFieldCommits) root.UOS.ProgramFieldCommits.register({ isDirty: function () { return pendingFields.size > 0; }, flush: flushFields });
+document.addEventListener('focusout', function (event) {
+  if (pendingFields.has(event.target)) (root.UOS.ProgramFieldCommits ? root.UOS.ProgramFieldCommits.flushAll() : flushFields()).catch(function (error) { if (root.UOS.toast) root.UOS.toast(error.message, 'error'); });
+});
     var deleteDialog = one("#deleteRegisterDialog");
     if (deleteDialog) deleteDialog.addEventListener("cancel", function (event) { event.preventDefault(); closeDeleteDialog(); });
     document.addEventListener("uos:disclosure-before-open", function (event) {
@@ -2327,7 +2364,7 @@
       var editInput = event.target.closest("[data-register-edit-key]");
       if (editInput) {
         if (editInput.closest(".program-register-protected-edit")) return;
-        handleFieldEdit(editInput);
+queueField(editInput);
       }
     });
 
@@ -2344,6 +2381,7 @@
       }
       var editInput = event.target.closest("[data-register-edit-key]");
       if (editInput && editInput.closest(".program-register-protected-edit")) return;
+if (editInput) queueField(editInput);
       if (editInput && editInput.tagName === "INPUT" && editInput.type === "text") {
         var key = editInput.getAttribute("data-register-edit-key");
         var id = editInput.getAttribute("data-register-edit-id") || state.selectedId;

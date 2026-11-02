@@ -665,7 +665,7 @@ function displayDate(value) {
       return saved;
     }).catch(function (error) {
       if (window.UOS && typeof window.UOS.toast === "function") window.UOS.toast(error.message || "Planner task update failed.", "error");
-      return null;
+throw error;
     });
   }
 
@@ -1185,7 +1185,23 @@ function displayDate(value) {
       savePlannerTask(form);
     });
 
-    document.addEventListener("input", function (event) {
+var pendingInlineFields = new Map();
+function queueInlineField(input, itemId, field) {
+  pendingInlineFields.set(input, { projectId: state.selectedProjectId, itemId: itemId, field: field, value: input.value });
+}
+function flushInlineFields() {
+  return Array.from(pendingInlineFields.entries()).reduce(function (previous, entry) {
+    return previous.then(function () {
+      var edit = entry[1];
+      return setProjectField(edit.projectId, edit.itemId, edit.field, edit.value).then(function () { if (pendingInlineFields.get(entry[0]) === edit) pendingInlineFields.delete(entry[0]); });
+    });
+  }, Promise.resolve());
+}
+if (root.UOS.ProgramFieldCommits) root.UOS.ProgramFieldCommits.register({ isDirty: function () { return pendingInlineFields.size > 0; }, flush: flushInlineFields });
+document.addEventListener('focusout', function (event) {
+  if (pendingInlineFields.has(event.target)) (root.UOS.ProgramFieldCommits ? root.UOS.ProgramFieldCommits.flushAll() : flushInlineFields()).catch(function () {});
+});
+document.addEventListener("input", function (event) {
       var searchInput = event.target.closest("#plannerSearchInput");
       var notesInput = event.target.closest("[data-checklist-notes]");
       var dueInput = event.target.closest("[data-checklist-due]");
@@ -1195,10 +1211,10 @@ function displayDate(value) {
         renderSidebarList();
       } else if (notesInput) {
         var itemId = notesInput.getAttribute("data-checklist-notes");
-        setProjectField(state.selectedProjectId, itemId, "notes", notesInput.value);
+queueInlineField(notesInput, itemId, "notes");
       } else if (dueInput) {
         var itemId = dueInput.getAttribute("data-checklist-due");
-        setProjectField(state.selectedProjectId, itemId, "due", dueInput.value);
+queueInlineField(dueInput, itemId, "due");
       }
     });
 
@@ -1208,10 +1224,10 @@ function displayDate(value) {
 
       if (statusSel) {
         var itemId = statusSel.getAttribute("data-checklist-status");
-        setProjectField(state.selectedProjectId, itemId, "status", statusSel.value);
+queueInlineField(statusSel, itemId, "status");
       } else if (ownerSel) {
         var itemId = ownerSel.getAttribute("data-checklist-owner");
-        setProjectField(state.selectedProjectId, itemId, "owner", ownerSel.value);
+queueInlineField(ownerSel, itemId, "owner");
       }
     });
 

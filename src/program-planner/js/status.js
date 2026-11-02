@@ -115,6 +115,7 @@
   function canTransition(domain, fromValue, toValue) {
     var from = codeFor(domain, fromValue), to = codeFor(domain, toValue);
     if (!DEFINITIONS[domain] || from === REVIEW || to === REVIEW || from === to) return from === to;
+    if (domain === "task" && from === "not_started" && to === "complete") return true;
     if (to === "cancelled") return DEFINITIONS[domain].terminal.indexOf(from) < 0;
     if (to === "on_hold") return domain === "project" || domain === "task";
     if (from === "on_hold") return domain === "project" ? ["planning", "in_delivery", "cancelled"].indexOf(to) >= 0 : ["not_started", "in_progress", "complete", "not_applicable"].indexOf(to) >= 0;

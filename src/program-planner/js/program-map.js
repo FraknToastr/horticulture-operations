@@ -3125,17 +3125,48 @@ var selectedSpatialFilter = null;
     }
 
 
+    var pendingMapFields = new Map(), mapFieldFlush = null, mapFieldRevision = 0;
+    var mapFieldSelector = "[data-space-visible-all],[data-shape-visible],[data-shape-type],[data-shape-rate],[data-shape-pricing-unit],#providerSelect";
+    function flushMapFields() {
+      if (mapFieldFlush) return mapFieldFlush.then(flushMapFields);
+      var pending = Array.from(pendingMapFields.keys());
+      if (!pending.length) return Promise.resolve();
+      mapFieldFlush = pending.reduce(function (queue, field) {
+        return queue.then(function () {
+          var edit = pendingMapFields.get(field);
+          return Promise.resolve(commitMapField({ target: edit.target, projectId: edit.projectId })).then(function () {
+            if (pendingMapFields.get(field) === edit) pendingMapFields.delete(field);
+          });
+        });
+      }, Promise.resolve()).finally(function () { mapFieldFlush = null; });
+      return mapFieldFlush.then(function () { if (pendingMapFields.size) return flushMapFields(); });
+    }
+    if (root.UOS.ProgramFieldCommits) root.UOS.ProgramFieldCommits.register({
+      isDirty: function () { return pendingMapFields.size > 0 || Boolean(mapFieldFlush); }, flush: flushMapFields
+    });
     root.document.addEventListener("change", function (event) {
+      if (event.target.matches(mapFieldSelector)) {
+        var target = event.target.cloneNode(true);
+        target.value = event.target.value; target.checked = event.target.checked;
+        pendingMapFields.set(event.target, { revision: ++mapFieldRevision, target: target, projectId: mapViewState(getWorkspace()).selectedProjectId });
+      }
+    });
+    root.document.addEventListener("focusout", function (event) {
+      if (pendingMapFields.has(event.target)) {
+        var commits = root.UOS.ProgramFieldCommits;
+        (commits ? commits.flushAll() : flushMapFields()).catch(showError);
+      }
+    });
+    function commitMapField(event) {
       var masterVisible=event.target.closest("[data-space-visible-all]");
       if(masterVisible){
-        var contextState=mapViewState(getWorkspace()),projectId=contextState.selectedProjectId,visible=masterVisible.checked;
-        updateMapWorkspace(function(candidate){
+        var projectId=event.projectId,visible=masterVisible.checked;
+        return updateMapWorkspace(function(candidate){
           if(canonicalMapState(candidate).selectedProjectId!==projectId)return candidate;
           var geometries=root.UOS.ProgramModel.projectWorkGeometry(candidate,projectId);
           geometries.forEach(function(geometry){candidate=root.UOS.WorkAreaService.updateGeometry(candidate,geometry.id,{payload:{visible:visible}});});
           return candidate;
-        }).then(renderShapeCards).catch(showError);
-        return;
+        }).then(renderShapeCards);
       }
       var visibleInput = event.target.closest("[data-shape-visible]");
       var typeSelect = event.target.closest("[data-shape-type]");
@@ -3150,21 +3181,21 @@ var selectedSpatialFilter = null;
           mapController.toggleShapeVisibility(shapeId, isChecked);
         }
         if (root.UOS.ProgramApp) {
-          updateMapWorkspace(function (candidate) {
+          return updateMapWorkspace(function (candidate) {
             return root.UOS.WorkAreaService.updateGeometry(candidate, shapeId, { payload: { visible: isChecked } });
           }).then(renderShapeCards);
         }
       } else if (pricingUnitSelect) {
         var pricingShapeId = pricingUnitSelect.getAttribute("data-shape-pricing-unit");
         var selectedUnit = pricingUnitSelect.value;
-        updateMapWorkspace(function (candidate) {
+        return updateMapWorkspace(function (candidate) {
           var geometry = root.UOS.ProgramModel.workGeometryById(candidate, pricingShapeId);
           var rates = eligiblePolygonRates(candidate, geometryWorkType(geometry)).filter(function (rate) { return polygonPricingUnit(rate) === selectedUnit; });
           var mapping = root.UOS.ProgramModel.workTypeRateMapping(candidate, geometryWorkType(geometry));
           var choice = rates.length === 1 ? rates[0] : rates.find(function (rate) { return rate.id === mapping.defaultRateItemId; });
           candidate = root.UOS.WorkAreaService.updateGeometry(candidate, pricingShapeId, { rateItemId: choice ? choice.id : null, payload: { pricingUnit: selectedUnit, rateItemId: choice ? choice.id : null } });
           return choice ? syncExistingGeometryWork(candidate, pricingShapeId) : candidate;
-        }).then(renderShapeCards).catch(showError);
+        }).then(renderShapeCards);
       } else if (typeSelect) {
         var shapeId = typeSelect.getAttribute("data-shape-type");
         var newType = typeSelect.value;
@@ -3172,7 +3203,7 @@ var selectedSpatialFilter = null;
           mapController.updateShapeType(shapeId, newType);
         }
         if (root.UOS.ProgramApp) {
-          updateMapWorkspace(function (candidate) {
+          return updateMapWorkspace(function (candidate) {
             candidate = root.UOS.WorkAreaService.updateGeometry(candidate, shapeId, {
               workTypeKey: newType,
               rateItemId: null,
@@ -3196,28 +3227,25 @@ var selectedSpatialFilter = null;
         var rateShapeId = rateSelect.getAttribute("data-shape-rate");
         var selectedRateItemId = text(rateSelect.value);
         if (!selectedRateItemId || !root.UOS.ProgramApp) return;
-        updateMapWorkspace(function (candidate) {
+        return updateMapWorkspace(function (candidate) {
           candidate = root.UOS.WorkAreaService.updateGeometry(candidate, rateShapeId, {
             rateItemId: selectedRateItemId,
             payload: { rateItemId: selectedRateItemId }
           });
           return syncExistingGeometryWork(candidate, rateShapeId);
-        }).then(renderShapeCards).catch(function (error) {
-          if (root.UOS.toast) root.UOS.toast(error.message || "Unable to change polygon pricing rate.", "error");
-          renderShapeCards();
-        });
+        }).then(renderShapeCards);
       } else if (providerSelect) {
         activeProviderId = providerSelect.value;
         if (mapController && typeof mapController.setProvider === "function") {
           mapController.setProvider(activeProviderId);
         }
       }
-    });
+    }
 
     initMetroMapActivation();
     var providerSelect = one("#providerSelect");
     if (providerSelect) {
-      providerSelect.addEventListener("change", function (event) {
+      providerSelect.addEventListener("focusout", function (event) {
         activeProviderId = event.target.value;
         if (mapController && typeof mapController.setProvider === "function") {
           mapController.setProvider(activeProviderId);

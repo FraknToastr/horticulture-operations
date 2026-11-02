@@ -340,6 +340,7 @@
   }
 
   function setWorkingContext(owner, projectId, selectFirstCard) {
+    if (UOS.ProgramFieldCommits && UOS.ProgramFieldCommits.isDirty()) return UOS.ProgramFieldCommits.flushAll().then(function () { return setWorkingContext(owner, projectId, selectFirstCard); });
     owner = owner === "EVT" ? "EVT" : "NSA";
     var configured = appConfig();
     if (configured && owner !== configured.owner) return Promise.reject(new Error("The " + owner + " workspace is outside this application."));
@@ -501,6 +502,7 @@
   }
 
   function selectWorkingItem(entityId) {
+    if (UOS.ProgramFieldCommits && UOS.ProgramFieldCommits.isDirty()) return UOS.ProgramFieldCommits.flushAll().then(function () { return selectWorkingItem(entityId); });
     return updateWorkspace(function (candidate) {
       applyWorkingContext(candidate, entityId);
       return candidate;
@@ -508,6 +510,7 @@
   }
 
   function navigateWithContext(next, entityId) {
+    if (UOS.ProgramFieldCommits && UOS.ProgramFieldCommits.isDirty()) return UOS.ProgramFieldCommits.flushAll().then(function () { return navigateWithContext(next, entityId); });
     if (state.phase !== "ready" || !state.workspace) return Promise.resolve(null);
     if (DESTINATIONS.indexOf(next) < 0) return Promise.resolve(state.workspace);
 
@@ -974,6 +977,7 @@ function resetStartupWorkspace(workspace) {
   }
 
   function navigate(next, options) {
+    if (UOS.ProgramFieldCommits && UOS.ProgramFieldCommits.isDirty()) return UOS.ProgramFieldCommits.flushAll().then(function () { return navigate(next, options); });
     if (state.phase !== "ready" || !state.workspace) return Promise.resolve(null);
     if (DESTINATIONS.indexOf(next) < 0) return Promise.resolve(state.workspace);
     var currentDestination = destination(state.workspace.workspace && state.workspace.workspace.destination);
@@ -1252,6 +1256,7 @@ function resetStartupWorkspace(workspace) {
   }
 
   function adoptWorkspace(candidate, commitOptions) {
+    if (UOS.ProgramFieldCommits && UOS.ProgramFieldCommits.isDirty()) return UOS.ProgramFieldCommits.flushAll().then(function () { return adoptWorkspace(candidate, commitOptions); });
     if (state.phase !== "ready" || !state.workspace) return Promise.reject(new Error("The program application is not ready."));
    var normalized;
     try {

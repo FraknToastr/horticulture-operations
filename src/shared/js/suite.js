@@ -401,11 +401,13 @@
     normalizeTips(document.documentElement);
     new MutationObserver(function (records) {
       records.forEach(function (record) {
+        if (record.type === "attributes" && record.attributeName === "data-uos-tooltip" && record.target === active) hide();
         if (record.type === "attributes") normalizeTips(record.target);
         else Array.prototype.forEach.call(record.addedNodes, normalizeTips);
       });
       if (active && !active.isConnected) hide();
-    }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["title"] });
+      if (active && !active.getAttribute("data-uos-tooltip") && !active.getAttribute("aria-label")) hide();
+    }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["title", "data-uos-tooltip"] });
     function position(target) {
       var rect = target.getBoundingClientRect();
       var viewport = window.visualViewport;

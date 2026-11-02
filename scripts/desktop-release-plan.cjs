@@ -29,7 +29,7 @@ const browserBatches = [
       'drawer-scroll-ownership', 'register-drawer-motion', 'register-shortcut-states',
       'planner-task-editor', 'planner-draft-recovery', 'cost-library-legacy-grouping',
       'calculator-planner-job-isolation', 'c4-browser-acceptance',
-      'quote-payment-funding-workflow', 'quote-first-interaction', 'quoted-lifecycle',
+'quote-payment-funding-workflow', 'quote-first-interaction', 'privacy-editing', 'quote-focus-commit', 'module-field-commits', 'map-field-focus-save', 'quoted-lifecycle',
       'draft-quoted-cost-deletion', 'workspace-backup-recovery',
       'startup-status-recovery', 'factory-reset-startup', 'workspace-sanitation',
       'data-import-keyboard', 'reviewed-workspace-recovery', 'scheduler-side-by-side', 'scheduler-multi-day',

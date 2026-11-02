@@ -6,6 +6,7 @@
   var EVENT_NAME = "uos:privacy-changed";
   // Privacy Mode is ALWAYS ON by default; never persisted in browser storage.
   var memoryState = true;
+var inputHelp = new WeakMap();
 
   var APPLICANT_CONTACT_FIELDS = {
     quoteaddress: true,
@@ -107,18 +108,30 @@
     options = options || {};
     var protectedField = isEnabled() && isSensitivePiiField(semanticField);
     if (protectedField) {
+if (!inputHelp.has(input)) inputHelp.set(input, {
+  title: input.getAttribute("title"), tooltip: input.getAttribute("data-uos-tooltip")
+});
       if (root.document && root.document.activeElement === input && typeof input.blur === "function") input.blur();
-      input.type = options.maskedType || "text";
+if (input.type !== (options.maskedType || "text")) input.type = options.maskedType || "text";
       input.value = value === null || typeof value === "undefined" || value === "" ? value || "" : MASK;
       input.readOnly = true;
       if (input.classList) input.classList.add("is-privacy-masked");
-      input.title = options.maskedTitle || "Hidden while Privacy Mode is enabled";
+input.removeAttribute("title");
+input.setAttribute("data-uos-tooltip", options.maskedTitle || "Hidden while Privacy Mode is enabled");
       return input.value;
     }
-    input.type = options.inputType || options.type || "text";
+var inputType = options.inputType || options.type || "text";
+if (input.type !== inputType) input.type = inputType;
     input.readOnly = Boolean(options.readOnly);
     if (input.classList) input.classList.remove("is-privacy-masked");
-    if (typeof input.removeAttribute === "function") input.removeAttribute("title");
+if (inputHelp.has(input)) {
+  var help = inputHelp.get(input);
+  input.removeAttribute("title");
+  var restoredTip = help.tooltip !== null ? help.tooltip : help.title;
+  if (restoredTip === null) input.removeAttribute("data-uos-tooltip");
+  else input.setAttribute("data-uos-tooltip", restoredTip);
+  inputHelp.delete(input);
+}
     if (!root.document || root.document.activeElement !== input || options.replaceActive === true) {
       input.value = value === null || typeof value === "undefined" ? "" : value;
     }
